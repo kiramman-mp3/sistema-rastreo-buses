@@ -1,0 +1,18 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bus_vehicle_user,bus.vehicle user,model_bus_vehicle,group_bus_user,1,0,0,0
+access_bus_vehicle_manager,bus.vehicle manager,model_bus_vehicle,group_bus_manager,1,1,1,1
+access_bus_route_user,bus.route user,model_bus_route,group_bus_user,1,0,0,0
+access_bus_route_manager,bus.route manager,model_bus_route,group_bus_manager,1,1,1,1
+access_bus_route_stop_user,bus.route.stop user,model_bus_route_stop,group_bus_user,1,0,0,0
+access_bus_route_stop_manager,bus.route.stop manager,model_bus_route_stop,group_bus_manager,1,1,1,1
+access_bus_schedule_user,bus.schedule user,model_bus_schedule,group_bus_user,1,0,0,0
+access_bus_schedule_manager,bus.schedule manager,model_bus_schedule,group_bus_manager,1,1,1,1
+access_bus_position_user,bus.position user,model_bus_position,group_bus_user,1,0,0,0
+access_bus_position_manager,bus.position manager,model_bus_position,group_bus_manager,1,0,0,1
+access_bus_alert_user,bus.alert user,model_bus_alert,group_bus_user,1,0,0,0
+access_bus_alert_manager,bus.alert manager,model_bus_alert,group_bus_manager,1,0,0,1
+access_bus_stop_arrival_user,bus.stop.arrival user,model_bus_stop_arrival,group_bus_user,1,0,0,0
+access_bus_stop_arrival_manager,bus.stop.arrival manager,model_bus_stop_arrival,group_bus_manager,1,0,0,1
+access_bus_complaint_user,bus.complaint user,model_bus_complaint,group_bus_user,1,0,0,0
+access_bus_complaint_manager,bus.complaint manager,model_bus_complaint,group_bus_manager,1,1,0,1
+access_bus_push_subscription_manager,bus.push.subscription manager,model_bus_push_subscription,group_bus_manager,1,0,0,1

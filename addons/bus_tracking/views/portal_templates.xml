@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_head" name="Passenger portal head">
+        <meta name="description" content="Mira por dónde van los buses de tu ruta."/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/portal.css?v=#{asset_v}"/>
+    </template>
+
+    <template id="portal_header" name="Passenger portal header">
+        <header class="wrap top">
+            <a class="marca" href="/" t-att-aria-label="brand">
+                <t t-call="bus_tracking.brand_mark"/>
+                <t t-esc="brand"/>
+            </a>
+            <nav class="portal-nav">
+                <form method="get" class="lang-form">
+                    <t t-foreach="languages.items()" t-as="entry">
+                        <button type="submit" name="lang" t-att-value="entry[0]"
+                                t-attf-class="lang #{'activa' if entry[0] == lang else ''}"
+                                t-att-lang="entry[0]" t-att-aria-current="'true' if entry[0] == lang else None"
+                                t-esc="entry[1]"/>
+                    </t>
+                </form>
+                <a class="btn" href="/web/login" t-esc="s['staff_login']"/>
+            </nav>
+        </header>
+    </template>
+
+    <template id="portal_routes" name="Passenger portal: routes">
+        <t t-call="web.layout">
+            <t t-set="title"><t t-esc="s['title_routes']"/> | <t t-esc="brand"/></t>
+            <t t-set="body_classname" t-value="'o_bus_landing'"/>
+            <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-call="bus_tracking.portal_header"/>
+            <main class="wrap portal">
+                <h1 t-esc="s['pick_route']"/>
+                <p class="lead" t-esc="s['pick_route_help']"/>
+                <p t-if="not routes" class="vacio" t-esc="s['no_routes']"/>
+                <ul class="rutas" t-if="routes">
+                    <li t-foreach="routes" t-as="r">
+                        <a t-attf-href="/rutas/#{r['code']}">
+                            <span class="chip" t-attf-style="background: #{r['color']}" t-esc="r['code']"/>
+                            <strong t-esc="r['name']"/>
+                            <span class="estado"
+                                  t-esc="s['buses_in_service'].format(n=r['buses']) if r['buses'] else s['no_service']"/>
+                        </a>
+                    </li>
+                </ul>
+            </main>
+            <p class="wrap reportar-enlace"><a href="/quejas" t-esc="s['report']"/></p>
+            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+        </t>
+    </template>
+
+    <template id="portal_route" name="Passenger portal: one route">
+        <t t-call="web.layout">
+            <t t-set="title"><t t-esc="route['name']"/> | <t t-esc="brand"/></t>
+            <t t-set="body_classname" t-value="'o_bus_landing'"/>
+            <t t-set="head">
+                <t t-call="bus_tracking.portal_head"/>
+                <link rel="stylesheet" href="/bus_tracking/static/lib/leaflet/leaflet.css"/>
+            </t>
+            <t t-call="bus_tracking.portal_header"/>
+            <main class="wrap portal">
+                <a class="volver" href="/rutas" t-esc="s['all_routes']"/>
+                <h1>
+                    <span class="chip" t-attf-style="background: #{route['color']}" t-esc="route['code']"/>
+                    <t t-esc="route['name']"/>
+                </h1>
+                <div class="mapa-wrap">
+                    <div id="bus-map" role="img" t-att-aria-label="s['map_label']"
+                         t-att-data-code="route['code']" t-att-data-color="route['color']"
+                         t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json"
+                         t-att-data-i18n="json_i18n"/>
+                    <aside>
+                        <h2 t-esc="s['buses_now']"/>
+                        <p id="bus-status" class="estado" aria-live="polite"/>
+                        <div id="path-picker" class="path-picker" hidden="hidden">
+                            <label for="path-select" t-esc="s['path_pick']"/>
+                            <select id="path-select"/>
+                            <button type="button" id="path-reset" class="btn" t-esc="s['path_reset']"/>
+                        </div>
+                        <ul id="bus-list" class="buses"/>
+                        <p id="bus-empty" class="vacio" hidden="hidden" t-esc="s['no_buses']"/>
+                        <a class="btn reportar" t-attf-href="/quejas?ruta=#{route['code']}" t-esc="s['report']"/>
+                    </aside>
+                </div>
+            </main>
+            <section class="wrap horario" t-if="timetable">
+                <h2 t-esc="s['timetable_title']"/>
+                <p class="ayuda" t-if="timetable['no_service']" t-esc="s['timetable_no_service']"/>
+                <p class="ayuda" t-elif="not timetable['items']" t-esc="s['timetable_none']"/>
+                <ul t-else="">
+                    <li t-foreach="timetable['items']" t-as="item">
+                        <strong t-esc="item['dep']"/>
+                        <span t-esc="s['timetable_arrives'].format(time=item['arr'])"/>
+                        <span class="bus" t-esc="item['bus']"/>
+                    </li>
+                </ul>
+                <p class="ayuda" t-if="not timetable['no_service']"
+                   t-esc="s['timetable_note'].format(as_of=timetable['as_of'])"/>
+            </section>
+            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+            <script src="/bus_tracking/static/lib/leaflet/leaflet.js"></script>
+            <script t-attf-src="/bus_tracking/static/src/portal/portal_map.js?v=#{asset_v}"></script>
+        </t>
+    </template>
+
+    <template id="complaint_form" name="Passenger portal: complaint form">
+        <t t-call="web.layout">
+            <t t-set="title"><t t-esc="s['report_title']"/> | <t t-esc="brand"/></t>
+            <t t-set="body_classname" t-value="'o_bus_landing'"/>
+            <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-call="bus_tracking.portal_header"/>
+            <main class="wrap portal">
+                <a class="volver" href="/rutas" t-esc="s['back_to_routes']"/>
+                <h1 t-esc="s['report_title']"/>
+                <p class="lead" t-esc="s['report_intro']"/>
+                <div t-if="errors" class="errores" role="alert">
+                    <strong t-esc="s['err_title']"/>
+                    <ul><li t-foreach="errors.values()" t-as="message" t-esc="message"/></ul>
+                </div>
+                <form class="formulario" method="post" action="/quejas">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="t" t-att-value="token"/>
+                    <div class="trampa" aria-hidden="true">
+                        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
+                    </div>
+
+                    <div class="campo">
+                        <label for="complaint-route" t-esc="s['field_route']"/>
+                        <select id="complaint-route" name="route">
+                            <option value="" t-esc="s['field_route_none']"/>
+                            <option t-foreach="routes" t-as="r" t-att-value="r['code']"
+                                    t-att-selected="'selected' if r['code'] == form['route'] else None">
+                                <t t-esc="r['code']"/> <t t-esc="r['name']"/>
+                            </option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="complaint-bus" t-esc="s['field_bus']"/>
+                        <select id="complaint-bus" name="bus">
+                            <option value="" t-esc="s['field_bus_none']"/>
+                            <option t-foreach="buses" t-as="b" t-att-value="b['id']"
+                                    t-att-data-route="b['route']" t-att-data-name="b['name']"
+                                    t-att-selected="'selected' if str(b['id']) == form['bus'] else None">
+                                <t t-esc="b['route']"/> <t t-esc="b['name']"/>
+                            </option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="complaint-kind" t-esc="s['field_kind']"/>
+                        <select id="complaint-kind" name="kind">
+                            <option t-foreach="kinds" t-as="k" t-att-value="k[0]"
+                                    t-att-selected="'selected' if k[0] == form['kind'] else None"
+                                    t-esc="s[k[1]]"/>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="complaint-description" t-esc="s['field_description']"/>
+                        <textarea id="complaint-description" name="description" rows="6" required="required"
+                                  minlength="10" t-att-maxlength="max_description"
+                                  aria-describedby="complaint-description-help"
+                                  t-att-aria-invalid="'true' if errors.get('description') else None"
+                                  t-esc="form['description']"/>
+                        <p id="complaint-description-help" class="ayuda" t-esc="s['field_description_help']"/>
+                        <p t-if="errors.get('description')" class="campo-error" t-esc="errors['description']"/>
+                    </div>
+                    <p class="ayuda" t-esc="s['contact_help']"/>
+                    <div class="campo">
+                        <label for="complaint-email" t-esc="s['field_email']"/>
+                        <input id="complaint-email" type="email" name="email" maxlength="255" autocomplete="email"
+                               t-att-value="form['email']"
+                               t-att-aria-invalid="'true' if errors.get('email') else None"/>
+                        <p t-if="errors.get('email')" class="campo-error" t-esc="errors['email']"/>
+                    </div>
+                    <div class="campo">
+                        <label for="complaint-phone" t-esc="s['field_phone']"/>
+                        <input id="complaint-phone" type="tel" name="phone" maxlength="40" autocomplete="tel"
+                               t-att-value="form['phone']"
+                               t-att-aria-invalid="'true' if errors.get('phone') else None"/>
+                        <p t-if="errors.get('phone')" class="campo-error" t-esc="errors['phone']"/>
+                    </div>
+                    <p class="ayuda">
+                        <t t-esc="privacy_text"/>
+                        <a t-if="privacy_url" t-att-href="privacy_url" target="_blank" rel="noopener noreferrer"
+                           t-esc="s['privacy_more']"/>
+                    </p>
+                    <button class="btn btn-primary" type="submit" t-esc="s['submit']"/>
+                </form>
+            </main>
+            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+            <script t-attf-src="/bus_tracking/static/src/portal/complaint.js?v=#{asset_v}"></script>
+        </t>
+    </template>
+
+    <template id="complaint_thanks" name="Passenger portal: complaint received">
+        <t t-call="web.layout">
+            <t t-set="title"><t t-esc="s['thanks_title']"/> | <t t-esc="brand"/></t>
+            <t t-set="body_classname" t-value="'o_bus_landing'"/>
+            <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-call="bus_tracking.portal_header"/>
+            <main class="wrap portal">
+                <h1 t-esc="s['thanks_title']"/>
+                <p class="lead" t-esc="s['thanks_text']"/>
+                <p t-if="folio" class="folio">
+                    <span t-esc="s['thanks_folio']"/> <strong t-esc="folio"/>
+                </p>
+                <p t-if="folio and not has_contact" class="ayuda" t-esc="s['thanks_no_contact']"/>
+                <p><a class="btn" href="/rutas" t-esc="s['back_to_routes']"/></p>
+            </main>
+            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+        </t>
+    </template>
+</odoo>

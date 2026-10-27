@@ -1,0 +1,43 @@
+.o_bus_live_map {
+    height: 100%;
+}
+
+.o_bus_live_map .o_bus_sidebar {
+    width: 290px;
+    min-width: 290px;
+}
+
+.o_bus_live_map .o_bus_item {
+    cursor: pointer;
+    border-left: 4px solid transparent;
+}
+
+.o_bus_live_map .o_bus_item:hover {
+    background: var(--bus-lluvia);
+}
+
+.o_bus_live_map .o_bus_item_selected {
+    background: var(--bus-lluvia);
+    border-left-color: var(--bus-senal);
+}
+
+.o_bus_live_map .o_bus_item strong {
+    font-family: var(--bus-font-display);
+    font-size: 1.05rem;
+}
+
+.o_bus_live_map .o_bus_map {
+    min-height: 400px;
+}
+
+.o_bus_marker {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}

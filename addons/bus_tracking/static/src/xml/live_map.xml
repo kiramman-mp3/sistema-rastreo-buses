@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="bus_tracking.LiveMap" owl="1">
+        <div class="o_bus_live_map d-flex">
+            <div class="o_bus_sidebar d-flex flex-column border-end bg-view">
+                <div class="p-2 border-bottom">
+                    <select class="form-select" t-on-change="onRouteChange">
+                        <option value="">All routes</option>
+                        <option t-foreach="state.routes" t-as="route" t-key="route.id"
+                                t-att-value="route.id" t-esc="route.code + ' · ' + route.name"/>
+                    </select>
+                    <button t-if="state.pathKey" class="btn btn-secondary btn-sm mt-2 w-100" t-on-click="resetPaths">
+                        Reset (show all routes)
+                    </button>
+                    <div t-if="state.error" class="text-danger small mt-1" t-esc="state.error"/>
+                </div>
+                <div class="o_bus_list flex-grow-1 overflow-auto">
+                    <div t-if="!filteredVehicles.length" class="p-3 text-muted">No positions yet.</div>
+                    <div t-foreach="filteredVehicles" t-as="v" t-key="v.id"
+                         class="o_bus_item px-3 py-2 border-bottom"
+                         t-att-class="{'o_bus_item_selected': v.id === state.selectedId}"
+                         t-on-click="() => this.selectVehicle(v)">
+                        <div class="d-flex justify-content-between">
+                            <strong t-esc="v.name"/>
+                            <span t-attf-class="badge text-bg-{{ v.status === 'moving' ? 'success' : v.status === 'stopped' ? 'warning' : 'secondary' }}"
+                                  t-esc="v.status"/>
+                        </div>
+                        <div class="small text-muted">
+                            <span t-if="v.route_name" t-esc="v.route_name"/>
+                            <span t-if="v.stop"> · @ <t t-esc="v.stop"/></span>
+                        </div>
+                        <div class="small text-muted"><t t-esc="v.speed"/> km/h</div>
+                        <div t-if="v.alerts.length" class="mt-1">
+                            <span t-foreach="v.alerts" t-as="kind" t-key="kind"
+                                  class="badge text-bg-danger me-1" t-esc="state.alertLabels[kind]"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="o_bus_map flex-grow-1" t-ref="map"/>
+        </div>
+    </t>
+</templates>

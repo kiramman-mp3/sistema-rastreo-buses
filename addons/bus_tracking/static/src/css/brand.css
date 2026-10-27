@@ -1,0 +1,37 @@
+/* Shared brand tokens and fonts: landing, login and backend. */
+
+@font-face {
+    font-family: "Bricolage Grotesque";
+    src: url("/bus_tracking/static/fonts/bricolage-grotesque-var.woff2") format("woff2");
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/bus_tracking/static/fonts/atkinson-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/bus_tracking/static/fonts/atkinson-700.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --bus-paper: #f1f3f2;
+    --bus-ink: #172025;
+    --bus-ruta: #1e5560;
+    --bus-rojo: #c23327;
+    --bus-senal: #ffc62b;
+    --bus-lluvia: #dce3e3;
+    --bus-muted: #526368;
+    --bus-font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --bus-font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}

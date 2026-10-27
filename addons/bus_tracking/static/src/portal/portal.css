@@ -1,0 +1,354 @@
+.portal {
+    padding-block: clamp(1.5rem, 4vw, 3rem) 3rem;
+}
+
+.portal h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.portal .lead {
+    margin-top: 1rem;
+    color: var(--bus-muted);
+    font-size: 1.2rem;
+}
+
+.portal h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.portal-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lang-form {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.lang {
+    font: inherit;
+    background: none;
+    border: 0;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--bus-muted);
+}
+
+.lang.activa {
+    background: var(--bus-ink);
+    color: var(--bus-paper);
+}
+
+.chip {
+    display: inline-block;
+    min-width: 3rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 12px;
+    color: #fff;
+    font-family: var(--bus-font-display);
+    font-weight: 800;
+    font-size: 0.6em;
+    text-align: center;
+    letter-spacing: 0;
+}
+
+.rutas {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+    max-width: 720px;
+}
+
+.rutas a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--bus-ink);
+    border-radius: 18px;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rutas a:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--bus-senal);
+}
+
+.rutas .chip {
+    font-size: 1.1rem;
+}
+
+.rutas .estado {
+    margin-left: auto;
+    font-size: 0.95rem;
+    color: var(--bus-muted);
+}
+
+.vacio {
+    margin-top: 1.5rem;
+    color: var(--bus-muted);
+}
+
+.volver {
+    display: inline-block;
+    margin-bottom: 1rem;
+    text-underline-offset: 0.3em;
+}
+
+.mapa-wrap {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+#bus-map {
+    height: clamp(360px, 62vh, 620px);
+    border: 4px solid var(--bus-ink);
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--bus-lluvia);
+}
+
+.mapa-wrap aside .estado {
+    color: var(--bus-muted);
+    font-size: 0.95rem;
+    min-height: 1.4em;
+}
+
+.buses {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.buses li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    background: var(--bus-lluvia);
+}
+
+.bus-marker {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 3px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 860px) {
+    .mapa-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    .portal-nav {
+        gap: 0.5rem;
+    }
+
+    .rutas a {
+        flex-wrap: wrap;
+    }
+
+    .rutas .estado {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 520px) {
+    .top {
+        gap: 0.5rem;
+    }
+
+    .marca {
+        font-size: 0;           /* logo only; the link keeps its aria-label */
+    }
+
+    .top .btn {
+        white-space: nowrap;
+    }
+
+    .marca svg {
+        width: 30px;
+        height: 30px;
+    }
+
+    .portal-nav {
+        gap: 0.25rem;
+    }
+
+    .top .btn {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.95rem;
+    }
+
+    .lang {
+        padding: 0.3rem 0.45rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* ---------- Complaint form ---------- */
+
+.formulario {
+    margin-top: 2rem;
+    max-width: 640px;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.campo {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.campo label {
+    font-weight: 700;
+}
+
+.campo select,
+.campo input,
+.campo textarea {
+    font: inherit;
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--bus-ink);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--bus-ink);
+    width: 100%;
+}
+
+.campo textarea {
+    resize: vertical;
+}
+
+.campo [aria-invalid="true"] {
+    border-color: var(--bus-rojo);
+}
+
+.ayuda {
+    margin: 0;
+    color: var(--bus-muted);
+    font-size: 0.95rem;
+}
+
+.campo-error {
+    margin: 0;
+    color: var(--bus-rojo);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.errores {
+    margin-top: 1.5rem;
+    max-width: 640px;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--bus-rojo);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.errores ul {
+    margin: 0.4rem 0 0;
+    padding-left: 1.2rem;
+}
+
+.trampa {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.folio {
+    margin-top: 1.5rem;
+    font-size: 1.4rem;
+}
+
+.reportar {
+    display: inline-block;
+    margin-top: 1.25rem;
+}
+
+.reportar-enlace {
+    margin-top: 2rem;
+}
+
+.formulario .btn {
+    justify-self: start;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+/* ---------- Official timetable ---------- */
+
+.horario {
+    padding-bottom: 2rem;
+}
+
+.horario-grupo {
+    margin-top: 1.25rem;
+}
+
+.horario-grupo h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.horario-grupo ul {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.horario-grupo li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 12px;
+    background: var(--bus-lluvia);
+}
+
+.horario-grupo li strong {
+    font-family: var(--bus-font-display);
+    font-size: 1.15rem;
+}
+
+.horario-grupo .bus {
+    color: var(--bus-muted);
+    font-size: 0.95rem;
+}
+
+.path-picker { display: grid; gap: .4rem; margin: .8rem 0; }
+.path-picker select { width: 100%; padding: .5rem; border-radius: .5rem; border: 1px solid #c9d3d6; font: inherit; }
+.path-picker[hidden] { display: none; }

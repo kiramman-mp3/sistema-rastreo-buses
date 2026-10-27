@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_bus" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.bus.tracking</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="40"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Bus Tracking" string="Bus Tracking"
+                     data-key="bus_tracking" groups="bus_tracking.group_bus_manager">
+                    <h2>Traccar server</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="traccar_url"/>
+                                <div class="text-muted">Base URL reachable from the Odoo server.</div>
+                                <field name="traccar_url" placeholder="http://traccar:8082"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_gps_url"/>
+                                <div class="text-muted">What the drivers' phones connect to. Must be HTTPS in production.</div>
+                                <field name="bus_gps_url" placeholder="https://gps.example.com"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="traccar_user"/>
+                                <field name="traccar_user"/>
+                                <label for="traccar_password"/>
+                                <field name="traccar_password" password="True"/>
+                                <label for="traccar_token"/>
+                                <field name="traccar_token" password="True"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="traccar_webhook_secret"/>
+                                <div class="text-muted">
+                                    Traccar must forward to
+                                    <code>/bus_tracking/traccar/webhook?secret=&lt;secret&gt;</code>.
+                                    Empty secret disables the webhook.
+                                </div>
+                                <field name="traccar_webhook_secret" password="True"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_position_retention_days"/>
+                                <field name="bus_position_retention_days"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_stale_minutes"/>
+                                <div class="text-muted">
+                                    Used by <code>/bus_tracking/health</code> for uptime monitors.
+                                </div>
+                                <field name="bus_stale_minutes"/>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Alerts</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_speed_limit"/>
+                                <field name="bus_speed_limit"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_offline_minutes"/>
+                                <div class="text-muted">Only for buses that reported in the last 6 hours.</div>
+                                <field name="bus_offline_minutes"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_long_stop_minutes"/>
+                                <field name="bus_long_stop_minutes"/>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Route deviation</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_off_route_meters"/>
+                                <field name="bus_off_route_meters"/>
+                                <label for="bus_off_route_minutes"/>
+                                <field name="bus_off_route_minutes"/>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Passenger site</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_brand_name"/>
+                                <field name="bus_brand_name"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_map_center"/>
+                                <field name="bus_map_center"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_privacy_url"/>
+                                <field name="bus_privacy_url" placeholder="https://"/>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Complaints</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_complaint_retention_days"/>
+                                <div class="text-muted">Applies to the optional email and phone of passengers.</div>
+                                <field name="bus_complaint_retention_days"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt16">
+                        <button name="action_traccar_test_connection" type="object"
+                                string="Test connection" class="btn btn-secondary"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_bus_settings" model="ir.actions.act_window">
+        <field name="name">Ajustes</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'bus_tracking', 'bin_size': False}</field>
+    </record>
+</odoo>

@@ -1,0 +1,7 @@
+.env
+.env.prod
+config/odoo.prod.conf
+backups/
+__pycache__/
+*.pyc
+data/

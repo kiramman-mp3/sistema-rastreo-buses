@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-odoo}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  odoo:
+    build: ./docker/odoo
+    image: rastreo-odoo:16.0
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "${ODOO_PORT:-8069}:8069"
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: ${DB_PASSWORD:-odoo}
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./data:/mnt/data:ro
+      - ./config/odoo.conf:/etc/odoo/odoo.conf
+
+  traccar:
+    image: traccar/traccar:latest
+    restart: unless-stopped
+    depends_on:
+      - odoo
+    ports:
+      - "8082:8082"   # web UI + REST API
+      - "5055:5055"   # OsmAnd protocol (phone apps, e.g. Traccar Client)
+      - "5023:5023"   # GT06 protocol (common hardware trackers)
+    environment:
+      CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
+      # Push every position to Odoo as soon as it arrives
+      FORWARD_TYPE: "json"
+      FORWARD_RETRY_ENABLE: "true"
+      FORWARD_URL: "http://odoo:8069/bus_tracking/traccar/webhook"
+      FORWARD_HEADER: "X-Webhook-Secret: ${WEBHOOK_SECRET:-change-me}"
+    volumes:
+      - traccar-data:/opt/traccar/data
+      - traccar-logs:/opt/traccar/logs
+
+  # Development mailbox: catches every email Odoo sends. Web UI on http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+
+volumes:
+  db-data:
+  odoo-data:
+  traccar-data:
+  traccar-logs:

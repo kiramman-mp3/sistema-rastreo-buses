@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bus_alert_tree" model="ir.ui.view">
+        <field name="name">bus.alert.tree</field>
+        <field name="model">bus.alert</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" decoration-danger="state == 'open'" decoration-muted="state == 'closed'">
+                <field name="start_time"/>
+                <field name="vehicle_id"/>
+                <field name="route_id" optional="show"/>
+                <field name="kind"/>
+                <field name="detail"/>
+                <field name="duration_minutes" widget="float_time" string="Duration" optional="show"/>
+                <field name="end_time" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'open'" decoration-muted="state == 'closed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_alert_form" model="ir.ui.view">
+        <field name="name">bus.alert.form</field>
+        <field name="model">bus.alert</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="detail"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="vehicle_id"/>
+                            <field name="route_id"/>
+                            <field name="kind"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="start_time"/>
+                            <field name="end_time"/>
+                            <field name="duration_minutes" widget="float_time" string="Duration"/>
+                            <field name="max_speed" attrs="{'invisible': [('kind', '!=', 'speeding')]}"/>
+                            <field name="threshold"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_alert_search" model="ir.ui.view">
+        <field name="name">bus.alert.search</field>
+        <field name="model">bus.alert</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <filter name="open" string="Open" domain="[('state', '=', 'open')]"/>
+                <filter name="closed" string="Closed" domain="[('state', '=', 'closed')]"/>
+                <separator/>
+                <filter name="speeding" string="Speeding" domain="[('kind', '=', 'speeding')]"/>
+                <filter name="offline" string="No signal" domain="[('kind', '=', 'offline')]"/>
+                <filter name="long_stop" string="Long stop" domain="[('kind', '=', 'long_stop')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="group_vehicle" string="Bus" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'start_time:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bus_alert" model="ir.actions.act_window">
+        <field name="name">Reportes</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_bus_report_speeding" model="ir.actions.act_window">
+        <field name="name">Velocidad</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('kind', '=', 'speeding')]</field>
+    </record>
+
+    <record id="action_bus_report_offline" model="ir.actions.act_window">
+        <field name="name">Sin señal</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('kind', '=', 'offline')]</field>
+    </record>
+
+    <record id="action_bus_report_long_stop" model="ir.actions.act_window">
+        <field name="name">Paradas largas</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('kind', '=', 'long_stop')]</field>
+    </record>
+
+    <record id="action_bus_report_off_route" model="ir.actions.act_window">
+        <field name="name">Desvíos de ruta</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('kind', '=', 'off_route')]</field>
+    </record>
+</odoo>
