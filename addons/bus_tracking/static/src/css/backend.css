@@ -1,0 +1,21 @@
+/* Backend touches on top of the palette from primary_variables.scss. */
+
+.o_main_navbar {
+    border-bottom: 3px solid var(--bus-senal);
+}
+
+.o_web_client .o_form_view .oe_title h1,
+.o_web_client .o_control_panel .breadcrumb-item.active {
+    font-family: var(--bus-font-display);
+    letter-spacing: -0.02em;
+}
+
+.o_web_client .o_form_view .oe_title h1 {
+    font-weight: 800;
+}
+
+.o_web_client .btn-primary:focus-visible,
+.o_web_client .btn:focus-visible {
+    outline: 3px solid var(--bus-senal);
+    outline-offset: 2px;
+}

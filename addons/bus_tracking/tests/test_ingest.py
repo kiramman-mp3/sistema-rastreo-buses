@@ -1,0 +1,126 @@
+from datetime import datetime, timedelta
+
+from odoo import fields
+from odoo.tests import tagged
+
+from .common import STOPS, BusCase, traccar_position
+
+
+@tagged('post_install', '-at_install')
+class TestIngest(BusCase):
+
+    def test_position_is_stored_and_speed_converted(self):
+        rec = self.bus._apply_position(
+            traccar_position(7, '2026-10-26T12:00:00.000+00:00', -33.47, -70.62, speed_knots=10.0))
+        self.assertTrue(rec)
+        self.assertAlmostEqual(rec.speed, 18.52, places=2)
+        self.assertEqual(rec.fix_time, datetime(2026, 10, 26, 12, 0, 0))
+        self.assertAlmostEqual(self.bus.last_latitude, -33.47)
+        self.assertEqual(self.bus.last_fix_time, datetime(2026, 10, 26, 12, 0, 0))
+
+    def test_timezone_offset_is_normalized_to_utc(self):
+        rec = self.bus._apply_position(
+            traccar_position(7, '2026-10-26T09:00:00.000-03:00', -33.47, -70.62))
+        self.assertEqual(rec.fix_time, datetime(2026, 10, 26, 12, 0, 0))
+
+    def test_duplicate_position_is_ignored(self):
+        pos = traccar_position(7, '2026-10-26T12:00:00.000+00:00', -33.47, -70.62)
+        self.assertTrue(self.bus._apply_position(pos))
+        self.assertFalse(self.bus._apply_position(pos))
+        self.assertEqual(self.env['bus.position'].search_count([('vehicle_id', '=', self.bus.id)]), 1)
+
+    def test_invalid_position_is_rejected(self):
+        self.assertFalse(self.bus._apply_position({'deviceId': 7, 'latitude': -33.4}))
+        self.assertFalse(self.bus._apply_position(
+            {'deviceId': 7, 'fixTime': '2026-10-26T12:00:00Z', 'latitude': None, 'longitude': -70.6}))
+        self.assertFalse(self.env['bus.position'].search_count([]))
+
+    def test_older_position_does_not_overwrite_last_state(self):
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:10:00Z', -33.47, -70.62))
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', -33.48, -70.63))
+        self.assertAlmostEqual(self.bus.last_latitude, -33.47)
+        self.assertEqual(self.bus.last_fix_time, datetime(2026, 10, 26, 12, 10, 0))
+        self.assertEqual(self.env['bus.position'].search_count([('vehicle_id', '=', self.bus.id)]), 2)
+
+    def test_arrival_is_logged_once_while_inside_the_radius(self):
+        name, lat, lon = STOPS[0]
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', lat, lon))
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:10Z', lat + 0.0001, lon))
+        arrivals = self.env['bus.stop.arrival'].search([('vehicle_id', '=', self.bus.id)])
+        self.assertEqual(len(arrivals), 1)
+        self.assertEqual(arrivals.stop_id, self.stop['Terminal'])
+        self.assertEqual(self.bus.current_stop_id, self.stop['Terminal'])
+
+    def test_leaving_a_stop_clears_current_stop(self):
+        name, lat, lon = STOPS[0]
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', lat, lon))
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:01:00Z', lat - 0.005, lon))
+        self.assertFalse(self.bus.current_stop_id)
+
+    def test_full_route_logs_every_stop_in_order(self):
+        for minute, (name, lat, lon) in enumerate(STOPS):
+            self.bus._apply_position(traccar_position(7, '2026-10-26T12:%02d:00Z' % (minute * 5), lat, lon))
+            # a point between stops, so the bus leaves each radius
+            self.bus._apply_position(traccar_position(7, '2026-10-26T12:%02d:30Z' % (minute * 5), lat - 0.002, lon + 0.004))
+        arrivals = self.env['bus.stop.arrival'].search(
+            [('vehicle_id', '=', self.bus.id)], order='arrival_time asc')
+        self.assertEqual(arrivals.mapped('stop_id.name'), [s[0] for s in STOPS])
+
+    def test_bus_without_route_never_logs_arrivals(self):
+        self.bus.route_id = False
+        name, lat, lon = STOPS[0]
+        self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', lat, lon))
+        self.assertFalse(self.env['bus.stop.arrival'].search_count([]))
+
+    def test_payload_forwarded_by_traccar_matches_by_device_id(self):
+        payload = {
+            'position': traccar_position(7, '2026-10-26T12:00:00Z', -33.47, -70.62, speed_knots=5.0),
+            'device': {'id': 7, 'uniqueId': 'BUS007'},
+        }
+        self.assertTrue(self.env['bus.vehicle']._process_traccar_payload(payload))
+        self.assertEqual(self.env['bus.position'].search_count([('vehicle_id', '=', self.bus.id)]), 1)
+
+    def test_payload_falls_back_to_unique_id(self):
+        payload = {
+            'position': {'fixTime': '2026-10-26T12:00:00Z', 'latitude': -33.47, 'longitude': -70.62},
+            'device': {'uniqueId': 'BUS007'},
+        }
+        self.assertTrue(self.env['bus.vehicle']._process_traccar_payload(payload))
+
+    def test_payload_for_unknown_device_is_ignored(self):
+        payload = {'position': traccar_position(999, '2026-10-26T12:00:00Z', -33.47, -70.62)}
+        self.assertFalse(self.env['bus.vehicle']._process_traccar_payload(payload))
+        self.assertFalse(self.env['bus.position'].search_count([]))
+
+    def test_status(self):
+        self.assertEqual(self.bus.status, 'offline')
+        now = fields.Datetime.now()
+        self.bus.write({'last_fix_time': now, 'last_speed': 30.0})
+        self.bus.invalidate_recordset(['status'])
+        self.assertEqual(self.bus.status, 'moving')
+        self.bus.write({'last_speed': 0.5})
+        self.bus.invalidate_recordset(['status'])
+        self.assertEqual(self.bus.status, 'stopped')
+        self.bus.write({'last_fix_time': now - timedelta(minutes=6)})
+        self.bus.invalidate_recordset(['status'])
+        self.assertEqual(self.bus.status, 'offline')
+
+    def test_cleanup_deletes_only_positions_older_than_retention(self):
+        self.env['ir.config_parameter'].set_param('bus_tracking.retention_days', '30')
+        now = fields.Datetime.now()
+        Position = self.env['bus.position']
+        old = Position.create({'vehicle_id': self.bus.id, 'fix_time': now - timedelta(days=31),
+                               'latitude': -33.4, 'longitude': -70.6})
+        fresh = Position.create({'vehicle_id': self.bus.id, 'fix_time': now - timedelta(days=1),
+                                 'latitude': -33.4, 'longitude': -70.6})
+        Position._cron_cleanup()
+        self.assertFalse(old.exists())
+        self.assertTrue(fresh.exists())
+
+    def test_cleanup_with_zero_days_keeps_everything(self):
+        self.env['ir.config_parameter'].set_param('bus_tracking.retention_days', '0')
+        old = self.env['bus.position'].create({
+            'vehicle_id': self.bus.id, 'fix_time': fields.Datetime.now() - timedelta(days=400),
+            'latitude': -33.4, 'longitude': -70.6})
+        self.env['bus.position']._cron_cleanup()
+        self.assertTrue(old.exists())

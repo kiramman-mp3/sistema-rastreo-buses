@@ -1,0 +1,157 @@
+body.o_bus_login {
+    margin: 0;
+    background: var(--bus-paper);
+    color: var(--bus-ink);
+    font-family: var(--bus-font-body);
+}
+
+.o_bus_login_shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* ---------- Photo panel ---------- */
+
+.o_bus_login_visual {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+    background:
+        linear-gradient(to top, rgba(23, 32, 37, 0.88) 0%, rgba(23, 32, 37, 0.1) 55%, rgba(23, 32, 37, 0) 100%),
+        url("/bus_tracking/static/img/conductor.jpg") 30% 35% / cover no-repeat;
+    background-color: var(--bus-ink);
+}
+
+.o_bus_login_quote {
+    margin: 0;
+    max-width: 14ch;
+    font-family: var(--bus-font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #fff;
+}
+
+/* ---------- Form panel ---------- */
+
+.o_bus_login_panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+}
+
+.o_bus_login_card {
+    width: min(400px, 100%);
+}
+
+.o_bus_login_brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+    color: var(--bus-ink);
+    text-decoration: none;
+    font-family: var(--bus-font-display);
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+}
+
+.o_bus_login_brand svg {
+    width: 34px;
+    height: 34px;
+}
+
+.o_bus_login_title {
+    margin: 0;
+    font-family: var(--bus-font-display);
+    font-weight: 800;
+    font-size: 2.2rem;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.o_bus_login_sub {
+    margin: 0.5rem 0 1.75rem;
+    color: var(--bus-muted);
+}
+
+.o_bus_login .oe_login_form .form-label {
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.o_bus_login .oe_login_form .form-control {
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--bus-ink);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--bus-ink);
+}
+
+.o_bus_login .oe_login_form .form-control:focus {
+    border-color: var(--bus-ruta);
+    box-shadow: 0 0 0 4px rgba(255, 198, 43, 0.6);
+}
+
+.o_bus_login .oe_login_form .btn-primary {
+    padding: 0.8rem 1rem;
+    border-radius: 999px;
+    border: 2px solid var(--bus-rojo);
+    background: var(--bus-rojo);
+    color: #fff;
+    font-weight: 700;
+}
+
+.o_bus_login .oe_login_form .btn-primary:hover,
+.o_bus_login .oe_login_form .btn-primary:focus {
+    background: #a82a1f;
+    border-color: #a82a1f;
+}
+
+.o_bus_login .oe_login_form .btn-link {
+    color: var(--bus-ruta);
+}
+
+.o_bus_login .alert {
+    border-radius: 12px;
+}
+
+.o_bus_login_footer {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.9rem;
+}
+
+.o_bus_login_footer a {
+    color: var(--bus-muted);
+}
+
+/* ---------- Narrow screens: photo becomes a banner ---------- */
+
+@media (max-width: 800px) {
+    .o_bus_login_shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: 190px auto;
+    }
+
+    .o_bus_login_visual {
+        background-position: 30% 30%;
+        padding: 1.25rem;
+    }
+
+    .o_bus_login_quote {
+        font-size: 1.6rem;
+        max-width: 18ch;
+    }
+
+    .o_bus_login_panel {
+        align-items: flex-start;
+        padding-top: 1.5rem;
+    }
+}
