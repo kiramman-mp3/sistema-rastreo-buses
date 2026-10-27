@@ -1,0 +1,476 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body.o_bus_landing {
+    margin: 0;
+    background: var(--bus-paper);
+    color: var(--bus-ink);
+    font-family: var(--bus-font-body);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+.o_bus_landing a {
+    color: inherit;
+}
+
+.o_bus_landing :focus-visible {
+    outline: 3px solid var(--bus-senal);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.o_bus_landing .wrap {
+    width: min(1160px, 100% - 48px);
+    margin-inline: auto;
+}
+
+.o_bus_landing h1,
+.o_bus_landing h2,
+.o_bus_landing h3 {
+    font-family: var(--bus-font-display);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.o_bus_landing p {
+    margin: 0;
+    max-width: 58ch;
+}
+
+/* ---------- Buttons ---------- */
+
+.o_bus_landing .btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 2px solid var(--bus-ink);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.o_bus_landing .btn:hover {
+    transform: translateY(-2px);
+}
+
+.o_bus_landing .btn-primary {
+    background: var(--bus-rojo);
+    border-color: var(--bus-rojo);
+    color: #fff;
+}
+
+.o_bus_landing .btn-primary:hover {
+    background: #a82a1f;
+}
+
+.o_bus_landing .btn-quiet {
+    padding-inline: 0.25rem;
+    border-color: transparent;
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    text-decoration-thickness: 2px;
+}
+
+/* ---------- Header ---------- */
+
+.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.25rem;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: var(--bus-font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+}
+
+.marca svg {
+    width: 38px;
+    height: 38px;
+}
+
+.top .btn {
+    padding-block: 0.5rem;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: clamp(1.5rem, 5vw, 4rem);
+    align-items: center;
+    padding-block: clamp(0.5rem, 2.5vw, 2rem) 0.5rem;
+}
+
+.hero h1 {
+    font-size: clamp(3.2rem, 8vw, 6.4rem);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+}
+
+.hero .lead {
+    margin-top: 1.5rem;
+    font-size: 1.3rem;
+    color: var(--bus-muted);
+}
+
+.hero .acciones {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: center;
+}
+
+.ventana {
+    margin: 0;
+    aspect-ratio: 1 / 1;
+    max-height: min(440px, 58vh);
+    width: 100%;
+    border: 12px solid var(--bus-ink);
+    border-radius: 40px;
+    overflow: hidden;
+    background: var(--bus-lluvia);
+    box-shadow: 14px 14px 0 var(--bus-senal);
+}
+
+.ventana img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 62% 70%;
+    display: block;
+}
+
+/* ---------- Route line (the one memorable moment) ---------- */
+
+.linea {
+    position: relative;
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+    padding-bottom: 3.5rem;
+    --avance: 66%;
+}
+
+.linea .via {
+    position: relative;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--bus-lluvia);
+    margin-top: 58px;
+}
+
+.linea .via::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--avance);
+    border-radius: 5px;
+    background: var(--bus-ruta);
+    transform-origin: left;
+    animation: recorrido 3.6s cubic-bezier(0.5, 0, 0.2, 1) both;
+}
+
+.linea .parada {
+    position: absolute;
+    top: 50%;
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+    border-radius: 50%;
+    background: var(--bus-paper);
+    border: 5px solid var(--bus-ink);
+}
+
+.linea .parada span {
+    position: absolute;
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.linea .parada:nth-of-type(1) { left: 2%; }
+.linea .parada:nth-of-type(2) { left: 34%; animation: enciende 0.4s 1.2s both; }
+.linea .parada:nth-of-type(3) { left: 66%; animation: enciende 0.4s 2.4s both; }
+.linea .parada:nth-of-type(4) { left: 96%; }
+
+.linea .parada:nth-of-type(1) { background: var(--bus-senal); }
+
+.linea .bus {
+    position: absolute;
+    top: -50px;
+    left: var(--avance);
+    width: 74px;
+    margin-left: -37px;
+    animation: avanza 3.6s cubic-bezier(0.5, 0, 0.2, 1) both;
+}
+
+@keyframes recorrido {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@keyframes avanza {
+    from { left: 2%; }
+    to { left: var(--avance); }
+}
+
+@keyframes enciende {
+    from { background: var(--bus-paper); }
+    to { background: var(--bus-senal); }
+}
+
+/* ---------- Story rows ---------- */
+
+.fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 6vw, 5rem);
+    align-items: center;
+    padding-block: clamp(3rem, 8vw, 6rem);
+}
+
+.fila h2 {
+    font-size: clamp(2rem, 4.2vw, 3.3rem);
+    font-weight: 700;
+    line-height: 1.02;
+}
+
+.fila p {
+    margin-top: 1.25rem;
+}
+
+.fila figure {
+    margin: 0;
+}
+
+.fila img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 22px;
+}
+
+.fila.invertida figure {
+    order: 2;
+}
+
+.fila .retrato img {
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 20% 40%;
+    max-height: 560px;
+}
+
+/* ---------- Coordination band ---------- */
+
+.coordina {
+    background: var(--bus-ink);
+    color: var(--bus-paper);
+    padding-block: clamp(3rem, 8vw, 6rem);
+}
+
+.coordina h2 {
+    font-size: clamp(2rem, 4.2vw, 3.3rem);
+    font-weight: 700;
+    line-height: 1.02;
+    max-width: 18ch;
+}
+
+.coordina .tres {
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem 3rem;
+}
+
+.coordina h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--bus-senal);
+}
+
+.coordina .tres p {
+    margin-top: 0.5rem;
+    color: #d3dcdc;
+}
+
+/* ---------- How the signal travels ---------- */
+
+.como {
+    padding-block: clamp(3rem, 8vw, 6rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 6vw, 5rem);
+    align-items: start;
+}
+
+.como h2 {
+    font-size: clamp(2rem, 4.2vw, 3.3rem);
+    font-weight: 700;
+    line-height: 1.02;
+    max-width: 20ch;
+}
+
+.camino {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    position: relative;
+    max-width: 640px;
+}
+
+.camino::before {
+    content: "";
+    position: absolute;
+    left: 13px;
+    top: 14px;
+    bottom: 14px;
+    width: 6px;
+    border-radius: 3px;
+    background: var(--bus-ruta);
+}
+
+.camino li {
+    position: relative;
+    padding: 0 0 2.25rem 3.5rem;
+}
+
+.camino li:last-child {
+    padding-bottom: 0;
+}
+
+.camino li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bus-paper);
+    border: 6px solid var(--bus-ink);
+}
+
+.camino li:last-child::before {
+    background: var(--bus-senal);
+}
+
+.camino h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.camino p {
+    margin-top: 0.25rem;
+    color: var(--bus-muted);
+}
+
+/* ---------- Closing ---------- */
+
+.cierre {
+    background: var(--bus-senal);
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.cierre .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cierre h2 {
+    font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+    font-weight: 800;
+    max-width: 22ch;
+    line-height: 1.05;
+}
+
+.cierre .btn-primary:hover {
+    background: var(--bus-ink);
+    border-color: var(--bus-ink);
+}
+
+.pie {
+    padding-block: 2rem;
+    font-size: 0.95rem;
+    color: var(--bus-muted);
+}
+
+.pie p {
+    max-width: none;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 860px) {
+    .hero,
+    .fila,
+    .como {
+        grid-template-columns: 1fr;
+    }
+
+    .camino {
+        margin-top: 1.5rem;
+    }
+
+    .fila.invertida figure {
+        order: 0;
+    }
+
+    .ventana {
+        aspect-ratio: 5 / 4;
+        max-height: none;
+        box-shadow: 8px 8px 0 var(--bus-senal);
+    }
+
+    .coordina .tres {
+        grid-template-columns: 1fr;
+    }
+
+    .linea .parada span {
+        font-size: 0.8rem;
+    }
+
+    .linea .parada:nth-of-type(1) span { transform: translateX(-20%); }
+    .linea .parada:nth-of-type(4) span { transform: translateX(-80%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .linea .via::after,
+    .linea .bus,
+    .linea .parada {
+        animation: none !important;
+    }
+
+    .linea .parada:nth-of-type(2),
+    .linea .parada:nth-of-type(3) {
+        background: var(--bus-senal);
+    }
+}

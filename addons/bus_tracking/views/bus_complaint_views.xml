@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bus_complaint_tree" model="ir.ui.view">
+        <field name="name">bus.complaint.tree</field>
+        <field name="model">bus.complaint</field>
+        <field name="arch" type="xml">
+            <tree create="0" decoration-bf="state == 'new'" decoration-muted="state == 'resolved'">
+                <field name="name"/>
+                <field name="create_date" string="Received"/>
+                <field name="route_id"/>
+                <field name="vehicle_id" optional="show"/>
+                <field name="kind"/>
+                <field name="user_id" optional="show"/>
+                <field name="has_contact" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'new'" decoration-warning="state == 'review'"
+                       decoration-success="state == 'resolved'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_complaint_form" model="ir.ui.view">
+        <field name="name">bus.complaint.form</field>
+        <field name="model">bus.complaint</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_review" type="object" string="Start review" class="btn-primary"
+                            groups="bus_tracking.group_bus_manager" attrs="{'invisible': [('state', '!=', 'new')]}"/>
+                    <button name="action_resolve" type="object" string="Resolve" class="btn-primary"
+                            groups="bus_tracking.group_bus_manager" attrs="{'invisible': [('state', '=', 'resolved')]}"/>
+                    <button name="action_reopen" type="object" string="Reopen"
+                            groups="bus_tracking.group_bus_manager" attrs="{'invisible': [('state', '!=', 'resolved')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,review,resolved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="kind" readonly="1"/>
+                            <field name="route_id" readonly="1"/>
+                            <field name="vehicle_id" readonly="1"/>
+                            <field name="create_date" string="Received" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="user_id" groups="bus_tracking.group_bus_manager"/>
+                            <field name="resolved_date"/>
+                            <field name="lang" readonly="1"/>
+                            <field name="has_contact"/>
+                        </group>
+                    </group>
+                    <group string="What the passenger wrote">
+                        <field name="description" nolabel="1" colspan="2" readonly="1"/>
+                    </group>
+                    <group string="Contact (optional, erased after the retention period)"
+                           groups="bus_tracking.group_bus_manager">
+                        <field name="contact_email" readonly="1"/>
+                        <field name="contact_phone" readonly="1"/>
+                    </group>
+                    <group string="Internal note" groups="bus_tracking.group_bus_manager">
+                        <field name="internal_note" nolabel="1" colspan="2"
+                               placeholder="Only the team sees this."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_complaint_search" model="ir.ui.view">
+        <field name="name">bus.complaint.search</field>
+        <field name="model">bus.complaint</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="route_id"/>
+                <field name="vehicle_id"/>
+                <field name="description"/>
+                <filter name="unresolved" string="Unresolved" domain="[('state', '!=', 'resolved')]"/>
+                <filter name="new" string="New" domain="[('state', '=', 'new')]"/>
+                <filter name="review" string="In review" domain="[('state', '=', 'review')]"/>
+                <filter name="resolved" string="Resolved" domain="[('state', '=', 'resolved')]"/>
+                <separator/>
+                <filter name="mine" string="Assigned to me" domain="[('user_id', '=', uid)]"/>
+                <filter name="unassigned" string="Unassigned" domain="[('user_id', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_route" string="Route" context="{'group_by': 'route_id'}"/>
+                    <filter name="group_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bus_complaint" model="ir.actions.act_window">
+        <field name="name">Quejas</field>
+        <field name="res_model">bus.complaint</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_unresolved': 1}</field>
+    </record>
+</odoo>

@@ -1,0 +1,41 @@
+{
+	email {$ACME_EMAIL}
+}
+
+(security_headers) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options SAMEORIGIN
+		-Server
+	}
+}
+
+{$DOMAIN} {
+	import security_headers
+
+	# Positions reach Odoo over the internal Docker network, and the database
+	# manager must never be public: neither is served through the proxy.
+	@private path /bus_tracking/traccar/webhook /web/database/*
+	respond @private 404
+
+	@realtime path /longpolling/* /websocket
+	reverse_proxy @realtime odoo:8072
+
+	reverse_proxy odoo:8069
+}
+
+# Drivers' phones (Traccar Client, OsmAnd protocol) send their position here over HTTPS.
+{$GPS_DOMAIN} {
+	import security_headers
+	reverse_proxy traccar:5055
+}
+
+# Traccar's own admin panel is not exposed: Odoo creates devices through its API.
+# If you need the panel, point a DNS name at this server, uncomment and reload the proxy.
+# traccar.example.com {
+# 	import security_headers
+# 	reverse_proxy traccar:8082
+# }

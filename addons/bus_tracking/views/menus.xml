@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_bus_root" name="Bus Tracking" sequence="40"
+              groups="bus_tracking.group_bus_user"/>
+
+    <menuitem id="menu_bus_live_map" name="Mapa en vivo" parent="menu_bus_root"
+              action="action_live_map" sequence="10"/>
+
+    <menuitem id="menu_bus_fleet" name="Administración de Buses" parent="menu_bus_root" sequence="20"/>
+    <menuitem id="menu_bus_vehicle" name="Buses" parent="menu_bus_fleet"
+              action="action_bus_vehicle" sequence="10"/>
+    <menuitem id="menu_bus_schedule" name="Recorridos" parent="menu_bus_fleet"
+              action="action_bus_schedule" sequence="20"/>
+    <menuitem id="menu_bus_route" name="Rutas" parent="menu_bus_fleet"
+              action="action_bus_route" sequence="30"/>
+
+    <menuitem id="menu_bus_complaint" name="Quejas" parent="menu_bus_root"
+              action="action_bus_complaint" sequence="30"/>
+
+    <menuitem id="menu_bus_reports" name="Reportes" parent="menu_bus_root" sequence="40"/>
+    <menuitem id="menu_bus_report_speeding" name="Velocidad" parent="menu_bus_reports"
+              action="action_bus_report_speeding" sequence="10"/>
+    <menuitem id="menu_bus_report_offline" name="Sin señal" parent="menu_bus_reports"
+              action="action_bus_report_offline" sequence="20"/>
+    <menuitem id="menu_bus_report_long_stop" name="Paradas largas" parent="menu_bus_reports"
+              action="action_bus_report_long_stop" sequence="30"/>
+    <menuitem id="menu_bus_report_off_route" name="Desvíos de ruta" parent="menu_bus_reports"
+              action="action_bus_report_off_route" sequence="40"/>
+    <menuitem id="menu_bus_stop_arrival" name="Llegada a paradas" parent="menu_bus_reports"
+              action="action_bus_stop_arrival" sequence="50"/>
+
+    <menuitem id="menu_bus_config" name="Configuración" parent="menu_bus_root" sequence="90"
+              groups="bus_tracking.group_bus_manager"/>
+    <menuitem id="menu_bus_settings" name="Ajustes" parent="menu_bus_config"
+              action="action_bus_settings" sequence="10"/>
+    <menuitem id="menu_bus_push_setup" name="Notificaciones en este dispositivo" parent="menu_bus_config"
+              action="action_push_setup" sequence="20"/>
+
+    <!-- The Discuss chat app is not used by this system: keep it for administrators only. -->
+    <record id="mail.menu_root_discuss" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+</odoo>

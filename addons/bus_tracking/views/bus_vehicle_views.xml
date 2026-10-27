@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bus_vehicle_tree" model="ir.ui.view">
+        <field name="name">bus.vehicle.tree</field>
+        <field name="model">bus.vehicle</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="status == 'moving'" decoration-warning="status == 'stopped'" decoration-muted="status == 'offline'">
+                <field name="name"/>
+                <field name="plate"/>
+                <field name="route_id"/>
+                <field name="driver_id" optional="show"/>
+                <field name="traccar_device_id" optional="show"/>
+                <field name="last_fix_time"/>
+                <field name="last_speed" optional="show"/>
+                <field name="current_stop_id" optional="show"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'moving'"
+                       decoration-warning="status == 'stopped'"
+                       decoration-muted="status == 'offline'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_vehicle_form" model="ir.ui.view">
+        <field name="name">bus.vehicle.form</field>
+        <field name="model">bus.vehicle</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_map" type="object" string="View on map" class="btn-primary"/>
+                    <button name="action_register_gps" type="object" string="Register GPS in Traccar"
+                            class="btn-primary" groups="bus_tracking.group_bus_manager"
+                            attrs="{'invisible': [('traccar_device_id', '!=', 0)]}"
+                            confirm="Creates a device in Traccar with a random identifier for this bus."/>
+                    <button name="action_sync_now" type="object" string="Sync now" groups="bus_tracking.group_bus_manager"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
+                            attrs="{'invisible': [('active', '=', True)]}"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Bus 12"/></h1>
+                    </div>
+                    <group>
+                        <group string="Bus">
+                            <field name="plate"/>
+                            <field name="capacity"/>
+                            <field name="driver_id"/>
+                            <field name="route_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Traccar">
+                            <field name="traccar_device_id"/>
+                        </group>
+                    </group>
+                    <group string="Driver's phone" groups="bus_tracking.group_bus_manager"
+                           attrs="{'invisible': [('traccar_device_id', '=', 0)]}">
+                        <group>
+                            <field name="traccar_unique_id" string="Device identifier"/>
+                            <field name="gps_setup_link"/>
+                            <div colspan="2" class="text-muted">
+                                In the Traccar Client app enter the server address from
+                                Settings and this device identifier (or scan the QR with the phone).
+                                Then set accuracy to Highest, interval 10 s, angle 30, distance 0.
+                                Treat the identifier like a password: anyone who knows it can send positions for this bus.
+                            </div>
+                        </group>
+                        <group>
+                            <field name="gps_qr" widget="image" options="{'size': [260, 260]}" nolabel="1"/>
+                        </group>
+                    </group>
+                    <group string="Last position">
+                        <group>
+                            <field name="status"/>
+                            <field name="last_fix_time"/>
+                            <field name="current_stop_id"/>
+                        </group>
+                        <group>
+                            <field name="last_latitude"/>
+                            <field name="last_longitude"/>
+                            <field name="last_speed"/>
+                            <field name="last_course"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_vehicle_search" model="ir.ui.view">
+        <field name="name">bus.vehicle.search</field>
+        <field name="model">bus.vehicle</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="plate"/>
+                <field name="route_id"/>
+                <field name="driver_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_route" string="Route" context="{'group_by': 'route_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bus_vehicle" model="ir.actions.act_window">
+        <field name="name">Buses</field>
+        <field name="res_model">bus.vehicle</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_live_map" model="ir.actions.client">
+        <field name="name">Mapa en vivo</field>
+        <field name="tag">bus_tracking.live_map</field>
+    </record>
+</odoo>
