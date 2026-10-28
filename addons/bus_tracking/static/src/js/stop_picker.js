@@ -65,7 +65,14 @@ export class BusStopPicker extends Component {
     place(lat, lon) {
         const L = window.L;
         if (!this.marker) {
-            this.marker = L.marker([lat, lon], { draggable: true }).addTo(this.map);
+            // A drawn pin, so the page needs no marker image files.
+            const icon = L.divIcon({
+                className: "",
+                html: '<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#d9534f;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 22],
+            });
+            this.marker = L.marker([lat, lon], { icon, draggable: true }).addTo(this.map);
             this.marker.on("dragend", () => {
                 const at = this.marker.getLatLng();
                 this.state.lat = at.lat;
