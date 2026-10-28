@@ -1,11 +1,4 @@
 #!/bin/sh
-# Full quality run: restart the QA server (clean in-memory limits), live suite, audit and metrics.
-# Needs the QA stack: docker compose up -d db, a database "buses_qa" with bus_tracking installed and the container "qa-odoo"
-# (see Anexo B of the report).
-set -e
-cd "$(dirname "$0")/.."
-docker restart qa-odoo >/dev/null
-sleep 15
-python -X utf8 -u qa/qa_suite.py > docs/calidad/evidencias/suite.log 2>&1 || true
-python -X utf8 -u qa/auditoria.py > docs/calidad/evidencias/auditoria.log 2>&1
-python -X utf8 -u qa/metricas.py > docs/calidad/evidencias/metricas.log 2>&1
+# Full quality run from nothing (creates the database and the QA server if they are missing).
+# Same as: python -X utf8 qa/ejecutar_todo.py [odoo|suite|auditoria|metricas ...] [--limpiar]
+exec "${PYTHON:-python}" -X utf8 -u "$(dirname "$0")/ejecutar_todo.py" "$@"
