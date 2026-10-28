@@ -7,6 +7,10 @@
     min-width: 290px;
 }
 
+.o_bus_live_map .o_bus_sidebar {
+    background: #fff;
+}
+
 .o_bus_live_map .o_bus_item {
     cursor: pointer;
     border-left: 4px solid transparent;
