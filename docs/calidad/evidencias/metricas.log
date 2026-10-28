@@ -1,0 +1,173 @@
+{
+ "cobertura": {
+  "sentencias": 1144,
+  "perdidas": 58,
+  "ramas": 268,
+  "ramas_parciales": 13,
+  "porcentaje": 93.83852691218131,
+  "solo_lineas": 94.93006993006993,
+  "archivos": [
+   {
+    "archivo": "__init__.py",
+    "sentencias": 2,
+    "perdidas": 0,
+    "ramas": 0,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "__manifest__.py",
+    "sentencias": 1,
+    "perdidas": 1,
+    "ramas": 0,
+    "ramas_parciales": 0,
+    "cobertura": 0.0
+   },
+   {
+    "archivo": "controllers/__init__.py",
+    "sentencias": 6,
+    "perdidas": 0,
+    "ramas": 0,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "controllers/complaints.py",
+    "sentencias": 97,
+    "perdidas": 0,
+    "ramas": 22,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "controllers/landing.py",
+    "sentencias": 18,
+    "perdidas": 3,
+    "ramas": 4,
+    "ramas_parciales": 0,
+    "cobertura": 77.27272727272727
+   },
+   {
+    "archivo": "controllers/main.py",
+    "sentencias": 57,
+    "perdidas": 5,
+    "ramas": 14,
+    "ramas_parciales": 2,
+    "cobertura": 90.14084507042253
+   },
+   {
+    "archivo": "controllers/portal.py",
+    "sentencias": 106,
+    "perdidas": 0,
+    "ramas": 16,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "controllers/push.py",
+    "sentencias": 51,
+    "perdidas": 0,
+    "ramas": 8,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "controllers/stops.py",
+    "sentencias": 18,
+    "perdidas": 9,
+    "ramas": 4,
+    "ramas_parciales": 0,
+    "cobertura": 40.90909090909091
+   },
+   {
+    "archivo": "models/__init__.py",
+    "sentencias": 10,
+    "perdidas": 0,
+    "ramas": 0,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "models/bus_alert.py",
+    "sentencias": 130,
+    "perdidas": 14,
+    "ramas": 62,
+    "ramas_parciales": 4,
+    "cobertura": 85.41666666666667
+   },
+   {
+    "archivo": "models/bus_complaint.py",
+    "sentencias": 53,
+    "perdidas": 0,
+    "ramas": 14,
+    "ramas_parciales": 1,
+    "cobertura": 98.50746268656717
+   },
+   {
+    "archivo": "models/bus_position.py",
+    "sentencias": 23,
+    "perdidas": 0,
+    "ramas": 2,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "models/bus_push.py",
+    "sentencias": 74,
+    "perdidas": 4,
+    "ramas": 8,
+    "ramas_parciales": 0,
+    "cobertura": 95.1219512195122
+   },
+   {
+    "archivo": "models/bus_route.py",
+    "sentencias": 98,
+    "perdidas": 3,
+    "ramas": 18,
+    "ramas_parciales": 1,
+    "cobertura": 96.55172413793103
+   },
+   {
+    "archivo": "models/bus_route_record.py",
+    "sentencias": 25,
+    "perdidas": 1,
+    "ramas": 4,
+    "ramas_parciales": 1,
+    "cobertura": 93.10344827586206
+   },
+   {
+    "archivo": "models/bus_run.py",
+    "sentencias": 40,
+    "perdidas": 0,
+    "ramas": 10,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "models/bus_vehicle.py",
+    "sentencias": 123,
+    "perdidas": 4,
+    "ramas": 38,
+    "ramas_parciales": 2,
+    "cobertura": 96.27329192546584
+   },
+   {
+    "archivo": "models/geo.py",
+    "sentencias": 65,
+    "perdidas": 0,
+    "ramas": 22,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "models/portal_i18n.py",
+    "sentencias": 12,
+    "perdidas": 0,
+    "ramas": 4,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "models/res_config_settings.py",
+    "sentencias": 24,
+    "perdida
