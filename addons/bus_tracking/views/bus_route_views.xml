@@ -21,7 +21,7 @@
         <field name="arch" type="xml">
             <form>
                 <header groups="bus_tracking.group_bus_manager">
-                    <button name="action_add_stop_on_map" type="object" string="Agregar parada en el mapa"
+                    <button name="action_add_stop_on_map" type="object" string="Agregar parada"
                             class="btn-primary"/>
                     <button name="action_record_track" type="object" string="Grabar trazado desde un bus"
                             class="btn-primary"/>
@@ -47,7 +47,7 @@
                     <notebook>
                         <page string="Stops" name="stops">
                             <field name="stop_ids">
-                                <tree editable="bottom">
+                                <tree editable="bottom" create="0">
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="latitude"/>
