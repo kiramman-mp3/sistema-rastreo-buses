@@ -73,6 +73,7 @@
 }
 
 .rutas a {
+    background: #fff;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -84,9 +85,15 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.rutas a:hover {
+.rutas a:hover,
+.rutas a:focus-visible {
     transform: translate(-2px, -2px);
     box-shadow: 5px 5px 0 var(--bus-senal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rutas a, .o_bus_landing .btn { transition: none; }
+    .rutas a:hover, .o_bus_landing .btn:hover { transform: none; }
 }
 
 .rutas .chip {
@@ -142,12 +149,44 @@
 
 .buses li {
     display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.6rem 0.9rem;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.9rem;
     border-radius: 12px;
-    background: var(--bus-lluvia);
+    background: #fff;
+    border: 2px solid var(--bus-lluvia);
 }
+
+.buses li::before {
+    content: "";
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bus-muted);
+}
+
+.buses li.bus-moving::before { background: var(--bus-ok); }
+.buses li.bus-stopped::before { background: var(--bus-senal); box-shadow: 0 0 0 2px var(--bus-ink); }
+.buses li.bus-offline::before { background: var(--bus-rojo); }
+
+.buses li span {
+    margin-left: auto;
+    color: var(--bus-muted);
+    font-size: 0.95rem;
+}
+
+.rutas .estado::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 0.45rem;
+    border-radius: 50%;
+    background: var(--bus-rojo);
+}
+
+.rutas .estado.activa::before { background: var(--bus-ok); }
 
 .bus-marker {
     width: 34px;
@@ -295,8 +334,10 @@
     margin-top: 1.25rem;
 }
 
-.reportar-enlace {
-    margin-top: 2rem;
+.o_bus_landing .reportar-enlace {
+    max-width: none;
+    margin-top: 0;
+    margin-bottom: 1rem;
 }
 
 .formulario .btn {
@@ -347,6 +388,11 @@
 .horario-grupo .bus {
     color: var(--bus-muted);
     font-size: 0.95rem;
+}
+
+.pie {
+    margin-top: 2rem;
+    border-top: 2px solid var(--bus-lluvia);
 }
 
 .path-picker { display: grid; gap: .4rem; margin: .8rem 0; }
