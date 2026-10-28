@@ -1,0 +1,2 @@
+943 de 1000 correctas (5.70 % de error). Media 0.0370 s, máx. 0.1577 s. 5xx: 25. Fallos por causa: {'time_text': 14, 'lat_text': 11, 'coordenadas fuera de rango guardadas': 32}
+Con X-Forwarded-For distinto en cada petición: 10 respuestas 429 de 70
