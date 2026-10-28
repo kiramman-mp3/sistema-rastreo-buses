@@ -58,7 +58,7 @@ El sistema está ajustado para la Universidad Técnica de Ambato (zona horaria d
 ## Menú del panel
 
 - **Mapa en vivo**.
-- **Administración de Buses**: *Buses* (con el registro del GPS del celular), *Recorridos* (horario simple: bus, ruta, salida y llegada) y *Rutas* (la ruta y sus paradas).
+- **Administración de Buses**: *Buses* (con el registro del GPS del celular), *Recorridos* (los viajes reales de cada bus, escritos por el sistema: salida al dejar la primera parada y llegada al entrar a la última; nadie los llena a mano) y *Rutas* (la ruta y sus paradas).
 - **Quejas**: solo se leen y se cambian de estado; las crea el pasajero desde el portal público.
 - **Reportes**: *Velocidad*, *Sin señal*, *Paradas largas*, *Desvíos de ruta* y *Llegada a paradas*.
 - **Configuración**: *Ajustes* y *Notificaciones en este dispositivo*.
