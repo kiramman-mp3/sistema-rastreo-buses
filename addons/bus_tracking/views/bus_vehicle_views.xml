@@ -4,7 +4,7 @@
         <field name="name">bus.vehicle.tree</field>
         <field name="model">bus.vehicle</field>
         <field name="arch" type="xml">
-            <tree decoration-success="status == 'moving'" decoration-warning="status == 'stopped'" decoration-muted="status == 'offline'">
+            <tree decoration-muted="connection == 'offline'">
                 <field name="name"/>
                 <field name="plate"/>
                 <field name="route_id"/>
@@ -13,10 +13,10 @@
                 <field name="last_fix_time"/>
                 <field name="last_speed" optional="show"/>
                 <field name="current_stop_id" optional="show"/>
+                <field name="connection"/>
                 <field name="status" widget="badge"
                        decoration-success="status == 'moving'"
-                       decoration-warning="status == 'stopped'"
-                       decoration-muted="status == 'offline'"/>
+                       decoration-warning="status == 'stopped'"/>
             </tree>
         </field>
     </record>
@@ -70,6 +70,7 @@
                     </group>
                     <group string="Last position">
                         <group>
+                            <field name="connection"/>
                             <field name="status"/>
                             <field name="last_fix_time"/>
                             <field name="current_stop_id"/>

@@ -21,9 +21,9 @@
                          t-att-class="{'o_bus_item_selected': v.id === state.selectedId}"
                          t-on-click="() => this.selectVehicle(v)">
                         <div class="d-flex justify-content-between">
-                            <strong t-esc="v.name"/>
-                            <span t-attf-class="badge text-bg-{{ v.status === 'moving' ? 'success' : v.status === 'stopped' ? 'warning' : 'secondary' }}"
-                                  t-esc="v.status"/>
+                            <strong><span t-esc="v.connected ? '🟢' : '🔴'"/> <t t-esc="v.name"/></strong>
+                            <span t-attf-class="badge text-bg-{{ v.status === 'moving' ? 'success' : 'warning' }}"
+                                  t-esc="movementLabel(v.status)"/>
                         </div>
                         <div class="small text-muted">
                             <span t-if="v.route_name" t-esc="v.route_name"/>
