@@ -670,3 +670,20 @@ Los documentos 03, 04, 05 y 07 y las figuras de Pareto e Ishikawa los escribe `q
 
 - Cerrar DEF-008 a DEF-010 y regenerar la documentación.
 - Hacer una sesión real de lluvia de ideas con la universidad y registrar el acta.
+
+
+## 2026-10-28: guion de defensa del proyecto
+
+### Qué se hizo
+
+Se escribió `docs/GUION_DEFENSA.md`: guion de 15 minutos más 5 de preguntas, con apertura, problema y motivo, demostración, arquitectura, decisiones, proceso, calidad, estándares, defectos abiertos y cierre. Incluye 15 preguntas difíciles con respuesta, una tabla de cifras para memorizar y una lista de cosas que no hay que afirmar.
+
+### Qué se verificó
+
+Todas las cifras se tomaron de `docs/calidad/` (ejecución del 28-oct-2026). Se comprobó que 8 de las 12 metas del cuadro de mando se cumplen y que los 60 fallos (3 de la suite y 57 de la auditoría) coinciden con el Pareto.
+
+### Limitaciones
+
+- El motivo del proyecto (sección 1) se redactó con los datos del plan y de las decisiones del cliente; los documentos no registran una anécdota real de pasajeros, así que se dejó una nota para añadirla.
+- Las respuestas sobre costo de Azure y sobre el reparto de trabajo con Claude Code son orientativas y las debe ajustar quien defiende.
+- Si se cierran DEF-008 a DEF-010 antes de la defensa, hay que actualizar las secciones 6, 8 y 9 y la pregunta 2.
