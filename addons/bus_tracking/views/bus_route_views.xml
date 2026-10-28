@@ -21,6 +21,8 @@
         <field name="arch" type="xml">
             <form>
                 <header groups="bus_tracking.group_bus_manager">
+                    <button name="action_add_stop_on_map" type="object" string="Agregar parada en el mapa"
+                            class="btn-primary"/>
                     <button name="action_record_track" type="object" string="Grabar trazado desde un bus"
                             class="btn-primary"/>
                     <button name="action_clear_track" type="object" string="Borrar trazado grabado"
@@ -51,6 +53,8 @@
                                     <field name="latitude"/>
                                     <field name="longitude"/>
                                     <field name="radius"/>
+                                    <button name="action_pick_on_map" type="object" icon="fa-map-marker"
+                                            title="Elegir en el mapa"/>
                                 </tree>
                             </field>
                         </page>
