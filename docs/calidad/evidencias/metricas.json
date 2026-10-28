@@ -1,0 +1,780 @@
+{
+  "generado": "2026-10-28 10:37:45",
+  "unitarias": {
+    "fallos": 0,
+    "errores": 0,
+    "total": 150,
+    "tiempos_por_archivo": [
+      {
+        "archivo": "test_alerts",
+        "n": 14,
+        "mean": 0.01742857142857143,
+        "min": 0.007,
+        "max": 0.06,
+        "stdev": 0.013089715785327782,
+        "variance": 0.00017134065934065932,
+        "cv": 75.10492663712661,
+        "p50": 0.012,
+        "p95": 0.06,
+        "p99": 0.06
+      },
+      {
+        "archivo": "test_complaints",
+        "n": 29,
+        "mean": 0.11803448275862069,
+        "min": 0.007,
+        "max": 0.612,
+        "stdev": 0.11195550224423371,
+        "variance": 0.01253403448275862,
+        "cv": 94.8498266164995,
+        "p50": 0.115,
+        "p95": 0.276,
+        "p99": 0.612
+      },
+      {
+        "archivo": "test_gps_setup",
+        "n": 9,
+        "mean": 0.03166666666666666,
+        "min": 0.011,
+        "max": 0.098,
+        "stdev": 0.03502142201567492,
+        "variance": 0.0012265000000000002,
+        "cv": 110.59396426002608,
+        "p50": 0.013,
+        "p95": 0.098,
+        "p99": 0.098
+      },
+      {
+        "archivo": "test_http",
+        "n": 13,
+        "mean": 0.125,
+        "min": 0.011,
+        "max": 0.354,
+        "stdev": 0.15002110962572346,
+        "variance": 0.022506333333333337,
+        "cv": 120.01688770057876,
+        "p50": 0.035,
+        "p95": 0.354,
+        "p99": 0.354
+      },
+      {
+        "archivo": "test_ingest",
+        "n": 17,
+        "mean": 0.00823529411764706,
+        "min": 0.002,
+        "max": 0.021,
+        "stdev": 0.005309536370587195,
+        "variance": 2.819117647058824e-05,
+        "cv": 64.4729416428445,
+        "p50": 0.007,
+        "p95": 0.021,
+        "p99": 0.021
+      },
+      {
+        "archivo": "test_portal",
+        "n": 18,
+        "mean": 0.11477777777777777,
+        "min": 0.02,
+        "max": 0.438,
+        "stdev": 0.09904933741237275,
+        "variance": 0.009810771241830064,
+        "cv": 86.29661536411953,
+        "p50": 0.079,
+        "p95": 0.438,
+        "p99": 0.438
+      },
+      {
+        "archivo": "test_push",
+        "n": 14,
+        "mean": 0.5350714285714285,
+        "min": 0.099,
+        "max": 1.046,
+        "stdev": 0.446073547624279,
+        "variance": 0.19898160989010988,
+        "cv": 83.36710274649454,
+        "p50": 0.135,
+        "p95": 1.046,
+        "p99": 1.046
+      },
+      {
+        "archivo": "test_runs",
+        "n": 8,
+        "mean": 0.018875,
+        "min": 0.012,
+        "max": 0.03,
+        "stdev": 0.006512350903146596,
+        "variance": 4.2410714285714285e-05,
+        "cv": 34.50252134117402,
+        "p50": 0.016,
+        "p95": 0.03,
+        "p99": 0.03
+      },
+      {
+        "archivo": "test_simple",
+        "n": 7,
+        "mean": 0.01942857142857143,
+        "min": 0.009,
+        "max": 0.054,
+        "stdev": 0.015544100090357357,
+        "variance": 0.00024161904761904759,
+        "cv": 80.00639752389816,
+        "p50": 0.015,
+        "p95": 0.054,
+        "p99": 0.054
+      },
+      {
+        "archivo": "test_stop_picker",
+        "n": 6,
+        "mean": 0.013166666666666667,
+        "min": 0.003,
+        "max": 0.046,
+        "stdev": 0.016302351568613243,
+        "variance": 0.00026576666666666666,
+        "cv": 123.8153283692145,
+        "p50": 0.008,
+        "p95": 0.046,
+        "p99": 0.046
+      },
+      {
+        "archivo": "test_traccar_sync",
+        "n": 6,
+        "mean": 0.016166666666666666,
+        "min": 0.007,
+        "max": 0.03,
+        "stdev": 0.007935153852740769,
+        "variance": 6.296666666666667e-05,
+        "cv": 49.08342589324187,
+        "p50": 0.014,
+        "p95": 0.03,
+        "p99": 0.03
+      },
+      {
+        "archivo": "test_track",
+        "n": 9,
+        "mean": 0.02422222222222222,
+        "min": 0.002,
+        "max": 0.056,
+        "stdev": 0.023058500481263833,
+        "variance": 0.0005316944444444444,
+        "cv": 95.1956441887039,
+        "p50": 0.017,
+        "p95": 0.056,
+        "p99": 0.056
+      }
+    ],
+    "tiempo": {
+      "n": 150,
+      "mean": 0.10636666666666666,
+      "min": 0.002,
+      "max": 1.046,
+      "stdev": 0.21011257502454533,
+      "variance": 0.04414729418344519,
+      "cv": 197.53610939317957,
+      "p50": 0.022,
+      "p95": 0.612,
+      "p99": 1.044
+    },
+    "mas_lentas": [
+      {
+        "archivo": "test_push",
+        "clase": "TestPushEndpoints",
+        "prueba": "test_only_managers_can_use_the_push_endpoints",
+        "tiempo": 1.046
+      },
+      {
+        "archivo": "test_push",
+        "clase": "TestPushEndpoints",
+        "prueba": "test_bad_endpoints_and_keys_are_refused",
+        "tiempo": 1.044
+      },
+      {
+        "archivo": "test_push",
+        "clase": "TestPushEndpoints",
+        "prueba": "test_subscribing_stores_the_device_and_state_sees_it",
+        "tiempo": 1.015
+      },
+      {
+        "archivo": "test_push",
+        "clase": "TestPushEndpoints",
+        "prueba": "test_unsubscribing_only_removes_the_callers_device",
+        "tiempo": 0.998
+      },
+      {
+        "archivo": "test_push",
+        "clase": "TestPushEndpoints",
+        "prueba": "test_the_test_button_pushes_to_the_callers_devices",
+        "tiempo": 0.979
+      }
+    ]
+  },
+  "suite": {
+    "total": 42,
+    "fallos": 3,
+    "por_tipo": [
+      {
+        "tipo": "Funcional",
+        "n": 12,
+        "fallos": 0,
+        "mean": 0.07541306666341067,
+        "min": 0.026807799993548542,
+        "max": 0.13546340001630597,
+        "stdev": 0.03333587931962173,
+        "variance": 0.0011112808500123837,
+        "cv": 44.204381010533574,
+        "p50": 0.07031650000135414,
+        "p95": 0.13546340001630597,
+        "p99": 0.13546340001630597
+      },
+      {
+        "tipo": "Error",
+        "n": 22,
+        "fallos": 3,
+        "mean": 0.1430960636234059,
+        "min": 0.020683900016592816,
+        "max": 1.7717237998440396,
+        "stdev": 0.3694161372845104,
+        "variance": 0.13646828248620824,
+        "cv": 258.15953837606884,
+        "p50": 0.034828999981982633,
+        "p95": 0.2533538999850862,
+        "p99": 1.7717237998440396
+      },
+      {
+        "tipo": "Rendimiento",
+        "n": 7,
+        "fallos": 0,
+        "mean": 0.17954928172248721,
+        "min": 0.0278158555589875,
+        "max": 0.5607161549996817,
+        "stdev": 0.2119749436793515,
+        "variance": 0.04493337674786424,
+        "cv": 118.05947740129734,
+        "p50": 0.054155679001414686,
+        "p95": 0.5607161549996817,
+        "p99": 0.5607161549996817
+      },
+      {
+        "tipo": "Usabilidad",
+        "n": 1,
+        "fallos": 0,
+        "mean": 0.4436034999380354,
+        "min": 0.4436034999380354,
+        "max": 0.4436034999380354,
+        "stdev": 0.0,
+        "variance": 0.0,
+        "cv": 0.0,
+        "p50": 0.4436034999380354,
+        "p95": 0.4436034999380354,
+        "p99": 0.4436034999380354
+      }
+    ],
+    "rendimiento": [
+      {
+        "id": "P1",
+        "objetivo": "100 posiciones secuenciales al webhook",
+        "stats": {
+          "n": 100,
+          "mean": 0.04321796599921072,
+          "min": 0.0267786999756936,
+          "max": 0.07155920000514016,
+          "stdev": 0.010553179774383699,
+          "variance": 0.00011136960335046118,
+          "cv": 24.41850172813878,
+          "p50": 0.04150890000164509,
+          "p95": 0.06542299999273382,
+          "p99": 0.0692274000030011
+        },
+        "errores": 0,
+        "rps": 23.136560052190763
+      },
+      {
+        "id": "P2",
+        "objetivo": "200 posiciones con 20 hilos sobre 20 buses distintos",
+        "stats": {
+          "n": 200,
+          "mean": 0.39034667350089874,
+          "min": 0.027437399985501543,
+          "max": 2.1447126000130083,
+          "stdev": 0.5566304455913899,
+          "variance": 0.30983745295926923,
+          "cv": 142.59899811599348,
+          "p50": 0.06535039999289438,
+          "p95": 1.6008615999890026,
+          "p99": 1.9971590999921318
+        },
+        "errores": 0,
+        "rps": 39.0442369055771
+      },
+      {
+        "id": "P3",
+        "objetivo": "100 cargas de la página pública /rutas",
+        "stats": {
+          "n": 100,
+          "mean": 0.054155679001414686,
+          "min": 0.039005600003292784,
+          "max": 0.08968190001905896,
+          "stdev": 0.011317528690334566,
+          "variance": 0.00012808645565654604,
+          "cv": 20.898138291348765,
+          "p50": 0.050363300018943846,
+          "p95": 0.07511299999896437,
+          "p99": 0.08283910001046024
+        },
+        "errores": 0,
+        "rps": null
+      },
+      {
+        "id": "P4",
+        "objetivo": "45 lecturas del feed público (con caché de 5 s)",
+        "stats": {
+          "n": 45,
+          "mean": 0.0278158555589875,
+          "min": 0.019178399990778416,
+          "max": 0.05518640001537278,
+          "stdev": 0.010024202180824927,
+          "variance": 0.00010048462936205522,
+          "cv": 36.03772732989346,
+          "p50": 0.02280320000136271,
+          "p95": 0.046920299995690584,
+          "p99": 0.05518640001537278
+        },
+        "errores": 0,
+        "rps": null
+      },
+      {
+        "id": "P5",
+        "objetivo": "100 consultas al endpoint de salud",
+        "stats": {
+          "n": 100,
+          "mean": 0.032800508000073024,
+          "min": 0.019922799983760342,
+          "max": 0.05412310000974685,
+          "stdev": 0.010900578191390176,
+          "variance": 0.00011882260490661111,
+          "cv": 33.232955390099164,
+          "p50": 0.02687640002113767,
+          "p95": 0.051708499988308176,
+          "p99": 0.0540863000205718
+        },
+        "errores": 0,
+        "rps": null
+      },
+      {
+        "id": "P6",
+        "objetivo": "Integridad con 20 hilos que envían la misma posición a la vez",
+        "stats": {
+          "n": 20,
+          "mean": 0.1477921349971439,
+          "min": 0.12495280001894571,
+          "max": 0.16708420001668856,
+          "stdev": 0.010668569246083583,
+          "variance": 0.00011381836975848044,
+          "cv": 7.218631252799586,
+          "p50": 0.14680419999058358,
+          "p95": 0.16619289998197928,
+          "p99": 0.16708420001668856
+        },
+        "errores": 0,
+        "rps": null
+      },
+      {
+        "id": "P7",
+        "objetivo": "60 posiciones distintas de un mismo bus con 20 hilos",
+        "stats": {
+          "n": 60,
+          "mean": 0.5607161549996817,
+          "min": 0.02758729999186471,
+          "max": 2.088535699993372,
+          "stdev": 0.6728972281024926,
+          "variance": 0.452790679588018,
+          "cv": 120.00674888756764,
+          "p50": 0.20002290001139045,
+          "p95": 1.980399899999611,
+          "p99": 2.088535699993372
+        },
+        "errores": 0,
+        "rps": 20.42578641141462
+      }
+    ]
+  },
+  "auditoria": {
+    "total": 1000,
+    "fallos": 57,
+    "pct_error": 5.7,
+    "tiempo": {
+      "n": 1000,
+      "mean": 0.03696374709974043,
+      "min": 0.013712699990719557,
+      "max": 0.15769239998189732,
+      "stdev": 0.01747386929368364,
+      "variance": 0.00030533610809273996,
+      "cv": 47.272992228123826,
+      "p50": 0.031461100006708875,
+      "p95": 0.0718977999931667,
+      "p99": 0.08963709999807179
+    },
+    "atipicos": 13,
+    "umbral_atipico": 0.08938535498079135,
+    "sobre_p95": 50,
+    "estados_5xx": 25,
+    "posiciones_nuevas": 103,
+    "quejas_nuevas": 0,
+    "fallos_por_causa": {
+      "time_text": 14,
+      "lat_text": 11,
+      "coordenadas fuera de rango guardadas": 32
+    },
+    "suplantacion_xff": {
+      "peticiones": 70,
+      "respuestas_429": 10
+    }
+  },
+  "cobertura": {
+    "sentencias": 1144,
+    "perdidas": 58,
+    "ramas": 268,
+    "ramas_parciales": 13,
+    "porcentaje": 93.83852691218131,
+    "solo_lineas": 94.93006993006993,
+    "archivos": [
+      {
+        "archivo": "__init__.py",
+        "sentencias": 2,
+        "perdidas": 0,
+        "ramas": 0,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "__manifest__.py",
+        "sentencias": 1,
+        "perdidas": 1,
+        "ramas": 0,
+        "ramas_parciales": 0,
+        "cobertura": 0.0
+      },
+      {
+        "archivo": "controllers/__init__.py",
+        "sentencias": 6,
+        "perdidas": 0,
+        "ramas": 0,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "controllers/complaints.py",
+        "sentencias": 97,
+        "perdidas": 0,
+        "ramas": 22,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "controllers/landing.py",
+        "sentencias": 18,
+        "perdidas": 3,
+        "ramas": 4,
+        "ramas_parciales": 0,
+        "cobertura": 77.27272727272727
+      },
+      {
+        "archivo": "controllers/main.py",
+        "sentencias": 57,
+        "perdidas": 5,
+        "ramas": 14,
+        "ramas_parciales": 2,
+        "cobertura": 90.14084507042253
+      },
+      {
+        "archivo": "controllers/portal.py",
+        "sentencias": 106,
+        "perdidas": 0,
+        "ramas": 16,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "controllers/push.py",
+        "sentencias": 51,
+        "perdidas": 0,
+        "ramas": 8,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "controllers/stops.py",
+        "sentencias": 18,
+        "perdidas": 9,
+        "ramas": 4,
+        "ramas_parciales": 0,
+        "cobertura": 40.90909090909091
+      },
+      {
+        "archivo": "models/__init__.py",
+        "sentencias": 10,
+        "perdidas": 0,
+        "ramas": 0,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "models/bus_alert.py",
+        "sentencias": 130,
+        "perdidas": 14,
+        "ramas": 62,
+        "ramas_parciales": 4,
+        "cobertura": 85.41666666666667
+      },
+      {
+        "archivo": "models/bus_complaint.py",
+        "sentencias": 53,
+        "perdidas": 0,
+        "ramas": 14,
+        "ramas_parciales": 1,
+        "cobertura": 98.50746268656717
+      },
+      {
+        "archivo": "models/bus_position.py",
+        "sentencias": 23,
+        "perdidas": 0,
+        "ramas": 2,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "models/bus_push.py",
+        "sentencias": 74,
+        "perdidas": 4,
+        "ramas": 8,
+        "ramas_parciales": 0,
+        "cobertura": 95.1219512195122
+      },
+      {
+        "archivo": "models/bus_route.py",
+        "sentencias": 98,
+        "perdidas": 3,
+        "ramas": 18,
+        "ramas_parciales": 1,
+        "cobertura": 96.55172413793103
+      },
+      {
+        "archivo": "models/bus_route_record.py",
+        "sentencias": 25,
+        "perdidas": 1,
+        "ramas": 4,
+        "ramas_parciales": 1,
+        "cobertura": 93.10344827586206
+      },
+      {
+        "archivo": "models/bus_run.py",
+        "sentencias": 40,
+        "perdidas": 0,
+        "ramas": 10,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "models/bus_vehicle.py",
+        "sentencias": 123,
+        "perdidas": 4,
+        "ramas": 38,
+        "ramas_parciales": 2,
+        "cobertura": 96.27329192546584
+      },
+      {
+        "archivo": "models/geo.py",
+        "sentencias": 65,
+        "perdidas": 0,
+        "ramas": 22,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "models/portal_i18n.py",
+        "sentencias": 12,
+        "perdidas": 0,
+        "ramas": 4,
+        "ramas_parciales": 0,
+        "cobertura": 100.0
+      },
+      {
+        "archivo": "models/res_config_settings.py",
+        "sentencias": 24,
+        "perdidas": 3,
+        "ramas": 0,
+        "ramas_parciales": 0,
+        "cobertura": 87.5
+      },
+      {
+        "archivo": "models/traccar_api.py",
+        "sentencias": 64,
+        "perdidas": 3,
+        "ramas": 14,
+        "ramas_parciales": 1,
+        "cobertura": 94.87179487179488
+      },
+      {
+        "archivo": "models/utils.py",
+        "sentencias": 47,
+        "perdidas": 8,
+        "ramas": 4,
+        "ramas_parciales": 1,
+        "cobertura": 82.3529411764706
+      }
+    ]
+  },
+  "endpoints": {
+    "total": 19,
+    "cubiertos": 16,
+    "detalle": [
+      {
+        "controlador": "complaints.py",
+        "ruta": "/quejas",
+        "cubierta": true
+      },
+      {
+        "controlador": "complaints.py",
+        "ruta": "/quejas",
+        "cubierta": true
+      },
+      {
+        "controlador": "complaints.py",
+        "ruta": "/quejas/gracias",
+        "cubierta": true
+      },
+      {
+        "controlador": "landing.py",
+        "ruta": "/",
+        "cubierta": true
+      },
+      {
+        "controlador": "landing.py",
+        "ruta": "/inicio",
+        "cubierta": true
+      },
+      {
+        "controlador": "main.py",
+        "ruta": "/bus_tracking/live",
+        "cubierta": true
+      },
+      {
+        "controlador": "main.py",
+        "ruta": "/bus_tracking/track",
+        "cubierta": false
+      },
+      {
+        "controlador": "main.py",
+        "ruta": "/bus_tracking/traccar/webhook",
+        "cubierta": true
+      },
+      {
+        "controlador": "main.py",
+        "ruta": "/bus_tracking/health",
+        "cubierta": true
+      },
+      {
+        "controlador": "portal.py",
+        "ruta": "/rutas",
+        "cubierta": true
+      },
+      {
+        "controlador": "portal.py",
+        "ruta": "/rutas/<string:code>",
+        "cubierta": true
+      },
+      {
+        "controlador": "portal.py",
+        "ruta": "/rutas/<string:code>/buses.json",
+        "cubierta": true
+      },
+      {
+        "controlador": "push.py",
+        "ruta": "/bus_tracking/sw.js",
+        "cubierta": true
+      },
+      {
+        "controlador": "push.py",
+        "ruta": "/bus_tracking/push/state",
+        "cubierta": true
+      },
+      {
+        "controlador": "push.py",
+        "ruta": "/bus_tracking/push/subscribe",
+        "cubierta": true
+      },
+      {
+        "controlador": "push.py",
+        "ruta": "/bus_tracking/push/unsubscribe",
+        "cubierta": true
+      },
+      {
+        "controlador": "push.py",
+        "ruta": "/bus_tracking/push/test",
+        "cubierta": true
+      },
+      {
+        "controlador": "stops.py",
+        "ruta": "/bus_tracking/stop/load",
+        "cubierta": false
+      },
+      {
+        "controlador": "stops.py",
+        "ruta": "/bus_tracking/stop/save",
+        "cubierta": false
+      }
+    ]
+  },
+  "lineas": {
+    "python": 1686,
+    "python_tests": 1310,
+    "xml": 1283,
+    "js": 607,
+    "css": 1035
+  },
+  "datos": [
+    {
+      "consulta": "Posiciones guardadas (total)",
+      "valor": 478
+    },
+    {
+      "consulta": "Posiciones con latitud o longitud fuera de rango",
+      "valor": 33
+    },
+    {
+      "consulta": "Posiciones con velocidad negativa",
+      "valor": 0
+    },
+    {
+      "consulta": "Pares (bus, hora GPS) duplicados",
+      "valor": 0
+    },
+    {
+      "consulta": "Buses con más de una alerta abierta del mismo tipo",
+      "valor": 0
+    },
+    {
+      "consulta": "Alertas cerradas sin hora de cierre",
+      "valor": 0
+    },
+    {
+      "consulta": "Recorridos con llegada anterior a la salida",
+      "valor": 0
+    },
+    {
+      "consulta": "Recorridos terminados sin llegada",
+      "valor": 0
+    },
+    {
+      "consulta": "Quejas con descripción fuera de 10 a 2000 caracteres",
+      "valor": 0
+    },
+    {
+      "consulta": "Quejas sin folio asignado",
+      "valor": 0
+    },
+    {
+      "consulta": "Buses cuyo último estado no coincide con su posición más reciente",
+      "valor": 0
+    }
+  ]
+}
