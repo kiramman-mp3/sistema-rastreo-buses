@@ -6,5 +6,5 @@ from . import bus_position
 from . import bus_alert
 from . import bus_complaint
 from . import bus_push
-from . import bus_schedule
+from . import bus_run
 from . import res_config_settings

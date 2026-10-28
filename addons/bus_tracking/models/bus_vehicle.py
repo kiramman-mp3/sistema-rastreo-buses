@@ -30,7 +30,6 @@ class BusVehicle(models.Model):
     traccar_unique_id = fields.Char(string="Traccar Unique ID", copy=False,
                                     groups='bus_tracking.group_bus_manager')
 
-    schedule_ids = fields.One2many('bus.schedule', 'vehicle_id', string="Schedules")
     gps_setup_link = fields.Char(string="Phone setup link", compute='_compute_gps_setup',
                                  groups='bus_tracking.group_bus_manager')
     gps_qr = fields.Binary(string="Phone setup QR", compute='_compute_gps_setup',
@@ -115,6 +114,7 @@ class BusVehicle(models.Model):
     def _update_current_stop(self, lat, lon, when):
         """Log an arrival when the bus enters a stop radius of its route."""
         self.ensure_one()
+        previous = self.current_stop_id
         nearest, nearest_dist = False, None
         for stop in self.route_id.stop_ids:
             dist = haversine_m(lat, lon, stop.latitude, stop.longitude)
@@ -128,6 +128,7 @@ class BusVehicle(models.Model):
             })
         if nearest != self.current_stop_id:
             self.current_stop_id = nearest
+            self.env['bus.run']._on_stop_change(self, previous, nearest or self.env['bus.route.stop'], when)
 
     @api.model
     def _process_traccar_payload(self, payload):
