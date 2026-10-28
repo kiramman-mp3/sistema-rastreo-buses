@@ -9,8 +9,8 @@
     <menuitem id="menu_bus_fleet" name="Administración de Buses" parent="menu_bus_root" sequence="20"/>
     <menuitem id="menu_bus_vehicle" name="Buses" parent="menu_bus_fleet"
               action="action_bus_vehicle" sequence="10"/>
-    <menuitem id="menu_bus_schedule" name="Recorridos" parent="menu_bus_fleet"
-              action="action_bus_schedule" sequence="20"/>
+    <menuitem id="menu_bus_run" name="Recorridos" parent="menu_bus_fleet"
+              action="action_bus_run" sequence="20"/>
     <menuitem id="menu_bus_route" name="Rutas" parent="menu_bus_fleet"
               action="action_bus_route" sequence="30"/>
 

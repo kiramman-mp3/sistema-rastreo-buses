@@ -4,8 +4,8 @@
         <div class="o_bus_push p-4" style="max-width: 640px">
             <h2>Notifications on this device</h2>
             <p class="text-muted">
-                Get a notification on this browser or phone when a bus alert.
-                You choose what you receive in your user preferences.
+                Recibe un aviso en este navegador o celular cuando se abra una alerta de un bus
+                (velocidad, sin señal, parada larga o desvío de ruta).
             </p>
 
             <p t-if="state.status === 'loading'">Checking this device…</p>

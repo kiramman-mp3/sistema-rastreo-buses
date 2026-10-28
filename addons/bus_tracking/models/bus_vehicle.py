@@ -11,7 +11,7 @@ from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
 
 _logger = logging.getLogger(__name__)
 
-OFFLINE_AFTER = timedelta(minutes=5)
+CONNECTED_WITHIN = timedelta(minutes=3)     # the phone sends every few seconds while the app is open
 
 
 class BusVehicle(models.Model):
@@ -30,7 +30,6 @@ class BusVehicle(models.Model):
     traccar_unique_id = fields.Char(string="Traccar Unique ID", copy=False,
                                     groups='bus_tracking.group_bus_manager')
 
-    schedule_ids = fields.One2many('bus.schedule', 'vehicle_id', string="Schedules")
     gps_setup_link = fields.Char(string="Phone setup link", compute='_compute_gps_setup',
                                  groups='bus_tracking.group_bus_manager')
     gps_qr = fields.Binary(string="Phone setup QR", compute='_compute_gps_setup',
@@ -43,9 +42,13 @@ class BusVehicle(models.Model):
     last_fix_time = fields.Datetime(readonly=True, copy=False)
     current_stop_id = fields.Many2one('bus.route.stop', readonly=True, copy=False)
     off_route_since = fields.Datetime(readonly=True, copy=False)
+    connection = fields.Selection(
+        [('online', "🟢 Conectado"), ('offline', "🔴 Sin conexión")], string="Connection",
+        compute='_compute_status', help="Green while the phone keeps sending its position, even if the bus is parked.")
+    connected = fields.Boolean(compute='_compute_status')
     status = fields.Selection(
-        [('moving', "Moving"), ('stopped', "Stopped"), ('offline', "Offline")],
-        compute='_compute_status')
+        [('moving', "En movimiento"), ('stopped', "Parado")], compute='_compute_status',
+        help="From the last speed reported.")
 
     _sql_constraints = [
         ('traccar_device_uniq', 'unique(traccar_device_id)', "Traccar device is already linked to another bus."),
@@ -72,10 +75,12 @@ class BusVehicle(models.Model):
     def _compute_status(self):
         now = fields.Datetime.now()
         for bus in self:
-            if not bus.last_fix_time or now - bus.last_fix_time > OFFLINE_AFTER:
-                bus.status = 'offline'
-            else:
+            bus.connected = bool(bus.last_fix_time and now - bus.last_fix_time <= CONNECTED_WITHIN)
+            bus.connection = 'online' if bus.connected else 'offline'
+            if bus.last_fix_time:
                 bus.status = 'moving' if bus.last_speed > MOVING_ABOVE_KMH else 'stopped'
+            else:
+                bus.status = False
 
     # ------------------------------------------------------------------
     # Position ingestion
@@ -115,6 +120,7 @@ class BusVehicle(models.Model):
     def _update_current_stop(self, lat, lon, when):
         """Log an arrival when the bus enters a stop radius of its route."""
         self.ensure_one()
+        previous = self.current_stop_id
         nearest, nearest_dist = False, None
         for stop in self.route_id.stop_ids:
             dist = haversine_m(lat, lon, stop.latitude, stop.longitude)
@@ -128,6 +134,7 @@ class BusVehicle(models.Model):
             })
         if nearest != self.current_stop_id:
             self.current_stop_id = nearest
+            self.env['bus.run']._on_stop_change(self, previous, nearest or self.env['bus.route.stop'], when)
 
     @api.model
     def _process_traccar_payload(self, payload):
