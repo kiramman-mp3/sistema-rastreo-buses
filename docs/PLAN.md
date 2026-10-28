@@ -98,7 +98,9 @@ Las reglas y sus umbrales son un supuesto mío (la fase 0 no se respondió) y se
 
 - **[HECHO]** Tests automatizados: 53 tests (`addons/bus_tracking/tests/`): ingesta, deduplicación, llegadas a paradas, purga, alertas, reporte de actividad, cliente de Traccar con respuestas simuladas, webhook, salud, endpoints y landing. Comprobado que fallan si se rompe el factor de velocidad o la autenticación del webhook.
 - **[HECHO]** Traducción `i18n/es.po` (146 textos traducidos; los textos de la landing ya están en español en el código).
-- **[PENDIENTE]** Prueba de carga de ingesta con el volumen de la fase 0.
+- **[HECHO*]** Prueba de carga de ingesta (2026-10-28): 39 peticiones por segundo con 20 hilos en un solo proceso, sin errores; falta repetirla con varios procesos y el volumen de 30 días.
+- **[HECHO]** Informe de calidad en PDF (`docs/calidad/`) con 42 pruebas en vivo, auditoría de 1000 peticiones y cobertura de 93,8 %. Halló 3 defectos abiertos (DEF-008 a DEF-010) en la validación de la posición del webhook.
+- **[PENDIENTE]** Corregir DEF-008 a DEF-010 y portar E7, E8 y E9 a las pruebas de Odoo.
 
 ## Fase 8. Producción **[PARCIAL]**
 

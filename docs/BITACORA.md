@@ -600,3 +600,47 @@ Roster oficial y su importación, trazados por calle (OSM/OSRM) y sus scripts, v
 - Landing: pasos de "Así llega un bus" sin jerga (Traccar, Odoo).
 - Tests: 150, 0 fallos.
 - **Sin verificar a ojo:** el panel de Odoo (hace falta iniciar sesión; no se creó un usuario de prueba) y los anchos de móvil de esta sesión.
+
+
+## 2026-10-28: informe de calidad en PDF
+
+### Qué se hizo
+
+Se generó el informe técnico de calidad del sistema (`docs/calidad/Informe_calidad_rastreo_buses.pdf`, 25 páginas, copia en `Documentos` como `Manzano_Rodriguez_informeCalidad_rastreoBuses.pdf`) con la estructura del taller de ACS de la UTA que sirvió de modelo (`Manzano_Rodriguez_trabajoFinalU3.pdf`): objetivos, escenario, diseño y ejecución de pruebas, métricas, análisis estadístico, ISO 25010, ISO 12207, CMMI, decisión, conclusiones, referencias y anexos. Todas las cifras salen de pruebas ejecutadas hoy, no escritas a mano.
+
+Código nuevo en `qa/`: `qa_suite.py` (42 casos en vivo: 12 funcionales, 22 de error, 7 de rendimiento, 1 de usabilidad), `auditoria.py` (1000 peticiones aleatorias con semilla fija sobre 15 áreas), `metricas.py`, `graficos.py`, `informe_lib.py`, `generar_informe.py` y `ejecutar_todo.sh`. Las evidencias están en `docs/calidad/evidencias/`.
+
+### Resultados
+
+| Conjunto | Pruebas | Fallos |
+|---|---|---|
+| Pruebas de Odoo (con coverage.py) | 150 | 0; cobertura 93,8 % (sentencias y ramas) |
+| Suite en vivo | 42 | 3 (7,1 %) |
+| Auditoría aleatoria | 1000 | 57 (5,7 %): 25 respuestas HTTP 500 y 32 posiciones imposibles guardadas |
+
+Rendimiento (servidor de un solo proceso): 0,04 s en promedio en uso normal; con 20 hilos, media 0,39 s, p95 1,6 s y 39 peticiones por segundo (se necesitan 10 para 100 buses). Integridad concurrente correcta (1 de 20 envíos idénticos; 60 de 60 de un mismo bus).
+
+### Defectos nuevos (abiertos, no se corrigieron)
+
+- DEF-008: se guardan coordenadas imposibles (latitud 95°).
+- DEF-009: latitud no numérica produce HTTP 500 en el webhook.
+- DEF-010: hora GPS inválida produce HTTP 500 en el webhook.
+
+Los tres están en la validación de la posición (`bus_vehicle._apply_position`, `utils.parse_traccar_dt`). Decisión del informe: apto para un piloto controlado; para producción abierta faltan cerrarlos y probar con un celular real.
+
+### Problemas encontrados
+
+- Dos corridas de la suite se pisaron (una quedó huérfana al cerrarse la shell) y falsearon un resultado; se descartaron y se repitió todo desde un servidor reiniciado.
+- Los límites de uso (60 consultas por minuto, 5 quejas por hora) viven en memoria: la suite y la auditoría esperan o reinician el servidor antes de medir.
+- Dos pruebas mías compartían buses con otra y daban conteos falsos; se separaron.
+
+### Limitaciones
+
+- No se ejecutó SonarQube (el modelo lo incluía); figura como enfoque faltante.
+- El GPS se simuló con peticiones HTTP; no hay celular real ni push entregado a un navegador.
+- Las 16 mutaciones manuales citadas salen de esta bitácora, no se repitieron hoy.
+- El valor de 50 % de CV para "desviación alta" es una decisión del informe.
+
+### Estado del entorno
+
+Contenedor `qa-odoo` y base `buses_qa` eliminados. Para repetir: Anexo B del informe.
