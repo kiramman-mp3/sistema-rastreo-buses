@@ -165,7 +165,7 @@ class BusPortal(http.Controller):
                     'lat': bus.last_latitude,
                     'lon': bus.last_longitude,
                     'course': round(bus.last_course),
-                    'status': bus.status,
+                    'status': bus.status if bus.connected else 'offline',
                 } for bus in self._fresh_buses(route)],
             })
             cache.put(code, body)
