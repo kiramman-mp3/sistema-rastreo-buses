@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
 
 from ..models.geo import simplify, thin
@@ -64,3 +64,30 @@ class TestRecordTrack(BusCase):
     def test_a_broken_track_falls_back_to_the_stops(self):
         self.route.sudo().track_json = 'not json'
         self.assertEqual(len(self.route._map_lines()[0]['points']), 3)
+
+
+@tagged('post_install', '-at_install')
+class TestRecordTrackAccess(BusCase):
+
+    def user(self, group):
+        return self.env['res.users'].create({
+            'name': group, 'login': group + '@example.org',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.' + group).id])]})
+
+    def test_a_manager_can_open_the_wizard_and_record(self):
+        manager = self.user('group_bus_manager')
+        now = fields.Datetime.now().replace(microsecond=0)
+        for i in range(4):
+            when = now - timedelta(minutes=4 - i)
+            self.bus._apply_position(traccar_position(7, when.strftime('%Y-%m-%dT%H:%M:%SZ'), -33.45, -70.66 + i * 0.001, 5.0))
+        wizard = self.env['bus.route.record'].with_user(manager).create({
+            'route_id': self.route.id, 'vehicle_id': self.bus.id,
+            'date_from': now - timedelta(hours=1), 'date_to': now})
+        wizard.action_record()
+        self.assertGreater(self.route.track_points, 1)
+
+    def test_a_plain_user_cannot_open_the_wizard(self):
+        viewer = self.user('group_bus_user')
+        with self.assertRaises(AccessError):
+            self.env['bus.route.record'].with_user(viewer).create({
+                'route_id': self.route.id, 'vehicle_id': self.bus.id})
