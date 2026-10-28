@@ -1,8 +1,27 @@
 /* Backend touches on top of the palette from primary_variables.scss. */
 
+.o_web_client {
+    --bus-radius: 12px;
+}
+
+/* ---------- Navbar ---------- */
+
 .o_main_navbar {
     border-bottom: 3px solid var(--bus-senal);
 }
+
+.o_main_navbar .o_menu_brand,
+.o_main_navbar .o_menu_sections .dropdown-toggle {
+    font-weight: 700;
+}
+
+.o_main_navbar .o_menu_sections .dropdown-toggle:focus-visible,
+.o_main_navbar .o_menu_systray :focus-visible {
+    outline: 3px solid var(--bus-senal);
+    outline-offset: -3px;
+}
+
+/* ---------- Titles and control panel ---------- */
 
 .o_web_client .o_form_view .oe_title h1,
 .o_web_client .o_control_panel .breadcrumb-item.active {
@@ -14,8 +33,115 @@
     font-weight: 800;
 }
 
+.o_web_client .o_control_panel {
+    background: #fff;
+    border-bottom: 2px solid var(--bus-lluvia);
+}
+
+/* ---------- Forms: the sheet reads as a card, group titles as headings ---------- */
+
+.o_web_client .o_form_view .o_form_sheet_bg {
+    background: var(--bus-paper);
+}
+
+.o_web_client .o_form_view .o_form_sheet {
+    border-radius: var(--bus-radius);
+    border: 2px solid var(--bus-lluvia);
+    box-shadow: none;
+}
+
+.o_web_client .o_form_view .o_group .o_horizontal_separator {
+    font-family: var(--bus-font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--bus-ink);
+    padding-bottom: 0.35rem;
+    border-bottom: 3px solid var(--bus-senal);
+    display: inline-block;
+    margin-bottom: 0.75rem;
+}
+
+.o_web_client .o_form_view .o_form_statusbar {
+    background: #fff;
+    border-bottom: 2px solid var(--bus-lluvia);
+}
+
+/* ---------- Lists ---------- */
+
+.o_web_client .o_list_view .o_list_table thead th {
+    background: var(--bus-lluvia);
+    color: var(--bus-ink);
+    font-weight: 700;
+    border-bottom: 2px solid var(--bus-ink);
+}
+
+.o_web_client .o_list_view .o_data_row:hover {
+    background: rgba(255, 198, 43, 0.18);
+}
+
+.o_web_client .o_list_view .o_data_row.o_data_row_selected,
+.o_web_client .o_list_view .o_data_row:focus-within {
+    background: rgba(30, 85, 96, 0.1);
+}
+
+/* ---------- Status badges ---------- */
+
+.o_web_client .badge {
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.3em 0.75em;
+}
+
+.o_web_client .badge.text-bg-danger,
+.o_web_client .o_field_badge.text-bg-danger {
+    background-color: var(--bus-rojo) !important;
+    color: #fff !important;
+}
+
+.o_web_client .badge.text-bg-success,
+.o_web_client .o_field_badge.text-bg-success {
+    background-color: var(--bus-ok) !important;
+    color: #fff !important;
+}
+
+.o_web_client .badge.text-bg-warning,
+.o_web_client .o_field_badge.text-bg-warning {
+    background-color: var(--bus-senal) !important;
+    color: var(--bus-ink) !important;
+}
+
+/* ---------- Buttons and focus ---------- */
+
+.o_web_client .o_control_panel .btn,
+.o_web_client .o_form_statusbar .btn {
+    border-radius: 999px;
+}
+
 .o_web_client .btn-primary:focus-visible,
-.o_web_client .btn:focus-visible {
+.o_web_client .btn:focus-visible,
+.o_web_client .o_input:focus-visible,
+.o_web_client a:focus-visible {
     outline: 3px solid var(--bus-senal);
     outline-offset: 2px;
+}
+
+/* ---------- Settings page ---------- */
+
+.o_web_client .o_form_view .app_settings_block h2 {
+    font-family: var(--bus-font-display);
+    font-weight: 800;
+    border-bottom: 3px solid var(--bus-senal);
+    display: inline-block;
+}
+
+.o_web_client .o_form_view .o_setting_box:hover {
+    background: rgba(255, 198, 43, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_web_client * {
+        transition: none !important;
+        animation: none !important;
+    }
 }
