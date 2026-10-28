@@ -1,7 +1,7 @@
 import json
 
-from odoo import _, fields, models
-from odoo.exceptions import UserError
+from odoo import _, api, fields, models
+from odoo.exceptions import AccessError, UserError
 
 from .geo import PathMeasure
 
@@ -57,6 +57,10 @@ class BusRoute(models.Model):
             'context': {'default_route_id': self.id, 'default_vehicle_id': self.vehicle_ids[:1].id},
         }
 
+    def action_add_stop_on_map(self):
+        self.ensure_one()
+        return self.env['bus.route.stop']._open_map_picker(self.id)
+
     def action_clear_track(self):
         self.write({'track_json': False})
 
@@ -78,6 +82,49 @@ class BusRouteStop(models.Model):
     latitude = fields.Float(digits=(10, 7), required=True)
     longitude = fields.Float(digits=(10, 7), required=True)
     radius = fields.Integer(default=50, help="Arrival radius in meters.")
+
+    @api.model
+    def _open_map_picker(self, route_id, stop_id=False):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'bus_tracking.stop_picker',
+            'name': _("Stop on the map"),
+            'target': 'new',
+            'params': {'route_id': route_id, 'stop_id': stop_id},
+        }
+
+    def action_pick_on_map(self):
+        self.ensure_one()
+        return self._open_map_picker(self.route_id.id, self.id)
+
+    @api.model
+    def _save_from_map(self, route_id, stop_id, name, latitude, longitude, radius):
+        """Create a stop at the end of the route, or move and rename an existing one."""
+        if not self.env.user.has_group('bus_tracking.group_bus_manager'):
+            raise AccessError(_("Only managers can edit stops."))
+        name = (name or '').strip()
+        try:
+            latitude, longitude, radius = float(latitude), float(longitude), int(radius)
+        except (TypeError, ValueError):
+            raise UserError(_("Choose a point on the map."))
+        if not name:
+            raise UserError(_("The stop needs a name."))
+        if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            raise UserError(_("That point is not on the map."))
+        if not 5 <= radius <= 1000:
+            raise UserError(_("The arrival radius must be between 5 and 1000 meters."))
+        values = {'name': name[:128], 'latitude': round(latitude, 7), 'longitude': round(longitude, 7), 'radius': radius}
+        if stop_id:
+            stop = self.browse(int(stop_id)).exists()
+            if not stop or stop.route_id.id != int(route_id):
+                raise UserError(_("That stop does not belong to this route."))
+            stop.write(values)
+            return stop
+        route = self.env['bus.route'].browse(int(route_id)).exists()
+        if not route:
+            raise UserError(_("That route no longer exists."))
+        last = route.stop_ids[-1:].sequence or 0
+        return self.create(dict(values, route_id=route.id, sequence=last + 10))
 
 
 class BusStopArrival(models.Model):
