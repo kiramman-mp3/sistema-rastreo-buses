@@ -117,6 +117,7 @@
             window.L.marker([bus.lat, bus.lon], { icon: busIcon(bus), title: bus.name })
                 .bindTooltip(bus.name + ": " + label).addTo(busLayer);
             var li = document.createElement("li");
+            li.className = "bus-" + (bus.status === "moving" || bus.status === "stopped" ? bus.status : "offline");
             var name = document.createElement("strong");
             name.textContent = bus.name;
             var state = document.createElement("span");
