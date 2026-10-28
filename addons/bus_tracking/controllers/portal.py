@@ -9,7 +9,7 @@ from datetime import timedelta
 from odoo import fields, http
 from odoo.http import Response, request
 
-from ..models.utils import brand_name, float_to_clock, local_now, map_center
+from ..models.utils import brand_name, map_center
 from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
@@ -106,19 +106,6 @@ def render_portal(template, values, status=200):
     return response
 
 
-def build_timetable(route):
-    """The schedules of the buses of a line that have not left yet today."""
-    now = local_now(request.env(su=True))
-    hour = now.hour + now.minute / 60.0
-    schedules = request.env(su=True)['bus.schedule'].search([('route_id', '=', route.id)], order='departure, id')
-    return {
-        'no_service': not schedules,
-        'as_of': '%02d:%02d' % (now.hour, now.minute),
-        'items': [{'dep': float_to_clock(item.departure), 'arr': float_to_clock(item.arrival), 'bus': item.vehicle_id.name}
-                  for item in schedules if item.departure >= hour - 5 / 60.0],
-    }
-
-
 def public_routes():
     return request.env(su=True)['bus.route'].search([('active', '=', True), ('public', '=', True)])
 
@@ -160,7 +147,6 @@ class BusPortal(http.Controller):
             stops_json=json.dumps(stops), paths_json=json.dumps(route._map_lines(), separators=(',', ':')))
         values['json_i18n'] = json.dumps({key: values['s'][key] for key in JS_STRINGS})
         values['center_json'] = json.dumps(list(map_center(request.env(su=True))))
-        values['timetable'] = build_timetable(route)
         return render_portal('bus_tracking.portal_route', values)
 
     @http.route('/rutas/<string:code>/buses.json', type='http', auth='public', methods=['GET'])
@@ -179,7 +165,7 @@ class BusPortal(http.Controller):
                     'lat': bus.last_latitude,
                     'lon': bus.last_longitude,
                     'course': round(bus.last_course),
-                    'status': bus.status,
+                    'status': bus.status if bus.connected else 'offline',
                 } for bus in self._fresh_buses(route)],
             })
             cache.put(code, body)

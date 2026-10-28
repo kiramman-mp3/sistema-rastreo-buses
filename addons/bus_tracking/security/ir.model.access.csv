@@ -5,8 +5,8 @@ access_bus_route_user,bus.route user,model_bus_route,group_bus_user,1,0,0,0
 access_bus_route_manager,bus.route manager,model_bus_route,group_bus_manager,1,1,1,1
 access_bus_route_stop_user,bus.route.stop user,model_bus_route_stop,group_bus_user,1,0,0,0
 access_bus_route_stop_manager,bus.route.stop manager,model_bus_route_stop,group_bus_manager,1,1,1,1
-access_bus_schedule_user,bus.schedule user,model_bus_schedule,group_bus_user,1,0,0,0
-access_bus_schedule_manager,bus.schedule manager,model_bus_schedule,group_bus_manager,1,1,1,1
+access_bus_run_user,bus.run user,model_bus_run,group_bus_user,1,0,0,0
+access_bus_run_manager,bus.run manager,model_bus_run,group_bus_manager,1,0,0,1
 access_bus_position_user,bus.position user,model_bus_position,group_bus_user,1,0,0,0
 access_bus_position_manager,bus.position manager,model_bus_position,group_bus_manager,1,0,0,1
 access_bus_alert_user,bus.alert user,model_bus_alert,group_bus_user,1,0,0,0
@@ -16,3 +16,4 @@ access_bus_stop_arrival_manager,bus.stop.arrival manager,model_bus_stop_arrival,
 access_bus_complaint_user,bus.complaint user,model_bus_complaint,group_bus_user,1,0,0,0
 access_bus_complaint_manager,bus.complaint manager,model_bus_complaint,group_bus_manager,1,1,0,1
 access_bus_push_subscription_manager,bus.push.subscription manager,model_bus_push_subscription,group_bus_manager,1,0,0,1
+access_bus_route_record_manager,bus.route.record manager,model_bus_route_record,group_bus_manager,1,1,1,1

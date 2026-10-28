@@ -92,18 +92,25 @@ class TestIngest(BusCase):
         self.assertFalse(self.env['bus.vehicle']._process_traccar_payload(payload))
         self.assertFalse(self.env['bus.position'].search_count([]))
 
-    def test_status(self):
-        self.assertEqual(self.bus.status, 'offline')
+    def refresh(self):
+        self.bus.invalidate_recordset(['status', 'connected', 'connection'])
+
+    def test_a_bus_that_never_reported_is_disconnected_and_has_no_movement_state(self):
+        self.assertEqual((self.bus.connection, self.bus.connected, self.bus.status), ('offline', False, False))
+
+    def test_connected_depends_only_on_the_phone_still_sending(self):
         now = fields.Datetime.now()
-        self.bus.write({'last_fix_time': now, 'last_speed': 30.0})
-        self.bus.invalidate_recordset(['status'])
-        self.assertEqual(self.bus.status, 'moving')
-        self.bus.write({'last_speed': 0.5})
-        self.bus.invalidate_recordset(['status'])
-        self.assertEqual(self.bus.status, 'stopped')
-        self.bus.write({'last_fix_time': now - timedelta(minutes=6)})
-        self.bus.invalidate_recordset(['status'])
-        self.assertEqual(self.bus.status, 'offline')
+        self.bus.write({'last_fix_time': now, 'last_speed': 0.0})
+        self.refresh()
+        self.assertEqual((self.bus.connection, self.bus.status), ('online', 'stopped'))   # parked but connected
+        self.bus.write({'last_speed': 30.0})
+        self.refresh()
+        self.assertEqual((self.bus.connection, self.bus.status), ('online', 'moving'))
+
+    def test_silence_turns_the_bus_red_but_keeps_its_last_movement_state(self):
+        self.bus.write({'last_fix_time': fields.Datetime.now() - timedelta(minutes=4), 'last_speed': 30.0})
+        self.refresh()
+        self.assertEqual((self.bus.connection, self.bus.connected, self.bus.status), ('offline', False, 'moving'))
 
     def test_cleanup_deletes_only_positions_older_than_retention(self):
         self.env['ir.config_parameter'].set_param('bus_tracking.retention_days', '30')

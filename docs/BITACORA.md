@@ -582,3 +582,21 @@ Roster oficial y su importación, trazados por calle (OSM/OSRM) y sus scripts, v
 
 - `i18n/es.po` y `.pot` aún traen textos de lo eliminado.
 - La copia anterior del código quedó en la carpeta temporal de la sesión (no hay git).
+
+
+## 2026-10-28: Recorridos automáticos
+
+- `bus.schedule` (horario manual) se reemplazó por `bus.run`: el sistema abre un recorrido cuando el bus sale de la primera o la última parada de su ruta y lo cierra cuando entra a la otra. Si vuelve al origen sin llegar, el recorrido se descarta; uno abierto más de 12 horas también.
+- Se quitó la sección "Horario de hoy" del portal público: sin horario planificado no hay qué mostrar.
+- Límites: usa solo la primera y la última parada en orden; no distingue conductores; una ruta con menos de 2 paradas no genera recorridos.
+- Tests: 148, 0 fallos.
+
+
+## 2026-10-28: pulido del diseño
+
+- Se conservó la identidad (papel, tinta, verde ruta, amarillo señal, rojo bus; Bricolage Grotesque y Atkinson Hyperlegible).
+- Portal: punto de estado en cada ruta y en cada bus de la lista (verde en movimiento, amarillo detenido, rojo sin señal), tarjetas blancas, línea sobre el pie, `prefers-reduced-motion` respetado. Nuevo token `--bus-ok`.
+- Panel de Odoo (`backend.css`): hoja de formulario como tarjeta, títulos de grupo con subrayado amarillo, encabezados de lista con línea de tinta, fila resaltada al pasar, insignias de estado con los colores de la marca, foco visible, página de Ajustes y barra lateral del mapa en vivo.
+- Landing: pasos de "Así llega un bus" sin jerga (Traccar, Odoo).
+- Tests: 150, 0 fallos.
+- **Sin verificar a ojo:** el panel de Odoo (hace falta iniciar sesión; no se creó un usuario de prueba) y los anchos de móvil de esta sesión.

@@ -10,10 +10,14 @@ const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
 const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const REFRESH_MS = 10000;
 const DEFAULT_CENTER = [-1.2417, -78.6167];   // Ambato; replaced by the Settings value once loaded
-const STATUS_COLORS = { moving: "#28a745", stopped: "#ffc107", offline: "#6c757d" };
+const CONNECTION_COLORS = { true: "#28a745", false: "#dc3545" };
+const MOVEMENT_LABELS = { moving: "En movimiento", stopped: "Parado" };
 
 export class BusLiveMap extends Component {
     static template = "bus_tracking.LiveMap";
+    movementLabel(status) {
+        return MOVEMENT_LABELS[status] || "";
+    }
 
     setup() {
         this.rpc = useService("rpc");
@@ -127,13 +131,13 @@ export class BusLiveMap extends Component {
                 className: "",
                 iconSize: [30, 30],
                 iconAnchor: [15, 15],
-                html: `<div class="o_bus_marker" style="background:${v.color};border-color:${STATUS_COLORS[v.status]}">
+                html: `<div class="o_bus_marker" style="background:${v.color};border-color:${CONNECTION_COLORS[v.connected]}">
                            <i class="fa fa-bus"></i></div>`,
             });
             const marker = L.marker([v.lat, v.lon], { icon })
                 .bindTooltip(
                     `<b>${this.escape(v.name)}</b> ${this.escape(v.plate)}<br/>
-                     ${v.speed} km/h · ${v.status}<br/>${this.escape(v.fix_time)} UTC`
+                     ${v.connected ? "🟢 Conectado" : "🔴 Sin conexión"} · ${MOVEMENT_LABELS[v.status] || ""}<br/>${v.speed} km/h<br/>${this.escape(v.fix_time)} UTC`
                 )
                 .on("click", () => this.selectVehicle(v))
                 .addTo(this.busLayer);
