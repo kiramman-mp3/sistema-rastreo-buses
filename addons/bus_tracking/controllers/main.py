@@ -42,6 +42,7 @@ class BusTrackingController(http.Controller):
                 'course': bus.last_course,
                 'fix_time': fields.Datetime.to_string(bus.last_fix_time),
                 'status': bus.status,
+                'connected': bus.connected,
                 'stop': bus.current_stop_id.name or '',
                 'alerts': alerts.get(bus.id, []),
             })
