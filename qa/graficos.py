@@ -63,7 +63,7 @@ def histogram(times, p95, mean):
     return _save(fig, 'histograma_auditoria.png')
 
 
-def pareto(causes):
+def pareto(causes, name='pareto.png', xlabel_size=8):
     """causes: list of (label, count) sorted by count."""
     fig, ax = plt.subplots(figsize=(6.4, 2.9))
     labels = [c[0] for c in causes]
@@ -77,12 +77,13 @@ def pareto(causes):
         cumulative.append(100.0 * running / total)
     ax2.plot(range(len(counts)), cumulative, color=YELLOW, marker='o')
     ax2.set_ylim(0, 105)
+    ax2.axhline(80, color=INK, lw=0.6, ls=':')
     ax2.set_ylabel('% acumulado')
     ax2.spines['right'].set_visible(True)
     ax.set_xticks(range(len(counts)))
-    ax.set_xticklabels(labels, fontsize=8)
-    ax.set_ylabel('Fallos')
-    return _save(fig, 'pareto.png')
+    ax.set_xticklabels(labels, fontsize=xlabel_size)
+    ax.set_ylabel('Cantidad')
+    return _save(fig, name)
 
 
 def coverage(rows):
@@ -95,3 +96,30 @@ def coverage(rows):
     ax.set_xlabel('Cobertura de líneas y ramas (%)')
     ax.tick_params(axis='y', labelsize=7.5)
     return _save(fig, 'cobertura.png')
+
+
+def ishikawa(effect, branches, name):
+    """Fishbone diagram. branches: six (category, [causes]); the first three go above the spine, the rest below."""
+    import textwrap
+    fig, ax = plt.subplots(figsize=(11, 6.2))
+    ax.set_xlim(0, 12.2)
+    ax.set_ylim(-3.6, 3.6)
+    ax.axis('off')
+    ax.annotate('', xy=(9.3, 0), xytext=(0.3, 0), arrowprops=dict(arrowstyle='-|>', color=INK, lw=2))
+    ax.text(9.45, 0, textwrap.fill(effect, 24), va='center', ha='left', fontsize=9, fontweight='bold', color='white',
+            bbox=dict(boxstyle='round,pad=0.5', fc=GREEN, ec=INK))
+    for i, (title, causes) in enumerate(branches):
+        top = i < 3
+        sign = 1 if top else -1
+        x_s = 3.3 + (i % 3) * 3.0                       # where the bone meets the spine
+        x_t, y_t = x_s - 1.5, sign * 2.9                # outer end of the bone
+        ax.plot([x_t, x_s], [y_t, 0], color=INK, lw=1.4)
+        ax.text(x_t, y_t + sign * 0.28, title, ha='center', va='center', fontsize=9, fontweight='bold',
+                bbox=dict(boxstyle='round,pad=0.3', fc=YELLOW, ec=INK))
+        for k, cause in enumerate(causes):
+            frac = (k + 0.6) / (len(causes) + 0.4)
+            y = sign * 2.9 * (1 - frac)
+            x = x_t + (x_s - x_t) * frac
+            ax.plot([x - 0.25, x], [y, y], color=GREY, lw=0.8)
+            ax.text(x - 0.3, y, textwrap.fill(cause, 34), ha='right', va='center', fontsize=6.6, color=INK, linespacing=0.95)
+    return _save(fig, name)

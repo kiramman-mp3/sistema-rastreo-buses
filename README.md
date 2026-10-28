@@ -71,6 +71,10 @@ Sin login: `/rutas` lista las rutas marcadas como *Visible to passengers* y `/ru
 
 Quejas: `/quejas` es el formulario público (contacto opcional, con protección contra abuso). Llegan a `Bus Tracking > Quejas` con estados, responsable y nota interna; los datos de contacto solo los ven los administradores y se borran a los 90 días de resuelta la queja (ajustable).
 
+## Calidad
+
+Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`.
+
 ## Producción
 
 Para instalar en un servidor (HTTPS, secretos, respaldos, monitoreo) ve `docs/PRODUCCION.md`. El archivo `docker-compose.yml` de esta carpeta es solo para desarrollo.
