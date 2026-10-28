@@ -42,7 +42,7 @@
                         <a t-attf-href="/rutas/#{r['code']}">
                             <span class="chip" t-attf-style="background: #{r['color']}" t-esc="r['code']"/>
                             <strong t-esc="r['name']"/>
-                            <span class="estado"
+                            <span t-attf-class="estado #{'activa' if r['buses'] else ''}"
                                   t-esc="s['buses_in_service'].format(n=r['buses']) if r['buses'] else s['no_service']"/>
                         </a>
                     </li>
