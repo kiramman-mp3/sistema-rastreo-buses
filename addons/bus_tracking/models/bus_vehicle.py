@@ -11,7 +11,7 @@ from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
 
 _logger = logging.getLogger(__name__)
 
-OFFLINE_AFTER = timedelta(minutes=5)
+CONNECTED_WITHIN = timedelta(minutes=3)     # the phone sends every few seconds while the app is open
 
 
 class BusVehicle(models.Model):
@@ -42,9 +42,13 @@ class BusVehicle(models.Model):
     last_fix_time = fields.Datetime(readonly=True, copy=False)
     current_stop_id = fields.Many2one('bus.route.stop', readonly=True, copy=False)
     off_route_since = fields.Datetime(readonly=True, copy=False)
+    connection = fields.Selection(
+        [('online', "🟢 Conectado"), ('offline', "🔴 Sin conexión")], string="Connection",
+        compute='_compute_status', help="Green while the phone keeps sending its position, even if the bus is parked.")
+    connected = fields.Boolean(compute='_compute_status')
     status = fields.Selection(
-        [('moving', "Moving"), ('stopped', "Stopped"), ('offline', "Offline")],
-        compute='_compute_status')
+        [('moving', "En movimiento"), ('stopped', "Parado")], compute='_compute_status',
+        help="From the last speed reported.")
 
     _sql_constraints = [
         ('traccar_device_uniq', 'unique(traccar_device_id)', "Traccar device is already linked to another bus."),
@@ -71,10 +75,12 @@ class BusVehicle(models.Model):
     def _compute_status(self):
         now = fields.Datetime.now()
         for bus in self:
-            if not bus.last_fix_time or now - bus.last_fix_time > OFFLINE_AFTER:
-                bus.status = 'offline'
-            else:
+            bus.connected = bool(bus.last_fix_time and now - bus.last_fix_time <= CONNECTED_WITHIN)
+            bus.connection = 'online' if bus.connected else 'offline'
+            if bus.last_fix_time:
                 bus.status = 'moving' if bus.last_speed > MOVING_ABOVE_KMH else 'stopped'
+            else:
+                bus.status = False
 
     # ------------------------------------------------------------------
     # Position ingestion
