@@ -23,7 +23,7 @@ Live bus tracking and route monitoring backed by a Traccar server.
         'views/bus_route_views.xml',
         'views/bus_position_views.xml',
         'views/bus_alert_views.xml',
-        'views/bus_schedule_views.xml',
+        'views/bus_run_views.xml',
         'views/bus_complaint_views.xml',
         'views/notification_views.xml',
         'views/res_config_settings_views.xml',

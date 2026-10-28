@@ -87,20 +87,6 @@
                     </aside>
                 </div>
             </main>
-            <section class="wrap horario" t-if="timetable">
-                <h2 t-esc="s['timetable_title']"/>
-                <p class="ayuda" t-if="timetable['no_service']" t-esc="s['timetable_no_service']"/>
-                <p class="ayuda" t-elif="not timetable['items']" t-esc="s['timetable_none']"/>
-                <ul t-else="">
-                    <li t-foreach="timetable['items']" t-as="item">
-                        <strong t-esc="item['dep']"/>
-                        <span t-esc="s['timetable_arrives'].format(time=item['arr'])"/>
-                        <span class="bus" t-esc="item['bus']"/>
-                    </li>
-                </ul>
-                <p class="ayuda" t-if="not timetable['no_service']"
-                   t-esc="s['timetable_note'].format(as_of=timetable['as_of'])"/>
-            </section>
             <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
             <script src="/bus_tracking/static/lib/leaflet/leaflet.js"></script>
             <script t-attf-src="/bus_tracking/static/src/portal/portal_map.js?v=#{asset_v}"></script>

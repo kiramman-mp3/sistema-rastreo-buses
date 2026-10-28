@@ -582,3 +582,11 @@ Roster oficial y su importación, trazados por calle (OSM/OSRM) y sus scripts, v
 
 - `i18n/es.po` y `.pot` aún traen textos de lo eliminado.
 - La copia anterior del código quedó en la carpeta temporal de la sesión (no hay git).
+
+
+## 2026-10-28: Recorridos automáticos
+
+- `bus.schedule` (horario manual) se reemplazó por `bus.run`: el sistema abre un recorrido cuando el bus sale de la primera o la última parada de su ruta y lo cierra cuando entra a la otra. Si vuelve al origen sin llegar, el recorrido se descarta; uno abierto más de 12 horas también.
+- Se quitó la sección "Horario de hoy" del portal público: sin horario planificado no hay qué mostrar.
+- Límites: usa solo la primera y la última parada en orden; no distingue conductores; una ruta con menos de 2 paradas no genera recorridos.
+- Tests: 148, 0 fallos.

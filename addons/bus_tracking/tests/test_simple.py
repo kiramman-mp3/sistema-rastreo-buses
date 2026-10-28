@@ -12,22 +12,6 @@ KNOTS_90_KMH = 50.0
 
 
 @tagged('post_install', '-at_install')
-class TestSchedule(BusCase):
-
-    def test_schedule_name_shows_the_bus_and_the_times(self):
-        item = self.env['bus.schedule'].create({
-            'vehicle_id': self.bus.id, 'route_id': self.route.id, 'departure': 6.5, 'arrival': 7.25})
-        self.assertEqual(item.name, 'Bus 1 06:30-07:15')
-
-    def test_schedules_follow_the_bus(self):
-        self.env['bus.schedule'].create({
-            'vehicle_id': self.bus.id, 'route_id': self.route.id, 'departure': 6, 'arrival': 7})
-        self.assertEqual(len(self.bus.schedule_ids), 1)
-        self.bus.unlink()
-        self.assertFalse(self.env['bus.schedule'].search([('route_id', '=', self.route.id)]))
-
-
-@tagged('post_install', '-at_install')
 class TestMapLine(BusCase):
 
     def test_route_line_joins_the_stops_in_order(self):
