@@ -20,6 +20,13 @@
         <field name="model">bus.route</field>
         <field name="arch" type="xml">
             <form>
+                <header groups="bus_tracking.group_bus_manager">
+                    <button name="action_record_track" type="object" string="Grabar trazado desde un bus"
+                            class="btn-primary"/>
+                    <button name="action_clear_track" type="object" string="Borrar trazado grabado"
+                            attrs="{'invisible': [('track_points', '=', 0)]}"
+                            confirm="La ruta volverá a dibujarse como línea recta entre sus paradas."/>
+                </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
                             attrs="{'invisible': [('active', '=', True)]}"/>
@@ -31,6 +38,7 @@
                             <field name="code"/>
                             <field name="color" widget="color"/>
                             <field name="public"/>
+                            <field name="track_points" string="Puntos del trazado grabado"/>
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
@@ -57,6 +65,29 @@
                         </page>
                     </notebook>
                 </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_route_record_form" model="ir.ui.view">
+        <field name="name">bus.route.record.form</field>
+        <field name="model">bus.route.record</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    Se toman las posiciones GPS del bus en este periodo y se dibuja la ruta siguiendo ese recorrido.
+                    Elige el periodo en que el bus hizo la ruta completa, de una parada extrema a la otra.
+                </p>
+                <group>
+                    <field name="route_id" invisible="1"/>
+                    <field name="vehicle_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+                <footer>
+                    <button name="action_record" type="object" string="Grabar" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
             </form>
         </field>
     </record>

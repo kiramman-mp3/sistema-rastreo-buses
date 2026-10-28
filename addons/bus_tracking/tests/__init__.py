@@ -8,3 +8,4 @@ from . import test_portal
 from . import test_complaints
 from . import test_push
 from . import test_simple
+from . import test_track
