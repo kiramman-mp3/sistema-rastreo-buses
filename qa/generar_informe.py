@@ -373,9 +373,9 @@ add(table([['Estado', 'Procesos', 'Justificación'],
            ['Aplicados', '• Implementación<br/>• Verificación<br/>• Aseguramiento de la calidad<br/>• Medición<br/>• Gestión de la configuración', '• Código por fases con commits pequeños<br/>• %d pruebas automáticas repetibles<br/>• Política y metas de calidad, cobertura medida<br/>• Métricas de este informe<br/>• Ramas main, develop y feature/*' % n_unit],
            ['Parciales', '• Requisitos<br/>• Validación<br/>• Gestión de riesgos<br/>• Transición (despliegue)', '• Decisiones del cliente documentadas, sin especificación formal<br/>• Sin pruebas con usuarios reales ni celular real<br/>• Riesgos listados, sin plan formal de mitigación<br/>• Producción y Azure sin probar en un servidor real']],
           [0.14, 0.34, 0.52], align_center=(0,), caption='Estado de los procesos de ciclo de vida'))
-add([p('<b>7.3&nbsp;&nbsp;CMMI madurez [3]</b>'.replace('7.3', '7.3'), H2), p('Nivel: 2 Gestionado, con elementos del nivel 3 parciales y sin llegar al nivel 4.')])
+add([p('<b>7.3&nbsp;&nbsp;CMMI madurez [3]</b>'.replace('7.3', '7.3'), H2), p('Nivel: 2 Gestionado en consolidación. De las seis áreas del nivel 2 que aplican, cuatro se cumplen (planificación, seguimiento, medición y gestión de la configuración) y dos son parciales (requisitos y aseguramiento de la calidad); el nivel 3 se cumple solo en parte y el 4 no se alcanza. Es una autoevaluación, no una evaluación SCAMPI; el detalle por área está en docs/calidad/09-cumplimiento-iso.md.')])
 add(table([['Nivel', 'Valoración', 'Justificación técnica'],
-           ['2: Gestionado', 'Respaldado', 'Seguimiento de actividades (bitácora de 16 entradas y plan por fases), pruebas gestionadas (%d automáticas y repetibles), cambios controlados con Git y regresión, defectos registrados (DEF-001 a DEF-010)' % n_unit],
+           ['2: Gestionado', 'En consolidación', 'Seguimiento de actividades (bitácora de 16 entradas y plan por fases), pruebas gestionadas (%d automáticas y repetibles), cambios controlados con Git y regresión, defectos registrados (DEF-001 a DEF-010)' % n_unit],
            ['3: Definido', 'Parcial', 'Hay un flujo Git y guías en docs/, pero no un proceso estándar de calidad documentado ni revisiones con acta; depende de las mismas personas'],
            ['4: Gestionado cuantitativamente', 'Parcial', 'Se miden error, tiempos, desviación, cobertura y Defectos/KLOC, pero es la primera medición: no hay línea base histórica ni límites de control']],
           [0.24, 0.14, 0.62], align_center=(1,), caption='Justificación del nivel de madurez CMMI'))
@@ -462,5 +462,6 @@ add(console([
     'sh qa/ejecutar_todo.sh          # suite en vivo + auditoría + métricas',
     'python -X utf8 qa/generar_informe.py   # este informe'], 'Pasos para repetir la evaluación'))
 
+add([p('La documentación completa de calidad (política, reglas, plan de pruebas, defectos, lluvia de ideas, Pareto, Ishikawa y cumplimiento de las ISO) está en la carpeta docs/calidad del proyecto, con un índice en docs/calidad/README.md.')])
 doc.build(E)
 print('Informe:', os.path.abspath(SALIDA))
