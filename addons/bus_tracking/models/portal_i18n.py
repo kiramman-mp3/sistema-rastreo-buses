@@ -59,11 +59,6 @@ STRINGS = {
         'thanks_no_contact': 'Como no dejaste datos de contacto, no podremos responderte.',
         'back_to_routes': 'Volver a las rutas',
         'privacy_more': 'Política de privacidad',
-        'timetable_title': 'Horario de hoy',
-        'timetable_arrives': 'llega {time}',
-        'timetable_none': 'No quedan salidas hoy.',
-        'timetable_no_service': 'Esta línea no tiene recorridos en el horario.',
-        'timetable_note': 'Horario de los recorridos (hora de Ecuador, a las {as_of}).',
     },
     'en': {
         'lang_name': 'English',
@@ -117,11 +112,6 @@ STRINGS = {
         'thanks_no_contact': "Since you left no contact details, we won't be able to reply.",
         'back_to_routes': 'Back to the routes',
         'privacy_more': 'Privacy policy',
-        'timetable_title': "Today's timetable",
-        'timetable_arrives': 'arrives {time}',
-        'timetable_none': 'There are no departures left today.',
-        'timetable_no_service': 'This line has no trips in the timetable.',
-        'timetable_note': 'Timetable (Ecuador time, as of {as_of}).',
     },
 }
 STRINGS['es'].update(path_pick='Ver un recorrido', path_all='Todos los recorridos', path_reset='Restablecer')
