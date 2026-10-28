@@ -687,3 +687,21 @@ Todas las cifras se tomaron de `docs/calidad/` (ejecución del 28-oct-2026). Se 
 - El motivo del proyecto (sección 1) se redactó con los datos del plan y de las decisiones del cliente; los documentos no registran una anécdota real de pasajeros, así que se dejó una nota para añadirla.
 - Las respuestas sobre costo de Azure y sobre el reparto de trabajo con Claude Code son orientativas y las debe ajustar quien defiende.
 - Si se cierran DEF-008 a DEF-010 antes de la defensa, hay que actualizar las secciones 6, 8 y 9 y la pregunta 2.
+
+
+## 2026-10-28: el pipeline de calidad se prepara solo
+
+### Qué se hizo
+
+`qa/ejecutar_todo.py` (nuevo) crea Postgres, la base `buses_qa`, el servidor `qa-odoo` y la base desechable de las pruebas de Odoo, ejecuta las pruebas con cobertura, la suite en vivo, la auditoría y las métricas, y acepta un paso suelto (`odoo`, `suite`, `auditoria`, `metricas`) o `--limpiar`. Funciona en `cmd`, PowerShell y Git Bash. `qa/ejecutar_todo.sh` ahora solo lo llama. Antes había que crear la base y el servidor a mano y el script fallaba con `ConnectionRefusedError` si `qa-odoo` no existía.
+
+### Qué se verificó
+
+Ejecución completa desde cero (sin `qa-odoo` ni `buses_qa`), con la salida en otra carpeta: 150 pruebas de Odoo, 0 fallos, cobertura 94 %; suite en vivo 39 de 42 (los mismos DEF-008 a DEF-010); auditoría 943 de 1000 (5,7 %).
+
+### Limitaciones
+
+- La auditoría dio 25 respuestas 5xx y 32 posiciones imposibles, como en el informe; la suite y la auditoría cuentan 27 y 33 en total.
+- Los tiempos varían entre ejecuciones (la media de la auditoría fue 0,0585 s contra 0,037 s del informe), así que las cifras del PDF no se actualizaron.
+- Una ejecución nueva sobre `docs/calidad/evidencias/` reemplaza las evidencias del informe.
+- `qa-odoo` y `buses_qa` quedan creados al terminar; `--limpiar` los elimina.
