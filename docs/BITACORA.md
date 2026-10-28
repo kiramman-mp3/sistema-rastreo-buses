@@ -644,3 +644,29 @@ Los tres están en la validación de la posición (`bus_vehicle._apply_position`
 ### Estado del entorno
 
 Contenedor `qa-odoo` y base `buses_qa` eliminados. Para repetir: Anexo B del informe.
+
+
+## 2026-10-28: carpeta `docs/calidad` con toda la documentación de calidad
+
+### Qué se hizo
+
+Se organizó `docs/calidad/` como el lugar donde va toda la documentación de pruebas y calidad, con el formato del Taller de la Unidad 2 (`Taller ACS.pdf`) y el informe de la Unidad 3. Se agregaron 12 documentos: un índice (`README.md`) y 11 numerados: política y alcance con RACI y flujo, reglas de negocio y estándares de interfaz, plan y casos de prueba, resultados y cuadro de mando, registro de defectos con causa raíz, lluvia de ideas categorizada, Pareto, Ishikawa, cumplimiento de ISO 25010, 12207, CMMI y 29119-3, evidencias y reproducción, y elementos del ACS (qué existe, qué falta, qué mejorar).
+
+Los documentos 03, 04, 05 y 07 y las figuras de Pareto e Ishikawa los escribe `qa/generar_docs.py` desde las evidencias y desde `qa/datos_calidad.py`, para que las cifras coincidan con el PDF.
+
+### Qué se verificó
+
+- Los totales de la lluvia de ideas (94 ideas: 57 hechas, 14 retiradas, 2 descartadas, 21 pendientes) se contaron por script sobre las tablas, y las sumas de ISO 25010 (31 subcaracterísticas), 12207 (30 procesos) y CMMI (22 áreas) también.
+- El Pareto de problemas de la construcción clasifica los 53 problemas de la bitácora: pruebas y su entorno 16, herramientas 12, entorno y dependencias 10, datos y supuestos 8, lógica y diseño 7.
+
+### Hallazgos de esta tarea
+
+- La lluvia de ideas es una **reconstrucción** a partir del plan, la bitácora y los pedidos del cliente, no el acta de una sesión; así consta en el propio documento.
+- El RACI es una **propuesta** (roles tomados del Taller de la Unidad 2), a confirmar por el equipo.
+- El CMMI quedó en "nivel 2 en consolidación" (REQM y PPQA parciales): se corrigió el PDF, que decía "respaldado".
+- Siguen faltando el análisis estático (SonarQube, flake8, pylint-odoo) y la integración continua.
+
+### Pendiente
+
+- Cerrar DEF-008 a DEF-010 y regenerar la documentación.
+- Hacer una sesión real de lluvia de ideas con la universidad y registrar el acta.

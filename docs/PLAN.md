@@ -101,6 +101,8 @@ Las reglas y sus umbrales son un supuesto mío (la fase 0 no se respondió) y se
 - **[HECHO*]** Prueba de carga de ingesta (2026-10-28): 39 peticiones por segundo con 20 hilos en un solo proceso, sin errores; falta repetirla con varios procesos y el volumen de 30 días.
 - **[HECHO]** Informe de calidad en PDF (`docs/calidad/`) con 42 pruebas en vivo, auditoría de 1000 peticiones y cobertura de 93,8 %. Halló 3 defectos abiertos (DEF-008 a DEF-010) en la validación de la posición del webhook.
 - **[PENDIENTE]** Corregir DEF-008 a DEF-010 y portar E7, E8 y E9 a las pruebas de Odoo.
+- **[HECHO]** Documentación de calidad en `docs/calidad/` (política, reglas, casos, resultados, defectos, lluvia de ideas, Pareto, Ishikawa, ISO y evidencias).
+- **[PENDIENTE]** Análisis estático (flake8, pylint-odoo, SonarQube) e integración continua; una persona de QA independiente.
 
 ## Fase 8. Producción **[PARCIAL]**
 
