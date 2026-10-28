@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_bus_complaint" model="ir.sequence">
+        <field name="name">Passenger complaints</field>
+        <field name="code">bus.complaint</field>
+        <field name="prefix">Q-</field>
+        <field name="padding">5</field>
+    </record>
+</odoo>
