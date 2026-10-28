@@ -39,37 +39,18 @@ Dos límites del sistema viven en la memoria del proceso (60 consultas por minut
 
 ## 4. Procedimiento
 
+Un solo comando, desde `cmd`, PowerShell o Git Bash, con Docker Desktop abierto. Crea lo que falte (Postgres, la base `buses_qa` con el módulo, el servidor `qa-odoo`), reinicia `qa-odoo` antes de medir, ejecuta las pruebas de Odoo con cobertura en una base desechable (`buses_unit`) y luego la suite en vivo, la auditoría y las métricas:
+
 ```bash
-# 1. Servicios
-cp .env.example .env            # una sola vez; cambia DB_PASSWORD y WEBHOOK_SECRET
-docker compose up -d db
-
-# 2. Pruebas de Odoo con cobertura (base nueva buses_qa)
-SP="C:\ruta\a\una\carpeta\vacia"
-MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps --user root -v "$SP:/out" -w /out odoo sh -c '
-  pip3 install -q coverage
-  coverage run --branch --data-file=/out/.coverage --source=/mnt/extra-addons/bus_tracking --omit="*/tests/*" \
-    /usr/bin/odoo -d buses_qa --db_host $HOST --db_user $USER --db_password $PASSWORD -i bus_tracking \
-    --test-enable --test-tags /bus_tracking --stop-after-init --without-demo=all --log-level=test > /out/odoo_test.log 2>&1
-  coverage report --data-file=/out/.coverage -m > /out/coverage_report.txt
-  coverage json --data-file=/out/.coverage -o /out/coverage.json -q'
-# copiar odoo_test.log, coverage.json y coverage_report.txt (como cobertura.txt) a docs/calidad/evidencias/
-
-# 3. Servidor dedicado para las pruebas en vivo
-MSYS_NO_PATHCONV=1 docker compose run -d --no-deps --name qa-odoo -p 8071:8069 odoo \
-  odoo -d buses_qa --db-filter '^buses_qa$'
-
-# 4. Suite en vivo, auditoría y métricas (reinicia qa-odoo al empezar)
-sh qa/ejecutar_todo.sh
-
-# 5. Documentos y figuras
-python -X utf8 qa/generar_docs.py        # 03, 04, 05, 07 y las figuras de Pareto e Ishikawa
-python -X utf8 qa/generar_informe.py     # informe en PDF
-
-# 6. Limpieza
-docker rm -f qa-odoo
-docker exec <contenedor-db> psql -U odoo -d postgres -c "DROP DATABASE buses_qa"
+cp .env.example .env                       # una sola vez; sin .env se usan los valores por defecto
+python -X utf8 qa/ejecutar_todo.py         # todo (también: sh qa/ejecutar_todo.sh)
+python -X utf8 qa/ejecutar_todo.py suite   # un solo paso: odoo, suite, auditoria o metricas
+python -X utf8 qa/generar_docs.py          # documentos 03, 04, 05, 07 y las figuras
+python -X utf8 qa/generar_informe.py       # informe en PDF
+python -X utf8 qa/ejecutar_todo.py --limpiar   # elimina qa-odoo y las bases de pruebas
 ```
+
+La primera vez tarda unos minutos (crea la base e instala `coverage`). `suite` y `auditoria` reinician `qa-odoo` solos. El paso `metricas` lee los resultados de `odoo`, así que en una carpeta de evidencias vacía hay que ejecutar `odoo` antes. Para no pisar las evidencias guardadas, apunta la salida a otra carpeta con `QA_OUT`.
 
 Variables útiles: `QA_BASE`, `QA_DB`, `QA_ADMIN_LOGIN`, `QA_ADMIN_PASSWORD` y `QA_OUT` (carpeta de salida) cambian el servidor y los archivos que usa `qa/`.
 
