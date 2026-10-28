@@ -118,11 +118,11 @@
                             <p>Desde un GPS instalado en el bus o desde la app Traccar Client en un teléfono.</p>
                         </li>
                         <li>
-                            <h3>Traccar la recibe</h3>
-                            <p>Entiende los protocolos de decenas de modelos de GPS y se la pasa a Odoo al instante.</p>
+                            <h3>El sistema la recibe</h3>
+                            <p>Funciona con GPS de muchas marcas y con teléfonos, y la posición llega en segundos.</p>
                         </li>
                         <li>
-                            <h3>Odoo la guarda y la compara con tus paradas</h3>
+                            <h3>Se compara con tus paradas</h3>
                             <p>Si el bus entra al radio de una parada, la llegada queda anotada con su hora.</p>
                         </li>
                         <li>
