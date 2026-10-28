@@ -38,3 +38,46 @@ class PathMeasure:
                 best_off = off
                 best_along = self.cumulative[i] + t * math.sqrt(span)
         return best_along, (best_off if best_off is not None else math.inf)
+
+
+def thin(points, min_gap_m):
+    """Drop points closer than min_gap_m to the previous kept one (a parked bus draws a cloud of them)."""
+    kept = []
+    for lat, lon in points:
+        if not kept:
+            kept.append([lat, lon])
+            continue
+        dx = (lon - kept[-1][1]) * METERS_PER_DEGREE * math.cos(math.radians(lat))
+        dy = (lat - kept[-1][0]) * METERS_PER_DEGREE
+        if math.hypot(dx, dy) >= min_gap_m:
+            kept.append([lat, lon])
+    return kept
+
+
+def simplify(points, tolerance_m):
+    """Douglas-Peucker: the fewest points that stay within tolerance_m of the original line."""
+    if len(points) < 3:
+        return [list(p) for p in points]
+    lat0 = points[0][0]
+    kx = METERS_PER_DEGREE * math.cos(math.radians(lat0))
+    xy = [(p[1] * kx, p[0] * METERS_PER_DEGREE) for p in points]
+    keep = [False] * len(points)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(points) - 1)]
+    while stack:
+        first, last = stack.pop()
+        ax, ay = xy[first]
+        bx, by = xy[last]
+        dx, dy = bx - ax, by - ay
+        span = dx * dx + dy * dy
+        far, far_dist = None, tolerance_m
+        for i in range(first + 1, last):
+            px, py = xy[i]
+            t = 0.0 if span == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / span))
+            dist = math.hypot(px - ax - t * dx, py - ay - t * dy)
+            if dist > far_dist:
+                far, far_dist = i, dist
+        if far is not None:
+            keep[far] = True
+            stack.extend([(first, far), (far, last)])
+    return [list(p) for p, flag in zip(points, keep) if flag]
