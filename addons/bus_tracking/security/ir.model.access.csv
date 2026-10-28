@@ -16,3 +16,4 @@ access_bus_stop_arrival_manager,bus.stop.arrival manager,model_bus_stop_arrival,
 access_bus_complaint_user,bus.complaint user,model_bus_complaint,group_bus_user,1,0,0,0
 access_bus_complaint_manager,bus.complaint manager,model_bus_complaint,group_bus_manager,1,1,0,1
 access_bus_push_subscription_manager,bus.push.subscription manager,model_bus_push_subscription,group_bus_manager,1,0,0,1
+access_bus_route_record_manager,bus.route.record manager,model_bus_route_record,group_bus_manager,1,1,1,1
