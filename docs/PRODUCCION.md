@@ -5,7 +5,7 @@ Guía para instalar y operar el sistema en un servidor. Todo lo de esta página 
 ## Requisitos
 
 - Un servidor Linux con Docker y Docker Compose v2.
-- Dos nombres DNS que apunten al servidor, por ejemplo `buses.tuempresa.cl` (Odoo) y `gps.tuempresa.cl` (a donde los celulares de los choferes envían su posición).
+- Dos nombres DNS que apunten al servidor, por ejemplo `buses.tuempresa.cl` (Odoo) y `gps.tuempresa.cl` (a donde la tableta envía la posición OsmAnd).
 - Puertos abiertos hacia internet: solo 80 y 443. Los celulares también entran por HTTPS (443).
 - Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza. El panel de Traccar no se expone.
 
@@ -30,8 +30,8 @@ Es seguro repetirla: no sobrescribe `.env.prod`, la configuración ni las bases 
 Después, a mano:
 
 1. Entra a `https://<DOMAIN>` como `admin` con la contraseña que mostró el script y cámbiala.
-2. Crea las rutas y sus paradas, y un bus por cada celular de chofer.
-3. En cada bus pulsa **Register GPS in Traccar**. Aparece la sección *Driver's phone* con el identificador y el QR; sigue `docs/GUIA-CHOFER.md` en el celular.
+2. Crea las rutas y sus paradas, y un bus por cada tableta (o celular de respaldo).
+3. En cada bus pulsa **Register GPS in Traccar**. El identificador OsmAnd lo recibe la app al **iniciar el turno**, no se teclea en la tableta. Sigue `docs/GUIA-CHOFER.md`.
 
 No hace falta tocar el panel de Traccar: el script crea su cuenta de administrador (contraseña aleatoria guardada en Odoo), cierra el registro abierto, y Odoo crea los dispositivos por su API.
 
@@ -100,6 +100,29 @@ Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y
 
 Antes de la primera puesta en marcha real, fija las versiones de `ODOO_IMAGE`, `POSTGRES_IMAGE` y `TRACCAR_IMAGE` en `.env.prod` (por defecto Traccar usa `latest`), para que una actualización nunca ocurra por sorpresa.
 
+## Choferes: usuarios, tokens y tabletas
+
+Cada chofer es un usuario interno de Odoo (`base.group_user` + `group_bus_driver`). No abre el panel por sí solo. La contraseña la restablece un gestor en Odoo.
+
+La tableta no usa API keys de Odoo. Tras `/bus_tracking/driver/login` guarda un token hasheado (`bus.driver.token`, 30 días, cron de purga). Un 401 en la app borra el token local.
+
+El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`).
+
+Si se pierde una tableta o hay que echar a alguien del turno: en el usuario o en Turnos, acción **Cerrar sesión de la tableta**. Revoca tokens y cierra el turno; el GPS de esa app se detiene en el próximo 401 o al cerrar sesión.
+
+APK (sin Play Store):
+
+```bash
+cd apps/conductor-tablet
+# La URL de Odoo se congela al construir:
+# EXPO_PUBLIC_ODOO_URL=https://<DOMAIN> eas build --profile production --platform android
+eas build --profile production --platform android
+```
+
+Instala el APK a mano en cada tableta. Para actualizar, otro build y se instala encima. El perfil `development` es el que admite GPS de fondo en pruebas; Expo Go no.
+
+Checklist de la tableta: GPS real, ubicación todo el tiempo, sin ahorro de batería para la app, cargador, pantalla encendida, modo aplicación fija si el aparato lo tiene. Guía del chofer: `docs/GUIA-CHOFER.md`.
+
 ## Lo que se probó y lo que no
 
 Probado en una máquina local con Docker, con los dominios `localhost` y `gps.localhost`:
@@ -115,13 +138,15 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 - Certificados reales de Let's Encrypt: requiere un dominio público. Con `localhost` Caddy usa su autoridad interna.
 - Un servidor Linux real: las pruebas se hicieron en Windows con Docker Desktop y Git Bash.
-- Un GPS físico.
+- Un GPS físico ni una jornada completa con chofer real (fase 22, criterio de campo).
 - Carga con muchos buses.
+- `eas build` de producción (hace falta cuenta Expo y firmar el APK).
 
 ## Limitaciones conocidas
 
 - El identificador del dispositivo es la única credencial del protocolo OsmAnd: quien lo conozca puede enviar posiciones falsas de ese bus. Es aleatorio y solo lo ven los administradores; si se filtra, hay que registrar el bus de nuevo (hoy no hay un botón para rotarlo).
-- Solo se admite el protocolo OsmAnd (la app Traccar Client). Los GPS físicos con otros protocolos exigirían abrir su puerto en el servidor y en la red de Azure, y esos no van cifrados.
+- Solo se admite el protocolo OsmAnd (la app de tableta). Los GPS físicos con otros protocolos exigirían abrir su puerto en el servidor y en la red de Azure, y esos no van cifrados.
+- El login de choferes (`/bus_tracking/driver/login`) sí tiene límite de intentos; el login del panel de Odoo no.
 - El usuario de base de datos de Odoo es superusuario de Postgres (el patrón de la imagen oficial).
 - No hay límite de intentos de login, ni autenticación en dos pasos, ni bloqueo de IPs (por ejemplo con fail2ban).
 - Los respaldos no se copian fuera del servidor automáticamente.

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from odoo import fields
+from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
 from .common import STOPS, BusCase, traccar_position
@@ -34,6 +35,29 @@ class TestIngest(BusCase):
         self.assertFalse(self.bus._apply_position(
             {'deviceId': 7, 'fixTime': '2026-10-26T12:00:00Z', 'latitude': None, 'longitude': -70.6}))
         self.assertFalse(self.env['bus.position'].search_count([]))
+
+    def test_out_of_range_coordinates_raise_validation_error(self):
+        with self.assertRaises(ValidationError):
+            self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', 95.0, -70.62))
+        with self.assertRaises(ValidationError):
+            self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', -33.47, 190.0))
+
+    def test_non_numeric_coordinates_raise_validation_error(self):
+        with self.assertRaises(ValidationError):
+            self.bus._apply_position(traccar_position(7, '2026-10-26T12:00:00Z', 'abc', -70.62))
+
+    def test_invalid_fixtime_raises_validation_error(self):
+        with self.assertRaises(ValidationError):
+            self.bus._apply_position(traccar_position(7, 'ayer', -33.47, -70.62))
+
+    def test_position_model_constrains_coordinates(self):
+        with self.assertRaises(ValidationError):
+            self.env['bus.position'].create({
+                'vehicle_id': self.bus.id,
+                'fix_time': fields.Datetime.now(),
+                'latitude': 95.0,
+                'longitude': -70.62,
+            })
 
     def test_older_position_does_not_overwrite_last_state(self):
         self.bus._apply_position(traccar_position(7, '2026-10-26T12:10:00Z', -33.47, -70.62))

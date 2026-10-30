@@ -1,63 +1,50 @@
-# Guía para el chofer: tu celular como GPS del bus
+# Guía para el chofer: tableta del bus
 
-Esta guía es para quien maneja. Tu celular enviará la posición del bus mientras dure tu turno, y nada más. No hace falta que hagas nada mientras manejas.
+Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UTA**. Con ella inicias sesión, eliges el bus y la ruta, y el GPS se envía solo mientras tu turno está abierto. No uses Traccar Client en el celular para este sistema.
 
 ## Qué necesitas
 
-- Un celular Android o iPhone con datos móviles.
-- La aplicación gratuita **Traccar Client** (Google Play o App Store).
-- Dos datos que te entrega el administrador: la **dirección del servidor** y el **identificador del dispositivo** de tu bus. Trata el identificador como una contraseña: no lo compartas ni lo publiques.
+- Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app.
+- Datos móviles o Wi-Fi del bus.
+- Usuario y contraseña de Odoo que te da el administrador (grupo *Driver*). No es el identificador de Traccar: ese dato no se escribe a mano.
+- La app instalada como APK (no hace falta Play Store). Expo Go no sirve: el GPS de fondo necesita el APK de desarrollo o de producción.
 
-## Configurar la aplicación (una sola vez)
+## Instalar (el administrador lo hace una vez)
 
-1. Abre Traccar Client.
-2. En **Device identifier** escribe el identificador de tu bus.
-3. En **Server URL** escribe la dirección completa que te dieron, empezando con `https://`.
-4. Abre los ajustes y deja estos valores (son los recomendados por el proyecto):
-
-| Ajuste | Valor |
-|---|---|
-| Location accuracy | Highest |
-| Interval | 10 (segundos) |
-| Angle | 30 |
-| Distance | 0 |
-| Stationary heartbeat | unos 60 segundos |
-| Offline buffering | Activado |
-| Wake lock (solo Android) | Activado |
-
-Si tu celular se queda sin batería muy rápido, el administrador puede pedirte esta alternativa más suave: precisión **High** y distancia de **50** metros.
-
-Si el administrador te da un código QR, puedes escanearlo con la cámara del celular para llenar la dirección y el identificador. Ese método no está documentado oficialmente por la aplicación y puede no funcionar en tu teléfono; si no abre la aplicación, escribe los datos a mano como arriba.
-
-## Que no se detenga en segundo plano
-
-Sin esto el celular puede dormir la aplicación y el bus desaparece del mapa.
-
-- **Android:** en los ajustes del teléfono busca la aplicación Traccar Client, entra a Batería y elige **Sin restricciones**. Cada marca (Samsung, Xiaomi, Huawei, etc.) esconde estas opciones en lugares distintos; la guía [dontkillmyapp.com](https://dontkillmyapp.com) explica cómo hacerlo en cada una.
-- **iPhone:** concede el permiso de ubicación **Siempre**. El seguimiento en segundo plano en iPhone es menos fiable que en Android; avisa al administrador si el bus deja de aparecer.
-- Deja el celular **cargando** en el bus y con los datos móviles activados.
+1. Instala el APK de `eas build --profile production --platform android` (o el de *development* para pruebas).
+2. En el login se puede escribir la URL de Odoo o **Leer código QR** (Ajustes o ficha del bus en Odoo). El APK de producción ya trae `https://busesuta2340.eastus2.cloudapp.azure.com`.
+3. En Ajustes de Android: ubicación precisa; batería de **Buses UTA** sin restricciones; pantalla encendida mientras carga. Guía por marca: [dontkillmyapp.com](https://dontkillmyapp.com).
+4. Si el modelo lo permite, fija la app (modo aplicación fija / *screen pinning*) para que no se salga al escritorio.
+5. Deja la tableta **cargando** en el bus.
 
 ## Cada día
 
-1. Al **iniciar tu turno**, abre la aplicación y activa **Service status**.
-2. Comprueba que aparezca como activo.
-3. Al **terminar tu turno**, desactívalo. Fuera de tu turno el celular no debe seguir enviando tu ubicación.
+1. Abre **Buses UTA** e inicia sesión con tu usuario.
+2. Elige el bus (los ocupados salen deshabilitados) y la ruta. Concede ubicación *todo el tiempo* y la exclusión de ahorro de batería si Android la pide.
+3. Comprueba **Estado del GPS**: permisos concedidos y que haya un último envío tras unos segundos.
+4. Mientras manejas: las paradas avanzan solas; las alertas salen en el panel; un incidente se reporta con tipo y nota. Si no hay red, el incidente espera y se envía al volver.
+5. Al terminar, pulsa **Terminar turno** y confirma. Ahí se corta el GPS. **Cerrar sesión** también detiene el GPS en esa tableta.
+
+Si cierras la app sin terminar el turno, el servicio en primer plano sigue enviando posición hasta que alguien termine el turno o un gestor revoque la tableta.
 
 ## Qué ve el sistema de ti
 
-- La posición, el rumbo y la hora del bus mientras el servicio está activo.
-- No ve tus mensajes, llamadas, fotos ni contactos, y no sigue tu celular cuando lo desactivas.
-- Los pasajeros solo ven en un mapa el nombre del bus y por dónde va; no ven tu nombre ni la patente.
+- Posición, rumbo y hora del bus **solo con turno abierto**.
+- Tu nombre en el mapa en vivo del personal (el pasajero no ve tu nombre ni la placa).
+- Incidentes que reportes.
 
-Tu empresa debe pedirte que aceptes este seguimiento por escrito antes de empezar.
+No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seguimiento por escrito.
 
 ## Si algo falla
 
 | Problema | Qué hacer |
 |---|---|
-| El bus no aparece en el mapa | Revisa que el servicio esté activo, que tengas datos móviles, que la dirección empiece con `https://` y que el identificador esté bien escrito. |
-| Aparece y desaparece | Quita la restricción de batería a la aplicación y deja el celular cargando. |
-| La aplicación pide permisos | Acepta la ubicación (en iPhone, **Siempre**) y las notificaciones: Android las usa para mantener el servicio vivo. |
-| Cambiaste de celular | Avisa al administrador; el identificador puede usarse en el nuevo teléfono, pero solo debe estar activo en uno. |
+| No entra | Usuario o clave; el administrador restablece la clave en Odoo. |
+| El bus no aparece en el mapa | Estado del GPS, datos móviles, que el bus tenga GPS registrado en Odoo, y que el turno esté abierto. |
+| Aparece y desaparece | Quita el ahorro de batería a la app y deja la tableta cargando. |
+| La tableta no tiene GPS | Cámbiala o usa un celular Android con la misma app. |
+| Cambiaste de tableta | Entra con tu usuario. Un gestor puede *Cerrar sesión de la tableta* si la anterior sigue con sesión. |
 
-Los ajustes de esta guía provienen de la [documentación oficial de Traccar Client](https://www.traccar.org/client-configuration/). No se han probado todavía en un celular real con este sistema.
+## Actualizar la app
+
+El administrador construye un APK nuevo (`eas build --profile production --platform android`) y lo instala encima en cada tableta. No hay tienda. Confirma la versión en Ajustes de Android → Aplicaciones → Buses UTA.

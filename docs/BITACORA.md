@@ -600,3 +600,252 @@ Roster oficial y su importación, trazados por calle (OSM/OSRM) y sus scripts, v
 - Landing: pasos de "Así llega un bus" sin jerga (Traccar, Odoo).
 - Tests: 150, 0 fallos.
 - **Sin verificar a ojo:** el panel de Odoo (hace falta iniciar sesión; no se creó un usuario de prueba) y los anchos de móvil de esta sesión.
+
+
+## 2026-10-28: informe de calidad en PDF
+
+### Qué se hizo
+
+Se generó el informe técnico de calidad del sistema (`docs/calidad/Informe_calidad_rastreo_buses.pdf`, 25 páginas, copia en `Documentos` como `Manzano_Rodriguez_informeCalidad_rastreoBuses.pdf`) con la estructura del taller de ACS de la UTA que sirvió de modelo (`Manzano_Rodriguez_trabajoFinalU3.pdf`): objetivos, escenario, diseño y ejecución de pruebas, métricas, análisis estadístico, ISO 25010, ISO 12207, CMMI, decisión, conclusiones, referencias y anexos. Todas las cifras salen de pruebas ejecutadas hoy, no escritas a mano.
+
+Código nuevo en `qa/`: `qa_suite.py` (42 casos en vivo: 12 funcionales, 22 de error, 7 de rendimiento, 1 de usabilidad), `auditoria.py` (1000 peticiones aleatorias con semilla fija sobre 15 áreas), `metricas.py`, `graficos.py`, `informe_lib.py`, `generar_informe.py` y `ejecutar_todo.sh`. Las evidencias están en `docs/calidad/evidencias/`.
+
+### Resultados
+
+| Conjunto | Pruebas | Fallos |
+|---|---|---|
+| Pruebas de Odoo (con coverage.py) | 150 | 0; cobertura 93,8 % (sentencias y ramas) |
+| Suite en vivo | 42 | 3 (7,1 %) |
+| Auditoría aleatoria | 1000 | 57 (5,7 %): 25 respuestas HTTP 500 y 32 posiciones imposibles guardadas |
+
+Rendimiento (servidor de un solo proceso): 0,04 s en promedio en uso normal; con 20 hilos, media 0,39 s, p95 1,6 s y 39 peticiones por segundo (se necesitan 10 para 100 buses). Integridad concurrente correcta (1 de 20 envíos idénticos; 60 de 60 de un mismo bus).
+
+### Defectos nuevos (abiertos, no se corrigieron)
+
+- DEF-008: se guardan coordenadas imposibles (latitud 95°).
+- DEF-009: latitud no numérica produce HTTP 500 en el webhook.
+- DEF-010: hora GPS inválida produce HTTP 500 en el webhook.
+
+Los tres están en la validación de la posición (`bus_vehicle._apply_position`, `utils.parse_traccar_dt`). Decisión del informe: apto para un piloto controlado; para producción abierta faltan cerrarlos y probar con un celular real.
+
+### Problemas encontrados
+
+- Dos corridas de la suite se pisaron (una quedó huérfana al cerrarse la shell) y falsearon un resultado; se descartaron y se repitió todo desde un servidor reiniciado.
+- Los límites de uso (60 consultas por minuto, 5 quejas por hora) viven en memoria: la suite y la auditoría esperan o reinician el servidor antes de medir.
+- Dos pruebas mías compartían buses con otra y daban conteos falsos; se separaron.
+
+### Limitaciones
+
+- No se ejecutó SonarQube (el modelo lo incluía); figura como enfoque faltante.
+- El GPS se simuló con peticiones HTTP; no hay celular real ni push entregado a un navegador.
+- Las 16 mutaciones manuales citadas salen de esta bitácora, no se repitieron hoy.
+- El valor de 50 % de CV para "desviación alta" es una decisión del informe.
+
+### Estado del entorno
+
+Contenedor `qa-odoo` y base `buses_qa` eliminados. Para repetir: Anexo B del informe.
+
+
+## 2026-10-28: carpeta `docs/calidad` con toda la documentación de calidad
+
+### Qué se hizo
+
+Se organizó `docs/calidad/` como el lugar donde va toda la documentación de pruebas y calidad, con el formato del Taller de la Unidad 2 (`Taller ACS.pdf`) y el informe de la Unidad 3. Se agregaron 12 documentos: un índice (`README.md`) y 11 numerados: política y alcance con RACI y flujo, reglas de negocio y estándares de interfaz, plan y casos de prueba, resultados y cuadro de mando, registro de defectos con causa raíz, lluvia de ideas categorizada, Pareto, Ishikawa, cumplimiento de ISO 25010, 12207, CMMI y 29119-3, evidencias y reproducción, y elementos del ACS (qué existe, qué falta, qué mejorar).
+
+Los documentos 03, 04, 05 y 07 y las figuras de Pareto e Ishikawa los escribe `qa/generar_docs.py` desde las evidencias y desde `qa/datos_calidad.py`, para que las cifras coincidan con el PDF.
+
+### Qué se verificó
+
+- Los totales de la lluvia de ideas (94 ideas: 57 hechas, 14 retiradas, 2 descartadas, 21 pendientes) se contaron por script sobre las tablas, y las sumas de ISO 25010 (31 subcaracterísticas), 12207 (30 procesos) y CMMI (22 áreas) también.
+- El Pareto de problemas de la construcción clasifica los 53 problemas de la bitácora: pruebas y su entorno 16, herramientas 12, entorno y dependencias 10, datos y supuestos 8, lógica y diseño 7.
+
+### Hallazgos de esta tarea
+
+- La lluvia de ideas es una **reconstrucción** a partir del plan, la bitácora y los pedidos del cliente, no el acta de una sesión; así consta en el propio documento.
+- El RACI es una **propuesta** (roles tomados del Taller de la Unidad 2), a confirmar por el equipo.
+- El CMMI quedó en "nivel 2 en consolidación" (REQM y PPQA parciales): se corrigió el PDF, que decía "respaldado".
+- Siguen faltando el análisis estático (SonarQube, flake8, pylint-odoo) y la integración continua.
+
+### Pendiente
+
+- Cerrar DEF-008 a DEF-010 y regenerar la documentación.
+- Hacer una sesión real de lluvia de ideas con la universidad y registrar el acta.
+
+
+## 2026-10-28: guion de defensa del proyecto
+
+### Qué se hizo
+
+Se escribió `docs/GUION_DEFENSA.md`: guion de 15 minutos más 5 de preguntas, con apertura, problema y motivo, demostración, arquitectura, decisiones, proceso, calidad, estándares, defectos abiertos y cierre. Incluye 15 preguntas difíciles con respuesta, una tabla de cifras para memorizar y una lista de cosas que no hay que afirmar.
+
+### Qué se verificó
+
+Todas las cifras se tomaron de `docs/calidad/` (ejecución del 28-oct-2026). Se comprobó que 8 de las 12 metas del cuadro de mando se cumplen y que los 60 fallos (3 de la suite y 57 de la auditoría) coinciden con el Pareto.
+
+### Limitaciones
+
+- El motivo del proyecto (sección 1) se redactó con los datos del plan y de las decisiones del cliente; los documentos no registran una anécdota real de pasajeros, así que se dejó una nota para añadirla.
+- Las respuestas sobre costo de Azure y sobre el reparto de trabajo con Claude Code son orientativas y las debe ajustar quien defiende.
+- Si se cierran DEF-008 a DEF-010 antes de la defensa, hay que actualizar las secciones 6, 8 y 9 y la pregunta 2.
+
+
+## 2026-10-28: el pipeline de calidad se prepara solo
+
+### Qué se hizo
+
+`qa/ejecutar_todo.py` (nuevo) crea Postgres, la base `buses_qa`, el servidor `qa-odoo` y la base desechable de las pruebas de Odoo, ejecuta las pruebas con cobertura, la suite en vivo, la auditoría y las métricas, y acepta un paso suelto (`odoo`, `suite`, `auditoria`, `metricas`) o `--limpiar`. Funciona en `cmd`, PowerShell y Git Bash. `qa/ejecutar_todo.sh` ahora solo lo llama. Antes había que crear la base y el servidor a mano y el script fallaba con `ConnectionRefusedError` si `qa-odoo` no existía.
+
+### Qué se verificó
+
+Ejecución completa desde cero (sin `qa-odoo` ni `buses_qa`), con la salida en otra carpeta: 150 pruebas de Odoo, 0 fallos, cobertura 94 %; suite en vivo 39 de 42 (los mismos DEF-008 a DEF-010); auditoría 943 de 1000 (5,7 %).
+
+### Limitaciones
+
+- La auditoría dio 25 respuestas 5xx y 32 posiciones imposibles, como en el informe; la suite y la auditoría cuentan 27 y 33 en total.
+- Los tiempos varían entre ejecuciones (la media de la auditoría fue 0,0585 s contra 0,037 s del informe), así que las cifras del PDF no se actualizaron.
+- Una ejecución nueva sobre `docs/calidad/evidencias/` reemplaza las evidencias del informe.
+- `qa-odoo` y `buses_qa` quedan creados al terminar; `--limpiar` los elimina.
+
+
+## 2026-10-30: fase 16, autenticación de choferes
+
+### Qué se hizo
+
+Backend de la app de tableta: grupo Driver, `bus.shift`, tokens hasheados (`bus.driver.token`) y `POST /bus_tracking/driver/login`, `/logout`, `/me`. Rama `feature/driver-backend`.
+
+### Qué se verificó
+
+Suite Odoo del módulo (`-u bus_tracking --test-enable --test-tags /bus_tracking`): 216 tests, 0 fallos. La primera corrida falló en 5 tests HTTP: el cooldown de login de Odoo (IP 127.0.0.1) se activaba tras `test_login_is_rate_limited`. Se desactivó ese cooldown en el `setUp` de esos tests y los choferes de prueba llevan también `base.group_user`.
+
+### Pendiente
+
+Fase 17 en `feature/driver-shifts-api`: iniciar/terminar turno, estado, ruta e incidentes.
+
+
+## 2026-10-30: fase 17, API de turnos e incidentes
+
+### Qué se hizo
+
+- `POST /bus_tracking/driver/shift/start` y `/end`: un turno activo por chofer y por bus; 409 si hay conflicto o el bus no tiene GPS. El id de Traccar y `gps_url` salen solo en `start`. El mapa recibe el chofer como `bus.vehicle.driver_id` (partner del usuario).
+- `POST /driver/state` (paradas del turno, siguiente parada, alertas abiertas o de 2 h) y `/driver/route` (coordenadas y `_map_lines()`).
+- `POST /driver/incident` y modelo `bus.incident` (avería, tráfico, accidente, otro). Cron horario cierra turnos de más de 14 h.
+
+### Qué se verificó
+
+Suite Odoo: 232 tests, 0 fallos (los de la fase 16 más `test_driver_shift.py`).
+
+### Pendiente
+
+Fase 18: vistas de staff, traducciones y push de incidentes (`feature/driver-staff-views`).
+
+
+## 2026-10-30: fase 18, vistas de staff y avisos
+
+### Qué se hizo
+
+Menús Turnos e Incidentes (filtros por bus, ruta y fecha). Un incidente nuevo avisa a los gestores por el mismo canal push que las alertas (`_send_to_managers`, cron de un minuto). El gestor puede *Cerrar sesión de la tableta*: revoca los tokens y cierra el turno activo. Traducciones nuevas en `i18n/es.po`.
+
+### Qué se verificó
+
+Suite Odoo en base limpia: 239 tests, 0 fallos. Una corrida sobre la base anterior falló un test HTTP de push por sesión caducada; no era de esta fase y no se reprodujo en fresco.
+
+### Pendiente
+
+Fase 19: app Expo (`feature/driver-app-base`).
+
+
+## 2026-10-30: fase 19, app Expo de login y selección
+
+### Qué se hizo
+
+Proyecto `apps/conductor-tablet` (Expo SDK 58, TypeScript, expo-router). Login, lista de buses (los ocupados deshabilitados), inicio de turno y pantalla mínima de turno con keep-awake. El token va en SecureStore; un 401 lo borra. URL con `EXPO_PUBLIC_ODOO_URL` (por defecto `http://10.0.2.2:8069`). `eas.json` con perfil development APK. GPS queda para la fase 20.
+
+### Qué se verificó
+
+`tsc --noEmit` PASS. `expo lint` PASS. Jest 8 tests PASS.
+
+### Pendiente
+
+Fase 20: GPS en segundo plano. Probar login real en tableta o emulador.
+
+
+## 2026-10-30: fase 20, GPS en segundo plano
+
+### Qué se hizo
+
+`expo-location` + `expo-task-manager`: actualizaciones cada 10 s, servicio en primer plano, OsmAnd (`speed` en nudos). Cola en AsyncStorage (360 puntos, 2 h). Permisos de ubicación y exclusión de batería antes de abrir el turno. Diagnóstico desde la pantalla de turno. `NOTICE` cita Traccar Client (Apache 2.0). El id de Traccar se guarda en el dispositivo para reanudar el GPS si `/me` recupera el turno.
+
+### Qué se verificó
+
+`tsc --noEmit` PASS. `expo lint` PASS. Jest 20 tests PASS.
+
+### Pendiente
+
+Fase 21: paradas, mapa, alertas e incidentes. Probar GPS real con development build (Expo Go no sirve).
+
+
+## 2026-10-30: fase 21, recorrido, alertas e incidentes
+
+### Qué se hizo
+
+Pantalla de turno: paradas (siguiente destacada, hora de llegada), panel de alertas, mapa Leaflet/OSM en WebView, refresco `/driver/state` cada 15 s. Incidente (avería, tráfico, accidente, otro) con cola si no hay red. Terminar turno con confirmación. Idiomas es/en/qu; el kichwa sigue siendo borrador, como en el portal.
+
+### Qué se verificó
+
+`tsc --noEmit` PASS. `expo lint` PASS. Jest 29 tests PASS.
+
+### Pendiente
+
+Fase 22: tableta real, QA, APK y documentación.
+
+
+## 2026-10-30: fase 22, QA, docs y distribución (sin jornada de campo)
+
+### Qué se hizo
+
+Casos en vivo F13–F14 y E23–E25 (login, turno, estado, incidente, 401, bus sin GPS, incidente sin turno). Guía del chofer reescrita para la app de tableta. Sección de usuarios, tokens, revocación y APK en `docs/PRODUCCION.md`. README, PLAN, política de calidad y `eas.json` perfil `production`.
+
+### Qué se verificó
+
+Suite en vivo tras `-u bus_tracking` en `buses_qa`: **44 de 47 PASS**. Los cinco casos de chofer PASS. Fallos previos: E7, E9, P7 (p95 2,13 s). No se ejecutó `eas build` ni una jornada con chofer real.
+
+### Pendiente
+
+APK firmado, tableta con chip GPS, jornada completa. Defectos DEF-008 a DEF-010 del webhook siguen abiertos.
+
+
+## 2026-10-30: corrección de defectos DEF-008 a DEF-010, comprobación Azure y APK
+
+### Qué se hizo
+
+1. **Corrección de defectos del webhook (DEF-008 a DEF-010)**:
+   - models/utils.py: parse_traccar_dt captura (ValueError, TypeError, OverflowError) para formatos inválidos como 'ayer' (DEF-010).
+   - models/bus_position.py: restricción @api.constrains('latitude', 'longitude') para rangos válidos (−90..90 y −180..180) (DEF-008).
+   - models/bus_vehicle.py: _apply_position valida tipos numéricos, no infinitos ni NaN, rangos de coordenadas y fechas, lanzando ValidationError (DEF-008, DEF-009).
+   - controllers/main.py: 	raccar_webhook captura (ValueError, ValidationError) y responde HTTP 400 controlado en vez de 500 (DEF-009).
+   - 	ests/test_http.py y 	ests/test_ingest.py: casos portados para coordenadas fuera de rango, tipos no numéricos y formatos de hora inválidos.
+   - qa/datos_calidad.py: DEF-008, DEF-009 y DEF-010 marcados como cerrados y documentación regenerada.
+
+2. **Comprobación del despliegue en Azure**:
+   - Conectado a Azure CLI con jrodriguez0612@uta.edu.ec (*Azure for Students*).
+   - VM m-buses en RG-BUSES-EASTUS2 (usesuta2340.eastus2.cloudapp.azure.com, IP 20.119.213.192) en estado running.
+   - Servicios Docker en la VM (
+astreo-prod-proxy-1, 
+astreo-prod-odoo-1, 
+astreo-prod-traccar-1, 
+astreo-prod-db-1) verificados arriba y saludables.
+   - Endpoints HTTPS públicos (/, /rutas, /bus_tracking/health) verificados respondiendo 200 OK con Caddy y Let's Encrypt.
+
+3. **Compilación y distribución de la APK**:
+   - APK de desarrollo compilado y descargado a pps/conductor-tablet/buses-uta-dev.apk (211.9 MB), listo para instalación en tableta.
+   - Build de producción lanzado en EAS Build (c49ace1b-d3fd-4a8d-9ad4-212ae2c4cf42) con perfil production y EXPO_PUBLIC_ODOO_URL=https://busesuta2340.eastus2.cloudapp.azure.com.
+
+### Qué se verificó
+
+- Suite de Odoo: **247 tests / 0 fallos** (100% PASS).
+- Suite en vivo (qa/ejecutar_todo.py suite): **46 de 47 PASS**. E7, E8 y E9 PASS.
+- App de tableta: 8 suites Jest (33 tests) PASS, 	sc --noEmit PASS, expo lint PASS.
+
+### Pendiente
+
+- Finalización del build de producción en EAS Cloud y prueba de campo en tableta con GPS en recorrido real.

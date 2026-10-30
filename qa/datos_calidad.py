@@ -1,0 +1,132 @@
+"""Quality data that comes from reading docs/BITACORA.md and docs/PLAN.md, not from running tests.
+
+Used by generar_docs.py to draw the Pareto and Ishikawa diagrams and to write docs/calidad/*.md,
+so the tables and the figures always agree.
+"""
+
+# Categories of the problems found while building (used by the Pareto and the Ishikawa diagram).
+CATEGORIAS = {
+    'P': 'Pruebas y su entorno',
+    'H': 'Herramientas de shell y edición',
+    'E': 'Entorno, dependencias y configuración',
+    'D': 'Datos de entrada y supuestos sin confirmar',
+    'L': 'Lógica y diseño del código',
+}
+
+# Every bullet of every "Problemas encontrados" section of the logbook, plus the ones of the quality evaluation.
+# (session, problem, category)
+PROBLEMAS = [
+    ('1.ª (26-oct)', 'Puerto 8069 ocupado por otro Odoo de la máquina', 'E'),
+    ('1.ª (26-oct)', 'Traccar 6 reenvía con otra clave y el webhook respondía 405', 'E'),
+    ('1.ª (26-oct)', '"docker compose exec odoo shell" no recibe los argumentos de la base de datos', 'H'),
+    ('2.ª (26-oct)', 'Unsplash bloquea la descarga de fotos desde la línea de comandos', 'E'),
+    ('2.ª (26-oct)', 'Una foto candidata era de pago (Unsplash+) y se descartó', 'D'),
+    ('2.ª (26-oct)', 'La herramienta de pruebas no cambia el ancho real de la pantalla', 'H'),
+    ('2.ª (26-oct)', 'La ruta animada del hero queda bajo el pliegue en pantallas bajas', 'L'),
+    ('3.ª (26-oct)', 'Git Bash convierte /bus_tracking en una ruta de Windows y no corre ningún test', 'H'),
+    ('3.ª (26-oct)', 'El script que generó es.po perdió las barras invertidas al pasar por la shell', 'H'),
+    ('3.ª (26-oct)', 'Los tests HttpCase dependen de la contraseña admin de una base nueva', 'P'),
+    ('4.ª (26-oct)', 'Respaldo del filestore vacío: faltaba data_dir en la configuración de producción', 'E'),
+    ('4.ª (26-oct)', 'Docker creó un directorio donde iba un archivo de configuración', 'E'),
+    ('4.ª (26-oct)', 'Un comando de prueba fue bloqueado por la verificación de seguridad', 'H'),
+    ('4.ª (26-oct)', 'El log de Odoo imprimía el secreto del webhook porque iba en la URL', 'L'),
+    ('4.ª (26-oct)', 'La redirección a HTTPS apuntaba al puerto de la prueba', 'E'),
+    ('4.ª (26-oct)', 'El script de traducción no manejaba textos de ayuda en varias líneas', 'H'),
+    ('5.ª (26-oct)', 'Un test del reporte falló por un error del propio test (mapped elimina duplicados)', 'P'),
+    ('5.ª (26-oct)', 'Los tests comparaban horas con microsegundos contra horas exactas', 'P'),
+    ('8.ª (26-oct)', 'Encabezado del portal desbordado en pantallas de 390 px', 'L'),
+    ('8.ª (26-oct)', 'El navegador mostraba un CSS viejo de la caché', 'E'),
+    ('8.ª (26-oct)', 'Dos tests mal escritos (cookie de idioma y posición repetida)', 'P'),
+    ('8.ª (26-oct)', 'Datos de ejemplo en la base de desarrollo rompieron los tests', 'P'),
+    ('8.ª (26-oct)', 'Los tests comparan textos en inglés y fallan si se carga el español', 'P'),
+    ('9.ª (26-oct)', 'Cuatro tests mal escritos (redirección absoluta, caso sin error)', 'P'),
+    ('9.ª (26-oct)', 'Un comando con demasiadas comillas falló dos veces sin ejecutarse', 'H'),
+    ('9.ª (26-oct)', 'A una plantilla XML le faltaba el cierre </odoo> tras fusionar partes', 'H'),
+    ('9.ª (26-oct)', 'El folio de la prueba en Chrome fue Q-00075 porque los tests consumieron la secuencia', 'P'),
+    ('9.ª (26-oct)', 'Los tests deben correr en una base limpia y sin español', 'P'),
+    ('10.ª (26-oct)', 'La foto de portada no era de Ambato (paradero con letrero en portugués)', 'D'),
+    ('10.ª (26-oct)', 'El nombre "Buses UTA" y el aviso de privacidad son provisionales', 'D'),
+    ('10.ª (26-oct)', 'El límite de 50 km/h es un supuesto sin contrastar con la normativa', 'D'),
+    ('10.ª (26-oct)', 'Un test falló porque el orden de los atributos del enlace no era el supuesto', 'P'),
+    ('10.ª (26-oct)', 'Los scripts largos fallaban en la shell y se escribieron como archivos', 'H'),
+    ('11.ª (26-oct)', 'pip install pywebpush actualizó cryptography y Odoo dejó de arrancar', 'E'),
+    ('11.ª (26-oct)', 'Los tests contaban el correo de invitación de Odoo como propio', 'P'),
+    ('11.ª (26-oct)', 'El asistente de respuesta mostraba <br/> como texto (Markup escapado)', 'L'),
+    ('11.ª (26-oct)', 'mail.send() borra el correo enviado y los tests no podían leerlo', 'P'),
+    ('11.ª (26-oct)', 'Un script de mutaciones usó sintaxis de Git Bash dentro de Windows', 'H'),
+    ('11.ª (26-oct)', 'Con mail instalado aparece el menú "Conversaciones" que no es del sistema', 'E'),
+    ('12.ª (26-oct)', 'El texto extraído del PDF oficial salía mezclado entre celdas', 'D'),
+    ('12.ª (26-oct)', 'El documento oficial traía erratas, solapes y recorridos sin horas', 'D'),
+    ('12.ª (26-oct)', '"any" no existe en los dominios de Odoo 16', 'L'),
+    ('12.ª (26-oct)', 'Un servicio archivado dejaba al bus sin línea', 'L'),
+    ('12.ª (26-oct)', 'El mapa parecía mal ajustado por la rueda del ratón de la herramienta de prueba', 'P'),
+    ('12.ª (26-oct)', 'Git Bash volvió a convertir una ruta al pasarla en una variable', 'H'),
+    ('13.ª (27-oct)', 'Overpass rechazó la descarga de toda la zona (502 y 406)', 'E'),
+    ('13.ª (27-oct)', 'Calles homónimas de otras zonas hicieron un trazado de 133 km', 'D'),
+    ('13.ª (27-oct)', 'Acentos rotos y puntos sueltos del PDF partían mal los nombres', 'D'),
+    ('13.ª (27-oct)', 'Los heredocs de Git Bash fallan con ciertas comillas', 'H'),
+    ('14.ª (27-oct)', 'Un bus sin ruta rompía el cálculo de desvío (lo halló un test)', 'L'),
+    ('Evaluación (28-oct)', 'Dos corridas de la suite en vivo se pisaron y falsearon un resultado', 'P'),
+    ('Evaluación (28-oct)', 'Los límites de uso viven en memoria y hay que reiniciar el servidor antes de medir', 'P'),
+    ('Evaluación (28-oct)', 'Dos pruebas compartían buses y daban conteos falsos', 'P'),
+]
+
+# Defect log: id, date, who found it, description, where, root cause, category, status, test that guards it.
+DEFECTOS = [
+    ('DEF-001', '26-oct-2026', 'Prueba manual con Traccar real', 'El webhook respondía 405 porque Traccar reenviaba con GET',
+     'docker-compose.yml', 'Traccar 6 renombró la clave de reenvío (forward.json pasó a forward.type) y el proyecto asumía la versión anterior; no había prueba contra la versión vigente.',
+     'Configuración', 'Cerrado', 'F12 y test_http (webhook con cabecera); probado con Traccar real'),
+    ('DEF-002', '26-oct-2026', 'Prueba de respaldo y restauración', 'El respaldo del filestore salía con 0 archivos y no avisaba',
+     'config/odoo.conf, scripts/backup.sh', 'La configuración de producción sustituía el archivo de la imagen y no definía data_dir; el script no comprobaba que hubiera archivos.',
+     'Configuración', 'Cerrado', 'Respaldo y restauración repetidos de principio a fin (bitácora, 4.ª sesión)'),
+    ('DEF-003', '26-oct-2026', 'Revisión del log durante la prueba de punta a punta', 'El secreto del webhook aparecía completo en el log de Odoo',
+     'controllers/main.py', 'El secreto viajaba en la URL y el servidor registra las URL; se priorizó la compatibilidad y no la confidencialidad.',
+     'Seguridad', 'Cerrado', 'F1 y F12; test_webhook_accepts_secret_in_header; 0 apariciones del secreto en el log'),
+    ('DEF-004', '26-oct-2026', 'Arranque de Odoo tras instalar pywebpush', 'Odoo dejó de arrancar (module lib has no attribute GEN_EMAIL)',
+     'docker/odoo/Dockerfile', 'pip instaló la última cryptography, incompatible con el pyOpenSSL de la imagen; las dependencias no tenían versión fijada.',
+     'Configuración', 'Cerrado', 'Imagen reconstruida; test_push (cifrado y firma)'),
+    ('DEF-005', '26-oct-2026', 'Test del asistente de respuesta', 'El pasajero habría visto la etiqueta <br/> como texto',
+     'asistente de respuesta (retirado después)', 'html_escape devuelve Markup y .replace sobre Markup escapa el <br/> nuevo.',
+     'Lógica', 'Cerrado', 'Función retirada en la simplificación del 27-oct'),
+    ('DEF-006', '27-oct-2026', 'Suite de Odoo', 'Un bus sin ruta rompía el cálculo de desvío de ruta',
+     'models/bus_alert.py', 'La regla asumía que todo bus tiene ruta y ningún test cubría el caso sin ruta.',
+     'Lógica', 'Cerrado', 'test_simple.TestOffRoute'),
+    ('DEF-007', '26-oct-2026', 'Revisión en el navegador', 'El navegador seguía mostrando un CSS viejo del portal',
+     'controllers/portal.py', 'Odoo sirve los estáticos con caché larga y la URL no cambiaba al modificar el archivo.',
+     'Configuración', 'Cerrado', 'test_public_assets_are_versioned_so_browsers_never_keep_stale_copies'),
+    ('DEF-008', '28-oct-2026', 'Suite en vivo (E7) y auditoría', 'Se guardan posiciones con latitud o longitud imposibles (p. ej. 95°)',
+     'models/bus_vehicle.py (_apply_position), models/bus_position.py', 'Los campos float no tienen restricción de rango y _apply_position no valida lo que recibe; ninguna prueba enviaba coordenadas fuera de rango.',
+     'Validación de entrada', 'Cerrado', 'E7; test_webhook_rejects_out_of_range_latitude y test_out_of_range_coordinates_raise_validation_error'),
+    ('DEF-009', '28-oct-2026', 'Suite en vivo (E8) y auditoría', 'Una latitud no numérica produce HTTP 500 en el webhook',
+     'models/bus_vehicle.py, controllers/main.py', 'El valor llega sin convertir al ORM, que lanza una excepción no controlada.',
+     'Validación de entrada', 'Cerrado', 'E8; test_webhook_rejects_non_numeric_latitude y test_non_numeric_coordinates_raise_validation_error'),
+    ('DEF-010', '28-oct-2026', 'Suite en vivo (E9) y auditoría', 'Una hora GPS inválida produce HTTP 500 en el webhook',
+     'models/utils.py (parse_traccar_dt), controllers/main.py', 'parse_traccar_dt llama a isoparse sin capturar el error de formato.',
+     'Validación de entrada', 'Cerrado', 'E9; test_webhook_rejects_invalid_fixtime y test_invalid_fixtime_raises_validation_error'),
+]
+
+# Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
+ISHIKAWA_ENTRADA = (
+    'Entradas mal formadas provocan HTTP 500 o datos imposibles (DEF-008 a DEF-010)',
+    [
+        ('Método', ['Sin política de validar la entrada en el webhook', 'Pruebas solo con datos válidos', 'Sin revisión de código con acta']),
+        ('Material (datos)', ['El emisor (Traccar, el celular) puede mandar valores raros', 'fixTime llega como texto libre', 'Latitud y longitud sin rango']),
+        ('Máquina / herramientas', ['El ORM acepta cualquier float', 'Sin SonarQube ni linter configurado', 'Sin integración continua']),
+        ('Medición', ['Cobertura de reglas no medida antes', 'Sin pruebas de límites ni de fuzzing', 'Solo se medía el % de líneas']),
+        ('Personas', ['Se supuso que Traccar siempre manda datos correctos', 'Una sola persona escribe y prueba', 'Sin QA independiente']),
+        ('Entorno', ['El GPS se simuló siempre con datos bien formados', 'Sin celular real en campo', 'Servidor de desarrollo de un solo proceso']),
+    ],
+)
+
+# Ishikawa 2: why 53 problems appeared while building.
+ISHIKAWA_CONSTRUCCION = (
+    '53 problemas y retrabajo durante la construcción (26 al 28 de octubre)',
+    [
+        ('Pruebas y su entorno (16)', ['Tests mal escritos', 'Base de pruebas sucia o con idioma', 'Estado compartido entre pruebas', 'Corridas simultáneas']),
+        ('Herramientas (12)', ['Git Bash convierte rutas', 'Comillas y heredocs fallan', 'Scripts largos en la shell', 'Herramienta de prueba sin viewport']),
+        ('Entorno y dependencias (10)', ['Puertos ocupados', 'Versiones de librerías incompatibles', 'Configuración de producción distinta', 'Cambios de Traccar 6']),
+        ('Datos y supuestos (8)', ['Fase 0 sin responder al inicio', 'PDF oficial con erratas', 'Fotos y nombre provisionales', 'Límites supuestos (50 km/h)']),
+        ('Lógica y diseño (7)', ['API de Odoo 16 distinta a la supuesta', 'Casos límite sin prueba (bus sin ruta)', 'Secreto en la URL', 'Diseño móvil sin revisar']),
+        ('Gestión', ['Alcance cambió (simplificación)', 'Funciones construidas y luego retiradas', 'Sin plan inicial (se pidió después)', 'Una persona implementa y prueba']),
+    ],
+)
