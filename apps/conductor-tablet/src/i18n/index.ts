@@ -53,6 +53,10 @@ const es = {
   alert_off_route: 'Fuera de ruta',
   update_error: 'No pudimos actualizar. Reintentando…',
   map_label: 'Mapa con los buses de la ruta',
+  scanQr: 'Leer código QR',
+  odooUrl: 'Servidor Odoo',
+  qrBad: 'Ese QR no trae la dirección de Odoo.',
+  cameraNeed: 'Hay que permitir la cámara para leer el QR.',
 };
 
 const en: typeof es = {
@@ -107,6 +111,10 @@ const en: typeof es = {
   alert_off_route: 'Off route',
   update_error: "We couldn't update. Retrying…",
   map_label: 'Map with the buses of the route',
+  scanQr: 'Scan QR code',
+  odooUrl: 'Odoo server',
+  qrBad: 'That QR does not contain the Odoo address.',
+  cameraNeed: 'Allow the camera to scan the QR.',
 };
 
 const qu: typeof es = {

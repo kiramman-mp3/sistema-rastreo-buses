@@ -1,4 +1,5 @@
 import { AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
+import { normalizeOdooUrl } from '../config/odooUrl';
 import type {
   Driver,
   IncidentDraft,
@@ -23,6 +24,7 @@ export type SessionSnapshot = {
   gps: { uniqueId: string; url: string } | null;
   shiftState: StateResponse | null;
   routeMap: RouteMap | null;
+  odooUrl: string;
 };
 
 const empty: Omit<SessionSnapshot, 'ready'> = {
@@ -34,6 +36,7 @@ const empty: Omit<SessionSnapshot, 'ready'> = {
   gps: null,
   shiftState: null,
   routeMap: null,
+  odooUrl: defaultBaseUrl(),
 };
 
 export class Session {
@@ -49,6 +52,7 @@ export class Session {
       getItem: async () => null,
       setItem: async () => undefined,
     }),
+    private urlStore?: TokenStore,
   ) {}
 
   subscribe(listener: () => void) {
@@ -78,7 +82,20 @@ export class Session {
     });
   }
 
+  async setOdooUrl(raw: string) {
+    const url = normalizeOdooUrl(raw);
+    if (!url) throw new Error('bad_odoo_url');
+    await this.urlStore?.set(url);
+    this.client = createClient({ baseUrl: url, store: this.store });
+    this.set({ odooUrl: url });
+  }
+
   async boot() {
+    const savedUrl = await this.urlStore?.get();
+    if (savedUrl) {
+      this.client = createClient({ baseUrl: savedUrl, store: this.store });
+      this.set({ odooUrl: savedUrl });
+    }
     const token = await this.store.get();
     if (!token) {
       this.set({ ready: true, ...empty });
@@ -90,7 +107,7 @@ export class Session {
       await this.restoreGps(me.shift);
     } catch (error) {
       if (error instanceof AuthError) {
-        this.set({ ready: true, ...empty });
+        this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
         return;
       }
       this.set({ ready: true, token });
@@ -114,7 +131,7 @@ export class Session {
     }
     await this.stopGps();
     await this.store.clear();
-    this.set({ ready: true, ...empty });
+    this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
   }
 
   async startShift(vehicleId: number, routeId: number): Promise<StartResponse> {
