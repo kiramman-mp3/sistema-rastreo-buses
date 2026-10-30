@@ -812,3 +812,40 @@ Suite en vivo tras `-u bus_tracking` en `buses_qa`: **44 de 47 PASS**. Los cinco
 ### Pendiente
 
 APK firmado, tableta con chip GPS, jornada completa. Defectos DEF-008 a DEF-010 del webhook siguen abiertos.
+
+
+## 2026-10-30: corrección de defectos DEF-008 a DEF-010, comprobación Azure y APK
+
+### Qué se hizo
+
+1. **Corrección de defectos del webhook (DEF-008 a DEF-010)**:
+   - models/utils.py: parse_traccar_dt captura (ValueError, TypeError, OverflowError) para formatos inválidos como 'ayer' (DEF-010).
+   - models/bus_position.py: restricción @api.constrains('latitude', 'longitude') para rangos válidos (−90..90 y −180..180) (DEF-008).
+   - models/bus_vehicle.py: _apply_position valida tipos numéricos, no infinitos ni NaN, rangos de coordenadas y fechas, lanzando ValidationError (DEF-008, DEF-009).
+   - controllers/main.py: 	raccar_webhook captura (ValueError, ValidationError) y responde HTTP 400 controlado en vez de 500 (DEF-009).
+   - 	ests/test_http.py y 	ests/test_ingest.py: casos portados para coordenadas fuera de rango, tipos no numéricos y formatos de hora inválidos.
+   - qa/datos_calidad.py: DEF-008, DEF-009 y DEF-010 marcados como cerrados y documentación regenerada.
+
+2. **Comprobación del despliegue en Azure**:
+   - Conectado a Azure CLI con jrodriguez0612@uta.edu.ec (*Azure for Students*).
+   - VM m-buses en RG-BUSES-EASTUS2 (usesuta2340.eastus2.cloudapp.azure.com, IP 20.119.213.192) en estado running.
+   - Servicios Docker en la VM (
+astreo-prod-proxy-1, 
+astreo-prod-odoo-1, 
+astreo-prod-traccar-1, 
+astreo-prod-db-1) verificados arriba y saludables.
+   - Endpoints HTTPS públicos (/, /rutas, /bus_tracking/health) verificados respondiendo 200 OK con Caddy y Let's Encrypt.
+
+3. **Compilación y distribución de la APK**:
+   - APK de desarrollo compilado y descargado a pps/conductor-tablet/buses-uta-dev.apk (211.9 MB), listo para instalación en tableta.
+   - Build de producción lanzado en EAS Build (c49ace1b-d3fd-4a8d-9ad4-212ae2c4cf42) con perfil production y EXPO_PUBLIC_ODOO_URL=https://busesuta2340.eastus2.cloudapp.azure.com.
+
+### Qué se verificó
+
+- Suite de Odoo: **247 tests / 0 fallos** (100% PASS).
+- Suite en vivo (qa/ejecutar_todo.py suite): **46 de 47 PASS**. E7, E8 y E9 PASS.
+- App de tableta: 8 suites Jest (33 tests) PASS, 	sc --noEmit PASS, expo lint PASS.
+
+### Pendiente
+
+- Finalización del build de producción en EAS Cloud y prueba de campo en tableta con GPS en recorrido real.
