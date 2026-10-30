@@ -1,6 +1,17 @@
-import { AuthError, createClient, defaultBaseUrl, type DriverClient, type TokenStore } from '../api/client';
-import type { Driver, MeResponse, Route, Shift, StartResponse, Vehicle } from '../api/types';
+import { AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
+import type {
+  Driver,
+  IncidentDraft,
+  MeResponse,
+  Route,
+  RouteMap,
+  Shift,
+  StartResponse,
+  StateResponse,
+  Vehicle,
+} from '../api/types';
 import type { GpsController, GpsStore } from '../gps/types';
+import { flushIncidents, IncidentQueue } from '../incidents/queue';
 
 export type SessionSnapshot = {
   ready: boolean;
@@ -10,6 +21,8 @@ export type SessionSnapshot = {
   routes: Route[];
   shift: Shift | null;
   gps: { uniqueId: string; url: string } | null;
+  shiftState: StateResponse | null;
+  routeMap: RouteMap | null;
 };
 
 const empty: Omit<SessionSnapshot, 'ready'> = {
@@ -19,6 +32,8 @@ const empty: Omit<SessionSnapshot, 'ready'> = {
   routes: [],
   shift: null,
   gps: null,
+  shiftState: null,
+  routeMap: null,
 };
 
 export class Session {
@@ -30,6 +45,10 @@ export class Session {
     private client: DriverClient = createClient({ baseUrl: defaultBaseUrl(), store }),
     private gps?: GpsController,
     private gpsStore?: GpsStore,
+    private incidents: IncidentQueue = new IncidentQueue({
+      getItem: async () => null,
+      setItem: async () => undefined,
+    }),
   ) {}
 
   subscribe(listener: () => void) {
@@ -116,6 +135,50 @@ export class Session {
       ),
     });
     return started;
+  }
+
+  async pullState(): Promise<StateResponse> {
+    const state = await this.client.state();
+    this.set({ shiftState: state, shift: state.shift });
+    await this.flushIncidents();
+    return state;
+  }
+
+  async loadRouteMap(): Promise<RouteMap> {
+    const routeMap = await this.client.routeMap();
+    this.set({ routeMap });
+    return routeMap;
+  }
+
+  async reportIncident(draft: IncidentDraft) {
+    try {
+      await this.client.incident(draft);
+    } catch (error) {
+      if (error instanceof NetworkError) {
+        await this.incidents.push(draft);
+        return 'queued' as const;
+      }
+      throw error;
+    }
+    return 'sent' as const;
+  }
+
+  async flushIncidents() {
+    await flushIncidents(this.incidents, async (draft) => {
+      try {
+        await this.client.incident(draft);
+        return true;
+      } catch (error) {
+        return !(error instanceof NetworkError);
+      }
+    });
+  }
+
+  async endShift() {
+    await this.flushIncidents();
+    await this.client.endShift();
+    await this.stopGps();
+    this.set({ shift: null, gps: null, shiftState: null, routeMap: null });
   }
 
   private async restoreGps(shift: Shift | null) {

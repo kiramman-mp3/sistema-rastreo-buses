@@ -29,3 +29,53 @@ export type StartResponse = {
   traccar_unique_id: string;
   gps_url: string;
 };
+
+export type StopState = {
+  id: number;
+  name: string;
+  sequence: number;
+  arrived_at: string | null;
+};
+
+export type Alert = {
+  id: number;
+  kind: 'speeding' | 'offline' | 'long_stop' | 'off_route' | string;
+  state: 'open' | 'closed' | string;
+  detail: string;
+  start: string;
+};
+
+export type StateResponse = {
+  shift: Shift;
+  current_stop_id: number | null;
+  next_stop_id: number | null;
+  stops: StopState[];
+  alerts: Alert[];
+};
+
+export type RouteStop = {
+  id: number;
+  name: string;
+  sequence: number;
+  lat: number;
+  lon: number;
+  radius: number;
+};
+
+export type RouteMap = {
+  id: number;
+  code: string;
+  name: string;
+  color: string;
+  stops: RouteStop[];
+  lines: { name: string; km: number; points: number[][] }[];
+};
+
+export type IncidentKind = 'breakdown' | 'traffic' | 'accident' | 'other';
+
+export type IncidentDraft = {
+  kind: IncidentKind;
+  note: string;
+  lat: number | null;
+  lon: number | null;
+};
