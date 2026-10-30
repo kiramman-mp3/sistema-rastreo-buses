@@ -18,7 +18,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 
 | Fase | Contenido | Rama | Depende de | Estado |
 |---|---|---|---|---|
-| 16 | Backend: grupo, turnos, tokens, login | `feature/driver-backend` | — | Escrita, sin probar |
+| 16 | Backend: grupo, turnos, tokens, login | `feature/driver-backend` | — | Integrada en develop |
 | 17 | Backend: iniciar/terminar turno, ruta, estado, alertas, incidentes | `feature/driver-shifts-api` | 16 | Pendiente |
 | 18 | Backend: vistas de staff, traducciones, avisos push de incidentes | `feature/driver-staff-views` | 17 | Pendiente |
 | 19 | App: proyecto Expo, login, selección de bus y ruta | `feature/driver-app-base` | 16, 17 | Pendiente |
@@ -30,17 +30,17 @@ Las fases 19 a 21 pueden avanzar en paralelo con la 18 una vez que la 17 fije el
 
 ## Fase 16. Backend: base de autenticación y turnos
 
-Hecho en la rama `feature/driver-backend` (3 commits).
+Hecho en la rama `feature/driver-backend` y merge `--no-ff` a `develop`.
 
 - Grupo `group_bus_driver`, regla para que cada chofer vea solo sus turnos, accesos mínimos de lectura.
 - `bus.shift` con un turno activo por chofer y por bus (índices únicos parciales).
 - `bus.driver.token`: solo se guarda el hash, vence a los 30 días, cron diario de purga.
 - Endpoints `POST /bus_tracking/driver/login`, `/logout`, `/me`, con límite de intentos y misma respuesta para clave mala y usuario sin rol.
 - Tests en `tests/test_driver_auth.py`.
+- El chofer se crea como usuario interno (`base.group_user`) más el grupo Driver. El grupo Driver no abre el panel por sí solo.
+- Suite del módulo (2026-10-30): 216 tests, 0 fallos.
 
-Pendiente para cerrarla: **ejecutar los tests**. Docker Desktop estaba apagado cuando se escribió. Después, merge `--no-ff` a `develop`.
-
-Criterio de aceptación: los 3 grupos de tests nuevos y los 150 anteriores pasan.
+Criterio de aceptación: cumplido.
 
 ## Fase 17. Backend: turnos y datos del recorrido
 
