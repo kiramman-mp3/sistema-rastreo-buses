@@ -96,13 +96,13 @@ DEFECTOS = [
      'Configuración', 'Cerrado', 'test_public_assets_are_versioned_so_browsers_never_keep_stale_copies'),
     ('DEF-008', '28-oct-2026', 'Suite en vivo (E7) y auditoría', 'Se guardan posiciones con latitud o longitud imposibles (p. ej. 95°)',
      'models/bus_vehicle.py (_apply_position), models/bus_position.py', 'Los campos float no tienen restricción de rango y _apply_position no valida lo que recibe; ninguna prueba enviaba coordenadas fuera de rango.',
-     'Validación de entrada', 'ABIERTO', 'E7 (falla hoy); falta portarla a las pruebas de Odoo'),
+     'Validación de entrada', 'Cerrado', 'E7; test_webhook_rejects_out_of_range_latitude y test_out_of_range_coordinates_raise_validation_error'),
     ('DEF-009', '28-oct-2026', 'Suite en vivo (E8) y auditoría', 'Una latitud no numérica produce HTTP 500 en el webhook',
      'models/bus_vehicle.py, controllers/main.py', 'El valor llega sin convertir al ORM, que lanza una excepción no controlada.',
-     'Validación de entrada', 'ABIERTO', 'E8 (falla hoy)'),
+     'Validación de entrada', 'Cerrado', 'E8; test_webhook_rejects_non_numeric_latitude y test_non_numeric_coordinates_raise_validation_error'),
     ('DEF-010', '28-oct-2026', 'Suite en vivo (E9) y auditoría', 'Una hora GPS inválida produce HTTP 500 en el webhook',
      'models/utils.py (parse_traccar_dt), controllers/main.py', 'parse_traccar_dt llama a isoparse sin capturar el error de formato.',
-     'Validación de entrada', 'ABIERTO', 'E9 (falla hoy)'),
+     'Validación de entrada', 'Cerrado', 'E9; test_webhook_rejects_invalid_fixtime y test_invalid_fixtime_raises_validation_error'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
