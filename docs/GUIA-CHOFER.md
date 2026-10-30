@@ -12,7 +12,7 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 ## Instalar (el administrador lo hace una vez)
 
 1. Instala el APK de `eas build --profile production --platform android` (o el de *development* para pruebas).
-2. Si el servidor no es el de desarrollo, la URL de Odoo va en `EXPO_PUBLIC_ODOO_URL` **al construir** el APK.
+2. En el login se puede escribir la URL de Odoo o **Leer código QR** (Ajustes o ficha del bus en Odoo). El APK de producción ya trae `https://busesuta2340.eastus2.cloudapp.azure.com`.
 3. En Ajustes de Android: ubicación precisa; batería de **Buses UTA** sin restricciones; pantalla encendida mientras carga. Guía por marca: [dontkillmyapp.com](https://dontkillmyapp.com).
 4. Si el modelo lo permite, fija la app (modo aplicación fija / *screen pinning*) para que no se salga al escritorio.
 5. Deja la tableta **cargando** en el bus.
