@@ -705,3 +705,18 @@ Ejecución completa desde cero (sin `qa-odoo` ni `buses_qa`), con la salida en o
 - Los tiempos varían entre ejecuciones (la media de la auditoría fue 0,0585 s contra 0,037 s del informe), así que las cifras del PDF no se actualizaron.
 - Una ejecución nueva sobre `docs/calidad/evidencias/` reemplaza las evidencias del informe.
 - `qa-odoo` y `buses_qa` quedan creados al terminar; `--limpiar` los elimina.
+
+
+## 2026-10-30: fase 16, autenticación de choferes
+
+### Qué se hizo
+
+Backend de la app de tableta: grupo Driver, `bus.shift`, tokens hasheados (`bus.driver.token`) y `POST /bus_tracking/driver/login`, `/logout`, `/me`. Rama `feature/driver-backend`.
+
+### Qué se verificó
+
+Suite Odoo del módulo (`-u bus_tracking --test-enable --test-tags /bus_tracking`): 216 tests, 0 fallos. La primera corrida falló en 5 tests HTTP: el cooldown de login de Odoo (IP 127.0.0.1) se activaba tras `test_login_is_rate_limited`. Se desactivó ese cooldown en el `setUp` de esos tests y los choferes de prueba llevan también `base.group_user`.
+
+### Pendiente
+
+Fase 17 en `feature/driver-shifts-api`: iniciar/terminar turno, estado, ruta e incidentes.
