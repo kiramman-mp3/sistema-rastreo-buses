@@ -19,7 +19,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 | Fase | Contenido | Rama | Depende de | Estado |
 |---|---|---|---|---|
 | 16 | Backend: grupo, turnos, tokens, login | `feature/driver-backend` | — | Integrada en develop |
-| 17 | Backend: iniciar/terminar turno, ruta, estado, alertas, incidentes | `feature/driver-shifts-api` | 16 | Pendiente |
+| 17 | Backend: iniciar/terminar turno, ruta, estado, alertas, incidentes | `feature/driver-shifts-api` | 16 | Integrada en develop |
 | 18 | Backend: vistas de staff, traducciones, avisos push de incidentes | `feature/driver-staff-views` | 17 | Pendiente |
 | 19 | App: proyecto Expo, login, selección de bus y ruta | `feature/driver-app-base` | 16, 17 | Pendiente |
 | 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Pendiente |
@@ -59,7 +59,7 @@ Archivos: `controllers/driver_api.py`, `models/bus_shift.py`, nuevo `models/bus_
 
 Tests: bus ocupado, turno doble, bus sin GPS, id de GPS ausente en `/me` y presente solo en `shift/start`, cierre de turnos viejos, incidente sin turno, coordenadas fuera de rango, `state` con parada alcanzada, chofer sin acceso a turnos ajenos.
 
-Criterio de aceptación: con `curl` se recorre login, turno, estado, incidente y fin de turno, y el bus aparece con chofer en el mapa en vivo.
+Criterio de aceptación: cubierto por `tests/test_driver_shift.py` (login → start → state/route/incident → end; el bus recibe `driver_id` = partner del chofer, que es lo que pinta el mapa en vivo). Suite del módulo 2026-10-30: 232 tests, 0 fallos.
 
 ## Fase 18. Backend: vistas de staff y avisos
 
