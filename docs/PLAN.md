@@ -208,3 +208,7 @@ Fuente: `RECORRIDOS-INSTITUCIONALES-2025.pdf`. Detalle, anomalías y supuestos e
 ## Simplificación (2026-10-27)
 
 El alcance se redujo: ver la entrada de `docs/BITACORA.md` de esa fecha. Las fases sobre roster, trazados por calle, viajes y puntualidad, correo y respuestas a quejas quedan **canceladas**.
+
+## App de tableta para choferes (fases 16 a 22)
+
+Plan completo en `docs/PLAN-APP-CHOFER.md`: login de choferes contra Odoo, turnos, recorrido, alertas e incidentes, con una app Expo y el GPS sigue por Traccar.
