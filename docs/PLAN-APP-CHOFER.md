@@ -20,7 +20,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 |---|---|---|---|---|
 | 16 | Backend: grupo, turnos, tokens, login | `feature/driver-backend` | — | Integrada en develop |
 | 17 | Backend: iniciar/terminar turno, ruta, estado, alertas, incidentes | `feature/driver-shifts-api` | 16 | Integrada en develop |
-| 18 | Backend: vistas de staff, traducciones, avisos push de incidentes | `feature/driver-staff-views` | 17 | Pendiente |
+| 18 | Backend: vistas de staff, traducciones, avisos push de incidentes | `feature/driver-staff-views` | 17 | Integrada en develop |
 | 19 | App: proyecto Expo, login, selección de bus y ruta | `feature/driver-app-base` | 16, 17 | Pendiente |
 | 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Pendiente |
 | 21 | App: paradas, avance, alertas, incidentes, idiomas | `feature/driver-app-route` | 17, 19 | Pendiente |
@@ -71,7 +71,7 @@ Archivos: `views/bus_shift_views.xml`, `views/bus_incident_views.xml`, `views/me
 - Acción de gestor "Cerrar sesión de la tableta" que revoca los tokens de un chofer.
 - Traducciones al español de todo texto nuevo.
 
-Criterio de aceptación: un gestor ve turnos e incidentes, recibe el push y puede revocar una tableta.
+Criterio de aceptación: cubierto por `tests/test_driver_staff.py` (lectura/borrado, push una vez, revocar tableta cierra el turno). Suite del módulo 2026-10-30: 239 tests, 0 fallos.
 
 ## Fase 19. App: base, login y selección
 
