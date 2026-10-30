@@ -1,4 +1,5 @@
 import { AuthError, createClient, type TokenStore } from '../api/client';
+import { GpsPermissionError, type GpsController, type GpsStore } from '../gps/types';
 import { Session } from './session';
 
 function memoryStore(initial: string | null = null): TokenStore {
@@ -27,6 +28,33 @@ function json(status: number, body: unknown) {
     status,
     text: async () => JSON.stringify(body),
   } as Response);
+}
+
+function gpsMock(): GpsController & { started: string[] } {
+  const started: string[] = [];
+  return {
+    started,
+    prepare: async () => undefined,
+    start: async (uniqueId, url) => {
+      started.push(`${uniqueId}@${url}`);
+    },
+    stop: async () => {
+      started.length = 0;
+    },
+  };
+}
+
+function gpsMemory(): GpsStore {
+  let value: { uniqueId: string; url: string } | null = null;
+  return {
+    get: async () => value,
+    set: async (next) => {
+      value = next;
+    },
+    clear: async () => {
+      value = null;
+    },
+  };
 }
 
 describe('session', () => {
@@ -81,5 +109,76 @@ describe('session', () => {
     const session = new Session(tokens, client);
     await expect(session.login('x', 'y')).rejects.toBeInstanceOf(AuthError);
     expect(await tokens.get()).toBeNull();
+  });
+
+  test('startShift asks for GPS before opening the shift and then starts the task', async () => {
+    const tokens = memoryStore('tok');
+    const order: string[] = [];
+    const gps = gpsMock();
+    gps.prepare = async () => {
+      order.push('prepare');
+    };
+    gps.start = async (uniqueId, url) => {
+      order.push(`start:${uniqueId}@${url}`);
+    };
+    const fetchMock = jest.fn(async (url: string) => {
+      if (String(url).endsWith('/shift/start')) {
+        order.push('api');
+        return json(200, {
+          shift: { id: 3, vehicle_id: 1, route_id: 2, start: '2026-10-30T16:00:00Z' },
+          traccar_unique_id: 'dev-9',
+          gps_url: 'http://gps:5055',
+        });
+      }
+      return json(200, me);
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    await session.startShift(1, 2);
+    expect(order).toEqual(['prepare', 'api', 'start:dev-9@http://gps:5055']);
+    expect(session.snapshot.gps?.uniqueId).toBe('dev-9');
+  });
+
+  test('denied location permission never calls shift/start', async () => {
+    const tokens = memoryStore('tok');
+    const fetchMock = jest.fn(() => json(200, {}));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const gps = gpsMock();
+    gps.prepare = async () => {
+      throw new GpsPermissionError();
+    };
+    const session = new Session(tokens, client, gps);
+    await expect(session.startShift(1, 2)).rejects.toBeInstanceOf(GpsPermissionError);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test('boot with an active shift restarts GPS from the stored id', async () => {
+    const tokens = memoryStore('saved');
+    const gps = gpsMock();
+    const stored = gpsMemory();
+    await stored.set({ uniqueId: 'dev-9', url: 'http://gps:5055' });
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: () => json(200, { ...me, shift: { id: 9, vehicle_id: 1, route_id: 2, start: '2026-10-30T15:00:00Z' } }),
+    });
+    const session = new Session(tokens, client, gps, stored);
+    await session.boot();
+    expect(gps.started).toEqual(['dev-9@http://gps:5055']);
+    expect(session.snapshot.gps?.url).toBe('http://gps:5055');
+  });
+
+  test('logout stops GPS', async () => {
+    const tokens = memoryStore('tok');
+    const gps = gpsMock();
+    gps.started.push('running');
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: () => json(200, { ok: true }),
+    });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    await session.logout();
+    expect(gps.started).toEqual([]);
   });
 });
