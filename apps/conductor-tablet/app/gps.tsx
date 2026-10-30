@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { t } from '../src/i18n';
+import { useLang } from '../src/i18n/LangProvider';
 import { gpsPermissionSnapshot } from '../src/gps/permissions';
 import { locationQueue, readLastSent } from '../src/gps/store';
 import { useSession } from '../src/state/SessionContext';
@@ -10,6 +11,7 @@ import { Button } from '../src/ui/Button';
 import { colors, type } from '../src/ui/theme';
 
 export default function GpsScreen() {
+  useLang();
   const session = useSession();
   const [foreground, setForeground] = useState('—');
   const [background, setBackground] = useState('—');

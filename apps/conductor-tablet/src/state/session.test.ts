@@ -181,4 +181,20 @@ describe('session', () => {
     await session.logout();
     expect(gps.started).toEqual([]);
   });
+
+  test('endShift stops GPS and clears the shift', async () => {
+    const tokens = memoryStore('tok');
+    const gps = gpsMock();
+    gps.started.push('running');
+    const fetchMock = jest.fn(async (url: string) => {
+      if (String(url).endsWith('/shift/end')) return json(200, { ok: true });
+      return json(200, { ok: true });
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    session.snapshot.shift = { id: 3, vehicle_id: 1, route_id: 2, start: '2026-10-30T16:00:00Z' };
+    await session.endShift();
+    expect(session.snapshot.shift).toBeNull();
+    expect(gps.started).toEqual([]);
+  });
 });
