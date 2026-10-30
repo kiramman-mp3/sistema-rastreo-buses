@@ -8,3 +8,4 @@ __pycache__/
 apps/*/node_modules/
 apps/*/.expo/
 *.apk
+dist-mobile/
