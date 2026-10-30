@@ -782,3 +782,18 @@ Fase 20: GPS en segundo plano. Probar login real en tableta o emulador.
 ### Pendiente
 
 Fase 21: paradas, mapa, alertas e incidentes. Probar GPS real con development build (Expo Go no sirve).
+
+
+## 2026-10-30: fase 21, recorrido, alertas e incidentes
+
+### Qué se hizo
+
+Pantalla de turno: paradas (siguiente destacada, hora de llegada), panel de alertas, mapa Leaflet/OSM en WebView, refresco `/driver/state` cada 15 s. Incidente (avería, tráfico, accidente, otro) con cola si no hay red. Terminar turno con confirmación. Idiomas es/en/qu; el kichwa sigue siendo borrador, como en el portal.
+
+### Qué se verificó
+
+`tsc --noEmit` PASS. `expo lint` PASS. Jest 29 tests PASS.
+
+### Pendiente
+
+Fase 22: tableta real, QA, APK y documentación.

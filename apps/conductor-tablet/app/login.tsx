@@ -4,11 +4,14 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
+import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Button } from '../src/ui/Button';
+import { LangSwitch } from '../src/ui/LangSwitch';
 import { colors, hit, type } from '../src/ui/theme';
 
 export default function Login() {
+  useLang();
   const session = useSession();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -54,6 +57,7 @@ export default function Login() {
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button label={t('login')} onPress={submit} disabled={busy || !login || !password} />
+      <LangSwitch />
     </View>
   );
 }
