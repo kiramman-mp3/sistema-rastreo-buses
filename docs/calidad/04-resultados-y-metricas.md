@@ -7,7 +7,7 @@ Generado por `qa/generar_docs.py` con los datos de la ejecución del 28-oct-2026
 | Meta | Umbral | Resultado | Cumple |
 |---|---|---|---|
 | Pruebas de Odoo aprobadas | 100 % | 100,00 % | Sí |
-| Error en la suite en vivo | < 10 % | 6,38 % | Sí |
+| Error en la suite en vivo | < 10 % | 2,13 % | Sí |
 | Error en la auditoría | < 10 % | 5,70 % | Sí |
 | Respuestas HTTP 5xx ante cualquier entrada | 0 | 27 | **No** |
 | Tiempo promedio de la auditoría | < 0,5 s | 0,0370 s | Sí |
@@ -15,7 +15,7 @@ Generado por `qa/generar_docs.py` con los datos de la ejecución del 28-oct-2026
 | Capacidad de ingesta (100 buses, un reporte cada 10 s) | ≥ 10 req/s | 28,3 req/s | Sí |
 | Cobertura de código (sentencias y ramas) | ≥ 80 % | 93,8 % | Sí |
 | Cobertura de rutas HTTP | 100 % | 100,0 % | Sí |
-| Defectos cerrados | ≥ 90 % | 70,0 % | **No** |
+| Defectos cerrados | ≥ 90 % | 100,0 % | Sí |
 | Posiciones con datos imposibles | 0 | 1 | **No** |
 | Integridad concurrente (P6: 20 envíos iguales) | 1 guardada | 1 guardada | Sí |
 
@@ -26,9 +26,9 @@ Las metas que no se cumplen son las del defecto abierto en la validación de la 
 | Conjunto | Pruebas | Errores | % error |
 |---|---|---|---|
 | Pruebas de Odoo | 150 | 0 | 0,00 % |
-| Suite en vivo | 47 | 3 | 6,38 % |
+| Suite en vivo | 47 | 1 | 2,13 % |
 | Auditoría aleatoria | 1.000 | 57 | 5,70 % |
-| Total | 1.197 | 60 | 5,01 % |
+| Total | 1.197 | 58 | 4,85 % |
 
 ## 3. Por tipo de prueba (suite en vivo)
 
