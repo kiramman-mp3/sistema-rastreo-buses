@@ -1,0 +1,164 @@
+/** Overlapping keys match addons/bus_tracking/models/portal_i18n.py. qu is a draft. */
+export type Lang = 'es' | 'en' | 'qu';
+
+const es = {
+  login: 'Entrar',
+  user: 'Usuario',
+  password: 'Contraseña',
+  badCredentials: 'Usuario o clave incorrectos.',
+  network: 'Sin conexión. Inténtalo de nuevo.',
+  chooseBus: 'Elige el bus',
+  chooseRoute: 'Elige la ruta',
+  startShift: 'Iniciar turno',
+  taken: 'Ocupado',
+  onShift: 'Turno en curso',
+  bus: 'Bus',
+  route: 'Ruta',
+  signOut: 'Cerrar sesión',
+  loading: 'Cargando…',
+  conflict: 'Ese bus o tu usuario ya tienen un turno.',
+  noGps: 'Ese bus no tiene GPS registrado.',
+  gpsPermission: 'Hay que permitir la ubicación todo el tiempo para el GPS del bus.',
+  gpsStatus: 'Estado del GPS',
+  gpsForeground: 'Ubicación en uso',
+  gpsBackground: 'Ubicación en segundo plano',
+  gpsQueue: 'Puntos en cola',
+  gpsLast: 'Último envío',
+  gpsNone: 'Todavía no se ha enviado ninguna posición.',
+  granted: 'Concedido',
+  denied: 'Denegado',
+  lang_name: 'Español',
+  stops: 'Paradas',
+  nextStop: 'Siguiente',
+  alerts: 'Alertas',
+  noAlerts: 'Sin alertas.',
+  incident: 'Reportar incidente',
+  endShift: 'Terminar turno',
+  confirmEnd: '¿Terminar el turno?',
+  confirmEndBody: 'Se deja de enviar el GPS de este bus.',
+  cancel: 'Cancelar',
+  note: 'Nota (opcional)',
+  queued: 'Sin red. El incidente se enviará al volver.',
+  sent: 'Incidente enviado.',
+  field_kind: 'Qué pasó',
+  field_description: 'Descripción',
+  submit: 'Enviar reporte',
+  kind_other: 'Otro',
+  kind_breakdown: 'Avería',
+  kind_traffic: 'Tráfico',
+  kind_accident: 'Accidente',
+  alert_speeding: 'Exceso de velocidad',
+  alert_offline: 'sin señal',
+  alert_long_stop: 'Parada larga',
+  alert_off_route: 'Fuera de ruta',
+  update_error: 'No pudimos actualizar. Reintentando…',
+  map_label: 'Mapa con los buses de la ruta',
+  scanQr: 'Leer código QR',
+  odooUrl: 'Servidor Odoo',
+  qrBad: 'Ese QR no trae la dirección de Odoo.',
+  cameraNeed: 'Hay que permitir la cámara para leer el QR.',
+};
+
+const en: typeof es = {
+  login: 'Sign in',
+  user: 'User',
+  password: 'Password',
+  badCredentials: 'Wrong user or password.',
+  network: 'No connection. Try again.',
+  chooseBus: 'Choose the bus',
+  chooseRoute: 'Choose the route',
+  startShift: 'Start shift',
+  taken: 'In use',
+  onShift: 'Shift in progress',
+  bus: 'Bus',
+  route: 'Route',
+  signOut: 'Sign out',
+  loading: 'Loading…',
+  conflict: 'That bus or your user already has a shift.',
+  noGps: 'That bus has no GPS registered.',
+  gpsPermission: 'Allow location all the time for the bus GPS.',
+  gpsStatus: 'GPS status',
+  gpsForeground: 'Location while in use',
+  gpsBackground: 'Background location',
+  gpsQueue: 'Queued points',
+  gpsLast: 'Last send',
+  gpsNone: 'No position has been sent yet.',
+  granted: 'Granted',
+  denied: 'Denied',
+  lang_name: 'English',
+  stops: 'Stops',
+  nextStop: 'Next',
+  alerts: 'Alerts',
+  noAlerts: 'No alerts.',
+  incident: 'Report incident',
+  endShift: 'End shift',
+  confirmEnd: 'End the shift?',
+  confirmEndBody: 'This bus will stop sending GPS.',
+  cancel: 'Cancel',
+  note: 'Note (optional)',
+  queued: 'Offline. The incident will send when the network returns.',
+  sent: 'Incident sent.',
+  field_kind: 'What happened',
+  field_description: 'Description',
+  submit: 'Send report',
+  kind_other: 'Other',
+  kind_breakdown: 'Breakdown',
+  kind_traffic: 'Traffic',
+  kind_accident: 'Accident',
+  alert_speeding: 'Speeding',
+  alert_offline: 'no signal',
+  alert_long_stop: 'Long stop',
+  alert_off_route: 'Off route',
+  update_error: "We couldn't update. Retrying…",
+  map_label: 'Map with the buses of the route',
+  scanQr: 'Scan QR code',
+  odooUrl: 'Odoo server',
+  qrBad: 'That QR does not contain the Odoo address.',
+  cameraNeed: 'Allow the camera to scan the QR.',
+};
+
+const qu: typeof es = {
+  ...es,
+  lang_name: 'Kichwa (borrador)',
+  login: 'Yaykuy',
+  stops: 'Sayana kuna',
+  alert_offline: 'mana rikurin',
+  update_error: 'Mana kutin rikuchi ushashkachu. Kutin ruranchik…',
+};
+
+export const messages: Record<Lang, typeof es> = { es, en, qu };
+
+export type Message = keyof typeof es;
+
+let lang: Lang = 'es';
+const listeners = new Set<(next: Lang) => void>();
+
+export function getLang(): Lang {
+  return lang;
+}
+
+export function setLang(next: Lang) {
+  lang = next;
+  listeners.forEach((listener) => listener(next));
+}
+
+export function onLang(listener: (next: Lang) => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+export function t(key: Message): string {
+  return messages[lang][key] ?? messages.es[key];
+}
+
+export function alertLabel(kind: string): string {
+  if (kind === 'speeding') return t('alert_speeding');
+  if (kind === 'offline') return t('alert_offline');
+  if (kind === 'long_stop') return t('alert_long_stop');
+  if (kind === 'off_route') return t('alert_off_route');
+  return kind;
+}
+
+export const LANGS: Lang[] = ['es', 'en', 'qu'];

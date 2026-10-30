@@ -2276,3 +2276,63 @@ msgstr "Horas de trabajo"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_service__work_hours_computed
 msgid "Work Hours Computed"
 msgstr "Horas de trabajo calculadas"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__accident
+msgid "Accident"
+msgstr "Accidente"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__breakdown
+msgid "Breakdown"
+msgstr "Avería"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_shift__state__done
+msgid "Done"
+msgstr "Cerrado"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_incident
+msgid "Driver Incident"
+msgstr "Incidente del chofer"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_shift
+msgid "Driver Shift"
+msgstr "Turno"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_incident
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_incident
+msgid "Incidents"
+msgstr "Incidentes"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__note
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_form
+msgid "Note"
+msgstr "Nota"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_shift.py:0
+#, python-format
+msgid "Only managers can sign a tablet out."
+msgstr "Solo un gestor puede cerrar la sesión de la tableta."
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_shift
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_shift
+msgid "Shifts"
+msgstr "Turnos"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_shift_form
+msgid "Sign out tablet"
+msgstr "Cerrar sesión de la tableta"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__traffic
+msgid "Traffic"
+msgstr "Tráfico"

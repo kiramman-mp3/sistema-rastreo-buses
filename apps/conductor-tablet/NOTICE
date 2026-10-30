@@ -1,0 +1,10 @@
+This product includes behavior derived from Traccar Client
+(https://github.com/traccar/traccar-client), in particular the OsmAnd
+protocol upload of GPS positions and the offline retry queue.
+
+Traccar Client is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the license at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Traccar: https://www.traccar.org/

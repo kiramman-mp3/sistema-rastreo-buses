@@ -16,4 +16,17 @@
         <field name="implied_ids" eval="[(4, ref('group_bus_user'))]"/>
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
+
+    <!-- Only for the tablet app. It grants no access to the Odoo backend by itself. -->
+    <record id="group_bus_driver" model="res.groups">
+        <field name="name">Driver</field>
+        <field name="category_id" ref="module_category_bus_tracking"/>
+    </record>
+
+    <record id="rule_bus_shift_driver" model="ir.rule">
+        <field name="name">Drivers only see their own shifts</field>
+        <field name="model_id" ref="model_bus_shift"/>
+        <field name="groups" eval="[(4, ref('group_bus_driver'))]"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+    </record>
 </odoo>

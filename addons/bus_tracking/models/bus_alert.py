@@ -183,7 +183,6 @@ class BusAlert(models.Model):
         if not pending:
             return
         push = self.env['bus.push.subscription']
-        managers = self.env.ref('bus_tracking.group_bus_manager').users.filtered(lambda u: not u.share)
         for alert in pending:
             kind = dict(alert._fields['kind']._description_selection(self.env))[alert.kind]
             payload = {
@@ -192,6 +191,5 @@ class BusAlert(models.Model):
                 'url': '/web#id=%d&model=bus.alert&view_type=form' % alert.id,
                 'tag': 'bus-alert',
             }
-            for user in managers:
-                push._send_to_user(user, payload)
+            push._send_to_managers(payload)
         pending.write({'notified': True})
