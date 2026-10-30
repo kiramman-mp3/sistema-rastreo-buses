@@ -13,14 +13,14 @@ El sistema es para los buses de la **Universidad Técnica de Ambato (UTA)**, en 
 | Pasajeros | Solo pueden ver los buses de una ruta y levantar una queja o reporte | Portal público sin login: elegir ruta, ver el mapa con sus buses y paradas, enviar queja. No ven reportes, alertas, conductores ni historial. |
 | Cantidad de buses | Administrable | Sin tope fijo; el administrador crea y desactiva buses. El tamaño del servidor se calcula con la tabla de volumen de abajo. |
 | Frecuencia del GPS | La recomiendo yo | Ver recomendación abajo. |
-| GPS | Celular de cada chofer (app Traccar Client) | Sin ignición ni batería propia; hay que cuidar batería, plan de datos, permisos y consentimiento del chofer. |
+| GPS | Tableta Android en el bus (app Expo `apps/conductor-tablet`; OsmAnd a Traccar) | Sustituye Traccar Client. Hay que confirmar chip GPS, batería, datos y consentimiento del chofer. |
 | Alojamiento | Azure | Máquina virtual Linux con Docker (recomendada), ver fase 14. |
 | Alertas | Correo o notificación push | Fase 12. |
 | Idiomas | Español, inglés y, si se puede, quechua | Fase 13. Quechua necesita una variante definida y revisión de una persona hablante. |
 
 ### Recomendación de frecuencia del GPS
 
-**Cada 10 segundos en movimiento**. En la app Traccar Client: precisión **Highest** (el intervalo por tiempo solo funciona con esa precisión, o con distancia 0 en Android), intervalo 10, ángulo 30, distancia 0, guardado sin conexión activado y latido en reposo de unos 60 segundos. Alternativa más suave con la batería: precisión High y distancia de 50 metros. El mapa ya se refresca cada 10 segundos, así que más frecuencia no se vería. Si los celulares sufren con la batería, 15 a 20 segundos es aceptable.
+**Cada 10 segundos en movimiento**. La app de tableta usa `expo-location` en alta precisión, intervalo 10 s, cola sin red y OsmAnd hacia Traccar. El mapa se refresca cada 10 segundos. Si la batería no aguanta, 15 a 20 segundos es aceptable.
 
 Volumen estimado de posiciones con 10 horas de servicio al día y 10 segundos de intervalo (estimación mía, no medida):
 
@@ -209,6 +209,6 @@ Fuente: `RECORRIDOS-INSTITUCIONALES-2025.pdf`. Detalle, anomalías y supuestos e
 
 El alcance se redujo: ver la entrada de `docs/BITACORA.md` de esa fecha. Las fases sobre roster, trazados por calle, viajes y puntualidad, correo y respuestas a quejas quedan **canceladas**.
 
-## App de tableta para choferes (fases 16 a 22)
+## App de tableta para choferes (fases 16 a 22) **[código en develop; falta jornada real]**
 
-Plan completo en `docs/PLAN-APP-CHOFER.md`: login de choferes contra Odoo, turnos, recorrido, alertas e incidentes, con una app Expo y el GPS sigue por Traccar.
+Plan completo en `docs/PLAN-APP-CHOFER.md`. Backend (16–18) y app Expo (19–21) integrados. Fase 22: casos QA del API de chofer, guía, producción y perfil EAS `production`. Pendiente: APK firmado en tableta con GPS, jornada con chofer real.
