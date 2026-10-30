@@ -125,6 +125,4 @@ export function createClient(options: ClientOptions) {
 
 export type DriverClient = ReturnType<typeof createClient>;
 
-export function defaultBaseUrl(): string {
-  return (process.env.EXPO_PUBLIC_ODOO_URL || 'http://10.0.2.2:8069').replace(/\/$/, '');
-}
+export { defaultBaseUrl } from '../config/odooUrl';
