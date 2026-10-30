@@ -1,4 +1,4 @@
-import type { MeResponse, StartResponse } from './types';
+import type { IncidentDraft, MeResponse, RouteMap, StartResponse, StateResponse } from './types';
 
 export class AuthError extends Error {
   constructor() {
@@ -105,6 +105,20 @@ export function createClient(options: ClientOptions) {
     },
     endShift() {
       return post<{ ok: boolean }>('/bus_tracking/driver/shift/end');
+    },
+    state() {
+      return post<StateResponse>('/bus_tracking/driver/state');
+    },
+    routeMap() {
+      return post<RouteMap>('/bus_tracking/driver/route');
+    },
+    incident(draft: IncidentDraft) {
+      const body: Record<string, unknown> = { kind: draft.kind, note: draft.note };
+      if (draft.lat !== null && draft.lon !== null) {
+        body.lat = draft.lat;
+        body.lon = draft.lon;
+      }
+      return post<{ id: number }>('/bus_tracking/driver/incident', body);
     },
   };
 }

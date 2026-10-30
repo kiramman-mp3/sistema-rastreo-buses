@@ -5,11 +5,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ApiError, NetworkError } from '../src/api/client';
 import { GpsPermissionError } from '../src/gps/types';
 import { t } from '../src/i18n';
+import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Button } from '../src/ui/Button';
 import { colors, hit, type } from '../src/ui/theme';
 
 export default function Select() {
+  useLang();
   const session = useSession();
   const { vehicles, routes } = session.snapshot;
   const [vehicleId, setVehicleId] = useState<number | null>(
