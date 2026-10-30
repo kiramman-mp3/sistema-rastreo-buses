@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "eas:android:dev": "eas-cli build --profile development --platform android",
-    "eas:android": "eas-cli build --profile production --platform android"
+    "eas:android": "eas-cli build --profile production --platform android",
+    "eas-build-pre-install": "npm config set legacy-peer-deps true"
   },
   "jest": {
     "preset": "jest-expo",
