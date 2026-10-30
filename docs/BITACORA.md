@@ -752,3 +752,18 @@ Suite Odoo en base limpia: 239 tests, 0 fallos. Una corrida sobre la base anteri
 ### Pendiente
 
 Fase 19: app Expo (`feature/driver-app-base`).
+
+
+## 2026-10-30: fase 19, app Expo de login y selección
+
+### Qué se hizo
+
+Proyecto `apps/conductor-tablet` (Expo SDK 58, TypeScript, expo-router). Login, lista de buses (los ocupados deshabilitados), inicio de turno y pantalla mínima de turno con keep-awake. El token va en SecureStore; un 401 lo borra. URL con `EXPO_PUBLIC_ODOO_URL` (por defecto `http://10.0.2.2:8069`). `eas.json` con perfil development APK. GPS queda para la fase 20.
+
+### Qué se verificó
+
+`tsc --noEmit` PASS. `expo lint` PASS. Jest 8 tests PASS.
+
+### Pendiente
+
+Fase 20: GPS en segundo plano. Probar login real en tableta o emulador.
