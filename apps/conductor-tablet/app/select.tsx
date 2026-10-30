@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ApiError, NetworkError } from '../src/api/client';
+import { GpsPermissionError } from '../src/gps/types';
 import { t } from '../src/i18n';
 import { useSession } from '../src/state/SessionContext';
 import { Button } from '../src/ui/Button';
@@ -28,6 +29,7 @@ export default function Select() {
       router.replace('/shift');
     } catch (err) {
       if (err instanceof NetworkError) setError(t('network'));
+      else if (err instanceof GpsPermissionError) setError(t('gpsPermission'));
       else if (err instanceof ApiError && err.code === 'no_gps') setError(t('noGps'));
       else if (err instanceof ApiError && err.status === 409) setError(t('conflict'));
       else setError(t('conflict'));

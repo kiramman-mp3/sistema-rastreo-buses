@@ -32,6 +32,7 @@ export default function ShiftScreen() {
       <Text style={styles.body}>{driver?.name}</Text>
       <Text style={styles.body}>{t('bus')}: {bus?.name ?? shift?.vehicle_id}</Text>
       <Text style={styles.body}>{t('route')}: {route ? `${route.code} · ${route.name}` : shift?.route_id}</Text>
+      <Button label={t('gpsStatus')} onPress={() => router.push('/gps')} />
       <Button label={t('signOut')} onPress={signOut} danger />
     </View>
   );
