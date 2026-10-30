@@ -4,7 +4,7 @@ import logging
 from datetime import timedelta
 
 from odoo import fields, http
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
 from ..models.utils import map_center
@@ -88,7 +88,10 @@ class BusTrackingController(http.Controller):
         except ValueError:
             return Response(status=400)
         if isinstance(payload, dict):
-            env['bus.vehicle']._process_traccar_payload(payload)
+            try:
+                env['bus.vehicle']._process_traccar_payload(payload)
+            except (ValueError, ValidationError):
+                return Response(status=400)
         return Response(status=200)
 
     @http.route('/bus_tracking/health', type='http', auth='public', methods=['GET'], csrf=False)
