@@ -4,3 +4,4 @@ from . import portal
 from . import complaints
 from . import push
 from . import stops
+from . import driver_api
