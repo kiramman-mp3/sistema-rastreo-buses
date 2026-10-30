@@ -1,4 +1,8 @@
-from odoo import fields, models
+from datetime import timedelta
+
+from odoo import api, fields, models
+
+STALE_AFTER = timedelta(hours=14)
 
 
 class BusShift(models.Model):
@@ -21,3 +25,27 @@ class BusShift(models.Model):
         self.env.cr.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS bus_shift_one_active_vehicle_idx "
             "ON bus_shift (vehicle_id) WHERE state = 'active'")
+
+    def _assign_vehicle(self):
+        """The live map reads bus.vehicle.driver_id (a partner), not the Odoo user."""
+        for shift in self:
+            shift.vehicle_id.sudo().write({
+                'driver_id': shift.user_id.partner_id.id,
+                'route_id': shift.route_id.id,
+            })
+
+    def _end(self):
+        now = fields.Datetime.now()
+        for shift in self:
+            bus = shift.vehicle_id.sudo()
+            shift.write({'state': 'done', 'end': now})
+            if bus.driver_id == shift.user_id.partner_id:
+                bus.driver_id = False
+
+    @api.model
+    def _cron_close_stale(self):
+        stale = self.search([
+            ('state', '=', 'active'),
+            ('start', '<', fields.Datetime.now() - STALE_AFTER),
+        ])
+        stale._end()
