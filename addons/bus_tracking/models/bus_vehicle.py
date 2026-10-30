@@ -34,6 +34,10 @@ class BusVehicle(models.Model):
                                  groups='bus_tracking.group_bus_manager')
     gps_qr = fields.Binary(string="Phone setup QR", compute='_compute_gps_setup',
                            groups='bus_tracking.group_bus_manager')
+    tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_setup',
+                                    groups='bus_tracking.group_bus_manager')
+    tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_setup',
+                              groups='bus_tracking.group_bus_manager')
 
     last_latitude = fields.Float(digits=(10, 7), readonly=True, copy=False)
     last_longitude = fields.Float(digits=(10, 7), readonly=True, copy=False)
@@ -70,6 +74,25 @@ class BusVehicle(models.Model):
             else:
                 bus.gps_setup_link = False
                 bus.gps_qr = False
+
+    @api.model
+    def _tablet_setup_pair(self):
+        """QR the Buses UTA app scans: only the public Odoo URL, never the Traccar id."""
+        base = (self.env['ir.config_parameter'].sudo().get_param('web.base.url') or '').rstrip('/')
+        if base.endswith('/web'):
+            base = base[:-4].rstrip('/')
+        if not base:
+            return False, False
+        link = 'uta-buses://setup?' + urlencode({'odoo': base})
+        png = self.env['ir.actions.report'].barcode('QR', link, width=260, height=260)
+        return link, base64.b64encode(png)
+
+    @api.depends()
+    def _compute_tablet_setup(self):
+        link, qr = self._tablet_setup_pair()
+        for bus in self:
+            bus.tablet_setup_link = link
+            bus.tablet_qr = qr
 
     @api.depends('last_fix_time', 'last_speed')
     def _compute_status(self):
