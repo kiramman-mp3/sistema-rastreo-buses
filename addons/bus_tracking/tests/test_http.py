@@ -74,6 +74,30 @@ class TestHttp(HttpCase):
     def test_webhook_rejects_invalid_body(self):
         self.assertEqual(self.post(data='not json').status_code, 400)
 
+    def test_webhook_rejects_out_of_range_latitude(self):
+        body = json.dumps({
+            'position': traccar_position(7, '2026-10-26T12:00:00Z', 95.0, -70.62),
+            'device': {'id': 7},
+        })
+        self.assertEqual(self.post(data=body).status_code, 400)
+        self.assertEqual(self.positions(), 0)
+
+    def test_webhook_rejects_non_numeric_latitude(self):
+        body = json.dumps({
+            'position': traccar_position(7, '2026-10-26T12:00:00Z', 'abc', -70.62),
+            'device': {'id': 7},
+        })
+        self.assertEqual(self.post(data=body).status_code, 400)
+        self.assertEqual(self.positions(), 0)
+
+    def test_webhook_rejects_invalid_fixtime(self):
+        body = json.dumps({
+            'position': traccar_position(7, 'ayer', -33.47, -70.62),
+            'device': {'id': 7},
+        })
+        self.assertEqual(self.post(data=body).status_code, 400)
+        self.assertEqual(self.positions(), 0)
+
     def test_webhook_rejects_get(self):
         self.assertEqual(self.url_open(WEBHOOK + '?secret=s3cret').status_code, 405)
 

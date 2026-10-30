@@ -54,9 +54,9 @@ Códigos: F funcional, E manejo de errores, P rendimiento, U usabilidad.
 | E4 | Error | Rechazar un método distinto de POST en el webhook | GET al webhook | HTTP 405 (o 404), nunca 200/500 | PASS |
 | E5 | Error | Ignorar un JSON sin identificador de dispositivo | {"foo": 1} | HTTP 200 y 0 posiciones nuevas | PASS |
 | E6 | Error | Ignorar una posición de un dispositivo desconocido | deviceId 999999 | HTTP 200 y 0 posiciones nuevas | PASS |
-| E7 | Error | No guardar una latitud fuera de rango | lat = 95° (el máximo es 90°) | Rechazo (4xx) o descarte; nunca 5xx ni dato guardado | FAIL |
+| E7 | Error | No guardar una latitud fuera de rango | lat = 95° (el máximo es 90°) | Rechazo (4xx) o descarte; nunca 5xx ni dato guardado | PASS |
 | E8 | Error | Controlar una latitud no numérica | lat = "abc" | Rechazo (4xx) o descarte; nunca 5xx | PASS |
-| E9 | Error | Controlar una hora GPS inválida | fixTime = "ayer" | Rechazo (4xx) o descarte; nunca 5xx | FAIL |
+| E9 | Error | Controlar una hora GPS inválida | fixTime = "ayer" | Rechazo (4xx) o descarte; nunca 5xx | PASS |
 | E10 | Error | Responder 404 para una ruta pública inexistente | GET /rutas/NOPE y /rutas/NOPE/buses.json | HTTP 404 en ambas | PASS |
 | E11 | Error | No mostrar una ruta privada | GET /rutas/QA-PRIV y su feed | HTTP 404 en ambas | PASS |
 | E12 | Error | Rechazar una queja demasiado corta | description = "corto" | HTTP 400 con mensaje y 0 quejas nuevas | PASS |

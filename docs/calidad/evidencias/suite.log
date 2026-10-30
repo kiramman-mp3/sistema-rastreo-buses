@@ -1,49 +1,49 @@
-F1   PASS 0.0667 s  HTTP 200; 1 posición; bus en (-1.2650, -78.6250)
-F2   PASS 0.0837 s  18.52 km/h
-F3   PASS 0.1528 s  1 posición tras 2 envíos
-F4   PASS 0.1770 s  Estado intacto; 2 posiciones guardadas
-F5   PASS 0.1829 s  1 llegada en "QA Terminal"
-F6   PASS 0.3315 s  Recorrido "done": QA Terminal → QA Campus
-F7   PASS 0.1802 s  Abierta (máx. 74.1 km/h) y cerrada
-F8   PASS 0.1385 s  HTTP 200; solo la ruta pública
-F9   PASS 0.0601 s  7 buses; 5 claves; sin placa
-F10  PASS 0.1787 s  303; folio Q-00006; estado new
-F11  PASS 0.1859 s  303 → http://localhost:8071/quejas/gracias?f=Q-00007&c=0
-F12  PASS 0.0977 s  HTTP 200; 1 posición
-F13  PASS 0.6943 s  HTTP 200; token; /me sin id de GPS
-F14  PASS 0.9103 s  start/state/incident/end 200; 1 incidente
-E1   PASS 0.0451 s  HTTP 403
-E2   PASS 0.0348 s  HTTP 403
-E3   PASS 0.0511 s  HTTP 400
-E4   PASS 0.0425 s  HTTP 405
-E5   PASS 0.0514 s  HTTP 200; nada guardado
-E6   PASS 0.0506 s  HTTP 200; nada guardado
-E7   FAIL 0.0971 s  HTTP 200 y se guardó la posición inválida (lat 95°)
-E8   PASS 0.0426 s  HTTP 200; 0 guardadas
-E9   FAIL 0.0905 s  HTTP 500 (error de servidor con fixTime "ayer")
-E10  PASS 0.1019 s  HTTP 404 / 404
-E11  PASS 0.0898 s  HTTP 404 / 404
-E12  PASS 0.2733 s  HTTP 400
-E13  PASS 0.2323 s  HTTP 400
-E14  PASS 0.0633 s  HTTP 400
-E15  PASS 0.0519 s  HTTP 303; nada guardado
-E16  PASS 0.0440 s  HTTP 303; nada guardado
-E17  PASS 0.2284 s  HTTP 400; &lt;script&gt; escapado
-E18  PASS 0.0420 s  HTTP 413
-E19  PASS 0.0379 s  HTTP 200; odoo.http.SessionExpiredException
-E20  PASS 0.0442 s  AccessError
-E22  PASS 0.4798 s  5 aceptadas y la 6.ª con HTTP 429
-P1   PASS 7.3116 s  Media 0.0731 s; desv. 0.0687; máx. 0.7275; p95 0.0990
-P2   PASS 114.3063 s  Media 0.5715 s; desv. 0.6062; p95 1.7874; máx. 2.1768; 0 errores; 28.3 req/s
-P3   PASS 10.4992 s  Media 0.1050 s; desv. 0.0222; máx. 0.1644
-P4   PASS 1.9246 s  Media 0.0428 s; desv. 0.0087; máx. 0.0634
-P5   PASS 4.5550 s  Media 0.0456 s; desv. 0.0086; máx. 0.0722
-P6   PASS 8.3837 s  1 guardada; estados [200, 400]; media 0.4192 s; p95 0.4604 s
-P7   FAIL 50.4899 s  errores 0, p95 2.1280, guardadas 60
-U1   PASS 0.9825 s  7/7 claros
-E23  PASS 0.5537 s  HTTP 401 en ambos
-E24  PASS 0.6866 s  HTTP 409 no_gps
-E25  PASS 0.6962 s  HTTP 409 no_shift
-E21  PASS 2.6593 s  60 × HTTP 200 y luego 429 (Retry-After 30)
+F1   PASS 0.0678 s  HTTP 200; 1 posición; bus en (-1.2650, -78.6250)
+F2   PASS 0.0795 s  18.52 km/h
+F3   PASS 0.0979 s  1 posición tras 2 envíos
+F4   PASS 0.1313 s  Estado intacto; 2 posiciones guardadas
+F5   PASS 0.1965 s  1 llegada en "QA Terminal"
+F6   PASS 0.1862 s  Recorrido "done": QA Terminal → QA Campus
+F7   PASS 0.1162 s  Abierta (máx. 74.1 km/h) y cerrada
+F8   PASS 0.1769 s  HTTP 200; solo la ruta pública
+F9   PASS 0.0541 s  7 buses; 5 claves; sin placa
+F10  PASS 0.1520 s  303; folio Q-00011; estado new
+F11  PASS 0.1376 s  303 → http://localhost:8071/quejas/gracias?f=Q-00012&c=0
+F12  PASS 0.0667 s  HTTP 200; 1 posición
+F13  PASS 0.6846 s  HTTP 200; token; /me sin id de GPS
+F14  PASS 0.7239 s  start/state/incident/end 200; 1 incidente
+E1   PASS 0.0457 s  HTTP 403
+E2   PASS 0.0280 s  HTTP 403
+E3   PASS 0.0523 s  HTTP 400
+E4   PASS 0.0269 s  HTTP 405
+E5   PASS 0.0303 s  HTTP 200; nada guardado
+E6   PASS 0.0543 s  HTTP 200; nada guardado
+E7   PASS 0.0477 s  HTTP 400; 0 guardadas
+E8   PASS 0.0303 s  HTTP 400; 0 guardadas
+E9   PASS 0.0531 s  HTTP 400
+E10  PASS 0.0626 s  HTTP 404 / 404
+E11  PASS 0.0594 s  HTTP 404 / 404
+E12  PASS 0.1907 s  HTTP 400
+E13  PASS 0.1845 s  HTTP 400
+E14  PASS 0.0481 s  HTTP 400
+E15  PASS 0.0451 s  HTTP 303; nada guardado
+E16  PASS 0.0548 s  HTTP 303; nada guardado
+E17  PASS 0.2711 s  HTTP 400; &lt;script&gt; escapado
+E18  PASS 0.0510 s  HTTP 413
+E19  PASS 0.0402 s  HTTP 200; odoo.http.SessionExpiredException
+E20  PASS 0.0434 s  AccessError
+E22  PASS 0.6136 s  5 aceptadas y la 6.ª con HTTP 429
+P1   PASS 5.4830 s  Media 0.0548 s; desv. 0.0099; máx. 0.0819; p95 0.0737
+P2   PASS 105.9822 s  Media 0.5299 s; desv. 0.6466; p95 1.8496; máx. 3.2338; 0 errores; 32.0 req/s
+P3   PASS 10.7501 s  Media 0.1075 s; desv. 0.0339; máx. 0.2717
+P4   PASS 1.7667 s  Media 0.0393 s; desv. 0.0081; máx. 0.0524
+P5   PASS 3.9889 s  Media 0.0399 s; desv. 0.0082; máx. 0.0631
+P6   PASS 6.4969 s  1 guardada; estados [200, 400]; media 0.3248 s; p95 0.3577 s
+P7   FAIL 44.6551 s  errores 0, p95 2.1521, guardadas 60
+U1   PASS 0.7607 s  7/7 claros
+E23  PASS 0.6127 s  HTTP 401 en ambos
+E24  PASS 0.6582 s  HTTP 409 no_gps
+E25  PASS 0.5577 s  HTTP 409 no_shift
+E21  PASS 2.6251 s  60 × HTTP 200 y luego 429 (Retry-After 30)
 
-44 de 47 PASS. Guardado en C:\Users\johan\Proyecto\sistema-rastreo-buses\qa\..\docs\calidad\evidencias\suite.json
+46 de 47 PASS. Guardado en C:\Users\johan\Proyecto\sistema-rastreo-buses\qa\..\docs\calidad\evidencias\suite.json
