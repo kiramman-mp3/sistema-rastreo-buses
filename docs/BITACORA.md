@@ -797,3 +797,18 @@ Pantalla de turno: paradas (siguiente destacada, hora de llegada), panel de aler
 ### Pendiente
 
 Fase 22: tableta real, QA, APK y documentación.
+
+
+## 2026-10-30: fase 22, QA, docs y distribución (sin jornada de campo)
+
+### Qué se hizo
+
+Casos en vivo F13–F14 y E23–E25 (login, turno, estado, incidente, 401, bus sin GPS, incidente sin turno). Guía del chofer reescrita para la app de tableta. Sección de usuarios, tokens, revocación y APK en `docs/PRODUCCION.md`. README, PLAN, política de calidad y `eas.json` perfil `production`.
+
+### Qué se verificó
+
+Suite en vivo tras `-u bus_tracking` en `buses_qa`: **44 de 47 PASS**. Los cinco casos de chofer PASS. Fallos previos: E7, E9, P7 (p95 2,13 s). No se ejecutó `eas build` ni una jornada con chofer real.
+
+### Pendiente
+
+APK firmado, tableta con chip GPS, jornada completa. Defectos DEF-008 a DEF-010 del webhook siguen abiertos.
