@@ -114,3 +114,9 @@ class BusPushSubscription(models.Model):
             _logger.warning("pywebpush is not installed: push notifications are disabled")
             return 0
         return sum(1 for subscription in subscriptions if subscription._send_one(payload))
+
+    @api.model
+    def _send_to_managers(self, payload):
+        """Push to every internal user in the manager group."""
+        managers = self.env.ref('bus_tracking.group_bus_manager').users.filtered(lambda u: not u.share)
+        return sum(self._send_to_user(user, payload) for user in managers)

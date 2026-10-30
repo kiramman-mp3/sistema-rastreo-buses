@@ -52,15 +52,25 @@
                             <field name="traccar_device_id"/>
                         </group>
                     </group>
+                    <group string="Driver tablet" groups="bus_tracking.group_bus_manager">
+                        <group>
+                            <field name="tablet_setup_link"/>
+                            <div colspan="2" class="text-muted">
+                                In the Buses UTA app tap Scan QR. This code only has the Odoo address.
+                                The GPS identifier is delivered when the driver starts the shift.
+                            </div>
+                        </group>
+                        <group>
+                            <field name="tablet_qr" widget="image" options="{'size': [260, 260]}" nolabel="1"/>
+                        </group>
+                    </group>
                     <group string="Driver's phone" groups="bus_tracking.group_bus_manager"
                            attrs="{'invisible': [('traccar_device_id', '=', 0)]}">
                         <group>
                             <field name="traccar_unique_id" string="Device identifier"/>
                             <field name="gps_setup_link"/>
                             <div colspan="2" class="text-muted">
-                                In the Traccar Client app enter the server address from
-                                Settings and this device identifier (or scan the QR with the phone).
-                                Then set accuracy to Highest, interval 10 s, angle 30, distance 0.
+                                Legacy Traccar Client QR (server + device identifier). Prefer the tablet app above.
                                 Treat the identifier like a password: anyone who knows it can send positions for this bus.
                             </div>
                         </group>

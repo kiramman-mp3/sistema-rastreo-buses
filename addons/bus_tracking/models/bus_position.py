@@ -1,6 +1,7 @@
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class BusPosition(models.Model):
@@ -20,6 +21,12 @@ class BusPosition(models.Model):
     _sql_constraints = [
         ('vehicle_fix_uniq', 'unique(vehicle_id, fix_time)', "Duplicate position for this bus and time."),
     ]
+
+    @api.constrains('latitude', 'longitude')
+    def _check_coordinates(self):
+        for rec in self:
+            if not (-90.0 <= rec.latitude <= 90.0 and -180.0 <= rec.longitude <= 180.0):
+                raise ValidationError(_("Latitude must be between -90 and 90, and longitude between -180 and 180."))
 
     @api.model
     def _cron_cleanup(self):

@@ -48,9 +48,12 @@ def haversine_m(lat1, lon1, lat2, lon2):
 
 def parse_traccar_dt(value):
     """Traccar ISO-8601 string -> naive UTC datetime (Odoo format)."""
-    if not value:
+    if not value or not isinstance(value, str):
         return False
-    dt = parser.isoparse(value)
+    try:
+        dt = parser.isoparse(value)
+    except (ValueError, TypeError, OverflowError):
+        return False
     if dt.tzinfo:
         dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
     return dt

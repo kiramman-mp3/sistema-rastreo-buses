@@ -1,0 +1,27 @@
+Name                                                           Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------------------------------------------------
+/mnt/extra-addons/bus_tracking/__init__.py                         2      0      0      0   100%
+/mnt/extra-addons/bus_tracking/__manifest__.py                     1      1      0      0     0%   1
+/mnt/extra-addons/bus_tracking/controllers/__init__.py             6      0      0      0   100%
+/mnt/extra-addons/bus_tracking/controllers/complaints.py          97      0     22      0   100%
+/mnt/extra-addons/bus_tracking/controllers/landing.py             18      3      4      0    77%   20-22
+/mnt/extra-addons/bus_tracking/controllers/main.py                57      5     14      2    90%   19, 67-73, 90->92
+/mnt/extra-addons/bus_tracking/controllers/portal.py             106      0     16      0   100%
+/mnt/extra-addons/bus_tracking/controllers/push.py                51      0      8      0   100%
+/mnt/extra-addons/bus_tracking/controllers/stops.py               18      9      4      0    41%   13-20, 31-32
+/mnt/extra-addons/bus_tracking/models/__init__.py                 10      0      0      0   100%
+/mnt/extra-addons/bus_tracking/models/bus_alert.py               130     14     62      4    85%   47-53, 62-71, 115->122, 134, 166->exit
+/mnt/extra-addons/bus_tracking/models/bus_complaint.py            53      0     14      1    99%   53->52
+/mnt/extra-addons/bus_tracking/models/bus_position.py             23      0      2      0   100%
+/mnt/extra-addons/bus_tracking/models/bus_push.py                 74      4      8      0    95%   29-30, 58-59
+/mnt/extra-addons/bus_tracking/models/bus_route.py                98      3     18      1    97%   50-51, 125
+/mnt/extra-addons/bus_tracking/models/bus_route_record.py         25      1      4      1    93%   32
+/mnt/extra-addons/bus_tracking/models/bus_run.py                  40      0     10      0   100%
+/mnt/extra-addons/bus_tracking/models/bus_vehicle.py             123      4     38      2    96%   147->149, 150, 186, 189-190
+/mnt/extra-addons/bus_tracking/models/geo.py                      65      0     22      0   100%
+/mnt/extra-addons/bus_tracking/models/portal_i18n.py              12      0      4      0   100%
+/mnt/extra-addons/bus_tracking/models/res_config_settings.py      24      3      0      0    88%   56-63
+/mnt/extra-addons/bus_tracking/models/traccar_api.py              64      3     14      1    95%   36, 49-50
+/mnt/extra-addons/bus_tracking/models/utils.py                    47      8      4      1    82%   29, 54->56, 61-62, 67-68, 73-75
+----------------------------------------------------------------------------------------------------------
+TOTAL                                                           1144     58    268     13    94%

@@ -27,6 +27,17 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_right_pane">
+                                <label for="tablet_qr"/>
+                                <div class="text-muted">
+                                    Scan this QR in the Buses UTA tablet app to save the Odoo address
+                                    (from web.base.url). It does not include the GPS device identifier.
+                                </div>
+                                <field name="tablet_setup_link"/>
+                                <field name="tablet_qr" widget="image" options="{'size': [260, 260]}"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
                                 <label for="traccar_user"/>
                                 <field name="traccar_user"/>
                                 <label for="traccar_password"/>

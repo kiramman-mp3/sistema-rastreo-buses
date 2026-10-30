@@ -5,3 +5,7 @@ backups/
 __pycache__/
 *.pyc
 /data/
+apps/*/node_modules/
+apps/*/.expo/
+*.apk
+dist-mobile/

@@ -13,6 +13,10 @@
               action="action_bus_run" sequence="20"/>
     <menuitem id="menu_bus_route" name="Rutas" parent="menu_bus_fleet"
               action="action_bus_route" sequence="30"/>
+    <menuitem id="menu_bus_shift" name="Turnos" parent="menu_bus_fleet"
+              action="action_bus_shift" sequence="40"/>
+    <menuitem id="menu_bus_incident" name="Incidentes" parent="menu_bus_fleet"
+              action="action_bus_incident" sequence="50"/>
 
     <menuitem id="menu_bus_complaint" name="Quejas" parent="menu_bus_root"
               action="action_bus_complaint" sequence="30"/>

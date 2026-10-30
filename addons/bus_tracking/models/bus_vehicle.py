@@ -5,7 +5,8 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+import math
+from odoo.exceptions import UserError, ValidationError
 
 from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
 
@@ -34,6 +35,10 @@ class BusVehicle(models.Model):
                                  groups='bus_tracking.group_bus_manager')
     gps_qr = fields.Binary(string="Phone setup QR", compute='_compute_gps_setup',
                            groups='bus_tracking.group_bus_manager')
+    tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_setup',
+                                    groups='bus_tracking.group_bus_manager')
+    tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_setup',
+                              groups='bus_tracking.group_bus_manager')
 
     last_latitude = fields.Float(digits=(10, 7), readonly=True, copy=False)
     last_longitude = fields.Float(digits=(10, 7), readonly=True, copy=False)
@@ -71,6 +76,25 @@ class BusVehicle(models.Model):
                 bus.gps_setup_link = False
                 bus.gps_qr = False
 
+    @api.model
+    def _tablet_setup_pair(self):
+        """QR the Buses UTA app scans: only the public Odoo URL, never the Traccar id."""
+        base = (self.env['ir.config_parameter'].sudo().get_param('web.base.url') or '').rstrip('/')
+        if base.endswith('/web'):
+            base = base[:-4].rstrip('/')
+        if not base:
+            return False, False
+        link = 'uta-buses://setup?' + urlencode({'odoo': base})
+        png = self.env['ir.actions.report'].barcode('QR', link, width=260, height=260)
+        return link, base64.b64encode(png)
+
+    @api.depends()
+    def _compute_tablet_setup(self):
+        link, qr = self._tablet_setup_pair()
+        for bus in self:
+            bus.tablet_setup_link = link
+            bus.tablet_qr = qr
+
     @api.depends('last_fix_time', 'last_speed')
     def _compute_status(self):
         now = fields.Datetime.now()
@@ -88,32 +112,62 @@ class BusVehicle(models.Model):
     def _apply_position(self, pos):
         """Store a Traccar position dict and refresh the bus state."""
         self.ensure_one()
-        fix_time = parse_traccar_dt(pos.get('fixTime'))
-        if not fix_time or pos.get('latitude') is None or pos.get('longitude') is None:
+        raw_time = pos.get('fixTime')
+        if not raw_time:
             return False
+        fix_time = parse_traccar_dt(raw_time)
+        if not fix_time:
+            raise ValidationError(_("Invalid fixTime format."))
+        lat_raw = pos.get('latitude')
+        lon_raw = pos.get('longitude')
+        if lat_raw is None or lon_raw is None:
+            return False
+        try:
+            lat = float(lat_raw)
+            lon = float(lon_raw)
+        except (ValueError, TypeError):
+            raise ValidationError(_("Latitude and longitude must be numbers."))
+        if math.isnan(lat) or math.isnan(lon) or math.isinf(lat) or math.isinf(lon):
+            raise ValidationError(_("Latitude and longitude must be finite numbers."))
+        if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+            raise ValidationError(_("Latitude must be between -90 and 90, and longitude between -180 and 180."))
         if self.env['bus.position'].search_count(
                 [('vehicle_id', '=', self.id), ('fix_time', '=', fix_time)]):
             return False
-        speed = (pos.get('speed') or 0.0) * KNOTS_TO_KMH
+        speed_raw = pos.get('speed')
+        try:
+            speed = (float(speed_raw) if speed_raw is not None else 0.0) * KNOTS_TO_KMH
+        except (ValueError, TypeError):
+            speed = 0.0
+        course_raw = pos.get('course')
+        try:
+            course = float(course_raw) if course_raw is not None else 0.0
+        except (ValueError, TypeError):
+            course = 0.0
+        alt_raw = pos.get('altitude')
+        try:
+            altitude = float(alt_raw) if alt_raw is not None else 0.0
+        except (ValueError, TypeError):
+            altitude = 0.0
         record = self.env['bus.position'].create({
             'vehicle_id': self.id,
             'fix_time': fix_time,
-            'latitude': pos['latitude'],
-            'longitude': pos['longitude'],
+            'latitude': lat,
+            'longitude': lon,
             'speed': speed,
-            'course': pos.get('course') or 0.0,
-            'altitude': pos.get('altitude') or 0.0,
+            'course': course,
+            'altitude': altitude,
             'address': pos.get('address'),
         })
         if not self.last_fix_time or fix_time >= self.last_fix_time:
             self.write({
-                'last_latitude': pos['latitude'],
-                'last_longitude': pos['longitude'],
+                'last_latitude': lat,
+                'last_longitude': lon,
                 'last_speed': speed,
-                'last_course': pos.get('course') or 0.0,
+                'last_course': course,
                 'last_fix_time': fix_time,
             })
-            self._update_current_stop(pos['latitude'], pos['longitude'], fix_time)
+            self._update_current_stop(lat, lon, fix_time)
             self.env['bus.alert']._on_position(self, speed, fix_time)
         return record
 
@@ -160,7 +214,10 @@ class BusVehicle(models.Model):
         for bus in self.filtered('traccar_device_id'):
             pos = by_device.get(bus.traccar_device_id)
             if pos:
-                bus._apply_position(pos)
+                try:
+                    bus._apply_position(pos)
+                except ValidationError:
+                    _logger.warning("Ignoring invalid position from Traccar for bus %s", bus.name)
 
     @api.model
     def _cron_sync_positions(self):

@@ -5,9 +5,10 @@ Módulo Odoo `bus_tracking` que muestra en un mapa en vivo los buses de un servi
 ## Arquitectura
 
 ```
-GPS / app Traccar Client --> Traccar (:5055, :5023, ...) --webhook--> Odoo (/bus_tracking/traccar/webhook)
-                                  ^                                        |
-                                  +---- cron cada 1 min (REST /api) -------+
+Tableta (Buses UTA) --OsmAnd--> Traccar (:5055) --webhook--> Odoo (/bus_tracking/traccar/webhook)
+                                      ^                              |
+                                      +---- cron cada 1 min (REST /api)
+Login, turnos e incidentes: tableta --> Odoo (/bus_tracking/driver/*)
 ```
 
 - **Webhook**: Traccar reenvía cada posición a Odoo (tiempo real).
@@ -31,9 +32,9 @@ docker compose up -d
    - *Webhook secret*: el mismo valor de `WEBHOOK_SECRET` en `.env`
    - **Test connection**.
 3. Crea **Routes** con sus paradas (lat/lon y radio de llegada en metros).
-4. Crea un bus por cada celular de chofer, asígnale su ruta y pulsa **Register GPS in Traccar**: Odoo crea el dispositivo en Traccar y muestra el identificador y un QR en la sección *Driver's phone*. (Si ya tenías dispositivos en Traccar, **Save and import devices** en Ajustes crea un bus por cada uno.)
-5. En el celular sigue `docs/GUIA-CHOFER.md`. Para pruebas sin celular: `curl "http://localhost:5055/?id=<identificador>&lat=-33.45&lon=-70.66&speed=10"`.
-6. `Bus Tracking > Live Map`.
+4. Crea un bus por tableta, asígnale su ruta y pulsa **Register GPS in Traccar** (Odoo crea el dispositivo). El id OsmAnd llega a la app al iniciar el turno, no se pega a mano.
+5. Crea el usuario del chofer (interno + grupo Driver) y sigue `docs/GUIA-CHOFER.md`. App: `apps/conductor-tablet`. Para pruebas sin tableta: `curl "http://localhost:5055/?id=<identificador>&lat=-33.45&lon=-70.66&speed=10"`.
+6. `Bus Tracking > Live Map`. Menús **Turnos** e **Incidentes** para el personal.
 
 En desarrollo el puerto 5055 (OsmAnd) va sin cifrar; en producción los celulares usan HTTPS (ver `docs/PRODUCCION.md`).
 
@@ -58,7 +59,7 @@ El sistema está ajustado para la Universidad Técnica de Ambato (zona horaria d
 ## Menú del panel
 
 - **Mapa en vivo**.
-- **Administración de Buses**: *Buses* (con el registro del GPS del celular), *Recorridos* (los viajes reales de cada bus, escritos por el sistema: salida al dejar la primera parada y llegada al entrar a la última; nadie los llena a mano) y *Rutas* (la ruta y sus paradas).
+- **Administración de Buses**: *Buses* (GPS en Traccar), *Recorridos*, *Rutas*, *Turnos* e *Incidentes*.
 - **Quejas**: solo se leen y se cambian de estado; las crea el pasajero desde el portal público.
 - **Reportes**: *Velocidad*, *Sin señal*, *Paradas largas*, *Desvíos de ruta* y *Llegada a paradas*.
 - **Configuración**: *Ajustes* y *Notificaciones en este dispositivo*.
@@ -70,6 +71,10 @@ El desvío de ruta se mide contra la línea que une las paradas de la ruta, en o
 Sin login: `/rutas` lista las rutas marcadas como *Visible to passengers* y `/rutas/<código>` muestra el mapa con sus buses en vivo (solo nombre, posición, rumbo y estado). Español e inglés con selector. La landing (`/`) lleva a este portal.
 
 Quejas: `/quejas` es el formulario público (contacto opcional, con protección contra abuso). Llegan a `Bus Tracking > Quejas` con estados, responsable y nota interna; los datos de contacto solo los ven los administradores y se borran a los 90 días de resuelta la queja (ajustable).
+
+## Calidad
+
+Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/GUION_DEFENSA.md`.
 
 ## Producción
 
