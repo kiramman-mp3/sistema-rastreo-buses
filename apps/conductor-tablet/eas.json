@@ -10,7 +10,6 @@
       "android": {
         "buildType": "apk"
       },
-      "installCommand": "npm ci --include=dev --legacy-peer-deps",
       "env": {
         "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
       }
@@ -20,7 +19,6 @@
       "android": {
         "buildType": "apk"
       },
-      "installCommand": "npm ci --include=dev --legacy-peer-deps",
       "env": {
         "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
       }
