@@ -31,9 +31,15 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
+      "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Buses UTA lee el código QR de Odoo para guardar la dirección del servidor."
+        }
+      ],
       "expo-task-manager",
       [
         "expo-location",

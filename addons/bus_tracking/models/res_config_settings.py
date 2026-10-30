@@ -1,4 +1,4 @@
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -47,6 +47,16 @@ class ResConfigSettings(models.TransientModel):
     bus_privacy_url = fields.Char(
         string="Privacy policy link", config_parameter='bus_tracking.privacy_url',
         help="Optional address of your institution's privacy policy, shown on the complaint form.")
+    tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_qr')
+    tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_qr')
+
+    @api.depends()
+    def _compute_tablet_qr(self):
+        link, qr = self.env['bus.vehicle']._tablet_setup_pair()
+        for rec in self:
+            rec.tablet_setup_link = link
+            rec.tablet_qr = qr
+
     bus_complaint_retention_days = fields.Integer(
         string="Erase complaint contact data after (days)", config_parameter='bus_tracking.complaint_retention_days',
         default=90,

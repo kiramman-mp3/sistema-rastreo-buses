@@ -4,7 +4,7 @@ import { createClient, defaultBaseUrl } from '../api/client';
 import { gpsKv, gpsStore } from '../gps/store';
 import { liveGps } from '../gps/tracker';
 import { IncidentQueue } from '../incidents/queue';
-import { secureStore } from './secureStore';
+import { odooUrlStore, secureStore } from './secureStore';
 import { Session } from './session';
 
 const SessionContext = createContext<Session | null>(null);
@@ -18,6 +18,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         liveGps,
         gpsStore,
         new IncidentQueue(gpsKv),
+        odooUrlStore,
       ),
     [],
   );

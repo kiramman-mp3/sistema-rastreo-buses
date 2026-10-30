@@ -66,6 +66,17 @@ class TestGpsSetup(BusCase):
         self.assertIn('interval=10', link)
         self.assertTrue(base64.b64decode(self.new_bus.gps_qr).startswith(PNG_MAGIC))
 
+    def test_tablet_qr_has_the_odoo_url_and_not_the_device_id(self):
+        self.env['ir.config_parameter'].set_param(
+            'web.base.url', 'https://busesuta2340.eastus2.cloudapp.azure.com/web')
+        self.new_bus.invalidate_recordset(['tablet_setup_link', 'tablet_qr'])
+        link = self.new_bus.tablet_setup_link
+        self.assertTrue(link.startswith('uta-buses://setup?'))
+        self.assertIn('odoo=https%3A%2F%2Fbusesuta2340.eastus2.cloudapp.azure.com', link)
+        self.assertNotIn('/web', link)
+        self.assertNotIn('id=', link)
+        self.assertTrue(base64.b64decode(self.new_bus.tablet_qr).startswith(PNG_MAGIC))
+
     def test_no_link_until_the_phone_is_registered_and_the_address_is_set(self):
         self.assertFalse(self.new_bus.gps_setup_link)
         self.assertFalse(self.new_bus.gps_qr)

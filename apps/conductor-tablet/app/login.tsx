@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
@@ -17,15 +17,24 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [odooUrl, setOdooUrl] = useState(session.snapshot.odooUrl);
+
+  useFocusEffect(
+    useCallback(() => {
+      setOdooUrl(session.snapshot.odooUrl);
+    }, [session.snapshot.odooUrl]),
+  );
 
   async function submit() {
     setBusy(true);
     setError('');
     try {
+      await session.setOdooUrl(odooUrl);
       await session.login(login.trim(), password);
       router.replace(session.snapshot.shift ? '/shift' : '/select');
     } catch (err) {
-      if (err instanceof AuthError || (err instanceof ApiError && err.status === 401)) {
+      if (err instanceof Error && err.message === 'bad_odoo_url') setError(t('qrBad'));
+      else if (err instanceof AuthError || (err instanceof ApiError && err.status === 401)) {
         setError(t('badCredentials'));
       } else if (err instanceof NetworkError) {
         setError(t('network'));
@@ -40,6 +49,16 @@ export default function Login() {
   return (
     <View style={styles.page}>
       <Text style={styles.title}>{t('login')}</Text>
+      <Text style={styles.hint}>{t('odooUrl')}</Text>
+      <TextInput
+        value={odooUrl}
+        onChangeText={setOdooUrl}
+        autoCapitalize="none"
+        autoCorrect={false}
+        placeholder={t('odooUrl')}
+        style={styles.input}
+      />
+      <Button label={t('scanQr')} onPress={() => router.push('/scan')} />
       <TextInput
         value={login}
         onChangeText={setLogin}
@@ -76,4 +95,5 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   error: { color: colors.bus, fontSize: type.body },
+  hint: { fontSize: type.body - 2, color: colors.muted },
 });
