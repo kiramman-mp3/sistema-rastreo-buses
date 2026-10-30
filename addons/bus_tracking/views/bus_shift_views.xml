@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bus_shift_tree" model="ir.ui.view">
+        <field name="name">bus.shift.tree</field>
+        <field name="model">bus.shift</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" decoration-info="state == 'active'">
+                <field name="start"/>
+                <field name="end"/>
+                <field name="user_id"/>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <field name="state" widget="badge" decoration-info="state == 'active'"
+                       decoration-muted="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_shift_form" model="ir.ui.view">
+        <field name="name">bus.shift.form</field>
+        <field name="model">bus.shift</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <header>
+                    <button name="action_revoke_tablet" type="object" string="Sign out tablet"
+                            class="btn-primary" groups="bus_tracking.group_bus_manager"
+                            confirm="The driver will have to log in again. An active shift is closed."/>
+                    <field name="state" widget="statusbar" statusbar_visible="active,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="user_id"/>
+                            <field name="vehicle_id"/>
+                            <field name="route_id"/>
+                        </group>
+                        <group>
+                            <field name="start"/>
+                            <field name="end"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_shift_search" model="ir.ui.view">
+        <field name="name">bus.shift.search</field>
+        <field name="model">bus.shift</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <filter name="active" string="Active" domain="[('state', '=', 'active')]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="today" string="Today"
+                        domain="[('start', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_vehicle" string="Bus" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="group_route" string="Route" context="{'group_by': 'route_id'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'start:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bus_shift" model="ir.actions.act_window">
+        <field name="name">Shifts</field>
+        <field name="res_model">bus.shift</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+</odoo>

@@ -737,3 +737,18 @@ Suite Odoo: 232 tests, 0 fallos (los de la fase 16 más `test_driver_shift.py`).
 ### Pendiente
 
 Fase 18: vistas de staff, traducciones y push de incidentes (`feature/driver-staff-views`).
+
+
+## 2026-10-30: fase 18, vistas de staff y avisos
+
+### Qué se hizo
+
+Menús Turnos e Incidentes (filtros por bus, ruta y fecha). Un incidente nuevo avisa a los gestores por el mismo canal push que las alertas (`_send_to_managers`, cron de un minuto). El gestor puede *Cerrar sesión de la tableta*: revoca los tokens y cierra el turno activo. Traducciones nuevas en `i18n/es.po`.
+
+### Qué se verificó
+
+Suite Odoo en base limpia: 239 tests, 0 fallos. Una corrida sobre la base anterior falló un test HTTP de push por sesión caducada; no era de esta fase y no se reprodujo en fresco.
+
+### Pendiente
+
+Fase 19: app Expo (`feature/driver-app-base`).

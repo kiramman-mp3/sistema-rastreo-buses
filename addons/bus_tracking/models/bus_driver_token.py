@@ -58,5 +58,9 @@ class BusDriverToken(models.Model):
         self.sudo().search([('token_hash', '=', hash_token(raw))]).unlink()
 
     @api.model
+    def _revoke_user(self, user):
+        self.sudo().search([('user_id', '=', user.id)]).unlink()
+
+    @api.model
     def _cron_purge(self):
         self.sudo().search([('expires', '<', fields.Datetime.now())]).unlink()

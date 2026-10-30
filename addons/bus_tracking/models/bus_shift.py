@@ -1,6 +1,7 @@
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import AccessError
 
 STALE_AFTER = timedelta(hours=14)
 
@@ -41,6 +42,16 @@ class BusShift(models.Model):
             shift.write({'state': 'done', 'end': now})
             if bus.driver_id == shift.user_id.partner_id:
                 bus.driver_id = False
+
+    def action_revoke_tablet(self):
+        """Drop every app token of this driver so the tablet must log in again."""
+        if not self.env.user.has_group('bus_tracking.group_bus_manager'):
+            raise AccessError(_("Only managers can sign a tablet out."))
+        Token = self.env['bus.driver.token']
+        for shift in self:
+            Token._revoke_user(shift.user_id)
+            if shift.state == 'active':
+                shift.sudo()._end()
 
     @api.model
     def _cron_close_stale(self):
