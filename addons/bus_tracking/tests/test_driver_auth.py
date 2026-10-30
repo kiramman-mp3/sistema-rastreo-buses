@@ -15,11 +15,13 @@ LOGOUT = '/bus_tracking/driver/logout'
 
 
 def make_driver(env, login='chofer1', password='clave-segura-1', groups='bus_tracking.group_bus_driver'):
+    # Internal user + the requested role. Odoo 16 will not authenticate a user
+    # that has only a custom group (they are treated as share users without a portal).
     return env['res.users'].with_context(no_reset_password=True).create({
         'name': 'Chofer Uno',
         'login': login,
         'password': password,
-        'groups_id': [(6, 0, [env.ref(groups).id])],
+        'groups_id': [(6, 0, [env.ref('base.group_user').id, env.ref(groups).id])],
     })
 
 
@@ -115,6 +117,9 @@ class TestDriverApi(HttpCase):
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        # HttpCase tests share 127.0.0.1. Failed logins in one test would otherwise
+        # trip Odoo's cooldown and 401 the later successful-login tests.
+        self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
         self.driver = make_driver(self.env)
         make_driver(self.env, login='gerente', password='clave-gerente-1', groups='bus_tracking.group_bus_manager')
         self.route = self.env['bus.route'].create({'name': 'Linea Centro', 'code': 'L1'})
