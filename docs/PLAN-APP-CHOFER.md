@@ -24,7 +24,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 | 19 | App: proyecto Expo, login, selección de bus y ruta | `feature/driver-app-base` | 16, 17 | Integrada en develop |
 | 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Integrada en develop |
 | 21 | App: paradas, avance, alertas, incidentes, idiomas | `feature/driver-app-route` | 17, 19 | Integrada en develop |
-| 22 | Prueba real, QA, distribución y documentación | `feature/driver-app-release` | 18, 20, 21 | Pendiente |
+| 22 | Prueba real, QA, distribución y documentación | `feature/driver-app-release` | 18, 20, 21 | Docs y QA en develop; falta jornada real |
 
 Las fases 19 a 21 pueden avanzar en paralelo con la 18 una vez que la 17 fije el contrato de la API.
 
@@ -126,7 +126,7 @@ Criterio de aceptación: `classifyStops`, cola de incidentes e i18n es/en/qu cub
 - Documentación: reemplazar el uso de Traccar Client en `docs/GUIA-CHOFER.md`, nueva sección en `docs/PRODUCCION.md` (usuarios de chofer, tokens, revocación), entrada en `docs/BITACORA.md`, `docs/PLAN.md` y `README.md`, y actualizar la memoria del proyecto.
 - Configuración de la tableta: pantalla siempre encendida, sin ahorro de batería para la app, cargador en el bus, modo de aplicación fija si el modelo lo permite.
 
-Criterio de aceptación: una jornada completa con un chofer real, con GPS, turno, alerta e incidente, sin intervención del desarrollador.
+Criterio de aceptación (código): guía del chofer, sección de producción, README/PLAN, perfil EAS `production`, casos F13–F14 y E23–E25 en `qa/qa_suite.py`. Criterio de campo **abierto**: jornada completa con chofer real y APK firmado en tableta con GPS.
 
 ## Riesgos
 

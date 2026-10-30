@@ -19,7 +19,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-009 | 28-oct-2026 | Suite en vivo (E8) y auditoría | Una latitud no numérica produce HTTP 500 en el webhook | models/bus_vehicle.py, controllers/main.py | ABIERTO |
 | DEF-010 | 28-oct-2026 | Suite en vivo (E9) y auditoría | Una hora GPS inválida produce HTTP 500 en el webhook | models/utils.py (parse_traccar_dt), controllers/main.py | ABIERTO |
 
-Resumen: 10 registrados, 7 cerrados (70 %), 3 abiertos. Densidad: 5,9 defectos por KLOC (1,686 KLOC de Python sin pruebas).
+Resumen: 10 registrados, 7 cerrados (70 %), 3 abiertos. Densidad: 4,8 defectos por KLOC (2,090 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 

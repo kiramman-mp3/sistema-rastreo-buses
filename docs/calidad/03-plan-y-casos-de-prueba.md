@@ -7,7 +7,7 @@ Documento de pruebas en el sentido de ISO/IEC/IEEE 29119-3: estrategia, diseño 
 | Nivel | Qué prueba | Herramienta | Cantidad |
 |---|---|---|---|
 | Unitarias y de integración | Modelos, reglas de negocio, controladores y permisos dentro de Odoo, en una base limpia | `TransactionCase` y `HttpCase` de Odoo 16, con coverage.py | 150 pruebas |
-| Suite en vivo | El sistema como lo usan un celular, un pasajero y un administrador, por HTTP y XML-RPC | `qa/qa_suite.py` | 42 casos |
+| Suite en vivo | El sistema como lo usan un celular, un pasajero y un administrador, por HTTP y XML-RPC | `qa/qa_suite.py` | 47 casos |
 | Auditoría aleatoria | Robustez ante entradas normales y límite, con semilla fija, sobre 15 áreas | `qa/auditoria.py` | 1.000 peticiones |
 | Datos | Estado real de la base tras las pruebas (rangos, duplicados, coherencia) | Consultas SQL en `qa/metricas.py` | 11 consultas |
 | Mutación (manual) | Que las pruebas fallen si se rompe una regla | Registradas en `docs/BITACORA.md` | 16 mutaciones, todas detectadas |
@@ -42,7 +42,7 @@ Comando (base nueva, sin datos de demostración):
 MSYS_NO_PATHCONV=1 docker compose run --rm odoo odoo -d buses_test -i bus_tracking --test-enable --test-tags /bus_tracking --stop-after-init --without-demo=all
 ```
 
-## 4. Casos de la suite en vivo (42)
+## 4. Casos de la suite en vivo (47)
 
 Códigos: F funcional, E manejo de errores, P rendimiento, U usabilidad.
 
@@ -55,7 +55,7 @@ Códigos: F funcional, E manejo de errores, P rendimiento, U usabilidad.
 | E5 | Error | Ignorar un JSON sin identificador de dispositivo | {"foo": 1} | HTTP 200 y 0 posiciones nuevas | PASS |
 | E6 | Error | Ignorar una posición de un dispositivo desconocido | deviceId 999999 | HTTP 200 y 0 posiciones nuevas | PASS |
 | E7 | Error | No guardar una latitud fuera de rango | lat = 95° (el máximo es 90°) | Rechazo (4xx) o descarte; nunca 5xx ni dato guardado | FAIL |
-| E8 | Error | Controlar una latitud no numérica | lat = "abc" | Rechazo (4xx) o descarte; nunca 5xx | FAIL |
+| E8 | Error | Controlar una latitud no numérica | lat = "abc" | Rechazo (4xx) o descarte; nunca 5xx | PASS |
 | E9 | Error | Controlar una hora GPS inválida | fixTime = "ayer" | Rechazo (4xx) o descarte; nunca 5xx | FAIL |
 | E10 | Error | Responder 404 para una ruta pública inexistente | GET /rutas/NOPE y /rutas/NOPE/buses.json | HTTP 404 en ambas | PASS |
 | E11 | Error | No mostrar una ruta privada | GET /rutas/QA-PRIV y su feed | HTTP 404 en ambas | PASS |
@@ -70,6 +70,9 @@ Códigos: F funcional, E manejo de errores, P rendimiento, U usabilidad.
 | E20 | Error | Negar el uso de notificaciones push a un usuario sin rol de administrador | Usuario de solo lectura llama /bus_tracking/push/state | Error de acceso (AccessError) | PASS |
 | E21 | Error | Limitar el feed público a 60 peticiones por minuto y dirección | Más de 60 GET seguidos a /rutas/QA1/buses.json | Aparece HTTP 429 con Retry-After | PASS |
 | E22 | Error | Limitar a 5 quejas por hora y dirección | Quejas válidas seguidas desde la misma dirección | La sexta recibe HTTP 429 y no se guarda | PASS |
+| E23 | Error | Rechazar un login de chofer con clave incorrecta | POST /bus_tracking/driver/login con clave mala | HTTP 401; mismo aspecto que un usuario desconocido | PASS |
+| E24 | Error | Rechazar el inicio de turno si el bus no tiene GPS | shift/start sobre QA-21 sin traccar_unique_id | HTTP 409 no_gps | PASS |
+| E25 | Error | Rechazar un incidente sin turno activo | POST /driver/incident tras cerrar el turno | HTTP 409 no_shift | PASS |
 | F1 | Funcional | Guardar una posición válida enviada por el webhook (secreto en cabecera) | POST con deviceId 101, lat -1.2650, lon -78.6250 | HTTP 200; 1 posición; el bus queda en esa posición | PASS |
 | F2 | Funcional | Convertir la velocidad de nudos a km/h | speed = 10 nudos | last_speed = 18,52 km/h | PASS |
 | F3 | Funcional | Ignorar una posición duplicada (mismo bus y hora GPS) | La misma posición enviada 2 veces | 1 sola posición guardada | PASS |
@@ -82,13 +85,15 @@ Códigos: F funcional, E manejo de errores, P rendimiento, U usabilidad.
 | F10 | Funcional | Guardar una queja válida y entregar un folio | Formulario con descripción de 60 caracteres y correo | HTTP 303 a /quejas/gracias?f=Q-…; queja en estado "new" | PASS |
 | F11 | Funcional | Aceptar una queja anónima (sin correo ni teléfono) | Formulario solo con descripción | HTTP 303 con c=0 (no podemos responder) | PASS |
 | F12 | Funcional | Aceptar el secreto como parámetro de consulta (instalaciones antiguas) | POST ?secret=… sin cabecera | HTTP 200 y 1 posición | PASS |
+| F13 | Funcional | Iniciar sesión de chofer y recibir un token | POST /bus_tracking/driver/login con qa_driver | HTTP 200; token; el nombre del chofer | PASS |
+| F14 | Funcional | Abrir un turno, consultar estado, reportar incidente y cerrar | start → state → incident → end sobre QA-20 | Turno activo, state con paradas, incidente guardado, turno cerrado | PASS |
 | P1 | Rendimiento | 100 posiciones secuenciales al webhook | 100 POST de un mismo bus, una hora GPS distinta cada uno | Media < 0,5 s y 0 % de error | PASS |
 | P2 | Rendimiento | 200 posiciones con 20 hilos sobre 20 buses distintos | 20 hilos × 10 posiciones por bus | Media < 1 s y error < 10 % | PASS |
 | P3 | Rendimiento | 100 cargas de la página pública /rutas | 100 GET secuenciales | Media < 0,5 s y 0 % de error | PASS |
 | P4 | Rendimiento | 45 lecturas del feed público (con caché de 5 s) | 45 GET a /rutas/QA1/buses.json | Media < 0,5 s y 0 % de error | PASS |
 | P5 | Rendimiento | 100 consultas al endpoint de salud | 100 GET a /bus_tracking/health | Media < 0,5 s y 0 % de error | PASS |
 | P6 | Rendimiento | Integridad con 20 hilos que envían la misma posición a la vez | 20 POST idénticos simultáneos | 1 posición guardada y ningún HTTP 5xx | PASS |
-| P7 | Rendimiento | 60 posiciones distintas de un mismo bus con 20 hilos | 60 POST, un solo bus, 20 hilos | 60 guardadas, error < 10 % y p95 < 2 s | PASS |
+| P7 | Rendimiento | 60 posiciones distintas de un mismo bus con 20 hilos | 60 POST, un solo bus, 20 hilos | 60 guardadas, error < 10 % y p95 < 2 s | FAIL |
 | U1 | Usabilidad | Mensajes de rechazo comprensibles y sin datos técnicos | 7 entradas inválidas hacia la persona usuaria | 100 % con mensaje de negocio, sin SQL ni trazas | PASS |
 
 ## 5. Áreas de la auditoría aleatoria (1.000 peticiones, semilla 20261028)

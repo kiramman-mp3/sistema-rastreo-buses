@@ -161,7 +161,7 @@ metas = [
     ['Error en la auditoría', '< 10 %', pct(100.0 * f_aud / n_aud), mini(100.0 * f_aud / n_aud < 10)],
     ['Respuestas HTTP 5xx ante cualquier entrada', '0', str(A['estados_5xx'] + 2), mini(False)],
     ['Tiempo promedio de la auditoría', '< 0,5 s', n(A['tiempo']['mean']) + ' s', mini(A['tiempo']['mean'] < 0.5)],
-    ['Latencia p95 con 20 hilos (P2, P7)', '< 2 s', '%s s / %s s' % (n(PERF['P2']['p95']), n(PERF['P7']['p95'])), mini(max(PERF['P2']['p95'], PERF['P7']['p95']) < 2)],
+    ['Latencia p95 con 20 hilos (P2, P7)', '< 2 s', '%s s / %s s' % (n(PERF.get('P2', {}).get('p95', 0)), n(PERF.get('P7', {}).get('p95', 0))), mini(bool(PERF.get('P2') and PERF.get('P7') and max(PERF['P2']['p95'], PERF['P7']['p95']) < 2))],
     ['Capacidad de ingesta (100 buses, un reporte cada 10 s)', '≥ 10 req/s', n(cap, 1) + ' req/s', mini(cap >= 10)],
     ['Cobertura de código (sentencias y ramas)', '≥ 80 %', pct(COV['porcentaje'], 1), mini(COV['porcentaje'] >= 80)],
     ['Cobertura de rutas HTTP', '100 %', pct(100.0 * M['endpoints']['cubiertos'] / M['endpoints']['total'], 1), mini(M['endpoints']['cubiertos'] == M['endpoints']['total'])],

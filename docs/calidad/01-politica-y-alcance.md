@@ -20,10 +20,11 @@ La política aplica a todo `addons/bus_tracking` y a lo que lo hace funcionar:
 | Interfaz (mapa, portal, push) | `static/src/` |
 | Traducciones | `i18n/` |
 | Infraestructura | `docker-compose*.yml`, `docker/`, `proxy/Caddyfile`, `scripts/` |
+| App de tableta | `apps/conductor-tablet/` (login, turnos, GPS OsmAnd, incidentes) |
 
-Rutas HTTP que se validan (19 rutas, 16 con prueba de petición): `/bus_tracking/traccar/webhook`, `/bus_tracking/health`, `/bus_tracking/live`, `/bus_tracking/track`, `/rutas`, `/rutas/<código>`, `/rutas/<código>/buses.json`, `/quejas`, `/quejas/gracias`, `/`, `/inicio`, `/bus_tracking/sw.js`, `/bus_tracking/push/*` y `/bus_tracking/stop/*`.
+Rutas HTTP que se validan: las del portal y el webhook, más `/bus_tracking/driver/login`, `/logout`, `/me`, `/shift/start`, `/shift/end`, `/state`, `/route` e `/incident` (suite en vivo F13–F14, E23–E25 y tests de Odoo).
 
-Fuera de alcance: Odoo, Traccar y la app Traccar Client (son terceros); el contenido legal del aviso de privacidad (lo revisa la universidad).
+Fuera de alcance: Odoo y Traccar (terceros); Expo y el sistema operativo de la tableta; el contenido legal del aviso de privacidad (lo revisa la universidad). La app de chofer *sí* está en alcance: es código de este repositorio.
 
 ## 3. Política de calidad
 

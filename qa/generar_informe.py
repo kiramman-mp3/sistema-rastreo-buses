@@ -49,7 +49,10 @@ n_suite, f_suite = SUITE['total'], SUITE['fallos']
 n_aud, f_aud = AUD['total'], AUD['fallos']
 n_total, f_total = n_unit + n_suite + n_aud, f_unit + f_suite + f_aud
 tipos = {t['tipo']: t for t in SUITE['por_tipo']}
-perf = {r['id']: r for r in SUITE['rendimiento']}
+_EMPTY_STATS = {'n': 0, 'mean': 0.0, 'min': 0.0, 'max': 0.0, 'stdev': 0.0, 'p95': 0.0, 'cv': 0.0}
+_perf_raw = {r['id']: r for r in SUITE['rendimiento']}
+perf = {pid: _perf_raw.get(pid, {'id': pid, 'stats': _EMPTY_STATS, 'rps': 0})
+        for pid in ('P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7')}
 fallos_suite = [c for c in CASOS if c['estado'] != 'PASS']
 audit_notes = AUD['fallos_por_causa']
 DEFECTOS_ABIERTOS = ('DEF-008', 'DEF-009', 'DEF-010')
@@ -299,7 +302,8 @@ metas = [['Meta', 'Umbral', 'Resultado', 'Cumple'],
          meta('Error en la auditoría', '&lt; 10 %', pct(100.0 * f_aud / n_aud), 100.0 * f_aud / n_aud < 10),
          meta('Respuestas HTTP 5xx ante cualquier entrada', '0', str(AUD['estados_5xx'] + len([c for c in fallos_suite if 'HTTP 500' in c['error']])), AUD['estados_5xx'] == 0 and not any('HTTP 500' in c['error'] for c in fallos_suite)),
          meta('Tiempo promedio (auditoría / suite en vivo)', '&lt; 0,5 s', '%s s / %s s' % (fmt(AUD['tiempo']['mean']), fmt(tipos['Funcional']['mean'])), AUD['tiempo']['mean'] < 0.5),
-         meta('Latencia p95 bajo 20 hilos (P2, P7)', '&lt; 2 s', '%s s / %s s' % (fmt(perf['P2']['stats']['p95']), fmt(perf['P7']['stats']['p95'])), max(perf['P2']['stats']['p95'], perf['P7']['stats']['p95']) < 2),
+         meta('Latencia p95 bajo 20 hilos (P2, P7)', '&lt; 2 s', '%s s / %s s' % (fmt(perf['P2']['stats']['p95']), fmt(perf['P7']['stats']['p95']) if 'P7' in _perf_raw else 'sin medida'),
+              'P7' in _perf_raw and max(perf['P2']['stats']['p95'], perf['P7']['stats']['p95']) < 2),
          meta('Capacidad de ingesta (100 buses, un reporte cada 10 s)', '≥ 10 req/s', '%s req/s (P2)' % fmt(cap, 1), cap >= 10),
          meta('Cobertura de código', '≥ 80 %', pct(COV['porcentaje'], 1), COV['porcentaje'] >= 80),
          meta('Cobertura de rutas HTTP', '100 %', pct(100.0 * M['endpoints']['cubiertos'] / M['endpoints']['total'], 1), M['endpoints']['cubiertos'] == M['endpoints']['total']),
