@@ -11,7 +11,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
+        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       }
     },
     "production": {
@@ -20,7 +21,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
+        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       }
     }
   }
