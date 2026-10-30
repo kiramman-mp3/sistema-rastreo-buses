@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bus_incident_tree" model="ir.ui.view">
+        <field name="name">bus.incident.tree</field>
+        <field name="model">bus.incident</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0">
+                <field name="create_date"/>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <field name="user_id"/>
+                <field name="kind"/>
+                <field name="note"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_incident_form" model="ir.ui.view">
+        <field name="name">bus.incident.form</field>
+        <field name="model">bus.incident</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="kind"/>
+                            <field name="vehicle_id"/>
+                            <field name="route_id"/>
+                            <field name="user_id"/>
+                            <field name="shift_id"/>
+                        </group>
+                        <group>
+                            <field name="create_date"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                        </group>
+                    </group>
+                    <group string="Note">
+                        <field name="note" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_incident_search" model="ir.ui.view">
+        <field name="name">bus.incident.search</field>
+        <field name="model">bus.incident</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <field name="user_id"/>
+                <field name="note"/>
+                <filter name="today" string="Today"
+                        domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                <separator/>
+                <filter name="breakdown" string="Breakdown" domain="[('kind', '=', 'breakdown')]"/>
+                <filter name="traffic" string="Traffic" domain="[('kind', '=', 'traffic')]"/>
+                <filter name="accident" string="Accident" domain="[('kind', '=', 'accident')]"/>
+                <filter name="other" string="Other" domain="[('kind', '=', 'other')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_vehicle" string="Bus" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="group_route" string="Route" context="{'group_by': 'route_id'}"/>
+                    <filter name="group_kind" string="Kind" context="{'group_by': 'kind'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bus_incident" model="ir.actions.act_window">
+        <field name="name">Incidents</field>
+        <field name="res_model">bus.incident</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+</odoo>
