@@ -15,11 +15,11 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-005 | 26-oct-2026 | Test del asistente de respuesta | El pasajero habría visto la etiqueta <br/> como texto | asistente de respuesta (retirado después) | Cerrado |
 | DEF-006 | 27-oct-2026 | Suite de Odoo | Un bus sin ruta rompía el cálculo de desvío de ruta | models/bus_alert.py | Cerrado |
 | DEF-007 | 26-oct-2026 | Revisión en el navegador | El navegador seguía mostrando un CSS viejo del portal | controllers/portal.py | Cerrado |
-| DEF-008 | 28-oct-2026 | Suite en vivo (E7) y auditoría | Se guardan posiciones con latitud o longitud imposibles (p. ej. 95°) | models/bus_vehicle.py (_apply_position), models/bus_position.py | ABIERTO |
-| DEF-009 | 28-oct-2026 | Suite en vivo (E8) y auditoría | Una latitud no numérica produce HTTP 500 en el webhook | models/bus_vehicle.py, controllers/main.py | ABIERTO |
-| DEF-010 | 28-oct-2026 | Suite en vivo (E9) y auditoría | Una hora GPS inválida produce HTTP 500 en el webhook | models/utils.py (parse_traccar_dt), controllers/main.py | ABIERTO |
+| DEF-008 | 28-oct-2026 | Suite en vivo (E7) y auditoría | Se guardan posiciones con latitud o longitud imposibles (p. ej. 95°) | models/bus_vehicle.py (_apply_position), models/bus_position.py | Cerrado |
+| DEF-009 | 28-oct-2026 | Suite en vivo (E8) y auditoría | Una latitud no numérica produce HTTP 500 en el webhook | models/bus_vehicle.py, controllers/main.py | Cerrado |
+| DEF-010 | 28-oct-2026 | Suite en vivo (E9) y auditoría | Una hora GPS inválida produce HTTP 500 en el webhook | models/utils.py (parse_traccar_dt), controllers/main.py | Cerrado |
 
-Resumen: 10 registrados, 7 cerrados (70 %), 3 abiertos. Densidad: 4,8 defectos por KLOC (2,090 KLOC de Python sin pruebas).
+Resumen: 10 registrados, 10 cerrados (100 %), 0 abiertos. Densidad: 4,8 defectos por KLOC (2,090 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -69,19 +69,19 @@ Resumen: 10 registrados, 7 cerrados (70 %), 3 abiertos. Densidad: 4,8 defectos p
 
 - **Causa raíz:** Los campos float no tienen restricción de rango y _apply_position no valida lo que recibe; ninguna prueba enviaba coordenadas fuera de rango.
 - **Categoría:** Validación de entrada
-- **Prueba que lo protege:** E7 (falla hoy); falta portarla a las pruebas de Odoo
+- **Prueba que lo protege:** E7; test_webhook_rejects_out_of_range_latitude y test_out_of_range_coordinates_raise_validation_error
 
 ### DEF-009: Una latitud no numérica produce HTTP 500 en el webhook
 
 - **Causa raíz:** El valor llega sin convertir al ORM, que lanza una excepción no controlada.
 - **Categoría:** Validación de entrada
-- **Prueba que lo protege:** E8 (falla hoy)
+- **Prueba que lo protege:** E8; test_webhook_rejects_non_numeric_latitude y test_non_numeric_coordinates_raise_validation_error
 
 ### DEF-010: Una hora GPS inválida produce HTTP 500 en el webhook
 
 - **Causa raíz:** parse_traccar_dt llama a isoparse sin capturar el error de formato.
 - **Categoría:** Validación de entrada
-- **Prueba que lo protege:** E9 (falla hoy)
+- **Prueba que lo protege:** E9; test_webhook_rejects_invalid_fixtime y test_invalid_fixtime_raises_validation_error
 
 ## 3. Qué falta para cerrar los abiertos
 
