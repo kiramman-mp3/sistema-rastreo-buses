@@ -767,3 +767,18 @@ Proyecto `apps/conductor-tablet` (Expo SDK 58, TypeScript, expo-router). Login, 
 ### Pendiente
 
 Fase 20: GPS en segundo plano. Probar login real en tableta o emulador.
+
+
+## 2026-10-30: fase 20, GPS en segundo plano
+
+### Qué se hizo
+
+`expo-location` + `expo-task-manager`: actualizaciones cada 10 s, servicio en primer plano, OsmAnd (`speed` en nudos). Cola en AsyncStorage (360 puntos, 2 h). Permisos de ubicación y exclusión de batería antes de abrir el turno. Diagnóstico desde la pantalla de turno. `NOTICE` cita Traccar Client (Apache 2.0). El id de Traccar se guarda en el dispositivo para reanudar el GPS si `/me` recupera el turno.
+
+### Qué se verificó
+
+`tsc --noEmit` PASS. `expo lint` PASS. Jest 20 tests PASS.
+
+### Pendiente
+
+Fase 21: paradas, mapa, alertas e incidentes. Probar GPS real con development build (Expo Go no sirve).

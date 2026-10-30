@@ -22,7 +22,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 | 17 | Backend: iniciar/terminar turno, ruta, estado, alertas, incidentes | `feature/driver-shifts-api` | 16 | Integrada en develop |
 | 18 | Backend: vistas de staff, traducciones, avisos push de incidentes | `feature/driver-staff-views` | 17 | Integrada en develop |
 | 19 | App: proyecto Expo, login, selección de bus y ruta | `feature/driver-app-base` | 16, 17 | Integrada en develop |
-| 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Pendiente |
+| 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Integrada en develop |
 | 21 | App: paradas, avance, alertas, incidentes, idiomas | `feature/driver-app-route` | 17, 19 | Pendiente |
 | 22 | Prueba real, QA, distribución y documentación | `feature/driver-app-release` | 18, 20, 21 | Pendiente |
 
@@ -103,7 +103,7 @@ Archivos en `src/gps/`.
 
 Tests: construcción de la URL OsmAnd (conversión de unidades), cola (orden, reintento, tope), tarea con ubicación simulada.
 
-Criterio de aceptación: con la pantalla apagada 30 minutos, el bus sigue moviéndose en el mapa en vivo de Odoo. Tras cortar la red 5 minutos, la cola se vacía al volver.
+Criterio de aceptación: URL OsmAnd (nudos, timestamp en segundos), cola (orden, reintento, topes) y tarea con ubicación simulada cubiertos por Jest. `tsc --noEmit`, `expo lint` y 20 tests: PASS. El id se pide en permisos **antes** de `shift/start`. Falta la prueba con pantalla apagada 30 min y cola 5 min sin red (fase 22, development build).
 
 ## Fase 21. App: recorrido, alertas e incidentes
 
