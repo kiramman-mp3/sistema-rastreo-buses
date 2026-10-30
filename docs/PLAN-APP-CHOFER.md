@@ -23,7 +23,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 | 18 | Backend: vistas de staff, traducciones, avisos push de incidentes | `feature/driver-staff-views` | 17 | Integrada en develop |
 | 19 | App: proyecto Expo, login, selección de bus y ruta | `feature/driver-app-base` | 16, 17 | Integrada en develop |
 | 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Integrada en develop |
-| 21 | App: paradas, avance, alertas, incidentes, idiomas | `feature/driver-app-route` | 17, 19 | Pendiente |
+| 21 | App: paradas, avance, alertas, incidentes, idiomas | `feature/driver-app-route` | 17, 19 | Integrada en develop |
 | 22 | Prueba real, QA, distribución y documentación | `feature/driver-app-release` | 18, 20, 21 | Pendiente |
 
 Las fases 19 a 21 pueden avanzar en paralelo con la 18 una vez que la 17 fije el contrato de la API.
@@ -116,7 +116,7 @@ Criterio de aceptación: URL OsmAnd (nudos, timestamp en segundos), cola (orden,
 
 Tests: estado de las paradas, cola de incidentes, textos en los tres idiomas.
 
-Criterio de aceptación: un chofer completa un recorrido simulado, ve avanzar las paradas, ve una alerta de velocidad y reporta un incidente que el gestor recibe.
+Criterio de aceptación: `classifyStops`, cola de incidentes e i18n es/en/qu cubiertos por Jest. `tsc --noEmit`, `expo lint` y 29 tests: PASS. Falta el recorrido simulado en tableta/emulador (fase 22).
 
 ## Fase 22. Prueba real, QA y distribución
 
