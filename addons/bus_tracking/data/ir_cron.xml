@@ -50,6 +50,16 @@
         <field name="numbercall">-1</field>
     </record>
 
+    <record id="cron_purge_driver_tokens" model="ir.cron">
+        <field name="name">Bus Tracking: purge expired driver app tokens</field>
+        <field name="model_id" ref="model_bus_driver_token"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_purge()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+    </record>
+
     <record id="cron_cleanup_positions" model="ir.cron">
         <field name="name">Bus Tracking: purge old positions</field>
         <field name="model_id" ref="model_bus_position"/>
