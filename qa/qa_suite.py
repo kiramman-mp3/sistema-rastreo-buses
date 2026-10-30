@@ -258,6 +258,59 @@ def f12(ctx):
     return dict(obtenido='HTTP 200; 1 posición', mensaje='Sin cuerpo (200)')
 
 
+def driver_post(path, token=None, body=None):
+    headers = dict(HEADERS_JSON)
+    if token:
+        headers['Authorization'] = 'Bearer ' + token
+    return req('POST', BASE + path, json=body or {}, headers=headers)
+
+
+def driver_login(login='qa_driver', password='qa_driver_pw'):
+    return driver_post('/bus_tracking/driver/login', body={'login': login, 'password': password, 'device': 'qa'})
+
+
+@case('F13', 'Funcional', 'Iniciar sesión de chofer y recibir un token',
+      'POST /bus_tracking/driver/login con qa_driver', 'HTTP 200; token; el nombre del chofer')
+def f13(ctx):
+    r = driver_login()
+    check(r.status_code == 200, 'HTTP %s %s' % (r.status_code, r.text[:120]))
+    data = r.json()
+    check(data.get('token') and data.get('driver', {}).get('name'), 'cuerpo: %r' % data)
+    me = driver_post('/bus_tracking/driver/me', data['token'])
+    check(me.status_code == 200 and 'traccar_unique_id' not in me.text, 'me HTTP %s' % me.status_code)
+    return dict(obtenido='HTTP 200; token; /me sin id de GPS', mensaje='JSON')
+
+
+@case('F14', 'Funcional', 'Abrir un turno, consultar estado, reportar incidente y cerrar',
+      'start → state → incident → end sobre QA-20', 'Turno activo, state con paradas, incidente guardado, turno cerrado')
+def f14(ctx):
+    odoo = ctx['odoo']
+    bus = odoo.read('bus.vehicle', [('name', '=', 'QA-20')], ['id', 'route_id'])[0]
+    odoo.call('bus.vehicle', 'write', [bus['id']], {'traccar_unique_id': 'qa-driver-20'})
+    token = driver_login().json()['token']
+    start = driver_post('/bus_tracking/driver/shift/start', token, {
+        'vehicle_id': bus['id'], 'route_id': bus['route_id'][0],
+    })
+    check(start.status_code == 200, 'start HTTP %s %s' % (start.status_code, start.text[:160]))
+    payload = start.json()
+    check(payload.get('traccar_unique_id') == 'qa-driver-20' and payload.get('gps_url') is not None, 'start: %r' % payload)
+    try:
+        state = driver_post('/bus_tracking/driver/state', token)
+        check(state.status_code == 200, 'state HTTP %s' % state.status_code)
+        stops = state.json().get('stops') or []
+        check(len(stops) >= 3, 'paradas: %r' % stops)
+        incident = driver_post('/bus_tracking/driver/incident', token, {
+            'kind': 'breakdown', 'note': 'QA-F14 humo', 'lat': -1.26, 'lon': -78.62,
+        })
+        check(incident.status_code == 200 and incident.json().get('id'), 'incident HTTP %s' % incident.status_code)
+        rows = odoo.read('bus.incident', [('note', '=', 'QA-F14 humo')], ['kind', 'vehicle_id'])
+        check(len(rows) == 1 and rows[0]['kind'] == 'breakdown', 'incidente: %r' % rows)
+    finally:
+        end = driver_post('/bus_tracking/driver/shift/end', token)
+        check(end.status_code == 200, 'end HTTP %s' % end.status_code)
+    return dict(obtenido='start/state/incident/end 200; 1 incidente', mensaje='JSON')
+
+
 # ================================================================================================
 # Errors
 # ================================================================================================
@@ -635,6 +688,39 @@ def u1(ctx):
     return dict(obtenido='%d/%d claros' % (clear, len(probes)), mensaje='; '.join(detail))
 
 
+@case('E23', 'Error', 'Rechazar un login de chofer con clave incorrecta',
+      'POST /bus_tracking/driver/login con clave mala', 'HTTP 401; mismo aspecto que un usuario desconocido')
+def e23(ctx):
+    bad = driver_login(password='no-es-la-clave')
+    unknown = driver_login(login='nadie-qa', password='x')
+    check(bad.status_code == 401 and unknown.status_code == 401, 'HTTP %s / %s' % (bad.status_code, unknown.status_code))
+    check(bad.json().get('error') == unknown.json().get('error'), 'cuerpos distintos: %s %s' % (bad.text, unknown.text))
+    return dict(obtenido='HTTP 401 en ambos', mensaje=bad.text[:80])
+
+
+@case('E24', 'Error', 'Rechazar el inicio de turno si el bus no tiene GPS',
+      'shift/start sobre QA-21 sin traccar_unique_id', 'HTTP 409 no_gps')
+def e24(ctx):
+    bus = ctx['odoo'].read('bus.vehicle', [('name', '=', 'QA-21')], ['id', 'route_id', 'traccar_unique_id'])[0]
+    check(not bus.get('traccar_unique_id'), 'QA-21 ya tiene GPS')
+    token = driver_login().json()['token']
+    r = driver_post('/bus_tracking/driver/shift/start', token, {
+        'vehicle_id': bus['id'], 'route_id': bus['route_id'][0],
+    })
+    check(r.status_code == 409 and r.json().get('error') == 'no_gps', 'HTTP %s %s' % (r.status_code, r.text[:120]))
+    return dict(obtenido='HTTP 409 no_gps', mensaje=r.text[:80])
+
+
+@case('E25', 'Error', 'Rechazar un incidente sin turno activo',
+      'POST /driver/incident tras cerrar el turno', 'HTTP 409 no_shift')
+def e25(ctx):
+    token = driver_login().json()['token']
+    driver_post('/bus_tracking/driver/shift/end', token)
+    r = driver_post('/bus_tracking/driver/incident', token, {'kind': 'traffic', 'note': 'QA-E25'})
+    check(r.status_code == 409 and r.json().get('error') == 'no_shift', 'HTTP %s %s' % (r.status_code, r.text[:120]))
+    return dict(obtenido='HTTP 409 no_shift', mensaje=r.text[:80])
+
+
 # ================================================================================================
 def main():
     odoo = Odoo()
@@ -646,6 +732,17 @@ def main():
     base_user = odoo.call('ir.model.data', 'check_object_reference', 'base', 'group_user')[1]
     odoo.call('res.users', 'create', [{'name': 'QA viewer', 'login': 'qa_viewer', 'password': 'qa_viewer_pw',
                                        'groups_id': [(6, 0, [base_user, group_user])]}])
+    odoo.call('ir.config_parameter', 'set_param', 'base.login_cooldown_after', '0')
+    odoo.call('ir.config_parameter', 'set_param', 'bus_tracking.gps_url', 'http://gps.qa.test')
+    ids = odoo.call('res.users', 'search', [('login', '=', 'qa_driver')], context={'active_test': False})
+    if ids:
+        shifts = odoo.call('bus.shift', 'search', [('user_id', 'in', ids)])
+        if shifts:
+            odoo.call('bus.shift', 'unlink', shifts)
+        odoo.call('res.users', 'unlink', ids)
+    group_driver = odoo.call('ir.model.data', 'check_object_reference', 'bus_tracking', 'group_bus_driver')[1]
+    odoo.call('res.users', 'create', [{'name': 'QA driver', 'login': 'qa_driver', 'password': 'qa_driver_pw',
+                                       'groups_id': [(6, 0, [base_user, group_driver])]}])
     ctx = {'odoo': odoo}
     started = time.time()
     # E21 empties the one-minute window of the feed, so it goes last.
