@@ -12,6 +12,14 @@
     },
     "android": {
       "package": "ec.edu.uta.buses.conductor",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#F4EFE4",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -25,7 +33,16 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-task-manager",
+      [
+        "expo-location",
+        {
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true,
+          "locationAlwaysAndWhenInUsePermission": "Buses UTA envía la posición del bus mientras el turno está activo."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
