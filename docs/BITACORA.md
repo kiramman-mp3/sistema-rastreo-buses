@@ -720,3 +720,20 @@ Suite Odoo del módulo (`-u bus_tracking --test-enable --test-tags /bus_tracking
 ### Pendiente
 
 Fase 17 en `feature/driver-shifts-api`: iniciar/terminar turno, estado, ruta e incidentes.
+
+
+## 2026-10-30: fase 17, API de turnos e incidentes
+
+### Qué se hizo
+
+- `POST /bus_tracking/driver/shift/start` y `/end`: un turno activo por chofer y por bus; 409 si hay conflicto o el bus no tiene GPS. El id de Traccar y `gps_url` salen solo en `start`. El mapa recibe el chofer como `bus.vehicle.driver_id` (partner del usuario).
+- `POST /driver/state` (paradas del turno, siguiente parada, alertas abiertas o de 2 h) y `/driver/route` (coordenadas y `_map_lines()`).
+- `POST /driver/incident` y modelo `bus.incident` (avería, tráfico, accidente, otro). Cron horario cierra turnos de más de 14 h.
+
+### Qué se verificó
+
+Suite Odoo: 232 tests, 0 fallos (los de la fase 16 más `test_driver_shift.py`).
+
+### Pendiente
+
+Fase 18: vistas de staff, traducciones y push de incidentes (`feature/driver-staff-views`).
