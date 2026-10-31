@@ -61,6 +61,18 @@ const es = {
   odooUrl: 'Servidor Odoo',
   qrBad: 'Ese código no es válido. Escanea tu credencial de chofer o el QR de Odoo.',
   cameraNeed: 'Hay que permitir la cámara para leer el QR.',
+  confirmStartShift: '¿Iniciar turno?',
+  confirmStartBody: 'Se comenzará a registrar el recorrido y transmitir la ubicación GPS del bus en tiempo real.',
+  confirmSignOut: '¿Cerrar sesión?',
+  confirmSignOutBody: 'Se cerrará la sesión del conductor en esta tableta.',
+  confirmSignOutShiftBody: 'Se finalizará el turno activo y se cerrará la sesión en esta tableta.',
+  nextStopHero: 'PRÓXIMA PARADA',
+  noNextStop: 'Fin del recorrido',
+  loadingMap: 'Cargando mapa de la ruta…',
+  driverLabel: 'Conductor',
+  availableBuses: '1. Elige el bus',
+  availableRoutes: '2. Elige la ruta',
+  noStopsAvailable: 'No hay paradas registradas para esta ruta.',
 };
 
 const en: typeof es = {
@@ -123,6 +135,18 @@ const en: typeof es = {
   odooUrl: 'Odoo server',
   qrBad: 'Invalid QR code. Scan your driver badge or Odoo setup QR.',
   cameraNeed: 'Allow the camera to scan the QR.',
+  confirmStartShift: 'Start shift?',
+  confirmStartBody: 'Trip tracking and live GPS transmission will begin for this bus.',
+  confirmSignOut: 'Sign out?',
+  confirmSignOutBody: 'This driver session will be closed on this tablet.',
+  confirmSignOutShiftBody: 'The active shift will end and your session will close on this tablet.',
+  nextStopHero: 'NEXT STOP',
+  noNextStop: 'End of route',
+  loadingMap: 'Loading route map…',
+  driverLabel: 'Driver',
+  availableBuses: '1. Choose bus',
+  availableRoutes: '2. Choose route',
+  noStopsAvailable: 'No stops registered for this route.',
 };
 
 const qu: typeof es = {
