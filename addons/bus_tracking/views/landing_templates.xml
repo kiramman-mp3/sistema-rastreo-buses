@@ -115,11 +115,11 @@
                     <ol class="camino">
                         <li>
                             <h3>El bus envía su posición</h3>
-                            <p>Desde un GPS instalado en el bus o desde la app Traccar Client en un teléfono.</p>
+                            <p>Desde la tableta oficial Buses UTA instalada en cada vehículo.</p>
                         </li>
                         <li>
                             <h3>El sistema la recibe</h3>
-                            <p>Funciona con GPS de muchas marcas y con teléfonos, y la posición llega en segundos.</p>
+                            <p>Transmisión continua de alta frecuencia en segundo plano mientras el turno está activo.</p>
                         </li>
                         <li>
                             <h3>Se compara con tus paradas</h3>
