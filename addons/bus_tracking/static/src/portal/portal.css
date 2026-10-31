@@ -1,27 +1,32 @@
+/* Modern, institutional and clean Passenger Portal for Buses UTA */
+
 .portal {
-    padding-block: clamp(1.5rem, 4vw, 3rem) 3rem;
+    padding-block: clamp(2rem, 5vw, 3.5rem) 4rem;
 }
 
 .portal h1 {
-    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-size: clamp(2rem, 4vw, 2.8rem);
     font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.03em;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.75rem;
+    color: var(--bus-ink);
 }
 
 .portal .lead {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     color: var(--bus-muted);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    max-width: 65ch;
 }
 
 .portal h2 {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--bus-ink);
 }
 
 .portal-nav {
@@ -33,252 +38,339 @@
 .lang-form {
     display: flex;
     gap: 0.25rem;
+    background: #F1F5F9;
+    padding: 0.25rem;
+    border-radius: var(--bus-radius);
 }
 
 .lang {
     font: inherit;
     background: none;
     border: 0;
-    padding: 0.35rem 0.6rem;
-    border-radius: 999px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--bus-muted);
+    transition: all 0.15s ease;
 }
 
 .lang.activa {
-    background: var(--bus-ink);
-    color: var(--bus-paper);
+    background: #FFFFFF;
+    color: var(--bus-ink);
+    box-shadow: var(--bus-shadow-sm);
 }
 
 .chip {
-    display: inline-block;
-    min-width: 3rem;
-    padding: 0.2rem 0.7rem;
-    border-radius: 12px;
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.2rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    color: #FFFFFF;
     font-family: var(--bus-font-display);
     font-weight: 800;
-    font-size: 0.6em;
+    font-size: 0.75rem;
     text-align: center;
-    letter-spacing: 0;
+    letter-spacing: 0.04em;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
+
+/* ---------- Routes List Grid ---------- */
 
 .rutas {
     list-style: none;
-    margin: 2rem 0 0;
+    margin: 2.5rem 0 0;
     padding: 0;
     display: grid;
-    gap: 0.75rem;
-    max-width: 720px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
 }
 
 .rutas a {
-    background: #fff;
+    background: #FFFFFF;
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1.25rem;
-    border: 2px solid var(--bus-ink);
-    border-radius: 18px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--bus-line);
+    border-radius: var(--bus-radius);
     text-decoration: none;
-    font-size: 1.2rem;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: var(--bus-shadow-sm);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .rutas a:hover,
 .rutas a:focus-visible {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--bus-senal);
+    transform: translateY(-2px);
+    box-shadow: var(--bus-shadow);
+    border-color: var(--bus-uta-primary);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .rutas a, .o_bus_landing .btn { transition: none; }
-    .rutas a:hover, .o_bus_landing .btn:hover { transform: none; }
-}
-
-.rutas .chip {
-    font-size: 1.1rem;
+.rutas a strong {
+    font-size: 1.05rem;
+    color: var(--bus-ink);
+    flex: 1;
 }
 
 .rutas .estado {
-    margin-left: auto;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 700;
     color: var(--bus-muted);
-}
-
-.vacio {
-    margin-top: 1.5rem;
-    color: var(--bus-muted);
-}
-
-.volver {
-    display: inline-block;
-    margin-bottom: 1rem;
-    text-underline-offset: 0.3em;
-}
-
-.mapa-wrap {
-    margin-top: 1.5rem;
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
-    gap: 1.5rem;
-    align-items: start;
-}
-
-#bus-map {
-    height: clamp(360px, 62vh, 620px);
-    border: 4px solid var(--bus-ink);
-    border-radius: 24px;
-    overflow: hidden;
-    background: var(--bus-lluvia);
-}
-
-.mapa-wrap aside .estado {
-    color: var(--bus-muted);
-    font-size: 0.95rem;
-    min-height: 1.4em;
-}
-
-.buses {
-    list-style: none;
-    margin: 0.75rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 0.5rem;
-}
-
-.buses li {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.7rem 0.9rem;
-    border-radius: 12px;
-    background: #fff;
-    border: 2px solid var(--bus-lluvia);
+    gap: 0.4rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    background: #F1F5F9;
 }
 
-.buses li::before {
-    content: "";
-    flex: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--bus-muted);
-}
-
-.buses li.bus-moving::before { background: var(--bus-ok); }
-.buses li.bus-stopped::before { background: var(--bus-senal); box-shadow: 0 0 0 2px var(--bus-ink); }
-.buses li.bus-offline::before { background: var(--bus-rojo); }
-
-.buses li span {
-    margin-left: auto;
-    color: var(--bus-muted);
-    font-size: 0.95rem;
+.rutas .estado.activa {
+    background: var(--bus-ok-light);
+    color: var(--bus-ok);
 }
 
 .rutas .estado::before {
     content: "";
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 0.45rem;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--bus-rojo);
+    background: currentColor;
 }
 
-.rutas .estado.activa::before { background: var(--bus-ok); }
+.vacio {
+    margin-top: 1.5rem;
+    color: var(--bus-muted);
+    padding: 2rem;
+    background: #FFFFFF;
+    border-radius: var(--bus-radius);
+    border: 1px solid var(--bus-line);
+    text-align: center;
+}
+
+.volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--bus-uta-primary);
+    text-decoration: none;
+}
+
+.volver:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Map Layout ---------- */
+
+.mapa-wrap {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 2.2fr) minmax(320px, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+#bus-map {
+    height: clamp(450px, 70vh, 700px);
+    border: 1px solid var(--bus-line);
+    border-radius: var(--bus-radius-lg);
+    overflow: hidden;
+    background: #E2E8F0;
+    box-shadow: var(--bus-shadow);
+}
+
+.mapa-wrap aside {
+    background: #FFFFFF;
+    border: 1px solid var(--bus-line);
+    border-radius: var(--bus-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--bus-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.mapa-wrap aside .estado {
+    color: var(--bus-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-height: 1.2em;
+    margin: 0;
+}
+
+.path-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    background: #F8FAFC;
+    padding: 0.9rem;
+    border-radius: var(--bus-radius);
+    border: 1px solid var(--bus-line);
+}
+
+.path-picker label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bus-muted);
+    text-transform: uppercase;
+}
+
+.path-picker select {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--bus-line);
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--bus-ink);
+}
+
+.path-picker .btn {
+    align-self: flex-start;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.buses {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.buses li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--bus-radius);
+    background: #F8FAFC;
+    border: 1px solid var(--bus-line);
+}
+
+.buses li::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.buses li.bus-moving::before { background: var(--bus-ok); box-shadow: 0 0 0 2px var(--bus-ok-light); }
+.buses li.bus-stopped::before { background: var(--bus-warn); box-shadow: 0 0 0 2px var(--bus-warn-light); }
+.buses li.bus-offline::before { background: var(--bus-rojo); }
+
+.buses li strong {
+    font-size: 0.92rem;
+    color: var(--bus-ink);
+}
+
+.buses li span {
+    margin-left: auto;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--bus-muted);
+}
+
+.reportar {
+    margin-top: 0.5rem;
+    text-align: center;
+    background: #F8FAFC;
+    border: 1px solid var(--bus-line);
+    color: var(--bus-muted);
+    font-size: 0.88rem;
+    padding: 0.65rem 1rem;
+    border-radius: var(--bus-radius);
+}
+
+.reportar:hover {
+    background: var(--bus-uta-light);
+    border-color: var(--bus-uta-primary);
+    color: var(--bus-uta-primary);
+}
+
+/* Markers */
 
 .bus-marker {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    border: 3px solid;
+    border: 3px solid #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease;
 }
 
-@media (max-width: 860px) {
-    .mapa-wrap {
-        grid-template-columns: 1fr;
-    }
-
-    .portal-nav {
-        gap: 0.5rem;
-    }
-
-    .rutas a {
-        flex-wrap: wrap;
-    }
-
-    .rutas .estado {
-        margin-left: 0;
-        width: 100%;
-    }
+.stop-badge-marker {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    border: 2px solid #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
-@media (max-width: 520px) {
-    .top {
-        gap: 0.5rem;
-    }
-
-    .marca {
-        font-size: 0;           /* logo only; the link keeps its aria-label */
-    }
-
-    .top .btn {
-        white-space: nowrap;
-    }
-
-    .marca svg {
-        width: 30px;
-        height: 30px;
-    }
-
-    .portal-nav {
-        gap: 0.25rem;
-    }
-
-    .top .btn {
-        padding: 0.4rem 0.9rem;
-        font-size: 0.95rem;
-    }
-
-    .lang {
-        padding: 0.3rem 0.45rem;
-        font-size: 0.95rem;
-    }
-}
-
-/* ---------- Complaint form ---------- */
+/* ---------- Complaint Form ---------- */
 
 .formulario {
     margin-top: 2rem;
-    max-width: 640px;
+    max-width: 680px;
+    background: #FFFFFF;
+    padding: 2.25rem;
+    border-radius: var(--bus-radius-lg);
+    border: 1px solid var(--bus-line);
+    box-shadow: var(--bus-shadow-sm);
     display: grid;
-    gap: 1.25rem;
+    gap: 1.5rem;
 }
 
 .campo {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.4rem;
 }
 
 .campo label {
     font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--bus-ink);
 }
 
 .campo select,
 .campo input,
 .campo textarea {
     font: inherit;
-    padding: 0.7rem 0.9rem;
-    border: 2px solid var(--bus-ink);
-    border-radius: 12px;
-    background: #fff;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--bus-line);
+    border-radius: var(--bus-radius);
+    background: #F8FAFC;
     color: var(--bus-ink);
     width: 100%;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.campo select:focus,
+.campo input:focus,
+.campo textarea:focus {
+    outline: none;
+    border-color: var(--bus-uta-primary);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(139, 29, 36, 0.15);
 }
 
 .campo textarea {
@@ -287,114 +379,67 @@
 
 .campo [aria-invalid="true"] {
     border-color: var(--bus-rojo);
+    background: #FEF2F2;
 }
 
 .ayuda {
     margin: 0;
     color: var(--bus-muted);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .campo-error {
     margin: 0;
     color: var(--bus-rojo);
-    font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 .errores {
-    margin-top: 1.5rem;
-    max-width: 640px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: var(--bus-radius);
     padding: 1rem 1.25rem;
-    border: 2px solid var(--bus-rojo);
-    border-radius: 14px;
-    background: #fff;
+    color: var(--bus-rojo);
+}
+
+.errores strong {
+    display: block;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
 }
 
 .errores ul {
-    margin: 0.4rem 0 0;
-    padding-left: 1.2rem;
+    margin: 0;
+    padding-left: 1.25rem;
 }
 
-.trampa {
-    position: absolute;
-    left: -10000px;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
+.reportar-enlace {
+    margin-top: 2rem;
+    text-align: center;
 }
 
-.folio {
-    margin-top: 1.5rem;
-    font-size: 1.4rem;
-}
-
-.reportar {
-    display: inline-block;
-    margin-top: 1.25rem;
-}
-
-.o_bus_landing .reportar-enlace {
-    max-width: none;
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
-
-.formulario .btn {
-    justify-self: start;
-    cursor: pointer;
-    font: inherit;
-    font-weight: 700;
-}
-
-/* ---------- Official timetable ---------- */
-
-.horario {
-    padding-bottom: 2rem;
-}
-
-.horario-grupo {
-    margin-top: 1.25rem;
-}
-
-.horario-grupo h3 {
-    font-size: 1.15rem;
-    font-weight: 700;
-}
-
-.horario-grupo ul {
-    list-style: none;
-    margin: 0.5rem 0 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.horario-grupo li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    padding: 0.45rem 0.8rem;
-    border-radius: 12px;
-    background: var(--bus-lluvia);
-}
-
-.horario-grupo li strong {
-    font-family: var(--bus-font-display);
-    font-size: 1.15rem;
-}
-
-.horario-grupo .bus {
+.reportar-enlace a {
     color: var(--bus-muted);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.reportar-enlace a:hover {
+    color: var(--bus-uta-primary);
 }
 
 .pie {
-    margin-top: 2rem;
-    border-top: 2px solid var(--bus-lluvia);
+    margin-top: 3rem;
+    padding-block: 2rem;
+    border-top: 1px solid var(--bus-line);
+    color: var(--bus-muted);
+    font-size: 0.85rem;
+    text-align: center;
 }
 
-.path-picker { display: grid; gap: .4rem; margin: .8rem 0; }
-.path-picker select { width: 100%; padding: .5rem; border-radius: .5rem; border: 1px solid #c9d3d6; font: inherit; }
-.path-picker[hidden] { display: none; }
+@media (max-width: 860px) {
+    .mapa-wrap {
+        grid-template-columns: 1fr;
+    }
+}
