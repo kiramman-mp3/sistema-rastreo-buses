@@ -5,9 +5,10 @@ import { gpsKv, gpsStore } from '../gps/store';
 import { liveGps } from '../gps/tracker';
 import { IncidentQueue } from '../incidents/queue';
 import { odooUrlStore, secureStore } from './secureStore';
-import { Session } from './session';
+import { Session, type SessionSnapshot } from './session';
 
 const SessionContext = createContext<Session | null>(null);
+const SnapshotContext = createContext<SessionSnapshot | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const session = useMemo(
@@ -22,16 +23,39 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       ),
     [],
   );
-  const [, bump] = useState(0);
-  useEffect(() => session.subscribe(() => bump((n) => n + 1)), [session]);
+
+  const [snapshot, setSnapshot] = useState(session.snapshot);
+
+  useEffect(() => {
+    return session.subscribe(() => {
+      setSnapshot({ ...session.snapshot });
+    });
+  }, [session]);
+
   useEffect(() => {
     session.boot().catch(() => undefined);
   }, [session]);
-  return <SessionContext.Provider value={session}>{children}</SessionContext.Provider>;
+
+  return (
+    <SessionContext.Provider value={session}>
+      <SnapshotContext.Provider value={snapshot}>
+        {children}
+      </SnapshotContext.Provider>
+    </SessionContext.Provider>
+  );
 }
 
 export function useSession(): Session {
   const session = useContext(SessionContext);
-  if (!session) throw new Error('SessionProvider is missing');
-  return session;
+  const snapshot = useContext(SnapshotContext);
+  if (!session || !snapshot) throw new Error('SessionProvider is missing');
+
+  return useMemo(() => {
+    return new Proxy(session, {
+      get(target, prop, receiver) {
+        if (prop === 'snapshot') return snapshot;
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+  }, [session, snapshot]);
 }
