@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
@@ -18,6 +18,7 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [odooUrl, setOdooUrl] = useState(session.snapshot.odooUrl);
+  const [showServerConfig, setShowServerConfig] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,60 +49,197 @@ export default function Login() {
 
   return (
     <View style={styles.page}>
-      <Text style={styles.title}>{t('login')}</Text>
-      <Button label={t('scanDriverBadge')} onPress={() => router.push('/scan')} />
-      <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>{t('orManualLogin')}</Text>
-        <View style={styles.dividerLine} />
+      {/* Header Emblem */}
+      <View style={styles.brandHeader}>
+        <View style={styles.brandIcon}>
+          <Text style={styles.brandIconText}>🚌</Text>
+        </View>
+        <Text style={styles.brandTitle}>Buses UTA</Text>
+        <Text style={styles.brandSub}>Universidad Técnica de Ambato · Terminal Chofer</Text>
       </View>
-      <TextInput
-        value={login}
-        onChangeText={setLogin}
-        autoCapitalize="none"
-        autoCorrect={false}
-        placeholder={t('user')}
-        style={styles.input}
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholder={t('password')}
-        style={styles.input}
-      />
-      <TextInput
-        value={odooUrl}
-        onChangeText={setOdooUrl}
-        autoCapitalize="none"
-        autoCorrect={false}
-        placeholder={t('odooUrl')}
-        style={[styles.input, styles.inputSecondary]}
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button label={t('login')} onPress={submit} disabled={busy || !login || !password} />
+
+      {/* Main Login Card */}
+      <View style={styles.card}>
+        <Button
+          label={t('scanDriverBadge')}
+          onPress={() => router.push('/scan')}
+          style={styles.scanBtn}
+        />
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>{t('orManualLogin')}</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TextInput
+          value={login}
+          onChangeText={setLogin}
+          autoCapitalize="none"
+          autoCorrect={false}
+          placeholder={t('user')}
+          placeholderTextColor={colors.muted}
+          style={styles.input}
+        />
+        <TextInput
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          placeholder={t('password')}
+          placeholderTextColor={colors.muted}
+          style={styles.input}
+        />
+
+        {/* Expandable Server Config for Technical Setup */}
+        <Pressable
+          onPress={() => setShowServerConfig(!showServerConfig)}
+          style={styles.serverToggle}
+        >
+          <Text style={styles.serverToggleText}>
+            {showServerConfig ? '▼ Ocultar servidor' : '⚙️ Servidor: ' + (odooUrl || 'Por defecto')}
+          </Text>
+        </Pressable>
+
+        {showServerConfig ? (
+          <TextInput
+            value={odooUrl}
+            onChangeText={setOdooUrl}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={t('odooUrl')}
+            placeholderTextColor={colors.muted}
+            style={[styles.input, styles.inputSecondary]}
+          />
+        ) : null}
+
+        {error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
+
+        <Button
+          label={busy ? t('loading') : t('login')}
+          onPress={submit}
+          disabled={busy || !login || !password}
+          style={styles.loginBtn}
+        />
+      </View>
+
       <LangSwitch />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: colors.paper, padding: 32, justifyContent: 'center', gap: 16, maxWidth: 560, alignSelf: 'center', width: '100%' },
-  title: { fontSize: type.title, color: colors.ink, fontWeight: '700', marginBottom: 8 },
-  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 4, gap: 12 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.line },
-  dividerText: { fontSize: type.body - 2, color: colors.muted, fontWeight: '500' },
+  page: {
+    flex: 1,
+    backgroundColor: colors.paper,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  brandHeader: {
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 8,
+  },
+  brandIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: colors.route,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  brandIconText: {
+    fontSize: 28,
+  },
+  brandTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: colors.ink,
+    letterSpacing: -0.5,
+  },
+  brandSub: {
+    fontSize: 13,
+    color: colors.muted,
+    fontWeight: '600',
+  },
+  card: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: colors.line,
+    gap: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  scanBtn: {
+    minHeight: hit + 4,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 4,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.line,
+  },
+  dividerText: {
+    fontSize: 12,
+    color: colors.muted,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   input: {
     minHeight: hit,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: 8,
+    borderRadius: 10,
     paddingHorizontal: 16,
-    fontSize: type.body,
-    backgroundColor: '#fff',
+    fontSize: type.body - 1,
+    backgroundColor: '#F8FAFC',
     color: colors.ink,
   },
-  inputSecondary: { fontSize: type.body - 2, color: colors.muted },
-  error: { color: colors.bus, fontSize: type.body },
-  hint: { fontSize: type.body - 2, color: colors.muted },
+  inputSecondary: {
+    fontSize: 13,
+    color: colors.muted,
+    backgroundColor: '#F1F5F9',
+  },
+  serverToggle: {
+    paddingVertical: 4,
+  },
+  serverToggleText: {
+    fontSize: 12,
+    color: colors.muted,
+    fontWeight: '600',
+  },
+  errorBox: {
+    backgroundColor: colors.busLight,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.bus,
+  },
+  errorText: {
+    color: colors.bus,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  loginBtn: {
+    minHeight: hit,
+  },
 });

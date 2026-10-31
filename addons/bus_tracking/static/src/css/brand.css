@@ -1,38 +1,40 @@
-/* Shared brand tokens and fonts: landing, login and backend. */
-
-@font-face {
-    font-family: "Bricolage Grotesque";
-    src: url("/bus_tracking/static/fonts/bricolage-grotesque-var.woff2") format("woff2");
-    font-weight: 200 800;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Atkinson Hyperlegible";
-    src: url("/bus_tracking/static/fonts/atkinson-400.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Atkinson Hyperlegible";
-    src: url("/bus_tracking/static/fonts/atkinson-700.woff2") format("woff2");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
+/* Shared brand tokens and fonts: landing, login, portal and backend. */
 
 :root {
-    --bus-paper: #f1f3f2;
-    --bus-ink: #172025;
-    --bus-ruta: #1e5560;
-    --bus-rojo: #c23327;
-    --bus-senal: #ffc62b;
-    --bus-lluvia: #dce3e3;
-    --bus-muted: #526368;
-    --bus-ok: #2f8f4e;
-    --bus-font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-    --bus-font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    /* Institutional UTA Palette */
+    --bus-uta-primary: #8B1D24;
+    --bus-uta-dark: #5E1217;
+    --bus-uta-light: #FDF2F2;
+    --bus-uta-gold: #D97706;
+
+    /* Base neutrals */
+    --bus-paper: #F8FAFC;
+    --bus-surface: #FFFFFF;
+    --bus-ink: #0F172A;
+    --bus-slate-800: #1E293B;
+    --bus-muted: #64748B;
+    --bus-line: #E2E8F0;
+    --bus-line-dark: #CBD5E1;
+
+    /* Functional transit semantics */
+    --bus-ruta: #8B1D24;
+    --bus-rojo: #DC2626;
+    --bus-ok: #0D684D;
+    --bus-ok-light: #ECFDF5;
+    --bus-warn: #D97706;
+    --bus-warn-light: #FFFBEB;
+    --bus-senal: #D97706;
+    --bus-lluvia: #E2E8F0;
+
+    /* Typography */
+    --bus-font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bus-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Shadows & Radii */
+    --bus-radius-sm: 8px;
+    --bus-radius: 12px;
+    --bus-radius-lg: 18px;
+    --bus-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+    --bus-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+    --bus-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
 }

@@ -73,6 +73,7 @@ const es = {
   availableBuses: '1. Elige el bus',
   availableRoutes: '2. Elige la ruta',
   noStopsAvailable: 'No hay paradas registradas para esta ruta.',
+  backToShift: 'Volver al turno',
 };
 
 const en: typeof es = {
@@ -147,6 +148,7 @@ const en: typeof es = {
   availableBuses: '1. Choose bus',
   availableRoutes: '2. Choose route',
   noStopsAvailable: 'No stops registered for this route.',
+  backToShift: 'Back to shift',
 };
 
 const qu: typeof es = {
