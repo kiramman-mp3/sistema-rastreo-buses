@@ -91,27 +91,32 @@ export class Session {
   }
 
   async boot() {
-    const savedUrl = await this.urlStore?.get();
-    if (savedUrl) {
-      this.client = createClient({ baseUrl: savedUrl, store: this.store });
-      this.set({ odooUrl: savedUrl });
-    }
-    const token = await this.store.get();
-    if (!token) {
-      this.set({ ready: true, ...empty });
-      return;
-    }
     try {
-      const me = await this.client.me();
-      this.applyMe(me, token);
-      await this.restoreGps(me.shift);
-    } catch (error) {
-      if (error instanceof AuthError) {
+      const savedUrl = await this.urlStore?.get();
+      if (savedUrl) {
+        this.client = createClient({ baseUrl: savedUrl, store: this.store });
+        this.set({ odooUrl: savedUrl });
+      }
+      const token = await this.store.get();
+      if (!token) {
         this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
         return;
       }
-      this.set({ ready: true, token });
-      throw error;
+      try {
+        const me = await this.client.me();
+        this.applyMe(me, token);
+        await this.restoreGps(me.shift);
+      } catch (error) {
+        if (error instanceof AuthError) {
+          this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
+          return;
+        }
+        this.set({ ready: true, token, odooUrl: this.snapshot.odooUrl });
+        throw error;
+      }
+    } catch {
+      // In case of any unhandled error during startup, guarantee the app is ready and not stuck on a loading screen.
+      this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
     }
   }
 
