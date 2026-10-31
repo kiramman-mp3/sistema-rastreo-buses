@@ -55,14 +55,19 @@ export function createClient(options: ClientOptions) {
       if (token) headers.Authorization = 'Bearer ' + token;
     }
     let response: Response;
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 10000) : null;
     try {
       response = await http(root + path, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
+        signal: controller?.signal,
       });
     } catch {
       throw new NetworkError();
+    } finally {
+      if (timer) clearTimeout(timer);
     }
     if (response.status === 401) {
       await options.store.clear();
