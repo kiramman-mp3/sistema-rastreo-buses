@@ -36,6 +36,8 @@
                     <group>
                         <group string="Datos de Acceso">
                             <field name="login" string="Usuario"/>
+                            <field name="driver_password" password="True" string="Contraseña"
+                                   placeholder="Asignar o cambiar contraseña"/>
                             <field name="email"/>
                             <field name="phone"/>
                             <field name="is_bus_driver" invisible="1"/>

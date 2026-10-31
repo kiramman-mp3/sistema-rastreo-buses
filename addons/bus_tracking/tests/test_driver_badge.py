@@ -49,6 +49,23 @@ class TestDriverBadge(TransactionCase):
         drivers = self.env['res.users'].search([('is_bus_driver', '=', True)])
         self.assertIn(self.driver, drivers)
 
+    def test_driver_password_set_on_create_and_write(self):
+        new_driver = self.env['res.users'].create({
+            'name': 'Chofer Con Password',
+            'login': 'chofer_pwd',
+            'is_bus_driver': True,
+            'driver_password': 'mi-clave-secreta',
+        })
+        self.assertTrue(new_driver.is_bus_driver)
+        uid = self.env['res.users'].authenticate(
+            self.env.cr.dbname, 'chofer_pwd', 'mi-clave-secreta', {'interactive': False})
+        self.assertEqual(uid, new_driver.id)
+
+        new_driver.write({'driver_password': 'otra-clave-nueva'})
+        uid_new = self.env['res.users'].authenticate(
+            self.env.cr.dbname, 'chofer_pwd', 'otra-clave-nueva', {'interactive': False})
+        self.assertEqual(uid_new, new_driver.id)
+
 
 
 @tagged('post_install', '-at_install')

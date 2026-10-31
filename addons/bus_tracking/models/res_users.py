@@ -24,6 +24,33 @@ class ResUsers(models.Model):
         search='_search_is_bus_driver',
         inverse='_inverse_is_bus_driver',
     )
+    driver_password = fields.Char(
+        string="Contraseña",
+        copy=False,
+        store=False,
+        help="Escribe aquí para asignar o cambiar la contraseña del conductor.",
+    )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
+        internal_group = self.env.ref('base.group_user', raise_if_not_found=False)
+        for vals in vals_list:
+            if vals.get('is_bus_driver', self.env.context.get('default_is_bus_driver')):
+                groups = list(vals.get('groups_id', []))
+                if driver_group:
+                    groups.append((4, driver_group.id))
+                if internal_group:
+                    groups.append((4, internal_group.id))
+                vals['groups_id'] = groups
+            if vals.get('driver_password'):
+                vals['password'] = vals.pop('driver_password')
+        return super(ResUsers, self.with_context(no_reset_password=True)).create(vals_list)
+
+    def write(self, vals):
+        if vals.get('driver_password'):
+            vals['password'] = vals.pop('driver_password')
+        return super(ResUsers, self.with_context(no_reset_password=True)).write(vals)
 
     def _compute_is_bus_driver(self):
         driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
