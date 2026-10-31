@@ -96,6 +96,13 @@ export function createClient(options: ClientOptions) {
         false,
       );
     },
+    loginBadge(badgeToken: string, device = 'tablet') {
+      return post<{ token: string; driver: { id: number; name: string } }>(
+        '/bus_tracking/driver/login_badge',
+        { badge_token: badgeToken, device },
+        false,
+      );
+    },
     logout() {
       return post<{ ok: boolean }>('/bus_tracking/driver/logout');
     },
