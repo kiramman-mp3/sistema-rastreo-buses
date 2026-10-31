@@ -96,6 +96,26 @@ class BusDriverApi(http.Controller):
         token = request.env['bus.driver.token']._issue(user, label)
         return json_response({'token': token, 'driver': {'id': user.id, 'name': user.name}})
 
+    @http.route('/bus_tracking/driver/login_badge', type='http', auth='public', methods=['POST'], csrf=False)
+    def login_badge(self, **kwargs):
+        body = read_body()
+        if body is None:
+            return json_response({'error': 'bad_request'}, 400)
+        raw_token = body.get('badge_token') or body.get('token')
+        if not (isinstance(raw_token, str) and raw_token):
+            return json_response({'error': 'bad_request'}, 400)
+        ip = request.httprequest.remote_addr
+        if not login_limiter.allow('ip:%s' % ip):
+            return Response(status=429, headers=[('Retry-After', '60')])
+        user = request.env['bus.driver.token']._user_for_badge(raw_token)
+        if not user:
+            user = request.env['bus.driver.token']._user_for(raw_token)
+        if not user:
+            return json_response({'error': 'invalid_badge'}, 401)
+        label = body.get('device') if isinstance(body.get('device'), str) else 'tablet_badge'
+        token = request.env['bus.driver.token']._issue(user, label)
+        return json_response({'token': token, 'driver': {'id': user.id, 'name': user.name}})
+
     @http.route('/bus_tracking/driver/logout', type='http', auth='public', methods=['POST'], csrf=False)
     def logout(self, **kwargs):
         token = bearer_token()
