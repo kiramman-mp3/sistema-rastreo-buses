@@ -18,6 +18,42 @@ class ResUsers(models.Model):
         compute='_compute_driver_badge_active',
         help="Indica si el conductor tiene una credencial QR vigente.",
     )
+    is_bus_driver = fields.Boolean(
+        string="Es Chofer",
+        compute='_compute_is_bus_driver',
+        search='_search_is_bus_driver',
+        inverse='_inverse_is_bus_driver',
+    )
+
+    def _compute_is_bus_driver(self):
+        driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
+        for user in self:
+            user.is_bus_driver = bool(driver_group and driver_group in user.groups_id)
+
+    def _search_is_bus_driver(self, operator, value):
+        driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
+        if not driver_group:
+            return []
+        positive = (operator in ('=', '!=') and value) or (operator == 'in' and True in value)
+        if operator in ('!=', '<>'):
+            positive = not positive
+        if positive:
+            return [('groups_id', 'in', [driver_group.id])]
+        return [('groups_id', 'not in', [driver_group.id])]
+
+    def _inverse_is_bus_driver(self):
+        driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
+        internal_group = self.env.ref('base.group_user', raise_if_not_found=False)
+        if not driver_group:
+            return
+        for user in self:
+            if user.is_bus_driver:
+                groups = [(4, driver_group.id)]
+                if internal_group and internal_group not in user.groups_id:
+                    groups.append((4, internal_group.id))
+                user.write({'groups_id': groups})
+            else:
+                user.write({'groups_id': [(3, driver_group.id)]})
 
     def _compute_driver_badge_active(self):
         now = fields.Datetime.now()
