@@ -9,15 +9,15 @@ export type StopView = {
 };
 
 export function classifyStops(stops: StopState[], nextStopId: number | null): StopView[] {
-  return [...stops]
-    .sort((a, b) => a.sequence - b.sequence || a.id - b.id)
-    .map((stop) => ({
-      id: stop.id,
-      name: stop.name,
-      sequence: stop.sequence,
-      arrivedAt: stop.arrived_at,
-      status: stop.arrived_at ? 'arrived' : stop.id === nextStopId ? 'next' : 'later',
-    }));
+  const sorted = [...stops].sort((a, b) => a.sequence - b.sequence || a.id - b.id);
+  const effectiveNextId = nextStopId ?? sorted.find((s) => !s.arrived_at)?.id ?? null;
+  return sorted.map((stop) => ({
+    id: stop.id,
+    name: stop.name,
+    sequence: stop.sequence,
+    arrivedAt: stop.arrived_at,
+    status: stop.arrived_at ? 'arrived' : stop.id === effectiveNextId ? 'next' : 'later',
+  }));
 }
 
 export function clock(iso: string | null): string {

@@ -105,6 +105,14 @@ export class Session {
       try {
         const me = await this.client.me();
         this.applyMe(me, token);
+        if (me.shift) {
+          try {
+            await this.pullState();
+            await this.loadRouteMap();
+          } catch {
+            // Non-blocking fallback
+          }
+        }
         await this.restoreGps(me.shift);
       } catch (error) {
         if (error instanceof AuthError) {
@@ -186,6 +194,12 @@ export class Session {
         bus.id === vehicleId ? { ...bus, available: true, route_id: routeId } : { ...bus, available: bus.available && bus.id !== vehicleId },
       ),
     });
+    try {
+      await this.pullState();
+      await this.loadRouteMap();
+    } catch {
+      // Non-blocking fallback
+    }
     return started;
   }
 
