@@ -56,16 +56,6 @@ class TestGpsSetup(BusCase):
         self.assertFalse(self.new_bus.traccar_unique_id)
 
     # -- link and QR ---------------------------------------------------------
-    def test_setup_link_and_qr(self):
-        self.register(self.new_bus)
-        link = self.new_bus.gps_setup_link
-        self.assertTrue(link.startswith('org.traccar.client://config?'))
-        self.assertIn('url=https%3A%2F%2Fgps.example.com', link)      # trailing slash removed
-        self.assertNotIn('com%2F&', link)
-        self.assertIn('id=' + self.new_bus.traccar_unique_id, link)
-        self.assertIn('interval=10', link)
-        self.assertTrue(base64.b64decode(self.new_bus.gps_qr).startswith(PNG_MAGIC))
-
     def test_tablet_qr_has_the_odoo_url_and_not_the_device_id(self):
         self.env['ir.config_parameter'].set_param(
             'web.base.url', 'https://busesuta2340.eastus2.cloudapp.azure.com/web')
@@ -76,13 +66,6 @@ class TestGpsSetup(BusCase):
         self.assertNotIn('/web', link)
         self.assertNotIn('id=', link)
         self.assertTrue(base64.b64decode(self.new_bus.tablet_qr).startswith(PNG_MAGIC))
-
-    def test_no_link_until_the_phone_is_registered_and_the_address_is_set(self):
-        self.assertFalse(self.new_bus.gps_setup_link)
-        self.assertFalse(self.new_bus.gps_qr)
-        self.env['ir.config_parameter'].set_param('bus_tracking.gps_url', '')
-        self.bus.invalidate_recordset(['gps_setup_link', 'gps_qr'])
-        self.assertFalse(self.bus.gps_setup_link)
 
     # -- the identifier is a credential ---------------------------------------
     def test_identifier_is_hidden_from_regular_users_and_visible_to_managers(self):
@@ -95,8 +78,6 @@ class TestGpsSetup(BusCase):
         self.assertEqual(self.bus.with_user(viewer).name, 'Bus 1')
         with self.assertRaises(AccessError):
             self.bus.with_user(viewer).traccar_unique_id
-        with self.assertRaises(AccessError):
-            self.bus.with_user(viewer).gps_qr
         self.assertEqual(self.bus.with_user(manager).traccar_unique_id, 'BUS007')
 
     # -- first-run bootstrap of the Traccar account ---------------------------

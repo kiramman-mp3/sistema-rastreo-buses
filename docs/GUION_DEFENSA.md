@@ -47,10 +47,10 @@ Plan B si falla la demostración: capturas de pantalla preparadas y el informe `
 
 ## 3. Cómo funciona (1 min 30 s)
 
-*"El celular del chofer, con la app Traccar Client, manda su posición a Traccar. Traccar la reenvía por webhook a Odoo, donde está nuestro módulo `bus_tracking`. Como respaldo, un cron consulta a Traccar cada minuto, por si el webhook falla."*
+*"La tableta instalada en el bus, con la app oficial Buses UTA desarrollada para los choferes, manda su posición en protocolo OsmAnd a Traccar. Traccar la reenvía por webhook a Odoo, donde está nuestro módulo `bus_tracking`. Como respaldo, un cron consulta a Traccar cada minuto, por si el webhook falla."*
 
 ```
-Celular (Traccar Client) --> Traccar --webhook--> Odoo (bus_tracking) --> mapa, alertas, portal
+Tableta Chofer (App Buses UTA) --> Traccar --webhook--> Odoo (bus_tracking) --> mapa, alertas, portal
                                 ^                        |
                                 +---- cron cada 1 min ---+
 ```
