@@ -44,6 +44,12 @@ class TestDriverBadge(TransactionCase):
         self.assertFalse(self.driver.driver_badge_active)
         self.assertFalse(self.driver.driver_badge_qr)
 
+    def test_is_bus_driver_search_and_compute(self):
+        self.assertTrue(self.driver.is_bus_driver)
+        drivers = self.env['res.users'].search([('is_bus_driver', '=', True)])
+        self.assertIn(self.driver, drivers)
+
+
 
 @tagged('post_install', '-at_install')
 class TestDriverBadgeApi(HttpCase):
