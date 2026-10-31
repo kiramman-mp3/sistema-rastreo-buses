@@ -126,7 +126,7 @@ Detalle y comandos en `docs/PRODUCCION.md`.
 
 ## Fase 9. Teléfonos de los choferes como GPS **[HECHO salvo la prueba con un celular real]**
 
-- Código QR por bus para configurar la app Traccar Client (servidor, identificador del dispositivo y frecuencia recomendada).
+- Código QR para configurar la app tableta Buses UTA (dirección del servidor Odoo).
 - El proxy publica el puerto de OsmAnd por HTTPS, de modo que la ubicación viaje cifrada (hoy viaja en claro).
 - Guía corta para el chofer (instalar, activar el turno, batería).
 - Hecho: registro del GPS desde Odoo, identificador aleatorio solo visible para administradores, QR (sin verificar en un teléfono), HTTPS para los celulares, cuenta de Traccar creada automáticamente, `docs/GUIA-CHOFER.md`.
