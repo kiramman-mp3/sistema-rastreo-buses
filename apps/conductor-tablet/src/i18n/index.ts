@@ -55,7 +55,7 @@ const es = {
   map_label: 'Mapa con los buses de la ruta',
   scanQr: 'Leer código QR',
   odooUrl: 'Servidor Odoo',
-  qrBad: 'Ese QR no trae la dirección de Odoo.',
+  qrBad: 'Ese código no es válido. Escanea el código "Tableta del conductor" en Odoo.',
   cameraNeed: 'Hay que permitir la cámara para leer el QR.',
 };
 
@@ -113,7 +113,7 @@ const en: typeof es = {
   map_label: 'Map with the buses of the route',
   scanQr: 'Scan QR code',
   odooUrl: 'Odoo server',
-  qrBad: 'That QR does not contain the Odoo address.',
+  qrBad: 'Invalid QR code. Scan the "Driver tablet" code in Odoo.',
   cameraNeed: 'Allow the camera to scan the QR.',
 };
 
