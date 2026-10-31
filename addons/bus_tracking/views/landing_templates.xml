@@ -297,18 +297,18 @@
                                             </div>
                                         </div>
                                         <div class="screen-map-sim">
-                                            <div class="sim-route-line"></div>
-                                            <div class="sim-stop-pin p1">1</div>
-                                            <div class="sim-bus-marker">🚌</div>
-                                            <div class="sim-stop-pin p2">2</div>
-                                            <div class="sim-stop-pin p3">3</div>
+                                            <img src="/bus_tracking/static/img/landing/phone-map-live.png" alt="Mapa satelital de ruta en vivo Buses UTA" class="screen-map-real-img" loading="lazy"/>
+                                            <div class="map-live-overlay-chip">
+                                                <span class="live-dot-pulse"></span>
+                                                <span>GPS EN VIVO</span>
+                                            </div>
                                         </div>
                                         <div class="screen-bottom-card">
-                                            <div class="screen-route-name">Ruta Troncal Huachi - Ingahurco</div>
+                                            <div class="screen-route-name">Ruta Troncal Huachi – Querochaca</div>
                                             <div class="screen-progress-bar">
-                                                <div class="progress-fill" style="width: 65%;"></div>
+                                                <div class="progress-fill" style="width: 28%;"></div>
                                             </div>
-                                            <div class="screen-eta">Arribo estimado: 3 min (900m)</div>
+                                            <div class="screen-eta">Hacia: Parada 2 · Arribo en 2 min</div>
                                         </div>
                                     </div>
                                 </div>
