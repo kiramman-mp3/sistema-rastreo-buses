@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import type { IncidentKind } from '../src/api/types';
 import { readLastSent } from '../src/gps/store';
@@ -10,7 +10,12 @@ import { useSession } from '../src/state/SessionContext';
 import { Button } from '../src/ui/Button';
 import { colors, hit, type } from '../src/ui/theme';
 
-const KINDS: IncidentKind[] = ['breakdown', 'traffic', 'accident', 'other'];
+const KINDS: { key: IncidentKind; icon: string }[] = [
+  { key: 'breakdown', icon: '🛠️' },
+  { key: 'traffic', icon: '🚦' },
+  { key: 'accident', icon: '💥' },
+  { key: 'other', icon: '📝' },
+];
 
 function kindLabel(kind: IncidentKind) {
   if (kind === 'breakdown') return t('kind_breakdown');
@@ -26,6 +31,7 @@ export default function IncidentScreen() {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   async function submit() {
     setBusy(true);
@@ -38,8 +44,11 @@ export default function IncidentScreen() {
         lat: last?.lat ?? null,
         lon: last?.lon ?? null,
       });
+      setIsSuccess(true);
       setMessage(t(result === 'queued' ? 'queued' : 'sent'));
+      setNote('');
     } catch {
+      setIsSuccess(false);
       setMessage(t('network'));
     } finally {
       setBusy(false);
@@ -47,60 +56,200 @@ export default function IncidentScreen() {
   }
 
   return (
-    <View style={styles.page}>
-      <Text style={styles.title}>{t('incident')}</Text>
-      <Text style={styles.body}>{t('field_kind')}</Text>
-      <View style={styles.row}>
-        {KINDS.map((item) => (
-          <Pressable
-            key={item}
-            onPress={() => setKind(item)}
-            style={[styles.chip, kind === item && styles.on]}
-          >
-            <Text style={styles.chipText}>{kindLabel(item)}</Text>
-          </Pressable>
-        ))}
+    <ScrollView contentContainerStyle={styles.page}>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{t('incident')}</Text>
+          <Text style={styles.subtitle}>Notifica a la central de monitoreo de la UTA sobre cualquier novedad en la vía.</Text>
+        </View>
+
+        <Text style={styles.sectionLabel}>{t('field_kind')}</Text>
+        <View style={styles.grid}>
+          {KINDS.map((item) => {
+            const isSelected = kind === item.key;
+            return (
+              <Pressable
+                key={item.key}
+                onPress={() => setKind(item.key)}
+                style={[styles.chip, isSelected && styles.chipSelected]}
+              >
+                <Text style={styles.chipIcon}>{item.icon}</Text>
+                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                  {kindLabel(item.key)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View style={styles.textLabelRow}>
+          <Text style={styles.sectionLabel}>{t('field_description')}</Text>
+          <Text style={styles.charCounter}>{note.length} / 300</Text>
+        </View>
+        <TextInput
+          value={note}
+          onChangeText={setNote}
+          placeholder="Escribe detalles del suceso (opcional)..."
+          placeholderTextColor={colors.muted}
+          maxLength={300}
+          multiline
+          style={styles.input}
+        />
+
+        {message ? (
+          <View style={[styles.messageBox, isSuccess ? styles.messageSuccess : styles.messageError]}>
+            <Text style={[styles.messageText, isSuccess ? styles.messageTextSuccess : styles.messageTextError]}>
+              {message}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.actions}>
+          <Button
+            label={busy ? t('loading') : t('submit')}
+            onPress={submit}
+            disabled={busy}
+            style={styles.submitBtn}
+          />
+          <Button
+            label={t('backToShift')}
+            variant="secondary"
+            onPress={() => router.back()}
+          />
+        </View>
       </View>
-      <Text style={styles.body}>{t('field_description')}</Text>
-      <TextInput
-        value={note}
-        onChangeText={setNote}
-        placeholder={t('note')}
-        maxLength={300}
-        multiline
-        style={styles.input}
-      />
-      {message ? <Text style={styles.body}>{message}</Text> : null}
-      <Button label={t('submit')} onPress={submit} disabled={busy} />
-      <Button label={t('onShift')} onPress={() => router.back()} />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: colors.paper, padding: 28, gap: 12, maxWidth: 720, width: '100%', alignSelf: 'center' },
-  title: { fontSize: type.title, color: colors.ink, fontWeight: '700' },
-  body: { fontSize: type.body, color: colors.ink },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: {
-    minHeight: hit - 8,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: colors.line,
+  page: {
+    flexGrow: 1,
+    backgroundColor: colors.paper,
+    padding: 24,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    alignItems: 'center',
   },
-  on: { borderColor: colors.route, backgroundColor: '#E7F2EE' },
-  chipText: { fontSize: type.body, color: colors.ink },
-  input: {
-    minHeight: 88,
+  card: {
+    width: '100%',
+    maxWidth: 620,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 28,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: type.body,
-    backgroundColor: '#fff',
+    gap: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  header: {
+    gap: 4,
+    marginBottom: 4,
+  },
+  title: {
+    fontSize: type.title,
+    fontWeight: '800',
+    color: colors.ink,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.muted,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.ink,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  textLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  charCounter: {
+    fontSize: 12,
+    color: colors.muted,
+    fontWeight: '600',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  chip: {
+    flex: 1,
+    minWidth: 120,
+    minHeight: hit,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: '#FAFAFA',
+  },
+  chipSelected: {
+    borderColor: colors.route,
+    backgroundColor: colors.routeLight,
+  },
+  chipIcon: {
+    fontSize: 18,
+  },
+  chipText: {
+    fontSize: type.body - 2,
+    color: colors.ink,
+    fontWeight: '600',
+  },
+  chipTextSelected: {
+    color: colors.route,
+    fontWeight: '800',
+  },
+  input: {
+    minHeight: 110,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 10,
+    padding: 14,
+    fontSize: type.body - 1,
+    backgroundColor: '#F8FAFC',
+    color: colors.ink,
     textAlignVertical: 'top',
+  },
+  messageBox: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  messageSuccess: {
+    backgroundColor: colors.routeLight,
+    borderColor: colors.route,
+  },
+  messageError: {
+    backgroundColor: colors.busLight,
+    borderColor: colors.bus,
+  },
+  messageText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  messageTextSuccess: {
+    color: colors.route,
+  },
+  messageTextError: {
+    color: colors.bus,
+  },
+  actions: {
+    gap: 10,
+    marginTop: 8,
+  },
+  submitBtn: {
+    minHeight: hit,
   },
 });
