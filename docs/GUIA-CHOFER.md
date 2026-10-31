@@ -1,6 +1,6 @@
 # Guía para el chofer: tableta del bus
 
-Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UTA**. Con ella inicias sesión, eliges el bus y la ruta, y el GPS se envía solo mientras tu turno está abierto. No uses Traccar Client en el celular para este sistema.
+Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UTA**. Con ella inicias sesión, eliges el bus y la ruta, y el GPS se envía solo mientras tu turno está abierto. El sistema opera exclusivamente con esta app oficial.
 
 ## Qué necesitas
 
