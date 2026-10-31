@@ -38,6 +38,7 @@
                             <field name="login" string="Usuario"/>
                             <field name="email"/>
                             <field name="phone"/>
+                            <field name="is_bus_driver" invisible="1"/>
                             <field name="groups_id" invisible="1"/>
                         </group>
                         <group string="Estado">
@@ -65,8 +66,8 @@
         <field name="name">Choferes</field>
         <field name="res_model">res.users</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('groups_id', 'in', [ref('bus_tracking.group_bus_driver')])]</field>
-        <field name="context">{'default_groups_id': [(4, ref('bus_tracking.group_bus_driver'))]}</field>
+        <field name="domain">[('is_bus_driver', '=', True)]</field>
+        <field name="context">{'default_is_bus_driver': True}</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('view_bus_driver_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_bus_driver_form')})]"/>
