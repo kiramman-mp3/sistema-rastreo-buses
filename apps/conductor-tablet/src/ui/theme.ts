@@ -1,17 +1,22 @@
 export const colors = {
-  paper: '#F4EFE4',
-  ink: '#1C1916',
-  muted: '#5C564E',
-  route: '#2F6F5E',
-  bus: '#B42318',
-  line: '#D9D1C3',
-  taken: '#8A8378',
+  paper: '#F1F5F9',
+  card: '#FFFFFF',
+  ink: '#0F172A',
+  muted: '#64748B',
+  route: '#0D684D',
+  routeLight: '#ECFDF5',
+  bus: '#DC2626',
+  busLight: '#FEF2F2',
+  line: '#CBD5E1',
+  taken: '#94A3B8',
+  highlight: '#2563EB',
+  highlightLight: '#EFF6FF',
 };
 
 export const type = {
-  title: 28,
-  body: 20,
-  button: 22,
+  title: 26,
+  body: 18,
+  button: 18,
 };
 
-export const hit = 56;
+export const hit = 52;
