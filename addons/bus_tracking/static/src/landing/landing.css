@@ -24,13 +24,53 @@ body.o_bus_landing {
 }
 
 .o_bus_landing a {
-    color: inherit;
     text-decoration: none;
+    transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .o_bus_landing .wrap {
     width: min(1200px, 100% - 40px);
     margin-inline: auto;
+}
+
+/* Base button styling */
+.o_bus_landing .btn,
+.o_bus_landing a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.3;
+    border: 1.5px solid #8B1D24;
+    background: #FFFFFF;
+    color: #8B1D24 !important;
+    cursor: pointer;
+    text-decoration: none !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.o_bus_landing .btn:hover,
+.o_bus_landing a.btn:hover {
+    background: #8B1D24;
+    color: #FFFFFF !important;
+    border-color: #8B1D24;
+}
+
+.o_bus_landing .btn-primary,
+.o_bus_landing a.btn-primary {
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #8B1D24 !important;
+}
+
+.o_bus_landing .btn-primary:hover,
+.o_bus_landing a.btn-primary:hover {
+    background: #5E1217 !important;
+    color: #FFFFFF !important;
+    border-color: #5E1217 !important;
 }
 
 /* ==========================================================================
@@ -91,18 +131,21 @@ body.o_bus_landing {
     gap: 24px;
 }
 
-.nav-item {
+.o_bus_landing .nav-item,
+.o_bus_landing a.nav-item {
     font-size: 0.92rem;
     font-weight: 600;
-    color: #475569;
+    color: #475569 !important;
     padding: 8px 4px;
     position: relative;
     transition: color 0.18s ease;
 }
 
-.nav-item:hover,
-.nav-item.active {
-    color: #8B1D24;
+.o_bus_landing .nav-item:hover,
+.o_bus_landing a.nav-item:hover,
+.o_bus_landing .nav-item.active,
+.o_bus_landing a.nav-item.active {
+    color: #8B1D24 !important;
 }
 
 .nav-item.active::after {
@@ -121,13 +164,14 @@ body.o_bus_landing {
     align-items: center;
 }
 
-.btn-header-login {
+.o_bus_landing .btn-header-login,
+.o_bus_landing a.btn-header-login {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #FFFFFF;
-    color: #8B1D24;
-    border: 1.5px solid #8B1D24;
+    background: #FFFFFF !important;
+    color: #8B1D24 !important;
+    border: 1.5px solid #8B1D24 !important;
     border-radius: 8px;
     padding: 8px 16px;
     font-size: 0.86rem;
@@ -135,10 +179,23 @@ body.o_bus_landing {
     transition: all 0.18s ease;
 }
 
-.btn-header-login:hover {
-    background: #8B1D24;
-    color: #FFFFFF;
+.o_bus_landing .btn-header-login svg,
+.o_bus_landing a.btn-header-login svg {
+    stroke: #8B1D24 !important;
+}
+
+.o_bus_landing .btn-header-login:hover,
+.o_bus_landing a.btn-header-login:hover {
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border-color: #8B1D24 !important;
     box-shadow: 0 4px 12px rgba(139, 29, 36, 0.25);
+    transform: translateY(-1px);
+}
+
+.o_bus_landing .btn-header-login:hover svg,
+.o_bus_landing a.btn-header-login:hover svg {
+    stroke: #FFFFFF !important;
 }
 
 /* ==========================================================================
@@ -184,7 +241,7 @@ body.o_bus_landing {
     font-weight: 800;
     line-height: 1.14;
     letter-spacing: -0.025em;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     margin: 0 0 20px 0;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
@@ -192,7 +249,7 @@ body.o_bus_landing {
 .hero-subtext {
     font-size: 1.15rem;
     line-height: 1.65;
-    color: #E2E8F0;
+    color: #E2E8F0 !important;
     margin: 0;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
@@ -205,9 +262,11 @@ body.o_bus_landing {
     flex-wrap: wrap;
 }
 
-.btn-hero-primary {
-    background: #8B1D24;
-    color: #FFFFFF;
+.o_bus_landing .btn-hero-primary,
+.o_bus_landing a.btn-hero-primary {
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #8B1D24 !important;
     padding: 13px 26px;
     border-radius: 10px;
     font-size: 0.98rem;
@@ -219,16 +278,25 @@ body.o_bus_landing {
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-hero-primary:hover {
-    background: #5E1217;
+.o_bus_landing .btn-hero-primary svg,
+.o_bus_landing a.btn-hero-primary svg {
+    stroke: #FFFFFF !important;
+}
+
+.o_bus_landing .btn-hero-primary:hover,
+.o_bus_landing a.btn-hero-primary:hover {
+    background: #5E1217 !important;
+    color: #FFFFFF !important;
+    border-color: #5E1217 !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 22px rgba(139, 29, 36, 0.45);
 }
 
-.btn-hero-secondary {
-    background: rgba(255, 255, 255, 0.12);
-    color: #FFFFFF;
-    border: 1.5px solid rgba(255, 255, 255, 0.35);
+.o_bus_landing .btn-hero-secondary,
+.o_bus_landing a.btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
     padding: 12px 24px;
     border-radius: 10px;
     font-size: 0.98rem;
@@ -237,10 +305,13 @@ body.o_bus_landing {
     transition: all 0.2s ease;
 }
 
-.btn-hero-secondary:hover {
-    background: #FFFFFF;
-    color: #0F172A;
-    border-color: #FFFFFF;
+.o_bus_landing .btn-hero-secondary:hover,
+.o_bus_landing a.btn-hero-secondary:hover {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    border-color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
 }
 
 /* ==========================================================================
@@ -389,13 +460,15 @@ body.o_bus_landing {
     flex-grow: 1;
 }
 
-.product-link {
+.o_bus_landing .product-link,
+.o_bus_landing a.product-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     font-weight: 700;
-    color: #8B1D24;
+    color: #8B1D24 !important;
+    background: transparent !important;
     transition: all 0.18s ease;
 }
 
@@ -403,7 +476,13 @@ body.o_bus_landing {
     transition: transform 0.18s ease;
 }
 
-.product-link:hover .link-arrow {
+.o_bus_landing .product-link:hover,
+.o_bus_landing a.product-link:hover {
+    color: #5E1217 !important;
+}
+
+.o_bus_landing .product-link:hover .link-arrow,
+.o_bus_landing a.product-link:hover .link-arrow {
     transform: translateX(4px);
 }
 
@@ -498,26 +577,33 @@ body.o_bus_landing {
     flex-wrap: wrap;
 }
 
-.btn-about-cta {
-    background: #FFFFFF;
-    color: #8B1D24;
+.o_bus_landing .btn-about-cta,
+.o_bus_landing a.btn-about-cta {
+    background: #FFFFFF !important;
+    color: #8B1D24 !important;
+    border: 1.5px solid #FFFFFF !important;
     padding: 12px 22px;
     border-radius: 10px;
     font-size: 0.92rem;
     font-weight: 800;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
     transition: all 0.18s ease;
 }
 
-.btn-about-cta:hover {
-    background: #F8FAFC;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.o_bus_landing .btn-about-cta:hover,
+.o_bus_landing a.btn-about-cta:hover {
+    background: #F8FAFC !important;
+    color: #5E1217 !important;
+    border-color: #F8FAFC !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
 
-.btn-about-outline {
-    background: transparent;
-    color: #FFFFFF;
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
+.o_bus_landing .btn-about-outline,
+.o_bus_landing a.btn-about-outline {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
     padding: 11px 20px;
     border-radius: 10px;
     font-size: 0.92rem;
@@ -525,9 +611,12 @@ body.o_bus_landing {
     transition: all 0.18s ease;
 }
 
-.btn-about-outline:hover {
-    border-color: #FFFFFF;
-    background: rgba(255, 255, 255, 0.1);
+.o_bus_landing .btn-about-outline:hover,
+.o_bus_landing a.btn-about-outline:hover {
+    border-color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
 }
 
 .about-right-media {
@@ -678,13 +767,15 @@ body.o_bus_landing {
     margin: 0 0 18px 0;
 }
 
-.story-link {
+.o_bus_landing .story-link,
+.o_bus_landing a.story-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     font-size: 0.88rem;
     font-weight: 700;
-    color: #F59E0B;
+    color: #F59E0B !important;
+    background: transparent !important;
     transition: all 0.18s ease;
 }
 
@@ -692,7 +783,13 @@ body.o_bus_landing {
     transition: transform 0.18s ease;
 }
 
-.story-link:hover .story-arrow {
+.o_bus_landing .story-link:hover,
+.o_bus_landing a.story-link:hover {
+    color: #FBBF24 !important;
+}
+
+.o_bus_landing .story-link:hover .story-arrow,
+.o_bus_landing a.story-link:hover .story-arrow {
     transform: translateX(4px);
 }
 
@@ -968,38 +1065,78 @@ body.o_bus_landing {
     flex-wrap: wrap;
 }
 
-.btn-store-primary {
-    background: #0F172A;
-    color: #FFFFFF;
+.o_bus_landing .btn-store-primary,
+.o_bus_landing a.btn-store-primary {
+    background: #0F172A !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #0F172A !important;
     border-radius: 12px;
     padding: 12px 22px;
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+    transition: all 0.2s ease;
 }
 
-.btn-store-primary:hover {
-    background: #1E293B;
+.o_bus_landing .btn-store-primary svg,
+.o_bus_landing a.btn-store-primary svg {
+    stroke: #FFFFFF !important;
+}
+
+.o_bus_landing .btn-store-primary .btn-store-text small,
+.o_bus_landing a.btn-store-primary .btn-store-text small {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.o_bus_landing .btn-store-primary .btn-store-text strong,
+.o_bus_landing a.btn-store-primary .btn-store-text strong {
+    color: #FFFFFF !important;
+}
+
+.o_bus_landing .btn-store-primary:hover,
+.o_bus_landing a.btn-store-primary:hover {
+    background: #1E293B !important;
+    color: #FFFFFF !important;
+    border-color: #1E293B !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.3);
 }
 
-.btn-store-secondary {
-    background: #8B1D24;
-    color: #FFFFFF;
+.o_bus_landing .btn-store-secondary,
+.o_bus_landing a.btn-store-secondary {
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #8B1D24 !important;
     border-radius: 12px;
     padding: 12px 22px;
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(139, 29, 36, 0.25);
+    transition: all 0.2s ease;
 }
 
-.btn-store-secondary:hover {
-    background: #5E1217;
+.o_bus_landing .btn-store-secondary svg,
+.o_bus_landing a.btn-store-secondary svg {
+    stroke: #FFFFFF !important;
+}
+
+.o_bus_landing .btn-store-secondary .btn-store-text small,
+.o_bus_landing a.btn-store-secondary .btn-store-text small {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.o_bus_landing .btn-store-secondary .btn-store-text strong,
+.o_bus_landing a.btn-store-secondary .btn-store-text strong {
+    color: #FFFFFF !important;
+}
+
+.o_bus_landing .btn-store-secondary:hover,
+.o_bus_landing a.btn-store-secondary:hover {
+    background: #5E1217 !important;
+    color: #FFFFFF !important;
+    border-color: #5E1217 !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(139, 29, 36, 0.35);
 }
@@ -1057,13 +1194,13 @@ body.o_bus_landing {
 .ribbon-name {
     font-size: 1.15rem;
     font-weight: 800;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     letter-spacing: -0.01em;
 }
 
 .ribbon-sub {
     font-size: 0.75rem;
-    color: #94A3B8;
+    color: #94A3B8 !important;
     font-weight: 600;
 }
 
@@ -1074,18 +1211,20 @@ body.o_bus_landing {
     flex-wrap: wrap;
 }
 
-.ribbon-contact-item {
+.o_bus_landing .ribbon-contact-item,
+.o_bus_landing a.ribbon-contact-item {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     font-size: 0.92rem;
     font-weight: 600;
-    color: #CBD5E1;
+    color: #CBD5E1 !important;
     transition: color 0.15s ease;
 }
 
-.ribbon-contact-item:hover {
-    color: #F59E0B;
+.o_bus_landing .ribbon-contact-item:hover,
+.o_bus_landing a.ribbon-contact-item:hover {
+    color: #F59E0B !important;
 }
 
 .ribbon-social {
@@ -1094,23 +1233,25 @@ body.o_bus_landing {
     gap: 12px;
 }
 
-.social-icon {
+.o_bus_landing .social-icon,
+.o_bus_landing a.social-icon {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #CBD5E1;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #CBD5E1 !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.18s ease;
 }
 
-.social-icon:hover {
-    background: #8B1D24;
-    color: #FFFFFF;
-    border-color: #8B1D24;
+.o_bus_landing .social-icon:hover,
+.o_bus_landing a.social-icon:hover {
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border-color: #8B1D24 !important;
     transform: translateY(-2px);
 }
 
@@ -1125,7 +1266,7 @@ body.o_bus_landing {
 .footer-col-title {
     font-size: 0.96rem;
     font-weight: 800;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     margin: 0 0 18px 0;
     letter-spacing: 0.02em;
 }
@@ -1139,14 +1280,14 @@ body.o_bus_landing {
     gap: 10px;
 }
 
-.footer-links-list li a {
+.o_bus_landing .footer-links-list li a {
     font-size: 0.86rem;
-    color: #94A3B8;
+    color: #94A3B8 !important;
     transition: all 0.15s ease;
 }
 
-.footer-links-list li a:hover {
-    color: #FFFFFF;
+.o_bus_landing .footer-links-list li a:hover {
+    color: #FFFFFF !important;
     padding-left: 4px;
 }
 
