@@ -10,17 +10,17 @@
         <field name="category_id" ref="module_category_bus_tracking"/>
     </record>
 
+    <!-- Only for the tablet app. It grants no access to the Odoo backend by itself. -->
+    <record id="group_bus_driver" model="res.groups">
+        <field name="name">Driver</field>
+        <field name="category_id" ref="module_category_bus_tracking"/>
+    </record>
+
     <record id="group_bus_manager" model="res.groups">
         <field name="name">Manager</field>
         <field name="category_id" ref="module_category_bus_tracking"/>
         <field name="implied_ids" eval="[(4, ref('group_bus_user')), (4, ref('group_bus_driver'))]"/>
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
-    </record>
-
-    <!-- Only for the tablet app. It grants no access to the Odoo backend by itself. -->
-    <record id="group_bus_driver" model="res.groups">
-        <field name="name">Driver</field>
-        <field name="category_id" ref="module_category_bus_tracking"/>
     </record>
 
     <record id="rule_bus_shift_driver" model="ir.rule">
