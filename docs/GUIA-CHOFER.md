@@ -6,20 +6,20 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 
 - Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app.
 - Datos móviles o Wi-Fi del bus.
-- Usuario y contraseña de Odoo que te da el administrador (grupo *Driver*). No es el identificador de Traccar: ese dato no se escribe a mano.
+- Tu **Credencial QR de Chofer** asignada por el administrador en Odoo (menú *Choferes*), o tu usuario y contraseña de Odoo (grupo *Driver*). No es el identificador de Traccar: ese dato no se escribe a mano.
 - La app instalada como APK (no hace falta Play Store). Expo Go no sirve: el GPS de fondo necesita el APK de desarrollo o de producción.
 
 ## Instalar (el administrador lo hace una vez)
 
 1. Instala el APK de `eas build --profile production --platform android` (o el de *development* para pruebas).
-2. En el login se puede escribir la URL de Odoo o **Leer código QR** (Ajustes o ficha del bus en Odoo). El APK de producción ya trae `https://busesuta2340.eastus2.cloudapp.azure.com`.
+2. El APK de producción ya trae configurado `https://busesuta2340.eastus2.cloudapp.azure.com`. Para iniciar sesión, el chofer simplemente pulsa **Escanear credencial QR** y apunta a su carnet de conductor.
 3. En Ajustes de Android: ubicación precisa; batería de **Buses UTA** sin restricciones; pantalla encendida mientras carga. Guía por marca: [dontkillmyapp.com](https://dontkillmyapp.com).
 4. Si el modelo lo permite, fija la app (modo aplicación fija / *screen pinning*) para que no se salga al escritorio.
 5. Deja la tableta **cargando** en el bus.
 
 ## Cada día
 
-1. Abre **Buses UTA** e inicia sesión con tu usuario.
+1. Abre **Buses UTA** y pulsa **Escanear credencial QR** para entrar en 1 segundo con tu carnet de chofer (o ingresa manualmente con usuario y clave).
 2. Elige el bus (los ocupados salen deshabilitados) y la ruta. Concede ubicación *todo el tiempo* y la exclusión de ahorro de batería si Android la pide.
 3. Comprueba **Estado del GPS**: permisos concedidos y que haya un último envío tras unos segundos.
 4. Mientras manejas: las paradas avanzan solas; las alertas salen en el panel; un incidente se reporta con tipo y nota. Si no hay red, el incidente espera y se envía al volver.
