@@ -19,6 +19,55 @@ export function normalizeOdooUrl(raw: string): string | null {
   }
 }
 
+export type DriverBadgePayload = {
+  odooUrl: string | null;
+  token: string;
+  driverName: string | null;
+};
+
+export function parseDriverBadge(raw: string): DriverBadgePayload | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+
+  if (trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(trimmed) as { odoo?: string; token?: string; driver?: string };
+      if (parsed.token && typeof parsed.token === 'string') {
+        const odooUrl = parsed.odoo ? normalizeOdooUrl(parsed.odoo) : null;
+        return {
+          odooUrl,
+          token: parsed.token.trim(),
+          driverName: parsed.driver || null,
+        };
+      }
+    } catch {
+      // not JSON
+    }
+  }
+
+  if (trimmed.includes('token=')) {
+    try {
+      const query = trimmed.includes('?') ? trimmed.slice(trimmed.indexOf('?') + 1) : trimmed;
+      const params = new URLSearchParams(query);
+      const token = params.get('token');
+      if (token) {
+        const rawOdoo = params.get('odoo');
+        const odooUrl = rawOdoo ? normalizeOdooUrl(rawOdoo) : null;
+        const driverName = params.get('driver') || null;
+        return {
+          odooUrl,
+          token: token.trim(),
+          driverName,
+        };
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
 function odooFromPayload(raw: string): string | null {
   if (!raw) return null;
   if (raw.startsWith('{')) {

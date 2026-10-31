@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { parseDriverBadge } from '../src/config/odooUrl';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
@@ -19,6 +20,21 @@ export default function ScanScreen() {
   async function onScan({ data }: { data: string }) {
     if (busy) return;
     setBusy(true);
+    setError('');
+
+    const badge = parseDriverBadge(data);
+    if (badge) {
+      try {
+        await session.loginWithBadge(badge.token, badge.odooUrl);
+        router.replace(session.snapshot.shift ? '/shift' : '/select');
+        return;
+      } catch {
+        setError(t('badgeError'));
+        setBusy(false);
+        return;
+      }
+    }
+
     try {
       await session.setOdooUrl(data);
       router.back();
@@ -45,6 +61,7 @@ export default function ScanScreen() {
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
         onBarcodeScanned={busy ? undefined : onScan}
       />
+      {busy ? <Text style={styles.info}>{t('badgeLoggingIn')}</Text> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.bar}>
         <Button label={t('cancel')} onPress={() => router.back()} />
@@ -58,5 +75,6 @@ const styles = StyleSheet.create({
   camera: { flex: 1, backgroundColor: '#000' },
   body: { fontSize: type.body, color: colors.ink },
   error: { color: '#fff', fontSize: type.body, textAlign: 'center', marginTop: 24 },
+  info: { color: '#fff', fontSize: type.body + 2, textAlign: 'center', marginTop: 24, fontWeight: '600' },
   bar: { position: 'absolute', bottom: 24, left: 24, right: 24 },
 });
