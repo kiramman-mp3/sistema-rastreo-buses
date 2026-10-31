@@ -49,16 +49,12 @@ export default function Login() {
   return (
     <View style={styles.page}>
       <Text style={styles.title}>{t('login')}</Text>
-      <Text style={styles.hint}>{t('odooUrl')}</Text>
-      <TextInput
-        value={odooUrl}
-        onChangeText={setOdooUrl}
-        autoCapitalize="none"
-        autoCorrect={false}
-        placeholder={t('odooUrl')}
-        style={styles.input}
-      />
-      <Button label={t('scanQr')} onPress={() => router.push('/scan')} />
+      <Button label={t('scanDriverBadge')} onPress={() => router.push('/scan')} />
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>{t('orManualLogin')}</Text>
+        <View style={styles.dividerLine} />
+      </View>
       <TextInput
         value={login}
         onChangeText={setLogin}
@@ -74,6 +70,14 @@ export default function Login() {
         placeholder={t('password')}
         style={styles.input}
       />
+      <TextInput
+        value={odooUrl}
+        onChangeText={setOdooUrl}
+        autoCapitalize="none"
+        autoCorrect={false}
+        placeholder={t('odooUrl')}
+        style={[styles.input, styles.inputSecondary]}
+      />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button label={t('login')} onPress={submit} disabled={busy || !login || !password} />
       <LangSwitch />
@@ -84,6 +88,9 @@ export default function Login() {
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.paper, padding: 32, justifyContent: 'center', gap: 16, maxWidth: 560, alignSelf: 'center', width: '100%' },
   title: { fontSize: type.title, color: colors.ink, fontWeight: '700', marginBottom: 8 },
+  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 4, gap: 12 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.line },
+  dividerText: { fontSize: type.body - 2, color: colors.muted, fontWeight: '500' },
   input: {
     minHeight: hit,
     borderWidth: 1,
@@ -94,6 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     color: colors.ink,
   },
+  inputSecondary: { fontSize: type.body - 2, color: colors.muted },
   error: { color: colors.bus, fontSize: type.body },
   hint: { fontSize: type.body - 2, color: colors.muted },
 });

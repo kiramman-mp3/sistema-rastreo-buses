@@ -10,4 +10,5 @@ from . import bus_run
 from . import bus_shift
 from . import bus_driver_token
 from . import bus_incident
+from . import res_users
 from . import res_config_settings

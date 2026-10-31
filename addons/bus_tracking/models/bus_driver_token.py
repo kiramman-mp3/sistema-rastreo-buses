@@ -5,6 +5,7 @@ from datetime import timedelta
 from odoo import api, fields, models
 
 TOKEN_TTL = timedelta(days=30)
+BADGE_TTL = timedelta(days=365)
 
 
 def hash_token(raw):
@@ -48,6 +49,46 @@ class BusDriverToken(models.Model):
             return users
         token = self.sudo().search([
             ('token_hash', '=', hash_token(raw)), ('expires', '>', fields.Datetime.now())], limit=1)
+        user = token.user_id
+        if user.active and user.has_group('bus_tracking.group_bus_driver'):
+            return user
+        return users
+
+    @api.model
+    def _issue_badge(self, user):
+        """Create or replace a long-lived credential badge token for `user`."""
+        self.sudo().search([
+            ('user_id', '=', user.id),
+            ('device_label', '=', 'badge_qr'),
+        ]).unlink()
+        raw = secrets.token_urlsafe(32)
+        self.sudo().create({
+            'token_hash': hash_token(raw),
+            'user_id': user.id,
+            'device_label': 'badge_qr',
+            'expires': fields.Datetime.now() + BADGE_TTL,
+        })
+        return raw
+
+    @api.model
+    def _revoke_badge(self, user):
+        """Revoke badge token(s) for user."""
+        self.sudo().search([
+            ('user_id', '=', user.id),
+            ('device_label', '=', 'badge_qr'),
+        ]).unlink()
+
+    @api.model
+    def _user_for_badge(self, raw):
+        """The driver the badge token belongs to, or empty if unknown/expired/inactive."""
+        users = self.env['res.users']
+        if not raw:
+            return users
+        token = self.sudo().search([
+            ('token_hash', '=', hash_token(raw)),
+            ('device_label', '=', 'badge_qr'),
+            ('expires', '>', fields.Datetime.now()),
+        ], limit=1)
         user = token.user_id
         if user.active and user.has_group('bus_tracking.group_bus_driver'):
             return user
