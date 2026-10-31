@@ -54,8 +54,12 @@ const es = {
   update_error: 'No pudimos actualizar. Reintentando…',
   map_label: 'Mapa con los buses de la ruta',
   scanQr: 'Leer código QR',
+  scanDriverBadge: 'Escanear credencial QR',
+  badgeLoggingIn: 'Identificando chofer…',
+  badgeError: 'Credencial no válida o revocada.',
+  orManualLogin: 'O ingresar manualmente',
   odooUrl: 'Servidor Odoo',
-  qrBad: 'Ese código no es válido. Escanea el código "Tableta del conductor" en Odoo.',
+  qrBad: 'Ese código no es válido. Escanea tu credencial de chofer o el QR de Odoo.',
   cameraNeed: 'Hay que permitir la cámara para leer el QR.',
 };
 
@@ -112,8 +116,12 @@ const en: typeof es = {
   update_error: "We couldn't update. Retrying…",
   map_label: 'Map with the buses of the route',
   scanQr: 'Scan QR code',
+  scanDriverBadge: 'Scan driver badge',
+  badgeLoggingIn: 'Identifying driver…',
+  badgeError: 'Driver badge invalid or revoked.',
+  orManualLogin: 'Or sign in manually',
   odooUrl: 'Odoo server',
-  qrBad: 'Invalid QR code. Scan the "Driver tablet" code in Odoo.',
+  qrBad: 'Invalid QR code. Scan your driver badge or Odoo setup QR.',
   cameraNeed: 'Allow the camera to scan the QR.',
 };
 

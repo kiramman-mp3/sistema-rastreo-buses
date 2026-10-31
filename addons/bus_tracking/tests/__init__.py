@@ -13,4 +13,5 @@ from . import test_stop_picker
 from . import test_runs
 from . import test_driver_auth
 from . import test_driver_shift
+from . import test_driver_badge
 from . import test_driver_staff

@@ -1,4 +1,4 @@
-import { AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
+import { ApiError, AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
 import { normalizeOdooUrl } from '../config/odooUrl';
 import type {
   Driver,
@@ -126,6 +126,36 @@ export class Session {
     const me = await this.client.me();
     this.applyMe({ ...me, driver }, token);
     await this.restoreGps(me.shift);
+  }
+
+  async loginWithBadge(badgeToken: string, odooUrl?: string | null) {
+    if (odooUrl) {
+      await this.setOdooUrl(odooUrl);
+    }
+    let token: string;
+    let driver: Driver;
+    try {
+      const res = await this.client.loginBadge(badgeToken);
+      token = res.token;
+      driver = res.driver;
+      await this.store.set(token);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) {
+        token = badgeToken;
+        await this.store.set(token);
+        const me = await this.client.me();
+        driver = me.driver;
+      } else {
+        throw err;
+      }
+    }
+    const me = await this.client.me();
+    this.applyMe({ ...me, driver }, token);
+    await this.restoreGps(me.shift);
+  }
+
+  async loginWithToken(token: string, odooUrl?: string | null) {
+    return this.loginWithBadge(token, odooUrl);
   }
 
   async logout() {
