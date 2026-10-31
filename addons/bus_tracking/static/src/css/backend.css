@@ -1,13 +1,14 @@
-/* Backend touches on top of the palette from primary_variables.scss. */
+/* Modern, executive backend styling for Buses UTA in Odoo 16 */
 
 .o_web_client {
-    --bus-radius: 12px;
+    --bus-radius: 8px;
 }
 
 /* ---------- Navbar ---------- */
 
 .o_main_navbar {
-    border-bottom: 3px solid var(--bus-senal);
+    border-bottom: 2px solid var(--bus-uta-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .o_main_navbar .o_menu_brand,
@@ -17,126 +18,135 @@
 
 .o_main_navbar .o_menu_sections .dropdown-toggle:focus-visible,
 .o_main_navbar .o_menu_systray :focus-visible {
-    outline: 3px solid var(--bus-senal);
-    outline-offset: -3px;
+    outline: 2px solid var(--bus-uta-primary);
+    outline-offset: -2px;
 }
 
-/* ---------- Titles and control panel ---------- */
+/* ---------- Titles and Control Panel ---------- */
 
 .o_web_client .o_form_view .oe_title h1,
 .o_web_client .o_control_panel .breadcrumb-item.active {
     font-family: var(--bus-font-display);
-    letter-spacing: -0.02em;
-}
-
-.o_web_client .o_form_view .oe_title h1 {
+    letter-spacing: -0.015em;
     font-weight: 800;
 }
 
 .o_web_client .o_control_panel {
-    background: #fff;
-    border-bottom: 2px solid var(--bus-lluvia);
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--bus-line);
 }
 
-/* ---------- Forms: the sheet reads as a card, group titles as headings ---------- */
+/* ---------- Forms: Executive Card Sheet ---------- */
 
 .o_web_client .o_form_view .o_form_sheet_bg {
-    background: var(--bus-paper);
+    background: #F8FAFC;
 }
 
 .o_web_client .o_form_view .o_form_sheet {
     border-radius: var(--bus-radius);
-    border: 2px solid var(--bus-lluvia);
-    box-shadow: none;
+    border: 1px solid var(--bus-line);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .o_web_client .o_form_view .o_group .o_horizontal_separator {
     font-family: var(--bus-font-display);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 800;
     letter-spacing: -0.01em;
     color: var(--bus-ink);
     padding-bottom: 0.35rem;
-    border-bottom: 3px solid var(--bus-senal);
+    border-bottom: 2px solid var(--bus-uta-primary);
     display: inline-block;
     margin-bottom: 0.75rem;
 }
 
 .o_web_client .o_form_view .o_form_statusbar {
-    background: #fff;
-    border-bottom: 2px solid var(--bus-lluvia);
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--bus-line);
 }
 
 /* ---------- Lists ---------- */
 
 .o_web_client .o_list_view .o_list_table thead th {
-    background: var(--bus-lluvia);
+    background: #F1F5F9;
     color: var(--bus-ink);
     font-weight: 700;
-    border-bottom: 2px solid var(--bus-ink);
+    border-bottom: 2px solid var(--bus-line-dark);
 }
 
 .o_web_client .o_list_view .o_data_row:hover {
-    background: rgba(255, 198, 43, 0.18);
+    background: rgba(15, 23, 42, 0.035);
 }
 
 .o_web_client .o_list_view .o_data_row.o_data_row_selected,
 .o_web_client .o_list_view .o_data_row:focus-within {
-    background: rgba(30, 85, 96, 0.1);
+    background: rgba(139, 29, 36, 0.06);
 }
 
-/* ---------- Status badges ---------- */
+/* ---------- Status Badges ---------- */
 
 .o_web_client .badge {
     font-weight: 700;
-    border-radius: 999px;
-    padding: 0.3em 0.75em;
+    border-radius: 6px;
+    padding: 0.3em 0.65em;
+    font-size: 0.8rem;
 }
 
 .o_web_client .badge.text-bg-danger,
 .o_web_client .o_field_badge.text-bg-danger {
     background-color: var(--bus-rojo) !important;
-    color: #fff !important;
+    color: #FFFFFF !important;
 }
 
 .o_web_client .badge.text-bg-success,
 .o_web_client .o_field_badge.text-bg-success {
     background-color: var(--bus-ok) !important;
-    color: #fff !important;
+    color: #FFFFFF !important;
 }
 
 .o_web_client .badge.text-bg-warning,
 .o_web_client .o_field_badge.text-bg-warning {
-    background-color: var(--bus-senal) !important;
-    color: var(--bus-ink) !important;
+    background-color: var(--bus-warn) !important;
+    color: #FFFFFF !important;
 }
 
-/* ---------- Buttons and focus ---------- */
+/* ---------- Buttons and Focus ---------- */
 
 .o_web_client .o_control_panel .btn,
 .o_web_client .o_form_statusbar .btn {
-    border-radius: 999px;
+    border-radius: 6px;
+    font-weight: 600;
 }
 
-.o_web_client .btn-primary:focus-visible,
+.o_web_client .btn-primary {
+    background-color: var(--bus-uta-primary);
+    border-color: var(--bus-uta-primary);
+}
+
+.o_web_client .btn-primary:hover {
+    background-color: var(--bus-uta-dark);
+    border-color: var(--bus-uta-dark);
+}
+
 .o_web_client .btn:focus-visible,
 .o_web_client .o_input:focus-visible,
 .o_web_client a:focus-visible {
-    outline: 3px solid var(--bus-senal);
+    outline: 2px solid var(--bus-uta-primary);
     outline-offset: 2px;
 }
 
-/* ---------- Settings page ---------- */
+/* ---------- Settings Page ---------- */
 
 .o_web_client .o_form_view .app_settings_block h2 {
     font-family: var(--bus-font-display);
     font-weight: 800;
-    border-bottom: 3px solid var(--bus-senal);
+    border-bottom: 2px solid var(--bus-uta-primary);
     display: inline-block;
+    color: var(--bus-ink);
 }
 
 .o_web_client .o_form_view .o_setting_box:hover {
-    background: rgba(255, 198, 43, 0.12);
+    background: rgba(139, 29, 36, 0.03);
 }
 
 @media (prefers-reduced-motion: reduce) {
