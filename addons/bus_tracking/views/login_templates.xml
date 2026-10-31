@@ -8,7 +8,10 @@
             <t t-set="brand" t-value="request.env['ir.config_parameter'].sudo().get_param('bus_tracking.brand_name') or 'Buses UTA'"/>
             <div class="o_bus_login_shell">
                 <aside class="o_bus_login_visual">
-                    <p class="o_bus_login_quote">Buen día.<br/>Veamos por dónde van tus buses.</p>
+                    <div>
+                        <p class="o_bus_login_quote">Movilidad universitaria inteligente y segura.</p>
+                        <p class="o_bus_login_subquote">Plataforma centralizada de telemetría y coordinación de flota de la Universidad Técnica de Ambato.</p>
+                    </div>
                 </aside>
                 <main class="o_bus_login_panel">
                     <div class="o_bus_login_card">
@@ -19,9 +22,9 @@
                         <t t-out="0"/>
                         <div class="o_bus_login_footer" t-if="not disable_footer">
                             <t t-if="not disable_database_manager">
-                                <a href="/web/database/manager">Manage Databases</a>
+                                <a href="/web/database/manager">Gestión de Bases de Datos</a>
                             </t>
-                            <a href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" target="_blank">Powered by Odoo</a>
+                            <a href="/">Volver al Portal Público</a>
                         </div>
                     </div>
                 </main>
@@ -31,8 +34,8 @@
 
     <template id="login" inherit_id="web.login" name="Bus Tracking login">
         <xpath expr="//form[hasclass('oe_login_form')]" position="before">
-            <h1 class="o_bus_login_title">Bienvenido de vuelta</h1>
-            <p class="o_bus_login_sub">Entra para ver dónde están tus buses.</p>
+            <h1 class="o_bus_login_title">Portal de Operaciones</h1>
+            <p class="o_bus_login_sub">Ingresa con tus credenciales institucionales o de conductor.</p>
         </xpath>
     </template>
 </odoo>
