@@ -197,4 +197,26 @@ describe('session', () => {
     expect(session.snapshot.shift).toBeNull();
     expect(gps.started).toEqual([]);
   });
+
+  test('loginWithBadge exchanges badge token for a session and populates driver state', async () => {
+    const tokens = memoryStore(null);
+    const fetchMock = jest.fn(async (url: string) => {
+      const u = String(url);
+      if (u.endsWith('/login_badge')) {
+        return json(200, { token: 'session-tok-123', driver: { id: 7, name: 'Chofer Uno' } });
+      }
+      if (u.endsWith('/me')) {
+        return json(200, me);
+      }
+      return json(404, { error: 'not_found' });
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client);
+    await session.loginWithBadge('raw-badge-token-abc');
+
+    expect(session.snapshot.token).toBe('session-tok-123');
+    expect(session.snapshot.driver?.name).toBe('Chofer Uno');
+    expect(session.snapshot.vehicles).toHaveLength(1);
+    expect(session.snapshot.routes).toHaveLength(1);
+  });
 });
