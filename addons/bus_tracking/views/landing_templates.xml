@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Reusable institutional brand mark: UTA Transit emblem -->
+    <!-- Institutional UTA Transit emblem -->
     <template id="brand_mark">
         <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false" class="uta-brand-icon" width="40" height="40">
             <defs>
@@ -26,177 +26,600 @@
             <t t-set="title"><t t-esc="brand"/> | Universidad Técnica de Ambato</t>
             <t t-set="body_classname" t-value="'o_bus_landing'"/>
             <t t-set="head">
-                <meta name="description" content="Sistema oficial de rastreo satelital de buses de la Universidad Técnica de Ambato (UTA). Monitoreo en vivo de rutas y paradas universitarias."/>
+                <meta name="description" content="Sistema oficial de rastreo satelital de buses de la Universidad Técnica de Ambato (UTA). Monitoreo en tiempo real de rutas y paradas universitarias."/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
                 <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
                 <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
             </t>
 
-            <header class="top-nav-wrap">
-                <div class="wrap top">
-                    <a class="marca" href="/" t-attf-aria-label="#{brand}, inicio">
+            <!-- Top Micro Bar (Institutional) -->
+            <div class="top-micro-bar">
+                <div class="wrap top-micro-inner">
+                    <div class="micro-left">
+                        <span>Universidad Técnica de Ambato</span>
+                        <span class="micro-sep">·</span>
+                        <span>Dirección de Bienestar Universitario</span>
+                        <span class="micro-sep">·</span>
+                        <span class="micro-tag">Transporte Gratuito</span>
+                    </div>
+                    <div class="micro-right">
+                        <a href="https://sga.uta.edu.ec" target="_blank" rel="noopener" class="micro-link">Portal SGA</a>
+                        <span class="micro-sep">|</span>
+                        <a href="/quejas" class="micro-link">Atención al Usuario</a>
+                        <span class="micro-sep">|</span>
+                        <span class="micro-lang">🇪🇨 ES</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Navigation Header -->
+            <header class="site-header">
+                <div class="wrap header-inner">
+                    <a class="header-brand" href="/" t-attf-aria-label="#{brand}, inicio">
                         <t t-call="bus_tracking.brand_mark"/>
-                        <div class="marca-texto">
-                            <span class="marca-nombre"><t t-esc="brand"/></span>
-                            <span class="marca-sub">Universidad Técnica de Ambato</span>
+                        <div class="brand-text">
+                            <span class="brand-title"><t t-esc="brand"/></span>
+                            <span class="brand-sub">Universidad Técnica de Ambato</span>
                         </div>
                     </a>
-                    <div class="nav-actions">
-                        <a class="nav-link" href="/rutas">Rutas en vivo</a>
-                        <a class="nav-link" href="/quejas">Atención al usuario</a>
-                        <a class="btn btn-outline" href="/web/login">Acceso Chofer / Personal</a>
+                    <nav class="header-nav">
+                        <a class="nav-item active" href="/">Inicio</a>
+                        <a class="nav-item" href="/rutas">Rutas y Paradas</a>
+                        <a class="nav-item" href="#horarios">Horarios</a>
+                        <a class="nav-item" href="#campus">Campus</a>
+                        <a class="nav-item" href="/quejas">Atención / Quejas</a>
+                    </nav>
+                    <div class="header-actions">
+                        <a class="btn btn-header-login" href="/web/login">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                            </svg>
+                            <span>Portal Chofer / Operaciones</span>
+                        </a>
                     </div>
                 </div>
             </header>
 
             <main>
-                <!-- Hero Section -->
+                <!-- Hero Section with CasaBus-style High-Resolution Photo & Overlay -->
                 <section class="hero-section">
-                    <div class="wrap hero-grid">
-                        <div class="hero-content">
-                            <div class="hero-badge">
-                                <span class="badge-dot"></span>
-                                Sistema Oficial de Transporte Universitario
+                    <div class="hero-backdrop" style="background-image: url('/bus_tracking/static/img/landing/hero-bus.jpg');">
+                        <div class="hero-overlay"></div>
+                    </div>
+                    <div class="wrap hero-wrap">
+                        <div class="hero-text-block">
+                            <div class="hero-kicker">
+                                <span class="kicker-pulse"></span>
+                                <span>RED DE TRANSPORTE INSTITUCIONAL</span>
                             </div>
-                            <h1>Rastreo en tiempo real de los buses de la UTA.</h1>
-                            <p class="lead">Conoce la ubicación exacta de las unidades universitarias que conectan los campus Huachi, Ingahurco y Querochaca. Planifica tus viajes y llega a tiempo a clases.</p>
-                            <div class="acciones">
-                                <a class="btn btn-primary" href="/rutas">
-                                    <span>Ver buses de mi ruta en el mapa</span>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                </a>
-                                <a class="btn btn-secondary" href="/quejas">Reportar novedad</a>
-                            </div>
+                            <h1 class="hero-headline">Conectando tus sueños académicos en cada recorrido</h1>
+                            <p class="hero-subtext">Monitorea en tiempo real la ubicación satelital de los buses universitarios que unen los campus Huachi, Ingahurco y Querochaca con total puntualidad y seguridad.</p>
                         </div>
-                        <div class="hero-card-preview">
-                            <div class="preview-header">
-                                <div class="preview-title-row">
-                                    <span class="live-pill"><span class="live-indicator-dot"></span> EN SERVICIO</span>
-                                    <span class="preview-routes-count">3 Rutas Activas</span>
+                    </div>
+                </section>
+
+                <!-- Floating Route Search Widget (CasaBus Style) -->
+                <section class="planner-section">
+                    <div class="wrap planner-wrap">
+                        <div class="route-planner-card">
+                            <div class="planner-header-strip">
+                                <div class="planner-strip-title">
+                                    <span class="planner-strip-icon">🔍</span>
+                                    <span>Consulta tu ruta universitaria</span>
                                 </div>
-                                <h3 class="preview-headline">Red de Transporte UTA</h3>
+                                <div class="planner-strip-status">
+                                    <span class="status-live-dot"></span>
+                                    <span>Servicio satelital activo</span>
+                                </div>
                             </div>
-                            <div class="preview-routes-list">
-                                <a href="/rutas" class="preview-route-item">
-                                    <span class="route-chip r-huachi">HUACHI</span>
-                                    <div class="route-item-info">
-                                        <strong>UTA - Huachi Grande</strong>
-                                        <span>Campus Huachi · Parada Terminal Sur</span>
+                            <form class="planner-form" action="/rutas" method="get">
+                                <div class="planner-fields-row">
+                                    <div class="planner-field">
+                                        <label for="search-origen">Origen</label>
+                                        <div class="select-wrapper">
+                                            <select id="search-origen" name="origen" class="planner-select">
+                                                <option value="">Selecciona origen...</option>
+                                                <option value="huachi" selected="selected">Campus Huachi (Av. Los Chasquis)</option>
+                                                <option value="ingahurco">Campus Ingahurco (Av. Colombia)</option>
+                                                <option value="querochaca">Campus Querochaca (Cevallos)</option>
+                                                <option value="terminal">Terminal Terrestre Ambato</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <span class="route-arrow">➔</span>
-                                </a>
-                                <a href="/rutas" class="preview-route-item">
-                                    <span class="route-chip r-quero">QUERO</span>
-                                    <div class="route-item-info">
-                                        <strong>UTA - Querochaca</strong>
-                                        <span>Facultad Agropecuaria · Complejo Quero</span>
+
+                                    <button type="button" class="planner-swap-btn" aria-label="Invertir origen y destino" onclick="var o=document.getElementById('search-origen'); var d=document.getElementById('search-destino'); var t=o.value; o.value=d.value; d.value=t;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/>
+                                        </svg>
+                                    </button>
+
+                                    <div class="planner-field">
+                                        <label for="search-destino">Destino</label>
+                                        <div class="select-wrapper">
+                                            <select id="search-destino" name="destino" class="planner-select">
+                                                <option value="">Selecciona destino...</option>
+                                                <option value="querochaca" selected="selected">Campus Querochaca (Cevallos)</option>
+                                                <option value="huachi">Campus Huachi (Av. Los Chasquis)</option>
+                                                <option value="ingahurco">Campus Ingahurco (Av. Colombia)</option>
+                                                <option value="salud">Facultad de Ciencias de la Salud</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <span class="route-arrow">➔</span>
-                                </a>
-                                <a href="/rutas" class="preview-route-item">
-                                    <span class="route-chip r-ficoa">FICOA</span>
-                                    <div class="route-item-info">
-                                        <strong>UTA - Ficoa</strong>
-                                        <span>Campus Ingahurco · Av. Guayambalo</span>
+
+                                    <button type="submit" class="btn btn-planner-submit">
+                                        <span>Ver Ruta en Vivo</span>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Live Service Alert Ticker Bar -->
+                                <div class="planner-ticker-bar">
+                                    <div class="ticker-badge">Líneas en Vivo:</div>
+                                    <div class="ticker-items">
+                                        <a href="/rutas" class="ticker-pill pill-ok">
+                                            <span class="pill-dot"></span>
+                                            <strong>L01 Huachi – Ingahurco:</strong> Servicio normal
+                                        </a>
+                                        <a href="/rutas" class="ticker-pill pill-ok">
+                                            <span class="pill-dot"></span>
+                                            <strong>L02 Querochaca:</strong> En recorrido satelital
+                                        </a>
+                                        <a href="/rutas" class="ticker-pill pill-warn">
+                                            <span class="pill-dot"></span>
+                                            <strong>L03 Terminal:</strong> Frecuencia cada 12 min
+                                        </a>
+                                        <a href="/rutas" class="ticker-pill pill-info">
+                                            <span class="pill-dot"></span>
+                                            <strong>L04 Nocturno:</strong> Activo desde 18:30
+                                        </a>
                                     </div>
-                                    <span class="route-arrow">➔</span>
-                                </a>
-                            </div>
-                            <div class="preview-footer">
-                                <span>GPS de alta precisión vía tableta embarcada</span>
-                                <a href="/rutas" class="preview-all-link">Ver mapa general</a>
-                            </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </section>
 
-                <!-- Key Metrics Bar -->
-                <section class="stats-bar">
-                    <div class="wrap stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-num">3</span>
-                            <span class="stat-label">Campus Universitarios Conectados</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-num">10s</span>
-                            <span class="stat-label">Frecuencia de Actualización Satelital</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-num">100%</span>
-                            <span class="stat-label">Monitoreo Automatizado de Paradas</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-num">Gratis</span>
-                            <span class="stat-label">Servicio para la Comunidad UTA</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Features Section -->
-                <section class="features-section">
+                <!-- Quick Services / Action Cards (CasaBus 5-Cards Row) -->
+                <section class="quick-services-section" id="campus">
                     <div class="wrap">
-                        <div class="section-title-wrap">
-                            <span class="section-eyebrow">Tecnología al servicio universitario</span>
-                            <h2>Movilidad ágil, predecible y segura para el estudiante.</h2>
+                        <div class="services-grid">
+                            <!-- Card 1 -->
+                            <a href="/rutas" class="service-card">
+                                <div class="service-icon-box">
+                                    <span class="service-icon">🏛️</span>
+                                </div>
+                                <h3 class="service-title">Campus y Paradas</h3>
+                                <p class="service-desc">Ubicación satelital y puntos de abordaje oficial en Huachi, Ingahurco y Querochaca.</p>
+                                <div class="service-arrow-btn">
+                                    <span class="arrow-glyph">→</span>
+                                </div>
+                            </a>
+
+                            <!-- Card 2 -->
+                            <a href="/rutas" class="service-card" id="horarios">
+                                <div class="service-icon-box">
+                                    <span class="service-icon">🕒</span>
+                                </div>
+                                <h3 class="service-title">Horarios y Turnos</h3>
+                                <p class="service-desc">Frecuencias programadas desde las 06:30 hasta las 21:00 en días hábiles.</p>
+                                <div class="service-arrow-btn">
+                                    <span class="arrow-glyph">→</span>
+                                </div>
+                            </a>
+
+                            <!-- Card 3 -->
+                            <a href="/rutas" class="service-card">
+                                <div class="service-icon-box">
+                                    <span class="service-icon">🎓</span>
+                                </div>
+                                <h3 class="service-title">Gratuidad Universitaria</h3>
+                                <p class="service-desc">Beneficio 100% financiado por la UTA para estudiantes regulares matriculados.</p>
+                                <div class="service-arrow-btn">
+                                    <span class="arrow-glyph">→</span>
+                                </div>
+                            </a>
+
+                            <!-- Card 4 -->
+                            <a href="/rutas" class="service-card">
+                                <div class="service-icon-box">
+                                    <span class="service-icon">🛰️</span>
+                                </div>
+                                <h3 class="service-title">Monitoreo GPS</h3>
+                                <p class="service-desc">Telemetría satelital en directo conectada a tabletas embarcadas en cada bus.</p>
+                                <div class="service-arrow-btn">
+                                    <span class="arrow-glyph">→</span>
+                                </div>
+                            </a>
+
+                            <!-- Card 5 -->
+                            <a href="/quejas" class="service-card">
+                                <div class="service-icon-box">
+                                    <span class="service-icon">✍️</span>
+                                </div>
+                                <h3 class="service-title">Buzón de Atención</h3>
+                                <p class="service-desc">Canal directo para reportar quejas, sugerencias o novedades del servicio de transporte.</p>
+                                <div class="service-arrow-btn">
+                                    <span class="arrow-glyph">→</span>
+                                </div>
+                            </a>
                         </div>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <div class="feature-icon">📍</div>
-                                <h3>Ubicación GPS Satelital</h3>
-                                <p>Cada unidad transmite sus coordenadas en vivo desde su tableta embarcada directamente a los servidores universitarios.</p>
+                    </div>
+                </section>
+
+                <!-- Section "Nuestras Rutas Principales" (CasaBus "Our Products" Style) -->
+                <section class="products-section" id="rutas">
+                    <div class="wrap">
+                        <div class="section-badge-header">
+                            <span class="section-wings">人</span>
+                            <span class="section-badge-text">NUESTRAS RUTAS PRINCIPALES</span>
+                            <span class="section-wings">人</span>
+                        </div>
+                        <h2 class="section-main-title">Conectividad directa entre los campus de Ambato</h2>
+                        <p class="section-subtext">Nuestra flota cubre los corredores universitarios neurálgicos, garantizando traslados rápidos, seguros y predecibles.</p>
+
+                        <div class="products-grid">
+                            <!-- Route Card 1 -->
+                            <article class="product-card">
+                                <div class="product-media">
+                                    <img src="/bus_tracking/static/img/landing/route-huachi.jpg" alt="Ruta Troncal Huachi - Ingahurco" class="product-img" loading="lazy"/>
+                                    <div class="product-badge-float">
+                                        <span class="badge-code">R-01</span>
+                                        <span class="badge-status">Troncal</span>
+                                    </div>
+                                </div>
+                                <div class="product-body">
+                                    <h3 class="product-title">Troncal Huachi – Ingahurco</h3>
+                                    <p class="product-desc">Enlace directo entre el Campus Matriz y el Campus de la Salud e Ingeniería. Conecta facultades principales con frecuencias cada 10 a 12 minutos.</p>
+                                    <a href="/rutas" class="product-link">
+                                        <span>Consultar paradas y unidades</span>
+                                        <span class="link-arrow">→</span>
+                                    </a>
+                                </div>
+                            </article>
+
+                            <!-- Route Card 2 -->
+                            <article class="product-card">
+                                <div class="product-media">
+                                    <img src="/bus_tracking/static/img/landing/route-quero.jpg" alt="Expreso Inter-Campus Querochaca" class="product-img" loading="lazy"/>
+                                    <div class="product-badge-float">
+                                        <span class="badge-code">R-02</span>
+                                        <span class="badge-status">Expreso</span>
+                                    </div>
+                                </div>
+                                <div class="product-body">
+                                    <h3 class="product-title">Expreso Inter-Campus Querochaca</h3>
+                                    <p class="product-desc">Ruta rápida hacia el cantón Cevallos y la Facultad de Ciencias Agropecuarias, brindando capacidad ampliada en horarios de entrada y salida.</p>
+                                    <a href="/rutas" class="product-link">
+                                        <span>Consultar paradas y unidades</span>
+                                        <span class="link-arrow">→</span>
+                                    </a>
+                                </div>
+                            </article>
+
+                            <!-- Route Card 3 -->
+                            <article class="product-card">
+                                <div class="product-media">
+                                    <img src="/bus_tracking/static/img/landing/route-circuito.jpg" alt="Circuito de Transferencia Urbana" class="product-img" loading="lazy"/>
+                                    <div class="product-badge-float">
+                                        <span class="badge-code">R-03</span>
+                                        <span class="badge-status">Circuito</span>
+                                    </div>
+                                </div>
+                                <div class="product-body">
+                                    <h3 class="product-title">Circuito de Transferencia Urbana</h3>
+                                    <p class="product-desc">Articulación con el Terminal Terrestre de Ambato, el Mercado Mayorista y puntos clave para el arribo de estudiantes foráneos de toda la provincia.</p>
+                                    <a href="/rutas" class="product-link">
+                                        <span>Consultar paradas y unidades</span>
+                                        <span class="link-arrow">→</span>
+                                    </a>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Asymmetric Banner "Sobre Buses UTA" (CasaBus "About CasaBus" Style) -->
+                <section class="about-split-section">
+                    <div class="wrap">
+                        <div class="about-card-container">
+                            <div class="about-left-banner">
+                                <span class="about-kicker">COMPROMISO INSTITUCIONAL</span>
+                                <h2 class="about-title">Sobre Buses UTA</h2>
+                                <p class="about-lead">El Sistema de Transporte de la Universidad Técnica de Ambato es un servicio institucional prioritario impulsado por la Dirección de Bienestar Universitario, concebido para brindar traslados seguros, puntuales y dignos a estudiantes, profesores y trabajadores.</p>
+
+                                <ul class="about-features-list">
+                                    <li class="about-feature-item">
+                                        <span class="feature-check">✓</span>
+                                        <span>Rastreo GPS satelital continuo desde tabletas embarcadas en cada bus.</span>
+                                    </li>
+                                    <li class="about-feature-item">
+                                        <span class="feature-check">✓</span>
+                                        <span>Conectividad inter-campus garantizada para más de 15,000 estudiantes.</span>
+                                    </li>
+                                    <li class="about-feature-item">
+                                        <span class="feature-check">✓</span>
+                                        <span>Auditoría de cumplimiento de velocidades, itinerarios y paraderos oficiales.</span>
+                                    </li>
+                                    <li class="about-feature-item">
+                                        <span class="feature-check">✓</span>
+                                        <span>Servicio 100% gratuito para la comunidad universitaria regular.</span>
+                                    </li>
+                                </ul>
+
+                                <div class="about-actions">
+                                    <a href="/rutas" class="btn btn-about-cta">Conocer Rutas y Horarios</a>
+                                    <a href="/quejas" class="btn btn-about-outline">Reglamento y Sugerencias</a>
+                                </div>
                             </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">⏱️</div>
-                                <h3>Control de Tiempos y Paradas</h3>
-                                <p>El sistema detecta automáticamente cuándo el bus entra al radio geográfico de cada paradero universitario.</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🔔</div>
-                                <h3>Transparencia y Seguridad</h3>
-                                <p>Reportes de exceso de velocidad, desvíos de ruta e incidentes registrados en auditoría permanente.</p>
+                            <div class="about-right-media">
+                                <div class="media-mask-container">
+                                    <img src="/bus_tracking/static/img/landing/about-students.jpg" alt="Estudiantes de la Universidad Técnica de Ambato" class="about-photo" loading="lazy"/>
+                                    <div class="about-badge-overlay">
+                                        <div class="overlay-stat">
+                                            <strong>15,000+</strong>
+                                            <span>Estudiantes Beneficiados</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Call to action -->
-                <section class="cta-banner">
-                    <div class="wrap cta-content">
-                        <h2>¿Vas a clases o regresas a casa?</h2>
-                        <p>No esperes a ciegas. Abre el mapa en tu celular o computador y mira por dónde viene tu bus.</p>
-                        <a class="btn btn-primary btn-large" href="/rutas">Consultar mi ruta ahora</a>
+                <!-- Section "Avisos y Novedades del Servicio" (CasaBus "Latest News" Vertical Story Style) -->
+                <section class="news-section">
+                    <div class="wrap">
+                        <div class="section-badge-header">
+                            <span class="section-wings">人</span>
+                            <span class="section-badge-text">AVISOS Y NOVEDADES</span>
+                            <span class="section-wings">人</span>
+                        </div>
+                        <h2 class="section-main-title">Mantente informado sobre el transporte institucional</h2>
+                        <p class="section-subtext">Comunicados operativos, mejoras de paradas y avisos de contingencia en tiempo real.</p>
+
+                        <div class="news-grid">
+                            <!-- Story Card 1 -->
+                            <article class="news-story-card">
+                                <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-evaluaciones.jpg');">
+                                    <div class="story-overlay"></div>
+                                </div>
+                                <div class="story-content">
+                                    <div class="story-meta">
+                                        <span class="story-date">31 Octubre, 2026</span>
+                                        <span class="story-tag">OPERATIVIDAD</span>
+                                    </div>
+                                    <h3 class="story-title">Frecuencias ampliadas en horarios pico por evaluaciones de fin de ciclo</h3>
+                                    <p class="story-snippet">Se incorporan unidades de refuerzo a partir de las 17:00 en los campus Huachi e Ingahurco para garantizar el retorno oportuno.</p>
+                                    <a href="/rutas" class="story-link">
+                                        <span>Leer comunicado oficial</span>
+                                        <span class="story-arrow">→</span>
+                                    </a>
+                                </div>
+                            </article>
+
+                            <!-- Story Card 2 -->
+                            <article class="news-story-card">
+                                <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-bahia.jpg');">
+                                    <div class="story-overlay"></div>
+                                </div>
+                                <div class="story-content">
+                                    <div class="story-meta">
+                                        <span class="story-date">28 Octubre, 2026</span>
+                                        <span class="story-tag">INFRAESTRUCTURA</span>
+                                    </div>
+                                    <h3 class="story-title">Nueva bahía de abordaje señalizada en el Campus Querochaca</h3>
+                                    <p class="story-snippet">Instalación de cubierta con paneles solares, iluminación nocturna y pantalla informativa con el arribo de los próximos buses.</p>
+                                    <a href="/rutas" class="story-link">
+                                        <span>Leer comunicado oficial</span>
+                                        <span class="story-arrow">→</span>
+                                    </a>
+                                </div>
+                            </article>
+
+                            <!-- Story Card 3 -->
+                            <article class="news-story-card">
+                                <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-tablet.jpg');">
+                                    <div class="story-overlay"></div>
+                                </div>
+                                <div class="story-content">
+                                    <div class="story-meta">
+                                        <span class="story-date">24 Octubre, 2026</span>
+                                        <span class="story-tag">TECNOLOGÍA</span>
+                                    </div>
+                                    <h3 class="story-title">Tabletas de telemetría GPS con soporte offline instaladas en toda la flota</h3>
+                                    <p class="story-snippet">Los choferes disponen ahora de una interfaz especializada con alerta de paradas próximas y registro satelital ininterrumpido.</p>
+                                    <a href="/rutas" class="story-link">
+                                        <span>Leer comunicado oficial</span>
+                                        <span class="story-arrow">→</span>
+                                    </a>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section "App is Available for All Devices" (CasaBus Style with Phone Mockup & Monogram) -->
+                <section class="app-showcase-section">
+                    <div class="watermark-monogram">UTA</div>
+                    <div class="wrap">
+                        <div class="app-showcase-grid">
+                            <div class="app-mockup-wrapper">
+                                <div class="smartphone-frame">
+                                    <div class="phone-speaker"></div>
+                                    <div class="phone-screen">
+                                        <div class="screen-header">
+                                            <div class="screen-brand-row">
+                                                <span class="screen-brand">Buses UTA</span>
+                                                <span class="screen-status-badge">🟢 En Vivo</span>
+                                            </div>
+                                            <div class="screen-stop-hero">
+                                                <span class="screen-stop-label">PRÓXIMA PARADA</span>
+                                                <span class="screen-stop-name">Campus Huachi - Puerta 2</span>
+                                            </div>
+                                        </div>
+                                        <div class="screen-map-sim">
+                                            <div class="sim-route-line"></div>
+                                            <div class="sim-stop-pin p1">1</div>
+                                            <div class="sim-bus-marker">🚌</div>
+                                            <div class="sim-stop-pin p2">2</div>
+                                            <div class="sim-stop-pin p3">3</div>
+                                        </div>
+                                        <div class="screen-bottom-card">
+                                            <div class="screen-route-name">Ruta Troncal Huachi - Ingahurco</div>
+                                            <div class="screen-progress-bar">
+                                                <div class="progress-fill" style="width: 65%;"></div>
+                                            </div>
+                                            <div class="screen-eta">Arribo estimado: 3 min (900m)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="app-info-content">
+                                <div class="section-badge-header align-left">
+                                    <span class="section-wings">人</span>
+                                    <span class="section-badge-text">MOVILIDAD EN TU BOLSILLO</span>
+                                    <span class="section-wings">人</span>
+                                </div>
+                                <h2 class="app-title">El rastreo satelital disponible en todos tus dispositivos</h2>
+                                <p class="app-lead">Diseñado para funcionar sin interrupciones. Sigue las unidades desde cualquier teléfono o computadora sin instalar aplicaciones pesadas, o descarga la versión para conductores y operadores de la flota.</p>
+
+                                <div class="app-features-grid">
+                                    <div class="app-feature-box">
+                                        <span class="app-feat-icon">⚡</span>
+                                        <div>
+                                            <strong>Acceso Web Instantáneo</strong>
+                                            <p>Optimizado para navegar rápidamente en 4G, WiFi universitario o datos reducidos.</p>
+                                        </div>
+                                    </div>
+                                    <div class="app-feature-box">
+                                        <span class="app-feat-icon">📱</span>
+                                        <div>
+                                            <strong>App para Conductor y Personal</strong>
+                                            <p>Tableta embarcada con confirmación de turnos, mapa satelital y reporte de incidentes.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="app-cta-buttons">
+                                    <a href="/rutas" class="btn btn-store-primary">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="2" y1="12" x2="22" y2="12"/>
+                                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                        </svg>
+                                        <div class="btn-store-text">
+                                            <small>Abrir en tu Navegador</small>
+                                            <strong>Mapa Web Móvil</strong>
+                                        </div>
+                                    </a>
+
+                                    <a href="/web/login" class="btn btn-store-secondary">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                            <line x1="12" y1="18" x2="12.01" y2="18"/>
+                                        </svg>
+                                        <div class="btn-store-text">
+                                            <small>Acceso Conductor / Flota</small>
+                                            <strong>Portal de Operaciones</strong>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>
 
+            <!-- Dark Institutional Footer (CasaBus Style with UTA Institutional Identity) -->
             <footer class="footer-wrap">
-                <div class="wrap footer-grid">
-                    <div class="footer-brand">
-                        <div class="footer-logo-row">
+                <!-- Contact Ribbon -->
+                <div class="footer-contact-ribbon">
+                    <div class="wrap ribbon-inner">
+                        <div class="ribbon-brand">
                             <t t-call="bus_tracking.brand_mark"/>
-                            <span class="footer-title"><t t-esc="brand"/></span>
+                            <div class="ribbon-brand-info">
+                                <span class="ribbon-name"><t t-esc="brand"/></span>
+                                <span class="ribbon-sub">Universidad Técnica de Ambato</span>
+                            </div>
                         </div>
-                        <p class="footer-desc">Sistema de Transporte y Rastreo Satelital de la Universidad Técnica de Ambato. Desarrollado para garantizar la movilidad oportuna de estudiantes, docentes y personal.</p>
+                        <div class="ribbon-channels">
+                            <a href="tel:+59332848487" class="ribbon-contact-item">
+                                <span class="contact-icon">📞</span>
+                                <span>+593 (3) 284-8487</span>
+                            </a>
+                            <a href="mailto:transporte@uta.edu.ec" class="ribbon-contact-item">
+                                <span class="contact-icon">✉️</span>
+                                <span>transporte@uta.edu.ec</span>
+                            </a>
+                        </div>
+                        <div class="ribbon-social">
+                            <a href="https://facebook.com" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook UTA">
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            </a>
+                            <a href="https://twitter.com" target="_blank" rel="noopener" class="social-icon" aria-label="X / Twitter UTA">
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                            </a>
+                            <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram UTA">
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </a>
+                            <a href="https://youtube.com" target="_blank" rel="noopener" class="social-icon" aria-label="YouTube UTA">
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            </a>
+                        </div>
                     </div>
-                    <div class="footer-col">
-                        <h4>Campus</h4>
-                        <ul>
-                            <li><span>Campus Huachi (Av. Los Chasquis)</span></li>
-                            <li><span>Campus Ingahurco</span></li>
-                            <li><span>Campus Querochaca (Cevallos)</span></li>
+                </div>
+
+                <!-- Footer Navigation Columns -->
+                <div class="wrap footer-columns-grid">
+                    <div class="footer-nav-col">
+                        <h4 class="footer-col-title">Servicios al Pasajero</h4>
+                        <ul class="footer-links-list">
+                            <li><a href="/rutas">Rutas Satelitales en Vivo</a></li>
+                            <li><a href="/rutas">Mapa de Paradas y Terminales</a></li>
+                            <li><a href="#horarios">Horarios y Frecuencias Académicas</a></li>
+                            <li><a href="/quejas">Buzón de Incidencias y Sugerencias</a></li>
                         </ul>
                     </div>
-                    <div class="footer-col">
-                        <h4>Servicios</h4>
-                        <ul>
-                            <li><a href="/rutas">Rutas y Horarios</a></li>
-                            <li><a href="/quejas">Atención de Incidencias</a></li>
-                            <li><a href="/web/login">Portal de Operaciones</a></li>
+
+                    <div class="footer-nav-col">
+                        <h4 class="footer-col-title">Campus Universitarios</h4>
+                        <ul class="footer-links-list">
+                            <li><span class="campus-item-text"><strong>Campus Huachi:</strong> Av. Los Chasquis y Río Guayllabamba</span></li>
+                            <li><span class="campus-item-text"><strong>Campus Ingahurco:</strong> Av. Colombia y Chile</span></li>
+                            <li><span class="campus-item-text"><strong>Campus Querochaca:</strong> Sector Cevallos</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-nav-col">
+                        <h4 class="footer-col-title">Soporte y Normativa</h4>
+                        <ul class="footer-links-list">
+                            <li><a href="/quejas">Reglamento de Transporte Institucional</a></li>
+                            <li><a href="/quejas">Protocolo de Seguridad y Emergencias</a></li>
+                            <li><a href="/quejas">Reporte de Pérdidas de Objetos</a></li>
+                            <li><a href="/web/login">Portal de Operaciones para Choferes</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-nav-col">
+                        <h4 class="footer-col-title">Enlaces Institucionales</h4>
+                        <ul class="footer-links-list">
+                            <li><a href="https://uta.edu.ec" target="_blank" rel="noopener">Portal Oficial UTA</a></li>
+                            <li><a href="https://sga.uta.edu.ec" target="_blank" rel="noopener">Sistema SGA Estudiantil</a></li>
+                            <li><a href="https://uta.edu.ec" target="_blank" rel="noopener">Dirección de Bienestar Universitario</a></li>
+                            <li><a href="https://uta.edu.ec" target="_blank" rel="noopener">Biblioteca General UTA</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="wrap footer-bottom">
-                    <p>© <t t-esc="datetime.date.today().year"/> Universidad Técnica de Ambato. Todos los derechos reservados.</p>
-                    <p class="footer-location">Ambato, Tungurahua, Ecuador</p>
+
+                <!-- Copyright Bar -->
+                <div class="footer-bottom-bar">
+                    <div class="wrap bottom-bar-inner">
+                        <p class="bottom-copy">© <t t-esc="datetime.date.today().year"/> Universidad Técnica de Ambato. Dirección de Bienestar Universitario · Todos los derechos reservados.</p>
+                        <p class="bottom-location">Ambato, Tungurahua, Ecuador</p>
+                    </div>
                 </div>
             </footer>
         </t>
