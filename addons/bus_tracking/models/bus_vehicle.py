@@ -31,10 +31,6 @@ class BusVehicle(models.Model):
     traccar_unique_id = fields.Char(string="Traccar Unique ID", copy=False,
                                     groups='bus_tracking.group_bus_manager')
 
-    gps_setup_link = fields.Char(string="Phone setup link", compute='_compute_gps_setup',
-                                 groups='bus_tracking.group_bus_manager')
-    gps_qr = fields.Binary(string="Phone setup QR", compute='_compute_gps_setup',
-                           groups='bus_tracking.group_bus_manager')
     tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_setup',
                                     groups='bus_tracking.group_bus_manager')
     tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_setup',
@@ -58,23 +54,6 @@ class BusVehicle(models.Model):
     _sql_constraints = [
         ('traccar_device_uniq', 'unique(traccar_device_id)', "Traccar device is already linked to another bus."),
     ]
-
-    @api.depends('traccar_unique_id')
-    def _compute_gps_setup(self):
-        """Link and QR for the Traccar Client app. The app documents the server URL and the
-        device identifier; the link format is not officially documented, so the QR is a
-        convenience and the values must also be usable by typing them in."""
-        base = (self.env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').rstrip('/')
-        for bus in self:
-            if bus.traccar_unique_id and base:
-                link = 'org.traccar.client://config?' + urlencode(
-                    {'url': base, 'id': bus.traccar_unique_id, 'interval': 10, 'distance': 0})
-                bus.gps_setup_link = link
-                bus.gps_qr = base64.b64encode(
-                    self.env['ir.actions.report'].barcode('QR', link, width=260, height=260))
-            else:
-                bus.gps_setup_link = False
-                bus.gps_qr = False
 
     @api.model
     def _tablet_setup_pair(self):
