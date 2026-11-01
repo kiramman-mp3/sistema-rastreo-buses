@@ -1,30 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="portal_head" name="Passenger portal head">
-        <meta name="description" content="Mira por dónde van los buses de tu ruta."/>
+        <meta name="description" content="Portal oficial de rastreo y atención de transporte de la Universidad Técnica de Ambato."/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
         <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
         <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/portal.css?v=#{asset_v}"/>
-    </template>
-
-    <template id="portal_header" name="Passenger portal header">
-        <header class="wrap top">
-            <a class="marca" href="/" t-att-aria-label="brand">
-                <t t-call="bus_tracking.brand_mark"/>
-                <t t-esc="brand"/>
-            </a>
-            <nav class="portal-nav">
-                <form method="get" class="lang-form">
-                    <t t-foreach="languages.items()" t-as="entry">
-                        <button type="submit" name="lang" t-att-value="entry[0]"
-                                t-attf-class="lang #{'activa' if entry[0] == lang else ''}"
-                                t-att-lang="entry[0]" t-att-aria-current="'true' if entry[0] == lang else None"
-                                t-esc="entry[1]"/>
-                    </t>
-                </form>
-                <a class="btn" href="/web/login" t-esc="s['staff_login']"/>
-            </nav>
-        </header>
     </template>
 
     <template id="portal_routes" name="Passenger portal: routes">
@@ -32,24 +13,87 @@
             <t t-set="title"><t t-esc="s['title_routes']"/> | <t t-esc="brand"/></t>
             <t t-set="body_classname" t-value="'o_bus_landing'"/>
             <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-set="active_nav" t-value="'rutas'"/>
             <t t-call="bus_tracking.portal_header"/>
-            <main class="wrap portal">
-                <h1 t-esc="s['pick_route']"/>
-                <p class="lead" t-esc="s['pick_route_help']"/>
-                <p t-if="not routes" class="vacio" t-esc="s['no_routes']"/>
-                <ul class="rutas" t-if="routes">
-                    <li t-foreach="routes" t-as="r">
-                        <a t-attf-href="/rutas/#{r['code']}">
-                            <span class="chip" t-attf-style="background: #{r['color']}" t-esc="r['code']"/>
-                            <strong t-esc="r['name']"/>
-                            <span t-attf-class="estado #{'activa' if r['buses'] else ''}"
-                                  t-esc="s['buses_in_service'].format(n=r['buses']) if r['buses'] else s['no_service']"/>
-                        </a>
-                    </li>
-                </ul>
+
+            <main class="portal-main-wrapper">
+                <!-- Page Hero Header -->
+                <section class="portal-hero-strip">
+                    <div class="wrap">
+                        <div class="section-badge-header align-left">
+                            <span class="section-wings">人</span>
+                            <span class="section-badge-text">RED DE TRANSPORTE INSTITUCIONAL UTA</span>
+                            <span class="section-wings">人</span>
+                        </div>
+                        <h1 class="portal-hero-title"><t t-esc="s['pick_route']"/></h1>
+                        <p class="portal-hero-subtitle"><t t-esc="s['pick_route_help']"/></p>
+
+                        <!-- Quick Highlights Bar -->
+                        <div class="portal-highlights-bar">
+                            <div class="highlight-chip">
+                                <span class="chip-icon">🎓</span>
+                                <div>
+                                    <strong>Conexión Inter-Campus</strong>
+                                    <small>Huachi · Ingahurco · Querochaca</small>
+                                </div>
+                            </div>
+                            <div class="highlight-chip">
+                                <span class="chip-icon">🕒</span>
+                                <div>
+                                    <strong>Horario Académico</strong>
+                                    <small>06:30 – 20:30 (Lun a Vie)</small>
+                                </div>
+                            </div>
+                            <div class="highlight-chip">
+                                <span class="chip-icon">🛰️</span>
+                                <div>
+                                    <strong>Telemetría GPS</strong>
+                                    <small>Monitoreo activo en vivo</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="wrap portal-content-body">
+                    <p t-if="not routes" class="vacio" t-esc="s['no_routes']"/>
+                    <ul class="rutas" t-if="routes">
+                        <li t-foreach="routes" t-as="r">
+                            <a t-attf-href="/rutas/#{r['code']}" class="route-premium-card">
+                                <div class="card-top-row">
+                                    <span class="chip" t-attf-style="background: #{r['color']}" t-esc="r['code']"/>
+                                    <span t-attf-class="estado #{'activa' if r['buses'] else ''}">
+                                        <span class="status-pulse-dot"></span>
+                                        <t t-esc="s['buses_in_service'].format(n=r['buses']) if r['buses'] else s['no_service']"/>
+                                    </span>
+                                </div>
+                                <div class="card-middle-content">
+                                    <strong class="route-title" t-esc="r['name']"/>
+                                    <span class="route-corridor-desc">Corredor universitario con paradas autorizadas y auditoría de tiempos</span>
+                                </div>
+                                <div class="card-bottom-action">
+                                    <span class="action-text">Ver mapa interactivo y paradas</span>
+                                    <span class="action-arrow">→</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Help / Complaint Callout Card -->
+                    <div class="portal-help-callout">
+                        <div class="callout-icon-box">💬</div>
+                        <div class="callout-body">
+                            <h3>¿Detectaste retrasos o tienes una sugerencia sobre las rutas?</h3>
+                            <p>El canal oficial de la Dirección de Bienestar Universitario te permite reportar novedades de servicio y recuperar objetos olvidados.</p>
+                        </div>
+                        <div class="callout-action reportar-enlace">
+                            <a href="/quejas" class="btn btn-hero-primary"><t t-esc="s['report']"/></a>
+                        </div>
+                    </div>
+                </div>
             </main>
-            <p class="wrap reportar-enlace"><a href="/quejas" t-esc="s['report']"/></p>
-            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+
+            <t t-call="bus_tracking.portal_footer"/>
         </t>
     </template>
 
@@ -61,33 +105,78 @@
                 <t t-call="bus_tracking.portal_head"/>
                 <link rel="stylesheet" href="/bus_tracking/static/lib/leaflet/leaflet.css"/>
             </t>
+            <t t-set="active_nav" t-value="'rutas'"/>
             <t t-call="bus_tracking.portal_header"/>
-            <main class="wrap portal">
-                <a class="volver" href="/rutas" t-esc="s['all_routes']"/>
-                <h1>
-                    <span class="chip" t-attf-style="background: #{route['color']}" t-esc="route['code']"/>
-                    <t t-esc="route['name']"/>
-                </h1>
-                <div class="mapa-wrap">
-                    <div id="bus-map" role="img" t-att-aria-label="s['map_label']"
-                         t-att-data-code="route['code']" t-att-data-color="route['color']"
-                         t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json"
-                         t-att-data-i18n="json_i18n"/>
-                    <aside>
-                        <h2 t-esc="s['buses_now']"/>
-                        <p id="bus-status" class="estado" aria-live="polite"/>
-                        <div id="path-picker" class="path-picker" hidden="hidden">
-                            <label for="path-select" t-esc="s['path_pick']"/>
-                            <select id="path-select"/>
-                            <button type="button" id="path-reset" class="btn" t-esc="s['path_reset']"/>
+
+            <main class="portal-main-wrapper">
+                <!-- Route Header Banner -->
+                <section class="portal-hero-strip compact-hero">
+                    <div class="wrap">
+                        <div class="portal-breadcrumb-row">
+                            <a class="volver btn-back-link" href="/rutas">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                                <span t-esc="s['all_routes']"/>
+                            </a>
                         </div>
-                        <ul id="bus-list" class="buses"/>
-                        <p id="bus-empty" class="vacio" hidden="hidden" t-esc="s['no_buses']"/>
-                        <a class="btn reportar" t-attf-href="/quejas?ruta=#{route['code']}" t-esc="s['report']"/>
-                    </aside>
+                        <div class="route-header-main">
+                            <div class="route-title-cluster">
+                                <span class="chip route-large-chip" t-attf-style="background: #{route['color']}" t-esc="route['code']"/>
+                                <h1 class="route-hero-title"><t t-esc="route['name']"/></h1>
+                            </div>
+                            <div class="route-live-badge-top">
+                                <span class="live-dot-pulse"></span>
+                                <span>Rastreo Satelital Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="wrap portal-content-body">
+                    <div class="mapa-wrap">
+                        <div class="map-viewport-container">
+                            <div id="bus-map" role="img" t-att-aria-label="s['map_label']"
+                                 t-att-data-code="route['code']" t-att-data-color="route['color']"
+                                 t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json"
+                                 t-att-data-i18n="json_i18n"/>
+                        </div>
+                        <aside class="telemetry-panel">
+                            <div class="telemetry-panel-header">
+                                <h2 class="telemetry-title" t-esc="s['buses_now']"/>
+                                <p id="bus-status" class="estado" aria-live="polite"/>
+                            </div>
+
+                            <div id="path-picker" class="path-picker" hidden="hidden">
+                                <label for="path-select" t-esc="s['path_pick']"/>
+                                <select id="path-select" class="form-select"/>
+                                <button type="button" id="path-reset" class="btn btn-sm btn-outline-secondary" t-esc="s['path_reset']"/>
+                            </div>
+
+                            <div class="telemetry-list-wrap">
+                                <ul id="bus-list" class="buses"/>
+                                <div id="bus-empty" class="vacio" hidden="hidden">
+                                    <span class="empty-icon">🚌</span>
+                                    <p t-esc="s['no_buses']"/>
+                                </div>
+                            </div>
+
+                            <div class="telemetry-actions">
+                                <a class="btn reportar btn-reportar-route" t-attf-href="/quejas?ruta=#{route['code']}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                        <line x1="12" y1="9" x2="12" y2="13"/>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                    <span t-esc="s['report']"/>
+                                </a>
+                            </div>
+                        </aside>
+                    </div>
                 </div>
             </main>
-            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+
+            <t t-call="bus_tracking.portal_footer"/>
             <script src="/bus_tracking/static/lib/leaflet/leaflet.js"></script>
             <script t-attf-src="/bus_tracking/static/src/portal/portal_map.js?v=#{asset_v}"></script>
         </t>
@@ -98,85 +187,176 @@
             <t t-set="title"><t t-esc="s['report_title']"/> | <t t-esc="brand"/></t>
             <t t-set="body_classname" t-value="'o_bus_landing'"/>
             <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-set="active_nav" t-value="'quejas'"/>
             <t t-call="bus_tracking.portal_header"/>
-            <main class="wrap portal">
-                <a class="volver" href="/rutas" t-esc="s['back_to_routes']"/>
-                <h1 t-esc="s['report_title']"/>
-                <p class="lead" t-esc="s['report_intro']"/>
-                <div t-if="errors" class="errores" role="alert">
-                    <strong t-esc="s['err_title']"/>
-                    <ul><li t-foreach="errors.values()" t-as="message" t-esc="message"/></ul>
-                </div>
-                <form class="formulario" method="post" action="/quejas">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <input type="hidden" name="t" t-att-value="token"/>
-                    <div class="trampa" aria-hidden="true">
-                        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
-                    </div>
 
-                    <div class="campo">
-                        <label for="complaint-route" t-esc="s['field_route']"/>
-                        <select id="complaint-route" name="route">
-                            <option value="" t-esc="s['field_route_none']"/>
-                            <option t-foreach="routes" t-as="r" t-att-value="r['code']"
-                                    t-att-selected="'selected' if r['code'] == form['route'] else None">
-                                <t t-esc="r['code']"/> <t t-esc="r['name']"/>
-                            </option>
-                        </select>
+            <main class="portal-main-wrapper">
+                <section class="portal-hero-strip">
+                    <div class="wrap">
+                        <div class="portal-breadcrumb-row">
+                            <a class="volver btn-back-link" href="/rutas">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                                <span t-esc="s['back_to_routes']"/>
+                            </a>
+                        </div>
+                        <div class="section-badge-header align-left">
+                            <span class="section-wings">人</span>
+                            <span class="section-badge-text">ATENCIÓN INSTITUCIONAL Y MEJORA CONTINUA</span>
+                            <span class="section-wings">人</span>
+                        </div>
+                        <h1 class="portal-hero-title"><t t-esc="s['report_title']"/></h1>
+                        <p class="portal-hero-subtitle"><t t-esc="s['report_intro']"/></p>
                     </div>
-                    <div class="campo">
-                        <label for="complaint-bus" t-esc="s['field_bus']"/>
-                        <select id="complaint-bus" name="bus">
-                            <option value="" t-esc="s['field_bus_none']"/>
-                            <option t-foreach="buses" t-as="b" t-att-value="b['id']"
-                                    t-att-data-route="b['route']" t-att-data-name="b['name']"
-                                    t-att-selected="'selected' if str(b['id']) == form['bus'] else None">
-                                <t t-esc="b['route']"/> <t t-esc="b['name']"/>
-                            </option>
-                        </select>
+                </section>
+
+                <div class="wrap portal-content-body">
+                    <div class="complaint-layout-grid">
+                        <!-- Left Informative Institutional Sidebar -->
+                        <div class="complaint-sidebar">
+                            <div class="complaint-info-card">
+                                <div class="info-card-header">
+                                    <t t-call="bus_tracking.brand_mark"/>
+                                    <div>
+                                        <strong class="info-card-title">Bienestar Universitario</strong>
+                                        <span class="info-card-sub">Gestión de Transporte UTA</span>
+                                    </div>
+                                </div>
+
+                                <div class="info-card-section">
+                                    <h4>Compromiso de Respuesta</h4>
+                                    <p>Cada reporte es derivado a los supervisores de ruta. Te garantizamos revisión y seguimiento en un lapso de <strong>24 a 48 horas laborables</strong>.</p>
+                                </div>
+
+                                <div class="info-card-section">
+                                    <h4>Canales de Atención Directa</h4>
+                                    <ul class="contact-bullets">
+                                        <li>
+                                            <span class="bullet-icon">📞</span>
+                                            <span><strong>PBX Central:</strong> +593 (3) 284-8487 (Ext. 124)</span>
+                                        </li>
+                                        <li>
+                                            <span class="bullet-icon">✉️</span>
+                                            <span><strong>Email:</strong> transporte@uta.edu.ec</span>
+                                        </li>
+                                        <li>
+                                            <span class="bullet-icon">🏢</span>
+                                            <span><strong>Atención Presencial:</strong> Campus Huachi, Edificio Administrativo</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="info-card-section privacy-box">
+                                    <span class="shield-icon">🛡️</span>
+                                    <p class="ayuda">
+                                        <t t-esc="privacy_text"/>
+                                        <a t-if="privacy_url" t-att-href="privacy_url" target="_blank" rel="noopener noreferrer"
+                                           t-esc="s['privacy_more']"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Form Card -->
+                        <div class="complaint-form-wrapper">
+                            <div t-if="errors" class="errores" role="alert">
+                                <strong t-esc="s['err_title']"/>
+                                <ul><li t-foreach="errors.values()" t-as="message" t-esc="message"/></ul>
+                            </div>
+
+                            <form class="formulario" method="post" action="/quejas">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="t" t-att-value="token"/>
+                                <div class="trampa" aria-hidden="true">
+                                    <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
+                                </div>
+
+                                <div class="form-row-2col">
+                                    <div class="campo">
+                                        <label for="complaint-route" t-esc="s['field_route']"/>
+                                        <select id="complaint-route" name="route" class="form-select">
+                                            <option value="" t-esc="s['field_route_none']"/>
+                                            <option t-foreach="routes" t-as="r" t-att-value="r['code']"
+                                                    t-att-selected="'selected' if r['code'] == form['route'] else None">
+                                                <t t-esc="r['code']"/> <t t-esc="r['name']"/>
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="campo">
+                                        <label for="complaint-bus" t-esc="s['field_bus']"/>
+                                        <select id="complaint-bus" name="bus" class="form-select">
+                                            <option value="" t-esc="s['field_bus_none']"/>
+                                            <option t-foreach="buses" t-as="b" t-att-value="b['id']"
+                                                    t-att-data-route="b['route']" t-att-data-name="b['name']"
+                                                    t-att-selected="'selected' if str(b['id']) == form['bus'] else None">
+                                                <t t-esc="b['route']"/> <t t-esc="b['name']"/>
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="campo">
+                                    <label for="complaint-kind" t-esc="s['field_kind']"/>
+                                    <select id="complaint-kind" name="kind" class="form-select">
+                                        <option t-foreach="kinds" t-as="k" t-att-value="k[0]"
+                                                t-att-selected="'selected' if k[0] == form['kind'] else None"
+                                                t-esc="s[k[1]]"/>
+                                    </select>
+                                </div>
+
+                                <div class="campo">
+                                    <label for="complaint-description" t-esc="s['field_description']"/>
+                                    <textarea id="complaint-description" name="description" rows="5" required="required"
+                                              minlength="10" t-att-maxlength="max_description"
+                                              aria-describedby="complaint-description-help"
+                                              t-att-aria-invalid="'true' if errors.get('description') else None"
+                                              placeholder="Detalla lo sucedido con la mayor precisión posible (lugar, hora aproximada, sentido de la unidad)..."
+                                              t-esc="form['description']"/>
+                                    <p id="complaint-description-help" class="ayuda" t-esc="s['field_description_help']"/>
+                                    <p t-if="errors.get('description')" class="campo-error" t-esc="errors['description']"/>
+                                </div>
+
+                                <div class="form-contact-heading">
+                                    <strong>Datos de Contacto (Opcional)</strong>
+                                    <p class="ayuda" t-esc="s['contact_help']"/>
+                                </div>
+
+                                <div class="form-row-2col">
+                                    <div class="campo">
+                                        <label for="complaint-email" t-esc="s['field_email']"/>
+                                        <input id="complaint-email" type="email" name="email" maxlength="255" autocomplete="email"
+                                               placeholder="usuario@uta.edu.ec"
+                                               t-att-value="form['email']"
+                                               t-att-aria-invalid="'true' if errors.get('email') else None"/>
+                                        <p t-if="errors.get('email')" class="campo-error" t-esc="errors['email']"/>
+                                    </div>
+                                    <div class="campo">
+                                        <label for="complaint-phone" t-esc="s['field_phone']"/>
+                                        <input id="complaint-phone" type="tel" name="phone" maxlength="40" autocomplete="tel"
+                                               placeholder="+593 9..."
+                                               t-att-value="form['phone']"
+                                               t-att-aria-invalid="'true' if errors.get('phone') else None"/>
+                                        <p t-if="errors.get('phone')" class="campo-error" t-esc="errors['phone']"/>
+                                    </div>
+                                </div>
+
+                                <div class="form-submit-row">
+                                    <button class="btn btn-hero-primary btn-submit-complaint" type="submit">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                            <line x1="22" y1="2" x2="11" y2="13"/>
+                                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                        </svg>
+                                        <span t-esc="s['submit']"/>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <label for="complaint-kind" t-esc="s['field_kind']"/>
-                        <select id="complaint-kind" name="kind">
-                            <option t-foreach="kinds" t-as="k" t-att-value="k[0]"
-                                    t-att-selected="'selected' if k[0] == form['kind'] else None"
-                                    t-esc="s[k[1]]"/>
-                        </select>
-                    </div>
-                    <div class="campo">
-                        <label for="complaint-description" t-esc="s['field_description']"/>
-                        <textarea id="complaint-description" name="description" rows="6" required="required"
-                                  minlength="10" t-att-maxlength="max_description"
-                                  aria-describedby="complaint-description-help"
-                                  t-att-aria-invalid="'true' if errors.get('description') else None"
-                                  t-esc="form['description']"/>
-                        <p id="complaint-description-help" class="ayuda" t-esc="s['field_description_help']"/>
-                        <p t-if="errors.get('description')" class="campo-error" t-esc="errors['description']"/>
-                    </div>
-                    <p class="ayuda" t-esc="s['contact_help']"/>
-                    <div class="campo">
-                        <label for="complaint-email" t-esc="s['field_email']"/>
-                        <input id="complaint-email" type="email" name="email" maxlength="255" autocomplete="email"
-                               t-att-value="form['email']"
-                               t-att-aria-invalid="'true' if errors.get('email') else None"/>
-                        <p t-if="errors.get('email')" class="campo-error" t-esc="errors['email']"/>
-                    </div>
-                    <div class="campo">
-                        <label for="complaint-phone" t-esc="s['field_phone']"/>
-                        <input id="complaint-phone" type="tel" name="phone" maxlength="40" autocomplete="tel"
-                               t-att-value="form['phone']"
-                               t-att-aria-invalid="'true' if errors.get('phone') else None"/>
-                        <p t-if="errors.get('phone')" class="campo-error" t-esc="errors['phone']"/>
-                    </div>
-                    <p class="ayuda">
-                        <t t-esc="privacy_text"/>
-                        <a t-if="privacy_url" t-att-href="privacy_url" target="_blank" rel="noopener noreferrer"
-                           t-esc="s['privacy_more']"/>
-                    </p>
-                    <button class="btn btn-primary" type="submit" t-esc="s['submit']"/>
-                </form>
+                </div>
             </main>
-            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+
+            <t t-call="bus_tracking.portal_footer"/>
             <script t-attf-src="/bus_tracking/static/src/portal/complaint.js?v=#{asset_v}"></script>
         </t>
     </template>
@@ -186,17 +366,39 @@
             <t t-set="title"><t t-esc="s['thanks_title']"/> | <t t-esc="brand"/></t>
             <t t-set="body_classname" t-value="'o_bus_landing'"/>
             <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-set="active_nav" t-value="'quejas'"/>
             <t t-call="bus_tracking.portal_header"/>
-            <main class="wrap portal">
-                <h1 t-esc="s['thanks_title']"/>
-                <p class="lead" t-esc="s['thanks_text']"/>
-                <p t-if="folio" class="folio">
-                    <span t-esc="s['thanks_folio']"/> <strong t-esc="folio"/>
-                </p>
-                <p t-if="folio and not has_contact" class="ayuda" t-esc="s['thanks_no_contact']"/>
-                <p><a class="btn" href="/rutas" t-esc="s['back_to_routes']"/></p>
+
+            <main class="portal-main-wrapper">
+                <div class="wrap thanks-outer-container">
+                    <div class="thanks-card">
+                        <div class="thanks-icon-halo">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#8B1D24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <h1 class="thanks-title" t-esc="s['thanks_title']"/>
+                        <p class="thanks-lead" t-esc="s['thanks_text']"/>
+
+                        <div t-if="folio" class="thanks-ticket-box">
+                            <span class="ticket-header-label">COMPROBANTE INSTITUCIONAL</span>
+                            <div class="folio-highlight">
+                                <span class="folio-label" t-esc="s['thanks_folio']"/>
+                                <strong class="folio-code" t-esc="folio"/>
+                            </div>
+                            <p t-if="not has_contact" class="ayuda thanks-no-contact" t-esc="s['thanks_no_contact']"/>
+                        </div>
+
+                        <div class="thanks-actions-row">
+                            <a class="btn btn-hero-primary" href="/rutas" t-esc="s['back_to_routes']"/>
+                            <a class="btn btn-hero-secondary-dark" href="/">Ir a la Página Principal</a>
+                        </div>
+                    </div>
+                </div>
             </main>
-            <footer class="wrap pie"><p t-esc="s['footer']"/></footer>
+
+            <t t-call="bus_tracking.portal_footer"/>
         </t>
     </template>
 </odoo>
