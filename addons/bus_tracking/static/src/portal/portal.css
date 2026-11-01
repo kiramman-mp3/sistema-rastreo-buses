@@ -1,65 +1,181 @@
-/* Modern, institutional and clean Passenger Portal for Buses UTA */
+/* ==========================================================================
+   Buses UTA - Public Passenger Portal Stylesheet
+   Cohesive Institutional Design System for /rutas, /rutas/<code_or_id>, and /quejas
+   ========================================================================== */
 
-.portal {
-    padding-block: clamp(2rem, 5vw, 3.5rem) 4rem;
+/* Main Page Wrapper */
+.portal-main-wrapper {
+    background: #F8FAFC;
+    min-height: calc(100vh - 120px);
+    padding-bottom: 60px;
 }
 
-.portal h1 {
-    font-size: clamp(2rem, 4vw, 2.8rem);
+/* Page Hero Banner Strip */
+.portal-hero-strip {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
+    border-bottom: 1px solid #E2E8F0;
+    padding: 40px 0 32px;
+}
+
+.portal-hero-strip.compact-hero {
+    padding: 24px 0 20px;
+}
+
+.portal-hero-title {
+    font-size: clamp(1.8rem, 3.2vw, 2.5rem);
     font-weight: 800;
-    line-height: 1.15;
     letter-spacing: -0.025em;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    color: var(--bus-ink);
+    color: #0F172A;
+    margin: 10px 0 6px 0;
+    line-height: 1.18;
 }
 
-.portal .lead {
-    margin-top: 0.75rem;
-    color: var(--bus-muted);
-    font-size: 1.1rem;
+.portal-hero-subtitle {
+    font-size: 1.05rem;
+    color: #475569;
     max-width: 65ch;
+    margin: 0 0 20px 0;
+    line-height: 1.55;
 }
 
-.portal h2 {
-    font-size: 1.3rem;
+/* Breadcrumb & Back Links */
+.portal-breadcrumb-row {
+    margin-bottom: 12px;
+}
+
+.btn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #8B1D24 !important;
+    text-decoration: none !important;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.btn-back-link:hover {
+    color: #5E1217 !important;
+    transform: translateX(-3px);
+}
+
+.btn-back-link svg {
+    stroke: #8B1D24;
+    transition: stroke 0.15s ease;
+}
+
+.btn-back-link:hover svg {
+    stroke: #5E1217;
+}
+
+/* Section Badge Header (Consistent with Landing Page) */
+.section-badge-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
     font-weight: 800;
-    color: var(--bus-ink);
+    letter-spacing: 0.08em;
+    color: #8B1D24;
+    margin-bottom: 6px;
 }
 
-.portal-nav {
+.section-badge-header.align-left {
+    justify-content: flex-start;
+}
+
+.section-wings {
+    color: #D97706;
+    font-weight: 900;
+}
+
+.section-badge-text {
+    text-transform: uppercase;
+}
+
+/* Highlights Chips Bar */
+.portal-highlights-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.highlight-chip {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.chip-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.highlight-chip strong {
+    display: block;
+    font-size: 0.86rem;
+    color: #0F172A;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.highlight-chip small {
+    display: block;
+    font-size: 0.76rem;
+    color: #64748B;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+/* Content Body Container */
+.portal-content-body {
+    padding-top: 32px;
+}
+
+/* ==========================================================================
+   Routes Catalog Grid (/rutas)
+   ========================================================================== */
+
+.rutas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 22px;
+}
+
+.route-premium-card {
+    display: flex;
+    flex-direction: column;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04);
+    text-decoration: none !important;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+.route-premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 28px -6px rgba(139, 29, 36, 0.12), 0 0 0 1.5px #8B1D24;
+    border-color: #8B1D24;
+}
+
+.card-top-row {
     display: flex;
     align-items: center;
-    gap: 1rem;
-}
-
-.lang-form {
-    display: flex;
-    gap: 0.25rem;
-    background: #F1F5F9;
-    padding: 0.25rem;
-    border-radius: var(--bus-radius);
-}
-
-.lang {
-    font: inherit;
-    background: none;
-    border: 0;
-    padding: 0.35rem 0.65rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--bus-muted);
-    transition: all 0.15s ease;
-}
-
-.lang.activa {
-    background: #FFFFFF;
-    color: var(--bus-ink);
-    box-shadow: var(--bus-shadow-sm);
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 
 .chip {
@@ -67,174 +183,283 @@
     align-items: center;
     justify-content: center;
     min-width: 3.2rem;
-    padding: 0.25rem 0.75rem;
+    padding: 5px 12px;
     border-radius: 8px;
-    color: #FFFFFF;
-    font-family: var(--bus-font-display);
+    color: #FFFFFF !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-weight: 800;
-    font-size: 0.75rem;
-    text-align: center;
+    font-size: 0.78rem;
     letter-spacing: 0.04em;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
 }
 
-/* ---------- Routes List Grid ---------- */
-
-.rutas {
-    list-style: none;
-    margin: 2.5rem 0 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.25rem;
+.route-large-chip {
+    padding: 8px 18px;
+    font-size: 0.95rem;
+    border-radius: 10px;
 }
 
-.rutas a {
-    background: #FFFFFF;
+.estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #F1F5F9;
+    color: #64748B;
+}
+
+.status-pulse-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #94A3B8;
+}
+
+.estado.activa {
+    background: #ECFDF5;
+    color: #065F46;
+}
+
+.estado.activa .status-pulse-dot {
+    background: #10B981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    animation: livePulse 2s infinite;
+}
+
+.card-middle-content {
+    margin-bottom: 18px;
+}
+
+.route-title {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.28;
+    margin-bottom: 6px;
+}
+
+.route-corridor-desc {
+    display: block;
+    font-size: 0.84rem;
+    color: #64748B;
+    line-height: 1.45;
+}
+
+.card-bottom-action {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.25rem 1.5rem;
-    border: 1px solid var(--bus-line);
-    border-radius: var(--bus-radius);
-    text-decoration: none;
-    box-shadow: var(--bus-shadow-sm);
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid #F1F5F9;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #8B1D24;
 }
 
-.rutas a:hover,
-.rutas a:focus-visible {
-    transform: translateY(-2px);
-    box-shadow: var(--bus-shadow);
-    border-color: var(--bus-uta-primary);
+.action-arrow {
+    font-size: 1.15rem;
+    transition: transform 0.18s ease;
 }
 
-.rutas a strong {
-    font-size: 1.05rem;
-    color: var(--bus-ink);
+.route-premium-card:hover .action-arrow {
+    transform: translateX(5px);
+}
+
+/* Callout Card */
+.portal-help-callout {
+    margin-top: 48px;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 26px 30px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.callout-icon-box {
+    font-size: 2rem;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #FDF2F2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.callout-body {
     flex: 1;
 }
 
-.rutas .estado {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--bus-muted);
+.callout-body h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.callout-body p {
+    font-size: 0.88rem;
+    color: #64748B;
+    margin: 0;
+    line-height: 1.45;
+}
+
+.callout-action {
+    flex: none;
+}
+
+/* ==========================================================================
+   Route Detail & Live Telemetry Map (/rutas/<code_or_id>)
+   ========================================================================== */
+
+.route-header-main {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    background: #F1F5F9;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 6px;
 }
 
-.rutas .estado.activa {
-    background: var(--bus-ok-light);
-    color: var(--bus-ok);
+.route-title-cluster {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
-.rutas .estado::before {
-    content: "";
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
+.route-hero-title {
+    font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0;
+    line-height: 1.2;
 }
 
-.vacio {
-    margin-top: 1.5rem;
-    color: var(--bus-muted);
-    padding: 2rem;
-    background: #FFFFFF;
-    border-radius: var(--bus-radius);
-    border: 1px solid var(--bus-line);
-    text-align: center;
-}
-
-.volver {
+.route-live-badge-top {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-bottom: 1.25rem;
+    gap: 8px;
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
     font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--bus-uta-primary);
-    text-decoration: none;
 }
 
-.volver:hover {
-    text-decoration: underline;
+.live-dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+    animation: livePulse 2s infinite;
 }
 
-/* ---------- Map Layout ---------- */
+@keyframes livePulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
 
 .mapa-wrap {
-    margin-top: 1.5rem;
     display: grid;
-    grid-template-columns: minmax(0, 2.2fr) minmax(320px, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: minmax(0, 2.5fr) minmax(330px, 1fr);
+    gap: 24px;
     align-items: start;
 }
 
 #bus-map {
-    height: clamp(450px, 70vh, 700px);
-    border: 1px solid var(--bus-line);
-    border-radius: var(--bus-radius-lg);
+    height: clamp(500px, 72vh, 720px);
+    border-radius: 20px;
+    border: 1.5px solid #CBD5E1;
     overflow: hidden;
     background: #E2E8F0;
-    box-shadow: var(--bus-shadow);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
 }
 
-.mapa-wrap aside {
+.telemetry-panel {
     background: #FFFFFF;
-    border: 1px solid var(--bus-line);
-    border-radius: var(--bus-radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--bus-shadow-sm);
+    border: 1.5px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 16px;
 }
 
-.mapa-wrap aside .estado {
-    color: var(--bus-muted);
-    font-size: 0.85rem;
+.telemetry-panel-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.telemetry-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 4px 0;
+}
+
+.telemetry-panel-header .estado {
+    color: #64748B;
+    font-size: 0.84rem;
     font-weight: 600;
-    min-height: 1.2em;
-    margin: 0;
+    background: transparent;
+    padding: 0;
 }
 
 .path-picker {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 8px;
     background: #F8FAFC;
-    padding: 0.9rem;
-    border-radius: var(--bus-radius);
-    border: 1px solid var(--bus-line);
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
 }
 
 .path-picker label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--bus-muted);
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #64748B;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .path-picker select {
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    border: 1px solid var(--bus-line);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #CBD5E1;
     background: #FFFFFF;
     font: inherit;
-    font-size: 0.9rem;
-    color: var(--bus-ink);
+    font-size: 0.88rem;
+    color: #0F172A;
 }
 
-.path-picker .btn {
+.btn-reset-path {
     align-self: flex-start;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.8rem;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+    background: #FFFFFF !important;
+    color: #64748B !important;
+    border: 1px solid #CBD5E1 !important;
+}
+
+.btn-reset-path:hover {
+    background: #F1F5F9 !important;
+    color: #0F172A !important;
 }
 
 .buses {
@@ -243,17 +468,19 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 8px;
+    max-height: 380px;
+    overflow-y: auto;
 }
 
 .buses li {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    border-radius: var(--bus-radius);
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
     background: #F8FAFC;
-    border: 1px solid var(--bus-line);
+    border: 1px solid #E2E8F0;
 }
 
 .buses li::before {
@@ -264,41 +491,78 @@
     border-radius: 4px;
 }
 
-.buses li.bus-moving::before { background: var(--bus-ok); box-shadow: 0 0 0 2px var(--bus-ok-light); }
-.buses li.bus-stopped::before { background: var(--bus-warn); box-shadow: 0 0 0 2px var(--bus-warn-light); }
-.buses li.bus-offline::before { background: var(--bus-rojo); }
+.buses li.bus-moving::before { background: #10B981; box-shadow: 0 0 0 2px #D1FAE5; }
+.buses li.bus-stopped::before { background: #F59E0B; box-shadow: 0 0 0 2px #FEF3C7; }
+.buses li.bus-offline::before { background: #EF4444; }
 
 .buses li strong {
     font-size: 0.92rem;
-    color: var(--bus-ink);
+    color: #0F172A;
 }
 
 .buses li span {
     margin-left: auto;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: var(--bus-muted);
+    color: #64748B;
 }
 
-.reportar {
-    margin-top: 0.5rem;
-    text-align: center;
+.vacio {
+    margin: 0;
+    padding: 24px 16px;
     background: #F8FAFC;
-    border: 1px solid var(--bus-line);
-    color: var(--bus-muted);
-    font-size: 0.88rem;
-    padding: 0.65rem 1rem;
-    border-radius: var(--bus-radius);
+    border-radius: 12px;
+    border: 1px dashed #CBD5E1;
+    text-align: center;
 }
 
-.reportar:hover {
-    background: var(--bus-uta-light);
-    border-color: var(--bus-uta-primary);
-    color: var(--bus-uta-primary);
+.empty-icon {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.vacio p {
+    margin: 0;
+    color: #64748B;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.btn-reportar-route {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: #FDF2F2 !important;
+    color: #8B1D24 !important;
+    border: 1.5px solid #FECACA !important;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none !important;
+    transition: all 0.18s ease;
+}
+
+.btn-reportar-route svg {
+    stroke: #8B1D24;
+    transition: stroke 0.18s ease;
+}
+
+.btn-reportar-route:hover {
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border-color: #8B1D24 !important;
+    transform: translateY(-1px);
+}
+
+.btn-reportar-route:hover svg {
+    stroke: #FFFFFF;
 }
 
 /* Markers */
-
 .bus-marker {
     width: 38px;
     height: 38px;
@@ -325,121 +589,420 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
-/* ---------- Complaint Form ---------- */
+/* ==========================================================================
+   Complaint / Suggestions Form Layout (/quejas)
+   ========================================================================== */
 
-.formulario {
-    margin-top: 2rem;
-    max-width: 680px;
-    background: #FFFFFF;
-    padding: 2.25rem;
-    border-radius: var(--bus-radius-lg);
-    border: 1px solid var(--bus-line);
-    box-shadow: var(--bus-shadow-sm);
+.complaint-layout-grid {
     display: grid;
-    gap: 1.5rem;
+    grid-template-columns: 350px 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.complaint-info-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 26px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.info-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.info-card-title {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.info-card-sub {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748B;
+    font-weight: 600;
+}
+
+.info-card-section h4 {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #8B1D24;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 8px 0;
+}
+
+.info-card-section p {
+    font-size: 0.86rem;
+    color: #475569;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.contact-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.84rem;
+    color: #334155;
+    line-height: 1.45;
+}
+
+.bullet-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.privacy-box {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.shield-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex: none;
+}
+
+/* Form Card */
+.formulario {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 32px 36px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 0;
+}
+
+.form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
 }
 
 .campo {
-    display: grid;
-    gap: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .campo label {
     font-weight: 700;
-    font-size: 0.92rem;
-    color: var(--bus-ink);
+    font-size: 0.88rem;
+    color: #0F172A;
 }
 
 .campo select,
 .campo input,
 .campo textarea {
     font: inherit;
-    font-size: 0.95rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--bus-line);
-    border-radius: var(--bus-radius);
+    font-size: 0.92rem;
+    padding: 10px 14px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 10px;
     background: #F8FAFC;
-    color: var(--bus-ink);
+    color: #0F172A;
     width: 100%;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: all 0.16s ease;
+    box-sizing: border-box;
 }
 
 .campo select:focus,
 .campo input:focus,
 .campo textarea:focus {
     outline: none;
-    border-color: var(--bus-uta-primary);
+    border-color: #8B1D24;
     background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(139, 29, 36, 0.15);
+    box-shadow: 0 0 0 3.5px rgba(139, 29, 36, 0.12);
 }
 
 .campo textarea {
     resize: vertical;
+    min-height: 120px;
 }
 
 .campo [aria-invalid="true"] {
-    border-color: var(--bus-rojo);
+    border-color: #EF4444;
     background: #FEF2F2;
 }
 
 .ayuda {
     margin: 0;
-    color: var(--bus-muted);
-    font-size: 0.85rem;
+    color: #64748B;
+    font-size: 0.82rem;
+    line-height: 1.4;
 }
 
 .campo-error {
-    margin: 0;
-    color: var(--bus-rojo);
-    font-size: 0.85rem;
+    margin: 2px 0 0;
+    color: #DC2626;
+    font-size: 0.82rem;
     font-weight: 600;
+}
+
+.form-contact-heading {
+    padding-top: 8px;
+    border-top: 1px solid #F1F5F9;
+}
+
+.form-contact-heading strong {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0F172A;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.form-submit-row {
+    margin-top: 8px;
+}
+
+.btn-submit-complaint {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #8B1D24 !important;
+    color: #FFFFFF !important;
+    border: 1.5px solid #8B1D24 !important;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-size: 0.96rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 4px 12px rgba(139, 29, 36, 0.25);
+}
+
+.btn-submit-complaint:hover {
+    background: #5E1217 !important;
+    border-color: #5E1217 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(139, 29, 36, 0.35);
 }
 
 .errores {
     background: #FEF2F2;
-    border: 1px solid #FECACA;
-    border-radius: var(--bus-radius);
-    padding: 1rem 1.25rem;
-    color: var(--bus-rojo);
+    border: 1.5px solid #FECACA;
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #991B1B;
+    margin-bottom: 18px;
 }
 
 .errores strong {
     display: block;
     font-weight: 800;
-    margin-bottom: 0.5rem;
+    margin-bottom: 6px;
+    font-size: 0.92rem;
 }
 
 .errores ul {
     margin: 0;
     padding-left: 1.25rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
 }
 
-.reportar-enlace {
-    margin-top: 2rem;
+.trampa {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   Complaint Confirmation Page (/quejas/gracias)
+   ========================================================================== */
+
+.thanks-outer-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0 60px;
+}
+
+.thanks-card {
+    max-width: 620px;
+    width: 100%;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 24px;
+    padding: 48px 40px;
     text-align: center;
+    box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.reportar-enlace a {
-    color: var(--bus-muted);
-    font-size: 0.9rem;
-    font-weight: 600;
+.thanks-icon-halo {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: #FDF2F2;
+    border: 2px solid #FECACA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 22px;
+    box-shadow: 0 6px 16px rgba(139, 29, 36, 0.12);
 }
 
-.reportar-enlace a:hover {
-    color: var(--bus-uta-primary);
+.thanks-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 10px 0;
 }
 
-.pie {
-    margin-top: 3rem;
-    padding-block: 2rem;
-    border-top: 1px solid var(--bus-line);
-    color: var(--bus-muted);
-    font-size: 0.85rem;
-    text-align: center;
+.thanks-lead {
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 26px 0;
+    max-width: 48ch;
 }
 
-@media (max-width: 860px) {
+.thanks-ticket-box {
+    width: 100%;
+    background: #F8FAFC;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 30px;
+    box-sizing: border-box;
+}
+
+.ticket-header-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748B;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.folio-highlight {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    color: #8B1D24;
+}
+
+.folio-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: #FFFFFF;
+    padding: 4px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #CBD5E1;
+    color: #8B1D24;
+    letter-spacing: 0.05em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.thanks-no-contact {
+    margin-top: 12px;
+    font-size: 0.84rem;
+    color: #64748B;
+}
+
+.thanks-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-hero-secondary-dark {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none !important;
+    transition: all 0.18s ease;
+}
+
+.btn-hero-secondary-dark:hover {
+    background: #F8FAFC !important;
+    border-color: #94A3B8 !important;
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+
+@media (max-width: 960px) {
     .mapa-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    #bus-map {
+        height: 480px;
+    }
+
+    .complaint-layout-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .portal-hero-strip {
+        padding: 28px 0 22px;
+    }
+
+    .form-row-2col {
+        grid-template-columns: 1fr;
+    }
+
+    .formulario {
+        padding: 24px 20px;
+    }
+
+    .thanks-card {
+        padding: 32px 20px;
+    }
+
+    .portal-highlights-bar {
+        flex-direction: column;
+    }
+
+    .rutas {
         grid-template-columns: 1fr;
     }
 }
