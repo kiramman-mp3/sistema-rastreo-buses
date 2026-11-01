@@ -136,6 +136,13 @@ class BusPortal(http.Controller):
         } for r in routes]
         return render_portal('bus_tracking.portal_routes', portal_context(routes=items))
 
+    @http.route('/rutas/detalle', type='http', auth='public', methods=['GET'])
+    def route_detail_alias(self, **kwargs):
+        first = public_routes()[:1]
+        if first:
+            return request.redirect('/rutas/%s' % first.code)
+        return request.redirect('/rutas')
+
     @http.route('/rutas/<string:code>', type='http', auth='public', methods=['GET'])
     def route_map(self, code, **kwargs):
         route = self._public_route(code)
