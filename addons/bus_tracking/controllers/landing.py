@@ -4,7 +4,7 @@ from odoo.addons.web.controllers.home import Home
 from odoo.http import request
 
 from ..models.utils import brand_name
-from .portal import asset_version, SHOW_BUSES_FOR, safe_color
+from .portal import asset_version, SHOW_BUSES_FOR, safe_color, portal_context
 
 
 class BusLanding(Home):
@@ -48,9 +48,9 @@ class BusLanding(Home):
                 seen.add(name)
                 unique_stops.append(name)
 
-        return {
-            'asset_v': asset_version(),
-            'brand': brand_name(env),
-            'routes': route_list,
-            'stops': unique_stops,
-        }
+        return portal_context(
+            asset_v=asset_version(),
+            brand=brand_name(env),
+            routes=route_list,
+            stops=unique_stops,
+        )
