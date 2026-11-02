@@ -5,6 +5,7 @@ KINDS = [
     ('traffic', "Traffic"),
     ('accident', "Accident"),
     ('other', "Other"),
+    ('sos', "Emergency (SOS)"),
 ]
 
 
@@ -22,6 +23,16 @@ class BusIncident(models.Model):
     latitude = fields.Float(digits=(10, 7))
     longitude = fields.Float(digits=(10, 7))
     notified = fields.Boolean(default=False, index=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        if any(r.kind == 'sos' for r in records):
+            # An emergency must not wait for the next minute of the cron.
+            cron = self.env.ref('bus_tracking.cron_push_incidents', raise_if_not_found=False)
+            if cron:
+                cron.sudo()._trigger()
+        return records
 
     @api.model
     def _cron_push(self):
