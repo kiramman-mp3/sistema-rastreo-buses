@@ -15,7 +15,7 @@ from ..models.portal_i18n import STRINGS, pick_lang
 # A bus that has not reported for this long is not shown to passengers.
 SHOW_BUSES_FOR = timedelta(minutes=15)
 CACHE_SECONDS = 5
-RATE_LIMIT = 60          # requests per IP and window, per worker process
+RATE_LIMIT = 60          # uncached requests per IP and window, per worker process
 RATE_WINDOW = 60.0
 LANG_COOKIE = 'bus_lang'
 # The only strings the page's script needs.
@@ -217,10 +217,12 @@ class BusPortal(http.Controller):
 
     @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'], type='http', auth='public', methods=['GET'])
     def route_buses(self, code, **kwargs):
-        if not limiter.allow(request.httprequest.remote_addr):
-            return Response(status=429, headers=[('Retry-After', '30')])
+        # A whole campus behind one address (Wi-Fi, carrier NAT) polls the same line every ten
+        # seconds: a cached answer costs nothing, so only the requests that reach the database count.
         body = cache.get(code)
         if body is None:
+            if not limiter.allow(request.httprequest.remote_addr):
+                return Response(status=429, headers=[('Retry-After', '30')])
             route = self._public_route(code)
             if not route:
                 return request.not_found()
