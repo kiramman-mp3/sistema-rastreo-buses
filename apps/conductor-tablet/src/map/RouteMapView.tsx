@@ -1,10 +1,11 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 import type { RouteMap } from '../api/types';
 import { t } from '../i18n';
 import { buildMapHtml, type MapBus } from './html';
-import { colors, type } from '../ui/theme';
+import { Txt } from '../ui/cabin';
+import { useTheme } from '../ui/ThemeProvider';
 
 type Props = {
   route: RouteMap | null;
@@ -13,12 +14,15 @@ type Props = {
 };
 
 export function RouteMapView({ route, bus, nextStopId }: Props) {
+  const { palette } = useTheme();
   if (!route) {
     return (
-      <View style={styles.box} accessibilityLabel={t('map_label')}>
+      <View style={[styles.box, { backgroundColor: palette.panel }]} accessibilityLabel={t('map_label')}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.route} />
-          <Text style={styles.loadingText}>{t('loadingMap')}</Text>
+          <ActivityIndicator size="large" color={palette.ink} />
+          <Txt size="body" dim>
+            {t('loadingMap')}
+          </Txt>
         </View>
       </View>
     );
@@ -51,10 +55,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 280,
     overflow: 'hidden',
-    borderRadius: 16,
-    backgroundColor: '#E2E8F0',
-    borderWidth: 1,
-    borderColor: colors.line,
+    borderRadius: 8,
   },
   web: {
     flex: 1,
@@ -65,11 +66,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
-  },
-  loadingText: {
-    fontSize: type.body,
-    color: colors.muted,
-    fontWeight: '600',
   },
 });
 

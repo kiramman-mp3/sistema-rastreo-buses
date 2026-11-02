@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { LocationQueue } from './queue';
-import { CREDS_KEY, LAST_KEY, type GpsCreds, type LastSent } from './runtime';
+import { CREDS_KEY, LAST_KEY, SAMPLE_KEY, type GpsCreds, type LastSample, type LastSent } from './runtime';
 import type { GpsStore } from './types';
 
 export const gpsKv = {
@@ -44,4 +44,18 @@ export async function readLastSent(): Promise<LastSent | null> {
 
 export function writeLastSent(last: LastSent) {
   return AsyncStorage.setItem(LAST_KEY, JSON.stringify(last));
+}
+
+export async function readLastSample(): Promise<LastSample | null> {
+  const raw = await AsyncStorage.getItem(SAMPLE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as LastSample;
+  } catch {
+    return null;
+  }
+}
+
+export function writeLastSample(sample: LastSample) {
+  return AsyncStorage.setItem(SAMPLE_KEY, JSON.stringify(sample));
 }

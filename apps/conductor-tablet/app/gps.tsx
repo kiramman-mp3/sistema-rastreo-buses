@@ -1,240 +1,104 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { t } from '../src/i18n';
-import { useLang } from '../src/i18n/LangProvider';
 import { gpsPermissionSnapshot } from '../src/gps/permissions';
 import { locationQueue, readLastSent } from '../src/gps/store';
+import { t } from '../src/i18n';
+import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Button } from '../src/ui/Button';
-import { colors, type } from '../src/ui/theme';
+import { Action, Txt } from '../src/ui/cabin';
+import { useTheme } from '../src/ui/ThemeProvider';
+
+type Facts = { foreground: boolean; background: boolean; queue: number; last: string };
+
+function stamp(at: number, lat: number, lon: number) {
+  return `${new Date(at).toLocaleTimeString()} · ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+}
+
+async function loadFacts(): Promise<Facts> {
+  const [permissions, queue, sent] = await Promise.all([
+    gpsPermissionSnapshot(),
+    locationQueue.size(),
+    readLastSent(),
+  ]);
+  return {
+    foreground: permissions.foreground === 'granted',
+    background: permissions.background === 'granted',
+    queue,
+    last: sent ? stamp(sent.at, sent.lat, sent.lon) : t('gpsNone'),
+  };
+}
 
 export default function GpsScreen() {
   useLang();
+  const { palette } = useTheme();
   const session = useSession();
-  const [foreground, setForeground] = useState('—');
-  const [background, setBackground] = useState('—');
-  const [queue, setQueue] = useState(0);
-  const [last, setLast] = useState('');
+  const [facts, setFacts] = useState<Facts | null>(null);
 
-  const refresh = useCallback(async () => {
-    const permissions = await gpsPermissionSnapshot();
-    setForeground(permissions.foreground === 'granted' ? t('granted') : t('denied'));
-    setBackground(permissions.background === 'granted' ? t('granted') : t('denied'));
-    setQueue(await locationQueue.size());
-    const sent = await readLastSent();
-    setLast(
-      sent
-        ? `${new Date(sent.at).toLocaleTimeString()} (${sent.lat.toFixed(5)}, ${sent.lon.toFixed(5)})`
-        : t('gpsNone'),
-    );
+  const refresh = useCallback(() => loadFacts().then(setFacts), []);
+
+  useEffect(() => {
+    let live = true;
+    loadFacts()
+      .then((next) => {
+        if (live) setFacts(next);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
   }, []);
 
-  const opened = useRef(false);
-
-  const id = session.snapshot.gps?.uniqueId;
-  const host = session.snapshot.gps?.url;
-
-  const isFgOk = foreground === t('granted');
-  const isBgOk = background === t('granted');
+  const rows: [string, string, boolean | null][] = facts
+    ? [
+        [t('gpsForeground'), facts.foreground ? t('granted') : t('denied'), facts.foreground],
+        [t('gpsBackground'), facts.background ? t('granted') : t('denied'), facts.background],
+        [t('gpsQueue'), String(facts.queue), facts.queue === 0],
+        [t('gpsLast'), facts.last, null],
+        [t('gpsDevice'), session.snapshot.gps?.uniqueId ?? '-', null],
+      ]
+    : [];
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.page}
-      onLayout={() => {
-        if (opened.current) return;
-        opened.current = true;
-        void refresh();
-      }}
-    >
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('gpsStatus')}</Text>
-          <Text style={styles.subtitle}>Diagnóstico en tiempo real de telemetría y transmisión satelital</Text>
-        </View>
-
-        <View style={styles.metricsGrid}>
-          {/* Foreground Permission */}
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>{t('gpsForeground')}</Text>
-            <View style={[styles.statusBadge, isFgOk ? styles.badgeOk : styles.badgeError]}>
-              <View style={[styles.dot, isFgOk ? styles.dotOk : styles.dotError]} />
-              <Text style={[styles.statusText, isFgOk ? styles.textOk : styles.textError]}>
-                {foreground}
-              </Text>
-            </View>
-          </View>
-
-          {/* Background Permission */}
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>{t('gpsBackground')}</Text>
-            <View style={[styles.statusBadge, isBgOk ? styles.badgeOk : styles.badgeError]}>
-              <View style={[styles.dot, isBgOk ? styles.dotOk : styles.dotError]} />
-              <Text style={[styles.statusText, isBgOk ? styles.textOk : styles.textError]}>
-                {background}
-              </Text>
-            </View>
-          </View>
-
-          {/* Queue Count */}
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>{t('gpsQueue')}</Text>
-            <Text style={styles.metricBigNum}>{queue}</Text>
-            <Text style={styles.metricHint}>{queue === 0 ? 'Sin paquetes pendientes' : 'Pendientes de envío'}</Text>
-          </View>
-
-          {/* Hardware ID */}
-          <View style={styles.metricCard}>
-            <Text style={styles.metricLabel}>Dispositivo Traccar</Text>
-            <Text style={styles.metricMono}>{id ? `ID: ${id}` : 'No asignado'}</Text>
-            <Text style={styles.metricHint} numberOfLines={1}>{host || 'Servidor Traccar'}</Text>
-          </View>
-        </View>
-
-        {/* Last Send Block */}
-        <View style={styles.telemetryCard}>
-          <Text style={styles.telemetryLabel}>{t('gpsLast')}</Text>
-          <Text style={styles.telemetryValue}>{last}</Text>
-        </View>
-
-        <View style={styles.actions}>
-          <Button label="Actualizar telemetría" variant="secondary" onPress={refresh} />
-          <Button label={t('backToShift')} onPress={() => router.back()} />
+    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+      <View style={styles.head}>
+        <Txt bold size="title">
+          {t('gpsStatus')}
+        </Txt>
+        <View style={styles.headActions}>
+          <Action label={t('gpsRefresh')} onPress={() => refresh().catch(() => undefined)} />
+          <Action label={t('backToShift')} onPress={() => router.back()} kind="accent" />
         </View>
       </View>
-    </ScrollView>
+      <View style={styles.rows}>
+        {rows.map(([label, value, ok]) => (
+          <View key={label} style={[styles.row, { backgroundColor: palette.panel }]}>
+            <Txt size="body" dim>
+              {label}
+            </Txt>
+            <Txt bold size="body" color={ok === null ? palette.ink : ok ? palette.ok : palette.danger}>
+              {value}
+            </Txt>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flexGrow: 1,
-    backgroundColor: colors.paper,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    width: '100%',
-    maxWidth: 640,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: colors.line,
-    gap: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  header: {
-    gap: 4,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: type.title,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: colors.muted,
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  metricCard: {
-    flex: 1,
-    minWidth: 135,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.line,
-    padding: 14,
-    gap: 6,
-  },
-  metricLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.muted,
-    textTransform: 'uppercase',
-  },
-  metricBigNum: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: colors.ink,
-  },
-  metricMono: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  metricHint: {
-    fontSize: 11,
-    color: colors.muted,
-  },
-  statusBadge: {
+  page: { flex: 1, padding: 24, gap: 20 },
+  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
+  headActions: { flexDirection: 'row', gap: 12 },
+  rows: { gap: 10 },
+  row: {
+    minHeight: 64,
+    borderRadius: 8,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeOk: {
-    backgroundColor: colors.routeLight,
-  },
-  badgeError: {
-    backgroundColor: colors.busLight,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  dotOk: {
-    backgroundColor: colors.route,
-  },
-  dotError: {
-    backgroundColor: colors.bus,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  textOk: {
-    color: colors.route,
-  },
-  textError: {
-    color: colors.bus,
-  },
-  telemetryCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.line,
-    padding: 14,
-    gap: 4,
-  },
-  telemetryLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.muted,
-    textTransform: 'uppercase',
-  },
-  telemetryValue: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  actions: {
-    gap: 10,
-    marginTop: 4,
+    justifyContent: 'space-between',
+    gap: 16,
   },
 });
