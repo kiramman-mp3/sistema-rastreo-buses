@@ -6,7 +6,7 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 
 - Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app.
 - Datos móviles o Wi-Fi del bus.
-- Tu **Credencial QR de Chofer** asignada por el administrador en Odoo (menú *Choferes*), o tu usuario y contraseña de Odoo (grupo *Driver*). No es el identificador de Traccar: ese dato no se escribe a mano.
+- Tu **Credencial QR de Chofer** asignada por el administrador en Odoo (menú *Choferes*), o tu usuario y contraseña de chofer. Esa cuenta sólo sirve en la tableta: no abre el panel de Odoo. No es el identificador de Traccar: ese dato no se escribe a mano.
 - La app instalada como APK (no hace falta Play Store). Expo Go no sirve: el GPS de fondo necesita el APK de desarrollo o de producción.
 
 ## Instalar (el administrador lo hace una vez)
@@ -48,7 +48,8 @@ No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seg
 | El bus no aparece en el mapa | Estado del GPS, datos móviles, que el bus tenga GPS registrado en Odoo, y que el turno esté abierto. |
 | Aparece y desaparece | Quita el ahorro de batería a la app y deja la tableta cargando. |
 | La tableta no tiene GPS | Cámbiala o usa un celular Android con la misma app. |
-| Cambiaste de tableta | Entra con tu usuario. Un gestor puede *Cerrar sesión de la tableta* si la anterior sigue con sesión. |
+| Cambiaste de tableta | Entra con tu usuario o tu credencial. Un gestor puede *Cerrar sesión de la tableta* si la anterior sigue con sesión; tu credencial QR sigue valiendo. |
+| Perdiste la credencial QR | Pide al administrador que la revoque y genere otra en *Choferes*: la anterior deja de servir al instante. |
 
 ## Actualizar la app
 
