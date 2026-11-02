@@ -45,8 +45,17 @@ export type Alert = {
   start: string;
 };
 
+export type SosState = {
+  id: number;
+  sent_at: string | null;
+  seen_at: string | null;
+  seen_by: string | null;
+};
+
 export type StateResponse = {
   shift: Shift;
+  /** The last SOS of this shift and whether the office saw it (null when there was none). */
+  sos?: SosState | null;
   current_stop_id: number | null;
   next_stop_id: number | null;
   stops: StopState[];

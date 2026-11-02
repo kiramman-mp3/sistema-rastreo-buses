@@ -75,6 +75,40 @@ const es = {
   availableRoutes: '2. Elige la ruta',
   noStopsAvailable: 'No hay paradas registradas para esta ruta.',
   backToShift: 'Volver al turno',
+  cabinNext: 'Próxima parada',
+  cabinAfter: 'Después',
+  cabinStopsLeft: 'Quedan {n} paradas',
+  cabinLastStop: 'Última parada',
+  gpsSending: 'GPS enviando',
+  gpsSaving: 'Sin red: {n} puntos guardados',
+  gpsWaiting: 'Esperando señal del GPS',
+  gpsOff: 'GPS sin permiso',
+  lockedMoving: 'En marcha. Detén el bus para usar la pantalla.',
+  actionProblem: 'Avisar un problema',
+  actionProblemSub: 'Tráfico, avería, accidente',
+  actionSos: 'SOS',
+  actionSosSub: 'Mantén presionado',
+  sosHolding: 'Sigue presionando…',
+  sosSending: 'Enviando SOS…',
+  sosSent: 'SOS enviado. Esperando a la central.',
+  sosSeen: 'La central vio tu SOS · {by} · {time}',
+  sosQueued: 'SOS guardado. Sale apenas haya señal.',
+  modeDay: 'Día',
+  modeNight: 'Noche',
+  incidentWhat: '¿Qué pasa?',
+  incidentNote: 'Nota (opcional)',
+  incidentNoteHint: 'Por ejemplo: dónde está el trancón',
+  incidentSend: 'Enviar aviso',
+  loginTitle: 'Ingreso del chofer',
+  loginHelp: 'Escanea tu credencial o escribe tu usuario y tu clave.',
+  serverHint: 'Servidor (solo soporte técnico)',
+  selectTitle: 'Elige tu bus y tu línea',
+  selectHello: 'Hola, {name}',
+  busTaken: 'En uso',
+  clockLabel: 'Hora',
+  gpsDevice: 'Dispositivo en Traccar',
+  gpsRefresh: 'Actualizar',
+  gpsOpen: 'Ver el estado del GPS',
 };
 
 const en: typeof es = {
@@ -151,6 +185,40 @@ const en: typeof es = {
   availableRoutes: '2. Choose route',
   noStopsAvailable: 'No stops registered for this route.',
   backToShift: 'Back to shift',
+  cabinNext: 'Next stop',
+  cabinAfter: 'Then',
+  cabinStopsLeft: '{n} stops left',
+  cabinLastStop: 'Last stop',
+  gpsSending: 'GPS sending',
+  gpsSaving: 'No network: {n} points saved',
+  gpsWaiting: 'Waiting for the GPS',
+  gpsOff: 'GPS not allowed',
+  lockedMoving: 'Moving. Stop the bus to use the screen.',
+  actionProblem: 'Report a problem',
+  actionProblemSub: 'Traffic, breakdown, accident',
+  actionSos: 'SOS',
+  actionSosSub: 'Press and hold',
+  sosHolding: 'Keep pressing…',
+  sosSending: 'Sending SOS…',
+  sosSent: 'SOS sent. Waiting for the office.',
+  sosSeen: 'The office saw your SOS · {by} · {time}',
+  sosQueued: 'SOS saved. It goes out as soon as there is signal.',
+  modeDay: 'Day',
+  modeNight: 'Night',
+  incidentWhat: 'What is happening?',
+  incidentNote: 'Note (optional)',
+  incidentNoteHint: 'For example: where the traffic jam is',
+  incidentSend: 'Send',
+  loginTitle: 'Driver sign-in',
+  loginHelp: 'Scan your badge or type your user and password.',
+  serverHint: 'Server (technical support only)',
+  selectTitle: 'Pick your bus and your line',
+  selectHello: 'Hello, {name}',
+  busTaken: 'In use',
+  clockLabel: 'Time',
+  gpsDevice: 'Traccar device',
+  gpsRefresh: 'Refresh',
+  gpsOpen: 'Show the GPS state',
 };
 
 const qu: typeof es = {
@@ -187,6 +255,11 @@ export function onLang(listener: (next: Lang) => void) {
 
 export function t(key: Message): string {
   return messages[lang][key] ?? messages.es[key];
+}
+
+/** A message with values: tf('cabinStopsLeft', { n: 3 }). */
+export function tf(key: Message, values: Record<string, string | number>): string {
+  return t(key).replace(/\{(\w+)\}/g, (all, name: string) => (name in values ? String(values[name]) : all));
 }
 
 export function alertLabel(kind: string): string {
