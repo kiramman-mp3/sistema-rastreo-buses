@@ -401,7 +401,12 @@ export class BusLiveMap extends Component {
         for (const [id, b] of this.tracked) {
             const el = b.marker.getElement();
             if (el) {
-                el.style.opacity = visible.has(id) ? "1" : "0.18";
+                const shown = visible.has(id);
+                el.style.opacity = shown ? "1" : "0.18";
+                // A faded bus is out of the filter: no clicks and no keyboard stop on it.
+                el.style.pointerEvents = shown ? "" : "none";
+                el.setAttribute("tabindex", shown ? "0" : "-1");
+                el.setAttribute("aria-hidden", shown ? "false" : "true");
             }
         }
     }
