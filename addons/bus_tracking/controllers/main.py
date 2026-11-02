@@ -10,6 +10,8 @@ from odoo.http import Response, request
 from ..models.utils import int_param, map_center
 from .portal import line_positions
 
+MAX_TRACK_HOURS = 24
+
 _logger = logging.getLogger(__name__)
 
 
@@ -97,9 +99,17 @@ class BusTrackingController(http.Controller):
     @http.route('/bus_tracking/track', type='json', auth='user')
     def track(self, vehicle_id, hours=4):
         self._check_user()
+        try:
+            vehicle_id = int(vehicle_id)
+            hours = float(hours)
+        except (TypeError, ValueError):
+            raise ValidationError("vehicle_id and hours must be numbers.")
+        # At most one day: the map draws a recent trail, not the whole history.
+        if not 0 < hours <= MAX_TRACK_HOURS:
+            hours = MAX_TRACK_HOURS if hours > MAX_TRACK_HOURS else 4
         since = fields.Datetime.now() - timedelta(hours=hours)
         positions = request.env['bus.position'].search([
-            ('vehicle_id', '=', int(vehicle_id)),
+            ('vehicle_id', '=', vehicle_id),
             ('fix_time', '>=', since),
         ], order='fix_time asc')
         return [[p.latitude, p.longitude] for p in positions]
