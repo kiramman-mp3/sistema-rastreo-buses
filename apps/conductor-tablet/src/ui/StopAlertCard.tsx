@@ -53,10 +53,10 @@ export const StopAlertCard = React.memo(function StopAlertCard({
           adjustsFontSizeToFit
           accessibilityRole="header"
         >
-          {immediateStop ? immediateStop.name : 'Ruta completada / Sin parada activa'}
+          {immediateStop ? immediateStop.name : 'Fin del recorrido'}
         </Text>
 
-        {immediateStop ? (
+        {immediateStop && onConfirmArrival ? (
           <Pressable
             onPress={handlePress}
             onPressIn={() => setPressed(true)}
