@@ -1,7 +1,8 @@
 import json
+import re
 
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 from .geo import PathMeasure
 
@@ -27,6 +28,12 @@ class BusRoute(models.Model):
     _sql_constraints = [
         ('code_uniq', 'unique(code)', "Route code must be unique."),
     ]
+
+    @api.constrains('color')
+    def _check_color(self):
+        for route in self:
+            if route.color and not re.match(r'^#[0-9a-fA-F]{6}$', route.color):
+                raise ValidationError(_("The color must look like #1e5560."))
 
     def _recorded_points(self):
         self.ensure_one()
@@ -82,6 +89,15 @@ class BusRouteStop(models.Model):
     latitude = fields.Float(digits=(10, 7), required=True)
     longitude = fields.Float(digits=(10, 7), required=True)
     radius = fields.Integer(default=50, help="Arrival radius in meters.")
+
+    @api.constrains('latitude', 'longitude', 'radius')
+    def _check_place(self):
+        # The map picker checks this too, but stops can also be typed in the list or imported.
+        for stop in self:
+            if not (-90 <= stop.latitude <= 90 and -180 <= stop.longitude <= 180):
+                raise ValidationError(_("Latitude must be between -90 and 90, and longitude between -180 and 180."))
+            if not 5 <= stop.radius <= 1000:
+                raise ValidationError(_("The arrival radius must be between 5 and 1000 meters."))
 
     @api.model
     def _open_map_picker(self, route_id, stop_id=False):
