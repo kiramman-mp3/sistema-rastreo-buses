@@ -27,7 +27,7 @@ export default function ScanScreen() {
     if (badge) {
       try {
         await session.loginWithBadge(badge.token, badge.odooUrl);
-        router.replace(session.snapshot.shift ? '/shift' : '/select');
+        router.replace('/');
         return;
       } catch {
         setError(t('badgeError'));
