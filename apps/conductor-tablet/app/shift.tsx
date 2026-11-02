@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, AppState, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, AppState, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
@@ -12,7 +12,8 @@ import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, GpsBadge, SosButton, Txt } from '../src/ui/cabin';
+import { Action, GpsBadge, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
 
@@ -37,6 +38,7 @@ function distance(meters: number | null): string | null {
 export default function ShiftScreen() {
   useLang();
   const { palette, choice, setChoice } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const actions = useSessionActions();
   const { shift, vehicles, routes, shiftState, routeMap } = session.snapshot;
@@ -152,8 +154,35 @@ export default function ShiftScreen() {
   const color = route?.color || palette.line;
   const health = stale && gps.health === 'sending' ? 'saving' : gps.health;
 
+  // Landscape puts the next stop beside the map; portrait stacks them (the map takes what is left).
+  const side = layout.landscape;
+  // A phone in portrait has no width for three buttons in a row: SOS on top, the other two below.
+  const stackedActions = layout.phone && !layout.landscape;
+  // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
+  const showStrip = !layout.short;
+
+  const problem = (
+    <Action
+      label={t('actionProblem')}
+      sub={t('actionProblemSub')}
+      onPress={() => router.push('/incident')}
+      disabled={locked}
+      style={stackedActions ? undefined : styles.actionWide}
+    />
+  );
+  const sos = <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />;
+  const end = (
+    <Action
+      label={t('endShift')}
+      onPress={confirmEnd}
+      kind="quiet"
+      disabled={locked}
+      style={stackedActions ? undefined : styles.actionNarrow}
+    />
+  );
+
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+    <Screen>
       {/* Header: bus and line, real GPS state, time, day or night */}
       <View style={[styles.header, { backgroundColor: palette.panel }]}>
         <View style={styles.identity}>
@@ -163,7 +192,7 @@ export default function ShiftScreen() {
             </Txt>
           </View>
           <View style={styles.identityText}>
-            <Txt bold size="body">
+            <Txt bold size="body" lines={1}>
               {bus?.name ?? ''}
             </Txt>
             <Txt size="small" dim lines={1}>
@@ -171,7 +200,7 @@ export default function ShiftScreen() {
             </Txt>
           </View>
         </View>
-        <View style={styles.headerRight}>
+        <View style={[styles.headerRight, { gap: layout.phone ? 12 : 24 }]}>
           <Pressable
             onPress={() => router.push('/gps')}
             disabled={locked}
@@ -199,9 +228,13 @@ export default function ShiftScreen() {
         </View>
       </View>
 
-      <View style={styles.body}>
-        {/* Left: where the bus goes next */}
-        <View style={styles.left}>
+      <View style={[styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}>
+        {/* Where the bus goes next; it scrolls if a notice makes it taller than its room */}
+        <ScrollView
+          style={side ? styles.left : [styles.top, { maxHeight: Math.round(layout.height * 0.4) }]}
+          contentContainerStyle={styles.leftContent}
+          showsVerticalScrollIndicator={false}
+        >
           <Txt size="small" dim>
             {t('cabinNext')}
           </Txt>
@@ -221,9 +254,11 @@ export default function ShiftScreen() {
             </Txt>
           ) : null}
 
-          <View style={styles.strip}>
-            <StopStrip stops={stops} color={color} />
-          </View>
+          {showStrip ? (
+            <View style={styles.strip}>
+              <StopStrip stops={stops} color={color} />
+            </View>
+          ) : null}
 
           {alert ? (
             <View style={[styles.notice, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
@@ -244,10 +279,10 @@ export default function ShiftScreen() {
               </Txt>
             </View>
           ) : null}
-        </View>
+        </ScrollView>
 
-        {/* Right: the map */}
-        <View style={[styles.map, { backgroundColor: palette.panel }]}>
+        {/* The map */}
+        <View style={[styles.map, side ? styles.mapSide : styles.mapStack, { backgroundColor: palette.panel }]}>
           <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
         </View>
       </View>
@@ -260,46 +295,48 @@ export default function ShiftScreen() {
           </Txt>
         </View>
       ) : null}
-      <View style={styles.actions}>
-        <Action
-          label={t('actionProblem')}
-          sub={t('actionProblemSub')}
-          onPress={() => router.push('/incident')}
-          disabled={locked}
-          style={styles.actionWide}
-        />
-        <View style={styles.actionWide}>
-          <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />
+      {stackedActions ? (
+        <View style={[styles.actionsStack, { gap: layout.gap }]}>
+          {sos}
+          <View style={[styles.actionsPair, { gap: layout.gap }]}>
+            <View style={styles.pairItem}>{problem}</View>
+            <View style={styles.pairItem}>{end}</View>
+          </View>
         </View>
-        <Action label={t('endShift')} onPress={confirmEnd} kind="quiet" disabled={locked} style={styles.actionNarrow} />
-      </View>
-    </View>
+      ) : (
+        <View style={[styles.actions, { gap: layout.gap }]}>
+          {problem}
+          <View style={styles.actionWide}>{sos}</View>
+          {end}
+        </View>
+      )}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    gap: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    columnGap: 16,
+    rowGap: 8,
+    borderRadius: 8,
   },
   identity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
     flexShrink: 1,
   },
   identityText: {
     flexShrink: 1,
   },
   chip: {
-    minWidth: 56,
+    minWidth: 52,
     height: 44,
     paddingHorizontal: 10,
     borderRadius: 8,
@@ -309,7 +346,7 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 24,
+    flexShrink: 1,
   },
   gpsTap: {
     minHeight: 48,
@@ -317,7 +354,7 @@ const styles = StyleSheet.create({
   },
   mode: {
     minHeight: 48,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     borderRadius: 8,
     borderWidth: 2,
     flexDirection: 'row',
@@ -331,45 +368,63 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+  },
+  bodySide: {
     flexDirection: 'row',
-    gap: 20,
-    paddingHorizontal: 24,
-    paddingTop: 20,
+  },
+  bodyStack: {
+    flexDirection: 'column',
   },
   left: {
     flex: 4,
+  },
+  top: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  leftContent: {
     gap: 8,
   },
   strip: {
-    marginTop: 18,
+    marginTop: 12,
     marginBottom: 6,
   },
   notice: {
-    marginTop: 10,
+    marginTop: 6,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 8,
     borderLeftWidth: 8,
     borderWidth: 2,
     gap: 4,
   },
   map: {
-    flex: 6,
     borderRadius: 8,
     overflow: 'hidden',
   },
+  mapSide: {
+    flex: 6,
+  },
+  mapStack: {
+    flex: 1,
+    minHeight: 160,
+  },
   lockNote: {
-    marginHorizontal: 24,
-    marginTop: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
   },
   actions: {
     flexDirection: 'row',
-    gap: 16,
-    padding: 24,
-    paddingTop: 16,
+  },
+  actionsStack: {
+    flexDirection: 'column',
+  },
+  actionsPair: {
+    flexDirection: 'row',
+  },
+  pairItem: {
+    flex: 1,
   },
   actionWide: {
     flex: 3,
