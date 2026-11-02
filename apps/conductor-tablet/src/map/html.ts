@@ -11,41 +11,40 @@ export function buildMapHtml(route: RouteMap, bus: MapBus, nextStopId: number | 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <style>
 ${LEAFLET_CSS}
-  html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: #e2e8f0; }
+  html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: #E3E8E6; }
+  /* Stops: a white disc ringed in the route colour; the next one in the signal yellow. */
   .stop-marker-badge {
-    background: #0D684D;
-    color: #fff;
-    font-weight: 700;
-    font-size: 11px;
-    border-radius: 50%;
     width: 22px;
     height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 5px solid var(--c, #7A1A22);
+    background: #FFFFFF;
   }
   .stop-marker-next {
-    background: #DC2626;
-    transform: scale(1.3);
-    box-shadow: 0 0 10px rgba(220, 38, 38, 0.8);
-    border: 2px solid #ffffff;
-    z-index: 1000 !important;
+    width: 32px;
+    height: 32px;
+    border-color: #172025;
+    background: #FFC62B;
   }
+  /* The bus: dark disc, white ring, a front view drawn in CSS. */
   .bus-marker-dot {
-    background: #2563EB;
+    width: 36px;
+    height: 36px;
+    box-sizing: border-box;
     border-radius: 50%;
-    width: 26px;
-    height: 26px;
+    border: 4px solid #FFFFFF;
+    background: #172025;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid #ffffff;
-    box-shadow: 0 0 12px rgba(37, 99, 235, 0.9);
-    color: #fff;
-    font-size: 14px;
-    z-index: 2000 !important;
+  }
+  .bus-marker-dot i {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: #FFFFFF;
+    box-shadow: inset 0 -5px 0 #8A979B;
   }
 </style>
 <script>
@@ -62,7 +61,7 @@ ${LEAFLET_JS}
     subdomains: 'abcd'
   }).addTo(map);
 
-  const routeColor = data.route.color || '#0D684D';
+  const routeColor = data.route.color || '#7A1A22';
   const bounds = [];
   let hasLines = false;
 
@@ -91,9 +90,9 @@ ${LEAFLET_JS}
     const num = idx + 1;
     const icon = L.divIcon({
       className: '',
-      html: '<div class="stop-marker-badge ' + (isNext ? 'stop-marker-next' : '') + '">' + num + '</div>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
+      html: '<div class="stop-marker-badge ' + (isNext ? 'stop-marker-next' : '') + '" style="--c:' + routeColor + '"></div>',
+      iconSize: isNext ? [32, 32] : [22, 22],
+      iconAnchor: isNext ? [16, 16] : [11, 11]
     });
     L.marker([stop.lat, stop.lon], { icon: icon }).addTo(map)
       .bindPopup('<b>Parada ' + num + ':</b> ' + stop.name);
@@ -104,9 +103,9 @@ ${LEAFLET_JS}
   if (data.bus) {
     const busIcon = L.divIcon({
       className: '',
-      html: '<div class="bus-marker-dot">🚌</div>',
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
+      html: '<div class="bus-marker-dot"><i></i></div>',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
     });
     L.marker([data.bus.lat, data.bus.lon], { icon: busIcon }).addTo(map)
       .bindPopup('<b>Tu ubicación actual</b>');
