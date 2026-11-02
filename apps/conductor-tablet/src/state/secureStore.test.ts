@@ -55,6 +55,24 @@ describe('secureStore resilient storage', () => {
     expect(token).toBe('secure-tok');
   });
 
+  test('never writes the token to AsyncStorage when the keystore exists', async () => {
+    (SecureStore.isAvailableAsync as jest.Mock).mockResolvedValue(true);
+    await secureStore.set('new-tok');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('bus.driver.token', 'new-tok');
+    expect(AsyncStorage.setItem).not.toHaveBeenCalledWith('bus.driver.token', expect.anything());
+    expect(await AsyncStorage.getItem('bus.driver.token')).toBeNull();
+  });
+
+  test('moves a token left in AsyncStorage by an older version into the keystore', async () => {
+    (SecureStore.isAvailableAsync as jest.Mock).mockResolvedValue(true);
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
+    await AsyncStorage.setItem('bus.driver.token', 'legacy-tok');
+
+    expect(await secureStore.get()).toBe('legacy-tok');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('bus.driver.token', 'legacy-tok');
+    expect(await AsyncStorage.getItem('bus.driver.token')).toBeNull();
+  });
+
   test('odooUrlStore reads and writes without KeyStore dependency', async () => {
     await odooUrlStore.set('https://odoo.uta.edu.ec');
     expect(await odooUrlStore.get()).toBe('https://odoo.uta.edu.ec');

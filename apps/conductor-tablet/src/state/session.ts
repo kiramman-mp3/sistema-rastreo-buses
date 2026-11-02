@@ -1,4 +1,4 @@
-import { AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
+import { ApiError, AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
 import { normalizeOdooUrl } from '../config/odooUrl';
 import type {
   Driver,
@@ -42,6 +42,10 @@ const empty: Omit<SessionSnapshot, 'ready'> = {
   offline: false,
 };
 
+function isServerError(error: unknown): boolean {
+  return error instanceof ApiError && error.status >= 500;
+}
+
 export class Session {
   snapshot: SessionSnapshot = { ready: false, ...empty };
   private listeners = new Set<() => void>();
@@ -56,6 +60,8 @@ export class Session {
       setItem: async () => undefined,
     }),
     private urlStore?: TokenStore,
+    /** Remembers a shift the driver ended without signal, to close it on the server later. */
+    private endStore?: TokenStore,
   ) {}
 
   subscribe(listener: () => void) {
@@ -107,7 +113,10 @@ export class Session {
         return;
       }
       try {
+        const pendingEnd = await this.flushPendingEnd();
         const me = await this.client.me();
+        // The driver already ended it: never bring its GPS back.
+        if (pendingEnd) me.shift = null;
         this.applyMe(me, token);
         if (me.shift) {
           try {
@@ -148,7 +157,9 @@ export class Session {
     const token = await this.store.get();
     if (!token) return;
     try {
+      const pendingEnd = await this.flushPendingEnd();
       const me = await this.client.me();
+      if (pendingEnd) me.shift = null;
       this.applyMe(me, token);
       await this.restoreGps(me.shift);
     } catch (error) {
@@ -195,6 +206,8 @@ export class Session {
   }
 
   async startShift(vehicleId: number, routeId: number): Promise<StartResponse> {
+    // A shift ended without signal must be closed first, or the server answers conflict.
+    await this.flushPendingEnd();
     await this.gps?.prepare();
     const started = await this.client.startShift(vehicleId, routeId);
     const gps = { uniqueId: started.traccar_unique_id, url: started.gps_url };
@@ -221,7 +234,15 @@ export class Session {
   }
 
   async pullState(): Promise<StateResponse> {
-    const state = await this.client.state();
+    let state: StateResponse;
+    try {
+      state = await this.client.state();
+    } catch (error) {
+      // The office or the stale-shift cron closed it, or the tablet was signed out:
+      // the tablet must stop sending positions right away.
+      if (error instanceof ApiError && error.code === 'no_shift') await this.dropShift();
+      throw error;
+    }
     this.set({ shiftState: state, shift: state.shift });
     await this.flushIncidents();
     return state;
@@ -233,11 +254,12 @@ export class Session {
     return routeMap;
   }
 
-  async reportIncident(draft: IncidentDraft) {
+  async reportIncident(input: IncidentDraft) {
+    const draft = { ...input, reported_at: input.reported_at ?? new Date().toISOString() };
     try {
       await this.client.incident(draft);
     } catch (error) {
-      if (error instanceof NetworkError) {
+      if (error instanceof NetworkError || isServerError(error)) {
         await this.incidents.push(draft);
         return 'queued' as const;
       }
@@ -252,16 +274,56 @@ export class Session {
         await this.client.incident(draft);
         return true;
       } catch (error) {
-        return !(error instanceof NetworkError);
+        // Kept for later on no signal or a server error; only a request the server refuses
+        // for good (bad data, no shift) is dropped.
+        return !(error instanceof NetworkError || isServerError(error));
       }
     });
   }
 
-  async endShift() {
-    await this.flushIncidents();
-    await this.client.endShift();
+  /**
+   * End the shift. The GPS always stops here, with or without signal: without it the end is
+   * remembered and sent later (the stale-shift cron closes it on the server otherwise).
+   */
+  async endShift(): Promise<'ended' | 'queued'> {
+    try {
+      await this.flushIncidents();
+    } catch {
+      // Incidents stay queued; ending the shift must not wait for them.
+    }
+    let result: 'ended' | 'queued' = 'ended';
+    try {
+      await this.client.endShift();
+    } catch (error) {
+      if (error instanceof NetworkError || isServerError(error)) {
+        result = 'queued';
+        await this.endStore?.set(String(this.snapshot.shift?.id ?? 'pending'));
+      } else if (!(error instanceof ApiError && error.code === 'no_shift')) {
+        throw error;
+      }
+    }
+    await this.dropShift();
+    return result;
+  }
+
+  /** Forget the shift on this tablet and stop its GPS. */
+  async dropShift() {
     await this.stopGps();
     this.set({ shift: null, gps: null, shiftState: null, routeMap: null });
+  }
+
+  /** Send an end of shift saved without signal. True while it is still pending. */
+  async flushPendingEnd(): Promise<boolean> {
+    if (!this.endStore || !(await this.endStore.get())) return false;
+    try {
+      await this.client.endShift();
+    } catch (error) {
+      if (error instanceof NetworkError || isServerError(error)) return true;
+      if (error instanceof AuthError) throw error;
+      // no_shift: it was already closed.
+    }
+    await this.endStore.clear();
+    return false;
   }
 
   private async restoreGps(shift: Shift | null) {

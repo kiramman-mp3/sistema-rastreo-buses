@@ -3,8 +3,9 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
-import { ingestLocations } from './runtime';
-import { gpsStore, locationQueue, writeLastSample, writeLastSent } from './store';
+import { flushFixes, ingestLocations } from './runtime';
+import { gpsStore, locationQueue, writeLastError, writeLastSample, writeLastSent } from './store';
+import { t } from '../i18n';
 import type { GpsController } from './types';
 
 export const GPS_TASK = 'uta-bus-location';
@@ -35,8 +36,8 @@ export const liveGps: GpsController = {
       deferredUpdatesInterval: 10_000,
       pausesUpdatesAutomatically: false,
       foregroundService: {
-        notificationTitle: 'Buses UTA',
-        notificationBody: 'Enviando la posición del bus',
+        notificationTitle: t('gpsServiceTitle'),
+        notificationBody: t('gpsServiceBody'),
         notificationColor: '#B91C1C',
         killServiceOnDestroy: false,
       },
@@ -51,7 +52,18 @@ export const liveGps: GpsController = {
         // Already stopped after process death.
       }
     }
-    await locationQueue.clear();
+    // Last chance for the points saved without signal; whatever does not go now is dropped.
+    const creds = await gpsStore.get();
+    await locationQueue.exclusive(async () => {
+      if (creds) {
+        try {
+          await flushFixes(locationQueue, creds);
+        } catch {
+          // Ending the shift never waits on the network.
+        }
+      }
+      await locationQueue.clear();
+    });
     await gpsStore.clear();
   },
 };
@@ -65,5 +77,6 @@ export async function runLocationTask(locations: Location.LocationObject[]) {
     battery: batteryPercent,
     onSent: writeLastSent,
     onSample: writeLastSample,
+    onError: writeLastError,
   });
 }
