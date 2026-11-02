@@ -74,7 +74,7 @@ Quejas: `/quejas` es el formulario público (contacto opcional, con protección 
 
 ## Calidad
 
-Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/GUION_DEFENSA.md`.
+Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/GUION_DEFENSA.md`. Los hallazgos de la auditoría del 2026-11-02 y el plan para corregirlos están en `docs/PLAN-AUDITORIA.md`.
 
 ## Desarrollo local con datos y capturas
 
