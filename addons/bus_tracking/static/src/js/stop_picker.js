@@ -7,7 +7,7 @@ import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl
 
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
-const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 
 export class BusStopPicker extends Component {
     static template = "bus_tracking.StopPicker";
@@ -37,7 +37,11 @@ export class BusStopPicker extends Component {
     initMap(data) {
         const L = window.L;
         this.map = L.map(this.mapRef.el).setView(data.center, 14);
-        L.tileLayer(TILES, { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(this.map);
+        L.tileLayer(TILES, {
+            maxZoom: 19,
+            subdomains: "abcd",
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        }).addTo(this.map);
         const bounds = [];
         (data.lines || []).forEach((line) => {
             L.polyline(line.points, { color: data.color, weight: 4, opacity: 0.6 }).addTo(this.map);
