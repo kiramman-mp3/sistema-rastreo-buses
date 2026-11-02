@@ -11,8 +11,11 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    driver_badge_qr = fields.Binary(string="Credencial QR", readonly=True, copy=False)
-    driver_badge_link = fields.Char(string="Enlace de Credencial", readonly=True, copy=False)
+    # Both hold the raw badge token, which signs the driver in: only managers may read them.
+    driver_badge_qr = fields.Binary(string="Credencial QR", readonly=True, copy=False,
+                                    groups='bus_tracking.group_bus_manager')
+    driver_badge_link = fields.Char(string="Enlace de Credencial", readonly=True, copy=False,
+                                    groups='bus_tracking.group_bus_manager')
     driver_badge_active = fields.Boolean(
         string="Credencial activa",
         compute='_compute_driver_badge_active',
