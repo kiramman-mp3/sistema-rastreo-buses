@@ -4,7 +4,7 @@ import * as TaskManager from 'expo-task-manager';
 
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
 import { ingestLocations } from './runtime';
-import { gpsStore, locationQueue, writeLastSent } from './store';
+import { gpsStore, locationQueue, writeLastSample, writeLastSent } from './store';
 import type { GpsController } from './types';
 
 export const GPS_TASK = 'uta-bus-location';
@@ -64,5 +64,6 @@ export async function runLocationTask(locations: Location.LocationObject[]) {
     creds,
     battery: batteryPercent,
     onSent: writeLastSent,
+    onSample: writeLastSample,
   });
 }
