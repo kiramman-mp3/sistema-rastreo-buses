@@ -1,7 +1,4 @@
 import json
-from datetime import timedelta
-
-from odoo import fields
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
@@ -120,7 +117,6 @@ class TestDriverBadge(TransactionCase):
         self.tokens._revoke_sessions(self.driver)
         self.assertFalse(self.tokens._user_for(session))
         self.assertEqual(self.tokens._user_for_badge(badge), self.driver)
-
 
 
 @tagged('post_install', '-at_install')

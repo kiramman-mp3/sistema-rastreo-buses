@@ -82,4 +82,3 @@ class TestDriverStaff(TransactionCase):
         queue = self.env['bus.incident']._open_for_map()
         self.assertIn(sos, queue)
         self.assertNotIn(self.incident, queue)
-

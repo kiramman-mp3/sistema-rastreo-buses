@@ -165,4 +165,3 @@ class TestHttp(HttpCase):
     def test_webhook_still_accepts_the_secret_in_the_url_for_now(self):
         self.assertEqual(self.post().status_code, 200)
         self.assertEqual(self.positions(), 1)
-

@@ -2,7 +2,8 @@
 
 Run inside the Odoo container (local docker compose):
 
-    docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo < scripts/dev_seed.py
+    docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo \
+        < scripts/dev_seed.py
 
 It is idempotent: the first run creates lines, stops, buses, a driver and a few complaints;
 every later run only moves the buses forward along their lines with fresh timestamps, so the

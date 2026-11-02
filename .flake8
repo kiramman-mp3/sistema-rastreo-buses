@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 120
+exclude = .git,__pycache__,node_modules,apps
+per-file-ignores =
+    # Translation tables: one long string per line, aligned by hand.
+    addons/bus_tracking/models/portal_i18n.py: E128,E501
+    # Runs inside `odoo shell`, which provides `env`.
+    scripts/dev_seed.py: F821
+    # Odoo loads the submodules from the package files.
+    __init__.py: F401
