@@ -271,3 +271,7 @@ Rediseño integral de la experiencia de usuario y rendimiento frontend aplicando
   - Botón de SOS con retención obligatoria de 1.5s (`holdProgress` continuo) para evitar falsos accionamientos por vibración del bus.
 - **Pruebas y verificación:**
   - 10 suites Jest (44 tests) PASS, `tsc --noEmit` PASS (0 errores de tipo).
+
+## Rediseño de experiencia (fases 26 a 31) **[PENDIENTE]**
+
+Análisis y plan en `docs/PLAN-UX.md`: hallazgos del portal, el panel y la tableta (incluye datos inventados y riesgos de las fases 23 a 25), recorridos por persona, dirección de diseño y fases.
