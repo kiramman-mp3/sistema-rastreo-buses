@@ -12,26 +12,26 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     # Both hold the raw badge token, which signs the driver in: only managers may read them.
-    driver_badge_qr = fields.Binary(string="Credencial QR", readonly=True, copy=False,
+    driver_badge_qr = fields.Binary(string="Driver badge QR", readonly=True, copy=False,
                                     groups='bus_tracking.group_bus_manager')
-    driver_badge_link = fields.Char(string="Enlace de Credencial", readonly=True, copy=False,
+    driver_badge_link = fields.Char(string="Badge link", readonly=True, copy=False,
                                     groups='bus_tracking.group_bus_manager')
     driver_badge_active = fields.Boolean(
-        string="Credencial activa",
+        string="Badge active",
         compute='_compute_driver_badge_active',
-        help="Indica si el conductor tiene una credencial QR vigente.",
+        help="Whether the driver has a valid QR badge.",
     )
     is_bus_driver = fields.Boolean(
-        string="Es Chofer",
+        string="Is a driver",
         compute='_compute_is_bus_driver',
         search='_search_is_bus_driver',
         inverse='_inverse_is_bus_driver',
     )
     driver_password = fields.Char(
-        string="Contraseña",
+        string="Password",
         copy=False,
         store=False,
-        help="Escribe aquí para asignar o cambiar la contraseña del conductor.",
+        help="Type here to set or change the driver's password.",
     )
 
     @api.model_create_multi
@@ -94,13 +94,13 @@ class ResUsers(models.Model):
     def _check_badge_manager(self):
         # The buttons are hidden in the view, but the methods can be called over RPC.
         if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_manager')):
-            raise AccessError(_("Solo los administradores pueden emitir o revocar credenciales QR."))
+            raise AccessError(_("Only managers can issue or revoke QR badges."))
 
     def action_generate_driver_badge(self):
         self.ensure_one()
         self._check_badge_manager()
         if not self.has_group('bus_tracking.group_bus_driver'):
-            raise UserError(_("El usuario debe pertenecer al grupo de Choferes para tener una credencial QR."))
+            raise UserError(_("The user must be in the Driver group to have a QR badge."))
 
         raw = self.env['bus.driver.token']._issue_badge(self)
         base = (self.env['ir.config_parameter'].sudo().get_param('web.base.url') or '').rstrip('/')
