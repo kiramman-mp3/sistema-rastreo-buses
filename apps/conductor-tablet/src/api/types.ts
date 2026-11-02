@@ -82,6 +82,8 @@ export type RouteMap = {
   color: string;
   stops: RouteStop[];
   lines: { name: string; km: number; points: number[][] }[];
+  /** Map tiles chosen in Odoo (Settings > Map tiles); older servers do not send it. */
+  tile_url?: string;
 };
 
 export type IncidentKind = 'breakdown' | 'traffic' | 'accident' | 'other' | 'sos';

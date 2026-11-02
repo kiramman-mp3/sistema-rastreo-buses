@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+from psycopg2 import IntegrityError
+
 from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
+from odoo.tools import mute_logger
 
 from .common import STOPS, BusCase, traccar_position
 from .test_driver_auth import make_driver
@@ -196,3 +199,9 @@ class TestIngest(BusCase):
         self.env['bus.position']._cron_cleanup()      # must not raise
         icp.set_param('bus_tracking.complaint_retention_days', '9x')
         self.env['bus.complaint']._cron_purge_contacts()
+
+    def test_bus_names_are_unique(self):
+        with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
+            self.env['bus.vehicle'].create({'name': self.bus.name})
+            self.env.flush_all()
+

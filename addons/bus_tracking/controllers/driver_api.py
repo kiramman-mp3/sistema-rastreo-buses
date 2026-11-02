@@ -10,7 +10,7 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
-from ..models.utils import parse_traccar_dt
+from ..models.utils import parse_traccar_dt, tile_url
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
@@ -271,6 +271,7 @@ class BusDriverApi(http.Controller):
                 'radius': stop.radius,
             } for stop in route.stop_ids],
             'lines': route._map_lines(),
+            'tile_url': tile_url(request.env),
         })
 
     @http.route('/bus_tracking/driver/incident', type='http', auth='public', methods=['POST'], csrf=False)

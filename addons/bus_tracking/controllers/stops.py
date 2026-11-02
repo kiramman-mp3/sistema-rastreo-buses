@@ -2,7 +2,7 @@ from odoo import _, http
 from odoo.exceptions import AccessError
 from odoo.http import request
 
-from ..models.utils import map_center
+from ..models.utils import map_center, tile_url
 
 
 class BusStops(http.Controller):
@@ -23,6 +23,7 @@ class BusStops(http.Controller):
             'stops': stops,
             'lines': route._map_lines(),
             'center': list(map_center(request.env)),
+            'tile_url': tile_url(request.env),
             'stop': next((s for s in stops if s['id'] == int(stop_id or 0)), None),
         }
 
