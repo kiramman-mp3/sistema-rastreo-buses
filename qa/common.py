@@ -122,6 +122,8 @@ def prepare(odoo):
             odoo.call(model, 'unlink', ids)
     odoo.call('ir.config_parameter', 'set_param', 'bus_tracking.webhook_secret', SECRET)
     odoo.call('ir.config_parameter', 'set_param', 'bus_tracking.stale_minutes', '10')
+    # The live suite and the audit post positions by webhook for buses without a driver on shift.
+    odoo.call('ir.config_parameter', 'set_param', 'bus_tracking.accept_without_shift', '1')
     route = odoo.call('bus.route', 'create', [{
         'name': 'QA Troncal', 'code': 'QA1', 'public': True, 'color': '#1e5560',
         'stop_ids': [(0, 0, {'sequence': i * 10, 'name': name, 'latitude': lat, 'longitude': lon, 'radius': 80})
