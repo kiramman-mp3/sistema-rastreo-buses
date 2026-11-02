@@ -126,6 +126,20 @@
                                 <field name="bus_privacy_url" placeholder="https://"/>
                             </div>
                         </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_contact_phone"/>
+                                <div class="text-muted">Only the official number. Empty: no phone is shown.</div>
+                                <field name="bus_contact_phone"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_contact_email"/>
+                                <div class="text-muted">Only the official address. Empty: no email is shown.</div>
+                                <field name="bus_contact_email"/>
+                            </div>
+                        </div>
                     </div>
                     <h2>Complaints</h2>
                     <div class="row mt16 o_settings_container">

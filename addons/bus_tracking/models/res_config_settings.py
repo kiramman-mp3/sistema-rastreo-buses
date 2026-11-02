@@ -47,6 +47,12 @@ class ResConfigSettings(models.TransientModel):
     bus_privacy_url = fields.Char(
         string="Privacy policy link", config_parameter='bus_tracking.privacy_url',
         help="Optional address of your institution's privacy policy, shown on the complaint form.")
+    bus_contact_phone = fields.Char(
+        string="Contact phone for passengers", config_parameter='bus_tracking.contact_phone',
+        help="Official phone of the transport service. Leave it empty to show no phone on the public pages.")
+    bus_contact_email = fields.Char(
+        string="Contact email for passengers", config_parameter='bus_tracking.contact_email',
+        help="Official email of the transport service. Leave it empty to show no email on the public pages.")
     tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_qr')
     tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_qr')
 
