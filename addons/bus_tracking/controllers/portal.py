@@ -9,7 +9,7 @@ from datetime import timedelta
 from odoo import fields, http
 from odoo.http import Response, request
 
-from ..models.utils import brand_name, map_center
+from ..models.utils import brand_name, fold, map_center, public_contact
 from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
@@ -94,6 +94,7 @@ def portal_context(**values):
         remembered=request.httprequest.cookies.get(LANG_COOKIE))
     values.update(lang=lang, s=STRINGS[lang], asset_v=asset_version(),
                   brand=brand_name(request.env(su=True)),
+                  contact=public_contact(request.env(su=True)),
                   languages={c: s['lang_name'] for c, s in STRINGS.items()})
     return values
 
@@ -126,8 +127,14 @@ class BusPortal(http.Controller):
 
     # ------------------------------------------------------------------
     @http.route(['/rutas', '/transporte/rutas'], type='http', auth='public', methods=['GET'])
-    def routes(self, **kwargs):
+    def routes(self, q=None, **kwargs):
         routes = public_routes()
+        query = (q or '').strip()[:80]
+        if query:
+            needle = fold(query)
+            routes = routes.filtered(
+                lambda r: needle in fold(r.name) or needle in fold(r.code)
+                or any(needle in fold(stop.name) for stop in r.stop_ids))
         total_active_buses = 0
         items = []
         for r in routes:
@@ -139,10 +146,12 @@ class BusPortal(http.Controller):
                 'color': safe_color(r.color),
                 'buses': fresh_count,
                 'stops_count': len(r.stop_ids),
-                'first_stop': r.stop_ids[:1].name if r.stop_ids else 'Terminal',
-                'last_stop': r.stop_ids[-1:].name if r.stop_ids else 'Destino',
+                'first_stop': r.stop_ids[:1].name or '',
+                'last_stop': r.stop_ids[-1:].name or '',
+                'matching_stops': [s.name for s in r.stop_ids if query and fold(query) in fold(s.name)][:3],
             })
-        return render_portal('bus_tracking.portal_routes', portal_context(routes=items, total_active_buses=total_active_buses))
+        return render_portal('bus_tracking.portal_routes', portal_context(
+            routes=items, total_active_buses=total_active_buses, query=query))
 
     @http.route(['/rutas/detalle', '/transporte/rutas/detalle'], type='http', auth='public', methods=['GET'])
     def route_detail_alias(self, **kwargs):
