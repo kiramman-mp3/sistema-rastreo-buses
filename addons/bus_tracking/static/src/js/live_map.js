@@ -250,6 +250,15 @@ export class BusLiveMap extends Component {
         return this.state.now && ago(utcSeconds(incident.time));
     }
 
+    /** Accessible names that say which bus: several buttons share the same visible words. */
+    showLabel(busName) {
+        return _t("Show %s on the map").replace("%s", busName || "");
+    }
+
+    seenLabel(title, busName) {
+        return `${_t("Mark as seen")}: ${title || ""} · ${busName || ""}`;
+    }
+
     fixAge(v) {
         return ago(utcSeconds(v.fix_time));
     }
@@ -288,11 +297,13 @@ export class BusLiveMap extends Component {
             : this.state.routes;
         for (const r of shown) {
             for (const path of r.paths) {
-                L.polyline(path.points, { color: r.color, weight: 5, opacity: this.state.routeId ? 0.95 : 0.55 }).addTo(this.routeLayer);
+                // not interactive: an unnamed line would be an empty stop for keyboard users
+                L.polyline(path.points, { color: r.color, weight: 5, opacity: this.state.routeId ? 0.95 : 0.55, interactive: false })
+                    .addTo(this.routeLayer);
             }
             for (const s of r.stops) {
-                L.circleMarker([s.lat, s.lon], { radius: 5, color: r.color, weight: 3, fillColor: "#FFFFFF", fillOpacity: 1 })
-                    .bindTooltip(s.name).addTo(this.routeLayer);
+                L.circleMarker([s.lat, s.lon], { radius: 5, color: r.color, weight: 3, fillColor: "#FFFFFF", fillOpacity: 1, interactive: false })
+                    .addTo(this.routeLayer);
             }
         }
         if (!this.fitted) {
@@ -406,9 +417,10 @@ export class BusLiveMap extends Component {
                     className: "",
                     iconSize: [28, 28],
                     iconAnchor: [14, 14],
-                    html: `<span class="o_bus_inc ${i.kind === "sos" ? "sos" : ""}">!</span>`,
+                    html: `<span class="o_bus_inc ${i.kind === "sos" ? "sos" : ""}" aria-hidden="true">!</span>`,
                 }),
-                title: i.label,
+                // the "!" is decoration: the marker is announced by its title
+                title: `${i.label} · ${i.vehicle_name}`,
                 zIndexOffset: 300,
             }).bindTooltip(`${escapeHtml(i.label)} · ${escapeHtml(i.vehicle_name)}`).addTo(this.incidentLayer);
         }
