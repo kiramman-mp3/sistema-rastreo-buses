@@ -21,13 +21,13 @@
         <field name="arch" type="xml">
             <form>
                 <header groups="bus_tracking.group_bus_manager">
-                    <button name="action_add_stop_on_map" type="object" string="Agregar parada"
+                    <button name="action_add_stop_on_map" type="object" string="Add a stop"
                             class="btn-primary"/>
-                    <button name="action_record_track" type="object" string="Grabar trazado desde un bus"
+                    <button name="action_record_track" type="object" string="Record the track from a bus"
                             class="btn-primary"/>
-                    <button name="action_clear_track" type="object" string="Borrar trazado grabado"
+                    <button name="action_clear_track" type="object" string="Clear the recorded track"
                             attrs="{'invisible': [('track_points', '=', 0)]}"
-                            confirm="La ruta volverá a dibujarse como línea recta entre sus paradas."/>
+                            confirm="The route will be drawn again as straight lines between its stops."/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
@@ -40,7 +40,7 @@
                             <field name="code"/>
                             <field name="color" widget="color"/>
                             <field name="public"/>
-                            <field name="track_points" string="Puntos del trazado grabado"/>
+                            <field name="track_points" string="Points of the recorded track"/>
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
@@ -80,8 +80,8 @@
         <field name="arch" type="xml">
             <form>
                 <p class="text-muted">
-                    Se toman las posiciones GPS del bus en este periodo y se dibuja la ruta siguiendo ese recorrido.
-                    Elige el periodo en que el bus hizo la ruta completa, de una parada extrema a la otra.
+                    The bus GPS positions in this period are taken and the route is drawn along that trip.
+                    Choose a period in which the bus drove the whole route, from one end stop to the other.
                 </p>
                 <group>
                     <field name="route_id" invisible="1"/>
@@ -90,15 +90,15 @@
                     <field name="date_to"/>
                 </group>
                 <footer>
-                    <button name="action_record" type="object" string="Grabar" class="btn-primary"/>
-                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                    <button name="action_record" type="object" string="Record" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
 
     <record id="action_bus_route" model="ir.actions.act_window">
-        <field name="name">Rutas</field>
+        <field name="name">Routes</field>
         <field name="res_model">bus.route</field>
         <field name="view_mode">tree,form</field>
     </record>

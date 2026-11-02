@@ -4,11 +4,11 @@
         <field name="name">bus.driver.tree</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <tree string="Choferes">
+            <tree string="Drivers">
                 <field name="name"/>
                 <field name="login"/>
                 <field name="email"/>
-                <field name="driver_badge_active" widget="boolean" string="Credencial QR Activa"/>
+                <field name="driver_badge_active" widget="boolean" string="QR badge active"/>
             </tree>
         </field>
     </record>
@@ -17,41 +17,41 @@
         <field name="name">bus.driver.form</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <form string="Chofer">
+            <form string="Driver">
                 <header>
                     <button name="action_generate_driver_badge" type="object"
-                            string="Generar Credencial QR" class="btn-primary"
+                            string="Generate QR badge" class="btn-primary"
                             groups="bus_tracking.group_bus_manager"/>
                     <button name="action_revoke_driver_badge" type="object"
-                            string="Revocar Credencial" class="btn-secondary"
+                            string="Revoke badge" class="btn-secondary"
                             groups="bus_tracking.group_bus_manager"
                             attrs="{'invisible': [('driver_badge_active', '=', False)]}"
-                            confirm="¿Seguro que desea revocar la credencial QR de este chofer? Deberá generar una nueva para que vuelva a iniciar sesión escaneando."/>
+                            confirm="Revoke this driver's QR badge? A new one must be generated before they can sign in by scanning again."/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
-                        <h1><field name="name" placeholder="Nombre completo del conductor"/></h1>
+                        <h1><field name="name" placeholder="Driver's full name"/></h1>
                     </div>
                     <group>
-                        <group string="Datos de Acceso">
-                            <field name="login" string="Usuario"/>
-                            <field name="driver_password" password="True" string="Contraseña"
-                                   placeholder="Asignar o cambiar contraseña"/>
+                        <group string="Sign-in">
+                            <field name="login" string="User"/>
+                            <field name="driver_password" password="True" string="Password"
+                                   placeholder="Set or change the password"/>
                             <field name="email"/>
                             <field name="phone"/>
                             <field name="is_bus_driver" invisible="1"/>
                             <field name="groups_id" invisible="1"/>
                         </group>
-                        <group string="Estado">
-                            <field name="driver_badge_active" readonly="1" string="Credencial Activa"/>
+                        <group string="Status">
+                            <field name="driver_badge_active" readonly="1" string="Badge active"/>
                         </group>
                     </group>
-                    <group string="Credencial QR Móvil (Tableta del Conductor)" groups="bus_tracking.group_bus_manager">
+                    <group string="QR badge for the driver tablet" groups="bus_tracking.group_bus_manager">
                         <group>
-                            <field name="driver_badge_link" readonly="1" string="Enlace QR"/>
+                            <field name="driver_badge_link" readonly="1" string="QR link"/>
                             <div colspan="2" class="text-muted">
-                                El chofer puede escanear este código QR directamente con la cámara de la tableta para iniciar sesión al instante sin escribir usuario ni contraseña.
+                                The driver scans this QR code with the tablet camera to sign in without typing a user or password.
                             </div>
                         </group>
                         <group>
@@ -65,7 +65,7 @@
     </record>
 
     <record id="action_bus_driver" model="ir.actions.act_window">
-        <field name="name">Choferes</field>
+        <field name="name">Drivers</field>
         <field name="res_model">res.users</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('is_bus_driver', '=', True)]</field>
@@ -75,7 +75,7 @@
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_bus_driver_form')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Crea un nuevo chofer y genera su credencial QR.
+                Create a driver and generate their QR badge.
             </p>
         </field>
     </record>
