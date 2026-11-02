@@ -947,3 +947,48 @@ Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de ll
 - Las coordenadas de `scripts/dev_seed.py` son aproximadas y solo sirven para desarrollo.
 - No se desplegó en Azure ni se fusionó `develop` en `main`.
 
+
+## 2026-11-02: auditoría integral y su plan (fases 1 a 8)
+
+Auditoría del back, el front y la app de tableta: 63 hallazgos (5 críticos, 18 altos, 27 medios, 13 bajos) en `docs/PLAN-AUDITORIA.md`, con el plan por fases. El equipo decidió: quitar la contraseña del historial, choferes de portal, descartar posiciones sin turno y apagar el GPS al terminar el turno aunque no haya señal.
+
+### Qué se hizo
+
+1. **Historial de Git**: la contraseña del admin de producción salió de todos los commits de `main` y `develop` (reescritos en local con `filter-branch`); `scripts/clean-azure-db.sh` pasó a pedir `ADMIN_PASSWORD`. Falta el `push --force` y cambiar la contraseña (DEF-013).
+2. **Fase 1, credenciales** (`fix/credenciales-chofer`): sólo administradores emiten, revocan o leen la credencial QR; la credencial no sirve como sesión ni `login_badge` renueva sesiones; la tableta nunca guarda la credencial como sesión; *Cerrar sesión de la tableta* deja la credencial; choferes como usuarios de portal, con migración `16.0.1.2.0`.
+3. **Fase 2, ingesta y avisos** (`fix/ingesta-y-avisos`): duplicado concurrente sin 500; posiciones de buses sin turno descartadas (ajuste para pruebas con `curl`); push que sobrevive a errores de red sin repetir avisos; respuesta HTML de Traccar como error claro; parámetros numéricos seguros; `/track` acotado a 24 h; secreto por URL obsoleto.
+4. **Fase 3, turno de la tableta** (`fix/turno-tableta`): próxima parada por vuelta y en el sentido del viaje; no se inicia turno sin dirección del GPS; buses sin GPS marcados; rutas archivadas rechazadas; hora real de los incidentes (migración `16.0.1.3.0`); la tableta apaga el GPS si la oficina cierra el turno, termina el turno sin señal y lo cierra después, guarda incidentes ante errores 5xx, abandona envíos colgados a los 10 s, serializa la cola, intenta enviar lo guardado antes de borrarlo, muestra el último error del GPS, explica 429 y 5xx, guarda el token sólo en el almacén seguro, sólo acepta https y confirma el cambio de servidor; sin permiso de micrófono.
+5. **Fase 4, portal y panel** (`fix/portal-y-panel`): el límite del feed cuenta sólo las consultas fuera de caché; el limitador olvida direcciones quietas; el portal cuenta paradas en el sentido del bus; un SOS sin atender no sale de la cola; nombres de bus únicos; mapa en vivo que redibuja paradas y trazados editados, avisa errores y saca del foco los marcadores filtrados; una sola dirección de teselas en Ajustes (CARTO, con atribución también en la tableta).
+6. **Fase 5, validaciones** (`fix/validaciones-modelo`): paradas, radio, color y periodo de grabación validados en el modelo; trazado medido en caché por ruta; una queja demasiado rápida pide reenviar en vez de perderse.
+7. **Fase 6, traducciones** (`chore/traducciones`): textos de choferes, rutas y recorridos en inglés con su traducción; `.pot` y `es.po` regenerados desde el módulo (sin los seis modelos borrados, sin entradas vacías); `qa/traducciones.py` lo comprueba.
+8. **Fase 7, CI y scripts** (`ci/pipeline-completo`, `chore/scripts-produccion`): el CI corre el lint de la tableta, flake8 completo en Python 3.9, el chequeo de traducciones y la suite de Odoo contra Postgres; `scripts/reset-prod.sh` reemplaza a `clean-azure-db.sh` (confirmación, respaldo previo, `init-prod.sh`, sin secretos); Traccar fijado en 6.16.0; Mailpit fuera del entorno de desarrollo.
+9. **Fase 8, documentación** (`docs/actualizacion-auditoria`): README, guía del chofer, producción, plan de la app, ISO 25010, guion de defensa y registro de defectos (DEF-011 a DEF-026).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite Odoo en base limpia, tras cada fase | 222 → 230 → 238 → 244 → 248 pruebas, 0 fallos, 0 errores |
+| Mismo comando que el CI (addons en solo lectura, `--addons-path` explícito, `grep` del resumen) | 248 pruebas, 0 fallos |
+| Tableta: Jest, `tsc --noEmit`, `expo lint` | 14 suites, 72 pruebas PASS; sin errores |
+| flake8 (`.flake8`) en el módulo y `dev_seed.py`; errores en `qa/` | Sin hallazgos |
+| `qa/traducciones.py` | 0 sin traducir, 0 modelos inexistentes (el `es.po` anterior: 38 y 6) |
+| Migración `16.0.1.2.0` en la base de desarrollo | `chofer1` y `chofer2` pasan a portal; `chofer1` entra por la API y `/web` lo saca del panel |
+| Caché del trazado (1.000 posiciones, trazado de 1.500 puntos) | 1,53 s → 0,76 s |
+
+### Problemas encontrados
+
+- La prueba de privacidad del feed falló al sumar el campo `dir`: era un cambio intencional y se actualizó la lista permitida.
+- El barrido del limitador partía del reloj del sistema y las pruebas usan un reloj propio: ahora empieza en la primera petición.
+- La validación de color rompió la prueba de inyección CSS: la prueba ahora mete el color malo por SQL, como dato viejo, y sigue comprobando la defensa del portal.
+- Al regenerar `es.po`, "Trips" heredó la traducción vieja "Tramos" y "Driver" la de "Conductor": se dio prioridad a las traducciones nuevas.
+- La primera actualización de la base de desarrollo chocó con los crons de Odoo en marcha (`could not serialize access`): hay que detener Odoo antes de `-u`.
+- `PAN-01` estaba mal diagnosticado: Odoo 16 ya recarga la ficha al cerrar el selector de paradas; sólo faltaba traducirlo.
+
+### Pendiente o sin confirmar
+
+- `git push --force-with-lease origin main develop` y cambiar la contraseña del admin (DEF-013).
+- El job `odoo-tests` del CI no se ha ejecutado en GitHub; se simuló en local con el mismo comando.
+- La suite en vivo, la auditoría aleatoria y las métricas (`qa/ejecutar_todo.sh`) siguen con los datos del 28-oct.
+- Turno real de dos vueltas en una tableta, con corte de red, SOS sin señal y cierre desde la oficina.
+- Los menús del panel siguen escritos en español en el código.
