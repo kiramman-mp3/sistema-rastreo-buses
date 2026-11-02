@@ -213,65 +213,31 @@ El alcance se redujo: ver la entrada de `docs/BITACORA.md` de esa fecha. Las fas
 
 Plan completo en `docs/PLAN-APP-CHOFER.md`. Backend (16–18) y app Expo (19–21) integrados. Fase 22: casos QA del API de chofer, guía, producción y perfil EAS `production`. Pendiente: APK firmado en tableta con GPS, jornada con chofer real.
 
-## Evolución de diseño de producto e ingeniería frontend (fases 23 a 25) **[HECHO]**
+## Evolución de diseño de producto e ingeniería frontend (fases 23 a 25) **[REEMPLAZADA por las fases 26 a 31]**
 
-Rediseño integral de la experiencia de usuario y rendimiento frontend aplicando directrices de `design-taste-frontend`, `impeccable`, `emil-design-eng`, `frontend-design`, `mobile-native` y `vercel-react-native-skills`.
+Esta sección decía antes que las fases 23 a 25 estaban hechas y verificadas. La revisión del 2026-11-01 (`docs/PLAN-UX.md`, hallazgos D1) mostró que varias afirmaciones no eran ciertas, y se corrigen aquí para que el plan coincida con el código:
 
-| Fase | Contenido | Rama | Estado |
-|---|---|---|---|
-| 23 | Odoo Backend: rediseño cinemático del mapa en vivo OWL 2.0 (LERP 60fps, heading wrap, HUD translúcido, Carto Positron) | `feature/owl-live-map` | HECHO (integrada en develop) |
-| 24 | Portal Público: experiencia moderna y humana para pasajeros QWeb/CSS (landing `/transporte`, directorio visual de rutas, diagrama vertical estilo metro y quejas guiadas) | `feature/public-portal` | HECHO (integrada en develop) |
-| 25 | App Tableta Chofer: ergonomía de cabina a 100 cm (modo oscuro profundo, barra headway semafórica, parada 34px y SOS anti-vibración 1.5s) | `feature/driver-tablet-shift` | HECHO (integrada en develop) |
+| Se afirmaba | Lo que había en realidad |
+|---|---|
+| "Tiempos de llegada probabilísticos (ETA en rangos)" | Minutos calculados con el número de la parada (`índice × 3 + 2`), sin relación con los buses. Eliminados en la fase 26. |
+| "Barra de cadencia / headway semafórica" | Datos fijos en el código ("Bus #02", ±3/5 min) que, con un bus fuera de ruta, pedían al chofer "agilizar el paso". Eliminada en la fase 26. |
+| "Comprobante postal `#UTA-XXXX`" | El folio es `Q-00001`, generado por la secuencia de Odoo. |
+| "Contrastes WCAG AAA verificados" | No había medición. Ahora se mide con `qa/contraste.py` (fase 27). |
+| "Touch targets de mínimo 72 px" | Varios botones de la cabina medían 46 px y había textos de 11 a 14 px. Corregido en la fase 30. |
+| "Flujo de quejas con motivos visuales" | Dos de los cuatro motivos no existían en el modelo y se guardaban como "Otro". Corregido en la fase 26. |
+| "247 tests, 0 fallos" (bitácora del 2026-10-30) | En `develop` del 2026-11-01 había 4 fallos y 2 errores (grupo Manager con el rol de chofer, credencial QR, textos del portal). Corregido en la fase 26. |
 
-### Fase 23. Rediseño cinemático del mapa en vivo en OWL 2.0 **[HECHO]**
+El detalle técnico de esas fases sigue en el historial de Git (ramas `feature/owl-live-map`, `feature/public-portal`, `feature/driver-tablet-shift`).
 
-- **Componente desacoplado OWL 2.0** (`addons/bus_tracking/static/src/js/live_map.js` y `live_map.xml`).
-- **Interpolación cinemática continua:** Bucle a 60 fps con `requestAnimationFrame` y LERP (Linear Interpolation) sobre coordenadas geográficas (`lat`, `lng`), eliminando los saltos bruscos entre actualizaciones de GPS de 10 segundos.
-- **Normalización angular de rumbo:** Cálculo del camino angular más corto (`((target - current) % 360 + 540) % 360 - 180`) para evitar giros espurios de 350° al cruzar el norte (0°/360°).
-- **Cartografía de alto contraste:** Carto Positron (`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png`) libre de ruido visual, destacando los trazados viales y los marcadores de la flota.
-- **Floating HUD y drawer lateral:** Panel superior con métricas operativas en vivo (buses activos, demorados, inactivos) y filtros instantáneos sin destrucción del DOM (gestión persistente en memoria con `syncVehicles`). Drawer colapsable de flota y tarjeta flotante de telemetría de bus seleccionado.
-- **Tokens de estilo SCSS/CSS:** Integración en `brand.css` y `live_map.css` con variables CSS unificadas, efecto glassmorphism y pulso de radar en marcadores.
+## Rediseño de experiencia (fases 26 a 31) **[HECHO salvo las pruebas con personas]**
 
-### Fase 24. Portal público para pasajeros y comunidad universitaria **[HECHO]**
+Análisis, hallazgos y plan en `docs/PLAN-UX.md`; identidad en `docs/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
 
-- **Landing Page humana y mobile-first (`/transporte` y `/`):**
-  - Hero cercano ("Muévete seguro hacia el campus") con buscador predictivo de paradas y campus vía `<datalist>`.
-  - Chips interactivos de un toque para los campus universitarios principales (Huachi, Ingahurco, Querochaca).
-  - Barra de estado en vivo con pulso no burocrático ("🟢 Red Operativa · N buses en servicio").
-  - Grid de rutas destacadas con badges claros de frecuencia.
-- **Directorio visual de rutas (`/transporte/rutas` y `/rutas`):**
-  - Reemplazo absoluto de tablas administrativas por tarjetas de diseño editorial espacioso.
-  - Colores distintivos (Carmesí UTA `#7A1A22`, Ámbar `#D97706`), recorrido origen-destino, frecuencia en hora pico y unidades activas.
-- **Ruta Detalle e itinerario (`/transporte/rutas/<id>` y `/rutas/<codigo>`):**
-  - Diagrama lineal vertical estilo metro con paradas intermedias, resaltando la parada actual y próxima de cada bus activo.
-  - Tiempos de llegada probabilísticos (ETA en rangos tipo "Llega en 4-7 min").
-  - Panel de avisos de tráfico y desvíos en lenguaje natural.
-  - Mapa interactivo con Carto Positron y rotación precisa de vehículos.
-- **Canal empático de quejas y sugerencias (`/transporte/quejas` y `/quejas`):**
-  - Flujo guiado en 3 pasos con selector visual de motivos (Demora, Pérdida de pertenencia, Conducción, Sugerencia).
-  - Formulario limpio con retención de campos y confirmación postal humana con código de seguimiento `#UTA-XXXX`.
-
-### Fase 25. App tableta de chofer en cabina: ergonomía, cadencia headway y SOS anti-vibración **[HECHO]**
-
-- **Ergonomía de cabina a 100 cm:**
-  - Orientación fija en horizontal (Landscape), paleta ultra oscura antirreflejos (`#0B0F17`, superficie `#151D2A`) para evitar encandilamiento nocturno y reflejos diurnos.
-  - Touch targets de mínimo 72px de altura/ancho (`cockpitHit = 72`) para accionamiento fiable ante baches y vibraciones del camino.
-- **Header de telemetría:**
-  - Identificador gigante de unidad y línea, reloj digital monoespaciado en tiempo real de 1s, indicador GPS en vivo y finalización de turno con confirmación modal.
-- **Barra de cadencia / Headway (`HeadwayBar.tsx`):**
-  - Semáforo periférico de intervalo con respecto al bus delantero:
-    - 🟢 **A TIEMPO:** Intervalo óptimo de frecuencia.
-    - 🟡 **ADELANTADO:** Alerta de reducción de velocidad ("Baja el paso · Estás a X min").
-    - 🔴 **RETRASADO:** Alerta de aceleración ("Acelera el paso · +X min de demora").
-  - Física de resorte suave con `react-native-reanimated`.
-- **Próximas paradas (`StopAlertCard.tsx`):**
-  - Parada inmediata en tipografía de 34px, distancia estimada en vivo por Haversine (`useCockpitTelemetry.ts`), botón de confirmación táctil de 72px con feedback háptico (`expo-haptics`) y riel de 2 paradas subsiguientes.
-- **Acciones rápidas de emergencia (`IncidentActions.tsx`):**
-  - Botón de 1 toque para congestión/tráfico con despacho hacia la cola offline de Odoo (`session.reportIncident`).
-  - Botón de SOS con retención obligatoria de 1.5s (`holdProgress` continuo) para evitar falsos accionamientos por vibración del bus.
-- **Pruebas y verificación:**
-  - 10 suites Jest (44 tests) PASS, `tsc --noEmit` PASS (0 errores de tipo).
-
-## Rediseño de experiencia (fases 26 a 31) **[PENDIENTE]**
-
-Análisis y plan en `docs/PLAN-UX.md`: hallazgos del portal, el panel y la tableta (incluye datos inventados y riesgos de las fases 23 a 25), recorridos por persona, dirección de diseño y fases.
+| Fase | Contenido | Estado |
+|---|---|---|
+| 26 | Verdad y fallos críticos: sin datos inventados en portal ni tableta, SOS como tipo propio, motivos de queja reales, búsqueda por parada, sesión de la tableta sin red, pruebas base en verde | HECHO |
+| 27 | Sistema de diseño: tokens (papel, tinta, granate, señal), fuentes Bricolage y Atkinson, marca de la línea, contraste medido, `DISENO.md` | HECHO |
+| 28 | Portal: portada con la línea viva, "mi parada" con conteo de paradas, lista de líneas, quejas en una columna, fotos reales de Ambato con crédito, todo el texto en el diccionario | HECHO |
+| 29 | Panel: cola de atención, banda de SOS, acuse de incidentes que ve la tableta, filtros con contador, kanban de incidentes y mensajes, menús Operación y Flota, login con foto de Ambato | HECHO |
+| 30 | Tableta: tema día y noche, próxima parada en grande, estado real del GPS, bloqueo en marcha salvo SOS, hoja de incidentes, textos de 20 px o más | HECHO; falta tableta física |
+| 31 | Validación: inspector de diseño, axe, contraste, capturas antes y después, protocolo con personas | Medición automática HECHA; pruebas con personas PENDIENTES |
