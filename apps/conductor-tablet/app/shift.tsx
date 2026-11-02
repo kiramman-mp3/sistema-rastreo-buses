@@ -400,8 +400,10 @@ const styles = StyleSheet.create({
     flexBasis: 0,
   },
   top: {
+    // Content height, but it gives way (and scrolls) before the map is squeezed out.
     flexGrow: 0,
-    flexShrink: 0,
+    flexShrink: 1,
+    flexBasis: 'auto',
   },
   leftContent: {
     gap: 8,
@@ -427,8 +429,10 @@ const styles = StyleSheet.create({
     flex: 6,
   },
   mapStack: {
-    flex: 1,
-    minHeight: 0,
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 0,
+    minHeight: 150,
   },
   lockNote: {
     paddingHorizontal: 16,
