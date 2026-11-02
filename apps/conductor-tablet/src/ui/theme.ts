@@ -66,6 +66,15 @@ export const sizes = {
   stop: 60,
 };
 
+/** Phones are held closer than a dashboard tablet: smaller steps, but still large and never under 16. */
+export const sizesPhone: typeof sizes = {
+  small: 16,
+  body: 18,
+  data: 24,
+  title: 30,
+  stop: 40,
+};
+
 export const fonts = {
   text: 'Atkinson-Regular',
   bold: 'Atkinson-Bold',
