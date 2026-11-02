@@ -1,4 +1,4 @@
-import { ApiError, AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
+import { AuthError, createClient, defaultBaseUrl, NetworkError, type DriverClient, type TokenStore } from '../api/client';
 import { normalizeOdooUrl } from '../config/odooUrl';
 import type {
   Driver,
@@ -173,31 +173,15 @@ export class Session {
     if (odooUrl) {
       await this.setOdooUrl(odooUrl);
     }
-    let token: string;
-    let driver: Driver;
-    try {
-      const res = await this.client.loginBadge(badgeToken);
-      token = res.token;
-      driver = res.driver;
-      await this.store.set(token);
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 404) {
-        token = badgeToken;
-        await this.store.set(token);
-        const me = await this.client.me();
-        driver = me.driver;
-      } else {
-        throw err;
-      }
-    }
+    // The badge only buys a session; it is never kept as one. An old server without
+    // login_badge answers 404 and the error reaches the scan screen.
+    const { token, driver } = await this.client.loginBadge(badgeToken);
+    await this.store.set(token);
     const me = await this.client.me();
     this.applyMe({ ...me, driver }, token);
     await this.restoreGps(me.shift);
   }
 
-  async loginWithToken(token: string, odooUrl?: string | null) {
-    return this.loginWithBadge(token, odooUrl);
-  }
 
   async logout() {
     try {
