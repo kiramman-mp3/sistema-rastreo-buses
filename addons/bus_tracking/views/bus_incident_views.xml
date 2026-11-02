@@ -5,7 +5,7 @@
         <field name="model">bus.incident</field>
         <field name="arch" type="xml">
             <tree create="0" edit="0">
-                <field name="create_date"/>
+                <field name="reported_at"/>
                 <field name="vehicle_id"/>
                 <field name="route_id"/>
                 <field name="user_id"/>
@@ -37,7 +37,8 @@
                             <field name="shift_id"/>
                         </group>
                         <group>
-                            <field name="create_date"/>
+                            <field name="reported_at"/>
+                            <field name="create_date" string="Received"/>
                             <field name="latitude"/>
                             <field name="longitude"/>
                             <field name="acknowledged_by"/>
