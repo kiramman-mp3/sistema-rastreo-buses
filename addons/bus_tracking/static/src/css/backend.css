@@ -155,3 +155,35 @@
         animation: none !important;
     }
 }
+
+/* ---------- Kanban cards of incidents and passenger messages ---------- */
+
+.o_bus_kanban .o_bus_kcard {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem 0.85rem;
+    border-left: 4px solid var(--alerta);
+}
+
+.o_bus_kanban .o_bus_kcard_sos {
+    border-left-color: var(--peligro);
+    background: #F6E3E1;
+}
+
+.o_bus_kcard_title {
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.o_bus_kcard_note {
+    color: var(--tinta);
+}
+
+.o_bus_kcard_foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+}
