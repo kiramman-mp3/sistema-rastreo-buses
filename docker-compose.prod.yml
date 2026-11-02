@@ -68,6 +68,7 @@ services:
       DATABASE_URL: ${TRACCAR_DATABASE_URL:-jdbc:postgresql://db:5432/traccar}
       DATABASE_USER: ${TRACCAR_DB_USER:-traccar}
       DATABASE_PASSWORD: ${TRACCAR_DB_PASSWORD:?set TRACCAR_DB_PASSWORD in .env.prod}
+      DATABASE_MAX_POOL_SIZE: "3"
       FORWARD_TYPE: "json"
       FORWARD_RETRY_ENABLE: "true"
       FORWARD_URL: "http://odoo:8069/bus_tracking/traccar/webhook"
