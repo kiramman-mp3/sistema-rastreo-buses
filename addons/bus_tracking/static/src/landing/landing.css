@@ -1383,3 +1383,233 @@ body.o_bus_landing {
         align-items: flex-start;
     }
 }
+
+/* ==========================================================================
+   Phase 2: Hero Network Banner, Search Card & Live Route Enhancements
+   ========================================================================== */
+
+.hero-network-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 6px 16px;
+    border-radius: 30px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    font-size: 0.85rem;
+    color: var(--bus-slate-800, #1E293B);
+    margin-bottom: 20px;
+}
+
+.hero-network-banner .network-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--transit-on-time, #059669);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+    animation: oBusSyncPulseAnim 2s infinite;
+}
+
+.hero-network-banner .network-banner-link {
+    font-weight: 700;
+    color: var(--bus-uta-primary, #8B1D24);
+    margin-left: 8px;
+    font-size: 0.82rem;
+}
+
+.hero-network-banner .network-banner-link:hover {
+    text-decoration: underline;
+}
+
+.hero-search-card {
+    margin-top: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    max-width: 620px;
+}
+
+.hero-search-form .search-input-group {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid var(--bus-line, #E2E8F0);
+    border-radius: 12px;
+    padding: 4px 6px 4px 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-search-form .search-input-group:focus-within {
+    border-color: var(--bus-uta-primary, #8B1D24);
+    box-shadow: 0 0 0 4px rgba(139, 29, 36, 0.10);
+}
+
+.search-field-icon {
+    font-size: 1.1rem;
+    color: var(--bus-muted, #64748B);
+    margin-right: 8px;
+}
+
+.hero-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.92rem;
+    color: var(--bus-ink, #0F172A);
+    background: transparent;
+    padding: 8px 0;
+}
+
+.hero-search-input::placeholder {
+    color: var(--bus-muted, #94A3B8);
+}
+
+.btn-search-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bus-uta-primary, #8B1D24) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-search-submit:hover {
+    background: var(--bus-uta-dark, #5E1217) !important;
+}
+
+.btn-search-submit:active {
+    transform: scale(0.97);
+}
+
+.hero-quick-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.quick-chips-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bus-muted, #64748B);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.chip-item {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--bus-slate-800, #1E293B);
+    background: var(--bus-paper, #F8FAFC);
+    border: 1px solid var(--bus-line, #E2E8F0);
+    border-radius: 20px;
+    padding: 4px 12px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.chip-item:hover {
+    background: var(--bus-line, #E2E8F0);
+    border-color: var(--bus-line-dark, #CBD5E1);
+    color: var(--bus-ink, #0F172A);
+}
+
+.chip-item:active {
+    transform: scale(0.96);
+}
+
+.chip-item.chip-all {
+    background: var(--bus-uta-light, #FDF2F2);
+    border-color: rgba(139, 29, 36, 0.2);
+    color: var(--bus-uta-primary, #8B1D24);
+}
+
+/* Route live cards on landing */
+.route-live-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--bus-line, #E2E8F0);
+    border-radius: 16px;
+    background: #FFFFFF;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.route-live-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.10);
+}
+
+.product-top-badge {
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #FFFFFF;
+}
+
+.route-card-code {
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+}
+
+.route-card-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    animation: oBusSyncPulseAnim 2s infinite;
+}
+
+.route-service-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.route-service-indicator .service-dot.ok {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--transit-on-time, #059669);
+}
+
+.route-service-indicator .service-dot.regular {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--transit-delayed, #D97706);
+}
+
+.route-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--bus-line, #E2E8F0);
+}
+
+.route-frequency {
+    font-size: 0.78rem;
+    color: var(--bus-muted, #64748B);
+    font-weight: 600;
+}

@@ -9,7 +9,7 @@ from .portal import asset_version, SHOW_BUSES_FOR, safe_color, portal_context
 
 class BusLanding(Home):
 
-    @http.route('/', type='http', auth='none')
+    @http.route(['/', '/inicio', '/transporte'], type='http', auth='none')
     def index(self, *args, **kw):
         # Visitors without a session see the landing; signed-in users go to the backend as usual.
         if request.db and not request.session.uid:
@@ -27,16 +27,19 @@ class BusLanding(Home):
         routes = env['bus.route'].search([('active', '=', True), ('public', '=', True)])
         now = fields.Datetime.now()
         route_list = []
+        total_active_buses = 0
         for r in routes:
             fresh = r.vehicle_ids.filtered(
                 lambda b: b.connected or (b.last_fix_time and (now - b.last_fix_time) <= SHOW_BUSES_FOR)
             )
+            count = len(fresh)
+            total_active_buses += count
             route_list.append({
                 'id': r.id,
                 'code': r.code,
                 'name': r.name,
                 'color': safe_color(r.color),
-                'buses_count': len(fresh),
+                'buses_count': count,
             })
 
         stops = env['bus.route.stop'].search([], order='sequence, id')
@@ -53,4 +56,5 @@ class BusLanding(Home):
             brand=brand_name(env),
             routes=route_list,
             stops=unique_stops,
+            total_active_buses=total_active_buses,
         )
