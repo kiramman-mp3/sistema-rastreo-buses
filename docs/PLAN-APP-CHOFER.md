@@ -39,7 +39,7 @@ Hecho en la rama `feature/driver-backend` y merge `--no-ff` a `develop`.
 - Endpoints `POST /bus_tracking/driver/login`, `/logout`, `/me`, con límite de intentos y misma respuesta para clave mala y usuario sin rol.
 - Tests en `tests/test_driver_auth.py`.
 - El chofer se crea como usuario interno (`base.group_user`) más el grupo Driver. El grupo Driver no abre el panel por sí solo.
-- Suite del módulo (2026-10-30): 216 tests, 0 fallos.
+- Suite del módulo (2026-10-30): 216 tests, 0 fallos. Cifra de esa fecha; la actual está en `docs/PLAN-AUDITORIA.md` (248 tests el 2026-11-02).
 
 Criterio de aceptación: cumplido.
 
@@ -60,7 +60,7 @@ Archivos: `controllers/driver_api.py`, `models/bus_shift.py`, nuevo `models/bus_
 
 Tests: bus ocupado, turno doble, bus sin GPS, id de GPS ausente en `/me` y presente solo en `shift/start`, cierre de turnos viejos, incidente sin turno, coordenadas fuera de rango, `state` con parada alcanzada, chofer sin acceso a turnos ajenos.
 
-Criterio de aceptación: cubierto por `tests/test_driver_shift.py` (login → start → state/route/incident → end; el bus recibe `driver_id` = partner del chofer, que es lo que pinta el mapa en vivo). Suite del módulo 2026-10-30: 232 tests, 0 fallos.
+Criterio de aceptación: cubierto por `tests/test_driver_shift.py` (login → start → state/route/incident → end; el bus recibe `driver_id` = partner del chofer, que es lo que pinta el mapa en vivo). Suite del módulo 2026-10-30: 232 tests, 0 fallos (cifra de esa fecha; hoy son 248).
 
 ## Fase 18. Backend: vistas de staff y avisos
 
@@ -159,7 +159,7 @@ Hecho en la rama `feature/driver-tablet-shift` y merge `--no-ff` a `develop`.
 - El id de dispositivo sigue siendo la única credencial del lado de Traccar. Mitigación: solo se entrega durante un turno autenticado. Opcional: rotarlo al terminar el turno.
 - Android puede detener la tarea de GPS por ahorro de batería. Mitigación: servicio en primer plano y exclusión de optimización.
 - Las contraseñas de los choferes las gestiona Odoo. Definir quién crea los usuarios y cómo se restablecen.
-- Fuera de alcance, solo anotado: credenciales de Traccar en texto plano (`traccar_api.py:84-85`) y defectos DEF-008 a DEF-010 del webhook.
+- Fuera de alcance, solo anotado: credenciales de Traccar en texto plano (parámetros `bus_tracking.traccar_user` y `bus_tracking.traccar_password`, que lee `bus.traccar.api._get_conf`) y defectos DEF-008 a DEF-010 del webhook.
 
 ## Flujo de trabajo en Git
 
