@@ -107,9 +107,9 @@ class BusDriverApi(http.Controller):
         ip = request.httprequest.remote_addr
         if not login_limiter.allow('ip:%s' % ip):
             return Response(status=429, headers=[('Retry-After', '60')])
+        # Only a badge buys a session here: accepting a session token too would let a stolen one
+        # be renewed for ever.
         user = request.env['bus.driver.token']._user_for_badge(raw_token)
-        if not user:
-            user = request.env['bus.driver.token']._user_for(raw_token)
         if not user:
             return json_response({'error': 'invalid_badge'}, 401)
         label = body.get('device') if isinstance(body.get('device'), str) else 'tablet_badge'
