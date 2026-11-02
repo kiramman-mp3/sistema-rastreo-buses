@@ -8,6 +8,7 @@ import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl
 
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
+// Until the server says otherwise (Settings > Map tiles).
 const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 const TILE_OPTIONS = {
     maxZoom: 19,
@@ -135,6 +136,9 @@ export class BusLiveMap extends Component {
             this.state.newComplaints = data.new_complaints || 0;
             this.state.error = null;
             this.state.lastSync = Date.now();
+            if (data.tile_url && data.tile_url !== this.tiles._url) {
+                this.tiles.setUrl(data.tile_url);
+            }
             this.syncVehicles();
             this.drawRoutes(data.map_center);
             this.syncIncidents();
@@ -277,7 +281,7 @@ export class BusLiveMap extends Component {
         const L = window.L;
         this.map = L.map(this.mapRef.el, { zoomControl: false }).setView(DEFAULT_CENTER, 13);
         L.control.zoom({ position: "bottomright" }).addTo(this.map);
-        L.tileLayer(TILES, TILE_OPTIONS).addTo(this.map);
+        this.tiles = L.tileLayer(TILES, TILE_OPTIONS).addTo(this.map);
         this.routeLayer = L.layerGroup().addTo(this.map);
         this.trackLayer = L.layerGroup().addTo(this.map);
         this.incidentLayer = L.layerGroup().addTo(this.map);
@@ -286,7 +290,8 @@ export class BusLiveMap extends Component {
 
     drawRoutes(center) {
         const L = window.L;
-        const key = this.state.routeId + "|" + this.state.routes.map((r) => r.id).join(",");
+        // Stops and recorded tracks change too, not only the list of routes.
+        const key = this.state.routeId + "|" + JSON.stringify(this.state.routes);
         if (key === this.routesKey) {
             return;
         }
@@ -400,7 +405,12 @@ export class BusLiveMap extends Component {
         for (const [id, b] of this.tracked) {
             const el = b.marker.getElement();
             if (el) {
-                el.style.opacity = visible.has(id) ? "1" : "0.18";
+                const shown = visible.has(id);
+                el.style.opacity = shown ? "1" : "0.18";
+                // A faded bus is out of the filter: no clicks and no keyboard stop on it.
+                el.style.pointerEvents = shown ? "" : "none";
+                el.setAttribute("tabindex", shown ? "0" : "-1");
+                el.setAttribute("aria-hidden", shown ? "false" : "true");
             }
         }
     }
@@ -497,7 +507,13 @@ export class BusLiveMap extends Component {
             return;
         }
         this.trackLayer.clearLayers();
-        const pts = await this.rpc("/bus_tracking/track", { vehicle_id: v.id, hours: 4 });
+        let pts;
+        try {
+            pts = await this.rpc("/bus_tracking/track", { vehicle_id: v.id, hours: 4 });
+        } catch {
+            this.notification.add(_t("Could not load the track. Try again."), { type: "danger" });
+            return;
+        }
         if (pts && pts.length > 1) {
             const line = window.L.polyline(pts, { color: "#172025", weight: 3, dashArray: "6 6" }).addTo(this.trackLayer);
             this.map.fitBounds(line.getBounds(), { padding: [60, 60] });
@@ -513,7 +529,12 @@ export class BusLiveMap extends Component {
     }
 
     async acknowledge(incidentId) {
-        await this.rpc("/bus_tracking/incident/ack", { incident_id: incidentId });
+        try {
+            await this.rpc("/bus_tracking/incident/ack", { incident_id: incidentId });
+        } catch {
+            this.notification.add(_t("Could not mark it as seen. Try again."), { type: "danger" });
+            return;
+        }
         this.state.incidents = this.state.incidents.filter((i) => i.id !== incidentId);
         this.syncIncidents();
         this.syncVehicles();

@@ -55,10 +55,12 @@ ${LEAFLET_JS}
 <script>
 (function() {
   const data = ${payload};
-  const map = L.map('map', { zoomControl: true, attributionControl: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb', {
+  const map = L.map('map', { zoomControl: true });
+  map.attributionControl.setPrefix(false);
+  L.tileLayer(data.route.tile_url || 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb', {
     maxZoom: 19,
-    subdomains: 'abcd'
+    subdomains: 'abcd',
+    attribution: '&copy; OpenStreetMap &copy; CARTO'
   }).addTo(map);
 
   const routeColor = data.route.color || '#7A1A22';

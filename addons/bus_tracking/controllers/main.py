@@ -7,7 +7,7 @@ from odoo import fields, http
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
-from ..models.utils import int_param, map_center
+from ..models.utils import int_param, map_center, tile_url
 from .portal import line_positions
 
 MAX_TRACK_HOURS = 24
@@ -86,7 +86,7 @@ class BusTrackingController(http.Controller):
         } for r in env['bus.route'].search([])]
         return {'vehicles': vehicles, 'routes': routes, 'alert_labels': alert_labels,
                 'incidents': incidents, 'new_complaints': new_complaints,
-                'map_center': list(map_center(env))}
+                'map_center': list(map_center(env)), 'tile_url': tile_url(env)}
 
     @http.route('/bus_tracking/incident/ack', type='json', auth='user')
     def acknowledge_incident(self, incident_id):

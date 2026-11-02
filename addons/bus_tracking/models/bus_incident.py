@@ -49,7 +49,9 @@ class BusIncident(models.Model):
     @api.model
     def _open_for_map(self, hours=24):
         since = fields.Datetime.now() - timedelta(hours=hours)
-        return self.search([('acknowledged_at', '=', False), ('create_date', '>=', since)],
+        # An unattended SOS stays however old it is; other incidents fade after `hours`.
+        return self.search([('acknowledged_at', '=', False),
+                            '|', ('kind', '=', 'sos'), ('create_date', '>=', since)],
                            order='create_date desc', limit=50)
 
     @api.model_create_multi

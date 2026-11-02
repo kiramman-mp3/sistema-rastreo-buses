@@ -9,13 +9,13 @@ from datetime import timedelta
 from odoo import fields, http
 from odoo.http import Response, request
 
-from ..models.utils import brand_name, fold, map_center, public_contact
+from ..models.utils import brand_name, fold, map_center, public_contact, tile_url
 from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
 SHOW_BUSES_FOR = timedelta(minutes=15)
 CACHE_SECONDS = 5
-RATE_LIMIT = 60          # requests per IP and window, per worker process
+RATE_LIMIT = 60          # uncached requests per IP and window, per worker process
 RATE_WINDOW = 60.0
 LANG_COOKIE = 'bus_lang'
 # The only strings the page's script needs.
@@ -52,10 +52,25 @@ class RateLimiter:
         self.limit, self.window = limit, window
         self._hits = defaultdict(deque)
         self._lock = threading.Lock()
+        self._swept = None
+
+    def _sweep(self, now):
+        """Forget keys that have been quiet for a whole window, so many different addresses
+        cannot make the worker's memory grow for ever."""
+        for key in [k for k, hits in self._hits.items() if not hits or now - hits[-1] > self.window]:
+            del self._hits[key]
+        self._swept = now
+
+    def __len__(self):
+        return len(self._hits)
 
     def allow(self, key, now=None):
         now = time.monotonic() if now is None else now
         with self._lock:
+            if self._swept is None:
+                self._swept = now
+            elif now - self._swept > self.window:
+                self._sweep(now)
             hits = self._hits[key]
             while hits and now - hits[0] > self.window:
                 hits.popleft()
@@ -137,6 +152,35 @@ def line_positions(route, buses):
     return positions
 
 
+def line_directions(route, buses):
+    """Which way each bus travels the line: 1 towards the last stop, -1 back to the first. Read
+    from its last two different stops; reaching an end turns it around."""
+    index = {stop.id: i for i, stop in enumerate(route.stop_ids)}
+    last_index = len(route.stop_ids) - 1
+    since = fields.Datetime.now() - ARRIVAL_MEMORY
+    arrivals = route.env['bus.stop.arrival'].sudo().search(
+        [('vehicle_id', 'in', buses.ids), ('stop_id', 'in', route.stop_ids.ids), ('arrival_time', '>=', since)],
+        order='arrival_time desc, id desc')
+    seen = {}
+    for arrival in arrivals:
+        stops = seen.setdefault(arrival.vehicle_id.id, [])
+        i = index.get(arrival.stop_id.id)
+        if len(stops) < 2 and (not stops or stops[-1] != i):
+            stops.append(i)
+    directions = {}
+    for bus in buses:
+        stops = seen.get(bus.id, [])
+        if not stops:
+            directions[bus.id] = 1
+        elif stops[0] == last_index and last_index > 0:
+            directions[bus.id] = -1
+        elif stops[0] == 0 or len(stops) == 1:
+            directions[bus.id] = 1
+        else:
+            directions[bus.id] = 1 if stops[0] > stops[1] else -1
+    return directions
+
+
 def public_routes():
     return request.env(su=True)['bus.route'].search([('active', '=', True), ('public', '=', True)])
 
@@ -213,19 +257,23 @@ class BusPortal(http.Controller):
         )
         values['json_i18n'] = values['line_i18n']
         values['center_json'] = json.dumps(list(map_center(request.env(su=True))))
+        values['tile_url'] = tile_url(request.env(su=True))
         return render_portal('bus_tracking.portal_route', values)
 
     @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'], type='http', auth='public', methods=['GET'])
     def route_buses(self, code, **kwargs):
-        if not limiter.allow(request.httprequest.remote_addr):
-            return Response(status=429, headers=[('Retry-After', '30')])
+        # A whole campus behind one address (Wi-Fi, carrier NAT) polls the same line every ten
+        # seconds: a cached answer costs nothing, so only the requests that reach the database count.
         body = cache.get(code)
         if body is None:
+            if not limiter.allow(request.httprequest.remote_addr):
+                return Response(status=429, headers=[('Retry-After', '30')])
             route = self._public_route(code)
             if not route:
                 return request.not_found()
             buses = self._fresh_buses(route)
             where = line_positions(route, buses)
+            heading = line_directions(route, buses)
             body = json.dumps({
                 'generated_at': fields.Datetime.to_string(fields.Datetime.now()),
                 'buses': [{
@@ -236,6 +284,8 @@ class BusPortal(http.Controller):
                     'status': bus.status if bus.connected else 'offline',
                     'at': where[bus.id][0],
                     'after': where[bus.id][1],
+                    # 1 towards the last stop, -1 on the way back: the page counts stops that way.
+                    'dir': heading[bus.id],
                 } for bus in buses],
             })
             cache.put(code, body)
