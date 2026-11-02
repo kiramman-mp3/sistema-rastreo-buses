@@ -27,6 +27,7 @@ class TestTraccarSync(BusCase):
         icp.set_param('bus_tracking.traccar_user', 'admin@example.com')
         icp.set_param('bus_tracking.traccar_password', 'secret')
         icp.set_param('bus_tracking.traccar_token', '')
+        icp.set_param('bus_tracking.accept_without_shift', '1')
 
     def test_is_configured(self):
         api = self.env['bus.traccar.api']
