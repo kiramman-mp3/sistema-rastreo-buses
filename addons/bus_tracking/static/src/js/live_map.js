@@ -498,7 +498,13 @@ export class BusLiveMap extends Component {
             return;
         }
         this.trackLayer.clearLayers();
-        const pts = await this.rpc("/bus_tracking/track", { vehicle_id: v.id, hours: 4 });
+        let pts;
+        try {
+            pts = await this.rpc("/bus_tracking/track", { vehicle_id: v.id, hours: 4 });
+        } catch {
+            this.notification.add(_t("Could not load the track. Try again."), { type: "danger" });
+            return;
+        }
         if (pts && pts.length > 1) {
             const line = window.L.polyline(pts, { color: "#172025", weight: 3, dashArray: "6 6" }).addTo(this.trackLayer);
             this.map.fitBounds(line.getBounds(), { padding: [60, 60] });
@@ -514,7 +520,12 @@ export class BusLiveMap extends Component {
     }
 
     async acknowledge(incidentId) {
-        await this.rpc("/bus_tracking/incident/ack", { incident_id: incidentId });
+        try {
+            await this.rpc("/bus_tracking/incident/ack", { incident_id: incidentId });
+        } catch {
+            this.notification.add(_t("Could not mark it as seen. Try again."), { type: "danger" });
+            return;
+        }
         this.state.incidents = this.state.incidents.filter((i) => i.id !== incidentId);
         this.syncIncidents();
         this.syncVehicles();
