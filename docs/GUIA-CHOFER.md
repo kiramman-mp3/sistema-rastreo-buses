@@ -20,10 +20,15 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 ## Cada día
 
 1. Abre **Buses UTA** y pulsa **Escanear credencial QR** para entrar en 1 segundo con tu carnet de chofer (o ingresa manualmente con usuario y clave).
-2. Elige el bus (los ocupados salen deshabilitados) y la ruta. Concede ubicación *todo el tiempo* y la exclusión de ahorro de batería si Android la pide.
-3. Comprueba **Estado del GPS**: permisos concedidos y que haya un último envío tras unos segundos.
-4. Mientras manejas: las paradas avanzan solas; las alertas salen en el panel; un incidente se reporta con tipo y nota. Si no hay red, el incidente espera y se envía al volver.
-5. Al terminar, pulsa **Terminar turno** y confirma. Ahí se corta el GPS. **Cerrar sesión** también detiene el GPS en esa tableta.
+2. Elige el bus (los que están en uso salen atenuados) y la línea, y pulsa **Iniciar turno**. Concede ubicación *todo el tiempo* y la exclusión de ahorro de batería si Android la pide.
+3. Arriba a la derecha está el estado del GPS, en palabras: **GPS enviando**, **Sin red: N puntos guardados** (se envían solos al volver la señal), **Esperando señal del GPS** o **GPS sin permiso**. Tócalo para ver el detalle.
+4. Mientras manejas, la pantalla muestra en grande la **próxima parada**, cuánto falta y la franja con las paradas siguientes. Las paradas avanzan solas: no hay que confirmar nada.
+5. **En marcha la pantalla se bloquea** (más de 10 km/h por 5 segundos): solo responde el **SOS**. Para avisar un problema o terminar el turno, detén el bus.
+6. **Avisar un problema**: eliges tráfico, avería, accidente u otro, y una nota si quieres. Si no hay red, el aviso se guarda y sale solo.
+7. **SOS**: mantén presionado un segundo y medio (así un bache no lo dispara). La pantalla dice "SOS enviado. Esperando a la central." y, cuando alguien de la oficina lo ve, muestra quién y a qué hora.
+8. El botón **Día / Noche** cambia los colores (el modo día se lee mejor al sol). Si lo dejas presionado, vuelve al cambio automático por la hora.
+9. Al terminar, pulsa **Terminar turno** y confirma. Ahí se corta el GPS. **Cerrar sesión** también detiene el GPS en esa tableta.
+10. Si abres la app sin señal, tu sesión sigue abierta y el GPS sigue guardando; la app vuelve a intentar sola.
 
 Si cierras la app sin terminar el turno, el servicio en primer plano sigue enviando posición hasta que alguien termine el turno o un gestor revoque la tableta.
 
