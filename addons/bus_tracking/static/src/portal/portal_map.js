@@ -92,6 +92,7 @@
     });
 
     var busLayer = window.L.layerGroup().addTo(map);
+    var busMarkers = {};
     var statusEl = document.getElementById("bus-status");
     var listEl = document.getElementById("bus-list");
     var emptyEl = document.getElementById("bus-empty");
@@ -111,13 +112,52 @@
         });
     }
 
+    function animateMarker(marker, targetLat, targetLon, duration) {
+        var current = marker.getLatLng();
+        var startLat = current.lat;
+        var startLon = current.lng;
+        if (Math.abs(startLat - targetLat) < 0.000001 && Math.abs(startLon - targetLon) < 0.000001) {
+            return;
+        }
+        var startTime = window.performance ? window.performance.now() : Date.now();
+        function frame(now) {
+            var timeNow = now || (window.performance ? window.performance.now() : Date.now());
+            var progress = Math.min((timeNow - startTime) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 2);
+            var curLat = startLat + (targetLat - startLat) * ease;
+            var curLon = startLon + (targetLon - startLon) * ease;
+            marker.setLatLng([curLat, curLon]);
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+            }
+        }
+        requestAnimationFrame(frame);
+    }
+
     function render(buses) {
-        busLayer.clearLayers();
+        var seen = {};
         listEl.textContent = "";
+
         buses.forEach(function (bus) {
+            seen[bus.name] = true;
             var label = t["status_" + (bus.status === "moving" || bus.status === "stopped" ? bus.status : "offline")];
-            window.L.marker([bus.lat, bus.lon], { icon: busIcon(bus), title: bus.name })
-                .bindTooltip(bus.name + ": " + label, { direction: "top", offset: [0, -12] }).addTo(busLayer);
+            var tooltipText = bus.name + ": " + label;
+
+            if (busMarkers[bus.name]) {
+                var m = busMarkers[bus.name];
+                animateMarker(m, bus.lat, bus.lon, 1200);
+                if (m._lastStatus !== bus.status) {
+                    m.setIcon(busIcon(bus));
+                    m._lastStatus = bus.status;
+                }
+                m.setTooltipContent(tooltipText);
+            } else {
+                var marker = window.L.marker([bus.lat, bus.lon], { icon: busIcon(bus), title: bus.name });
+                marker.bindTooltip(tooltipText, { direction: "top", offset: [0, -12] }).addTo(busLayer);
+                marker._lastStatus = bus.status;
+                busMarkers[bus.name] = marker;
+            }
+
             var li = document.createElement("li");
             li.className = "bus-" + (bus.status === "moving" || bus.status === "stopped" ? bus.status : "offline");
             var name = document.createElement("strong");
@@ -128,6 +168,15 @@
             li.appendChild(state);
             listEl.appendChild(li);
         });
+
+        // Clean up buses that are no longer active
+        Object.keys(busMarkers).forEach(function (busName) {
+            if (!seen[busName]) {
+                busLayer.removeLayer(busMarkers[busName]);
+                delete busMarkers[busName];
+            }
+        });
+
         emptyEl.hidden = buses.length > 0;
     }
 
