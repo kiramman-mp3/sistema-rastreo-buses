@@ -281,7 +281,7 @@ a.fragmento-nombre:hover {
     transform: none;
 }
 
-.como-escenario[data-estado="1"] .demo-mia .nombre::after {
+.como-escenario[data-estado="1"] .demo-mia .parada::after {
     content: none;
 }
 
@@ -330,7 +330,7 @@ a.fragmento-nombre:hover {
         transform: scale(1.35) !important;
     }
 
-    .como-escenario .demo-mia .nombre::after {
+    .como-escenario .demo-mia .parada::after {
         content: attr(data-mia) !important;
     }
 }

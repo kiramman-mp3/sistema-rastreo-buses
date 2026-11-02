@@ -96,7 +96,7 @@
             var button = el("button", "parada");
             button.type = "button";
             button.setAttribute("data-mia", t.mine_tag || "");
-            button.append(el("span", "punto"), el("span", "nombre", name), el("span", "dato"));
+            button.append(el("span", "punto"), el("span", "nombre", name));
             button.addEventListener("click", function () { choose(mine === index ? null : index); });
             li.appendChild(button);
             list.appendChild(li);
