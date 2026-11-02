@@ -2336,3 +2336,8 @@ msgstr "Cerrar sesión de la tableta"
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__traffic
 msgid "Traffic"
 msgstr "Tráfico"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__sos
+msgid "Emergency (SOS)"
+msgstr "Emergencia (SOS)"

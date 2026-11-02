@@ -25,6 +25,8 @@ export type SessionSnapshot = {
   shiftState: StateResponse | null;
   routeMap: RouteMap | null;
   odooUrl: string;
+  /** True when the tablet has a saved session but could not reach the server yet. */
+  offline: boolean;
 };
 
 const empty: Omit<SessionSnapshot, 'ready'> = {
@@ -37,6 +39,7 @@ const empty: Omit<SessionSnapshot, 'ready'> = {
   shiftState: null,
   routeMap: null,
   odooUrl: defaultBaseUrl(),
+  offline: false,
 };
 
 export class Session {
@@ -79,6 +82,7 @@ export class Session {
       vehicles: me.vehicles,
       routes: me.routes,
       shift: me.shift,
+      offline: false,
     });
   }
 
@@ -110,7 +114,7 @@ export class Session {
             await this.pullState();
             await this.loadRouteMap();
           } catch {
-            // Non-blocking fallback
+            // The shift screen keeps retrying.
           }
         }
         await this.restoreGps(me.shift);
@@ -119,12 +123,41 @@ export class Session {
           this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
           return;
         }
-        this.set({ ready: true, token, odooUrl: this.snapshot.odooUrl });
-        throw error;
+        // No signal while opening the app: keep the session and the GPS running, retry later.
+        // Sending the driver back to the login screen here would force them to type the password
+        // again in a moving bus.
+        this.set({ ready: true, token, offline: true });
+        const gps = await this.gpsStore?.get();
+        if (gps) {
+          this.set({ gps });
+          try {
+            await this.gps?.start(gps.uniqueId, gps.url);
+          } catch {
+            // The diagnostic screen shows why.
+          }
+        }
       }
     } catch {
-      // In case of any unhandled error during startup, guarantee the app is ready and not stuck on a loading screen.
-      this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
+      // Unexpected storage error: never leave the app stuck on the loading screen.
+      this.set({ ready: true });
+    }
+  }
+
+  /** Ask the server again after an offline start. Throws NetworkError while there is no signal. */
+  async refreshMe() {
+    const token = await this.store.get();
+    if (!token) return;
+    try {
+      const me = await this.client.me();
+      this.applyMe(me, token);
+      await this.restoreGps(me.shift);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        await this.stopGps();
+        this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
+        return;
+      }
+      throw error;
     }
   }
 

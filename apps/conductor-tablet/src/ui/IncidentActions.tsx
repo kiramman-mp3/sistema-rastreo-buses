@@ -79,14 +79,14 @@ export const IncidentActions = React.memo(function IncidentActions({
           trafficPressed && styles.btnActive,
         ]}
         accessibilityRole="button"
-        accessibilityLabel="Reportar demora por congestión o tráfico vial"
+        accessibilityLabel="Avisar un problema: tráfico, avería o accidente"
       >
         <Text style={styles.iconTraffic}>⚠️</Text>
         <View style={styles.btnTextWrap}>
           <Text style={styles.btnTitleTraffic}>
-            {trafficLoading ? 'ENVIANDO...' : 'REPORTAR TRÁFICO'}
+            Avisar un problema
           </Text>
-          <Text style={styles.btnSub}>Demora en ruta (1 toque)</Text>
+          <Text style={styles.btnSub}>Tráfico, avería, accidente</Text>
         </View>
       </Pressable>
 
