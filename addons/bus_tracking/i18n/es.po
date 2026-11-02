@@ -155,6 +155,7 @@ msgstr "Rastreo de buses: purgar posiciones antiguas"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__vehicle_ids
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_vehicle
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_root
 msgid "Buses"
 msgstr "Buses"
 
@@ -317,6 +318,8 @@ msgstr ""
 msgid "Fix Time"
 msgstr "Hora GPS"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet
 msgid "Fleet"
@@ -433,6 +436,8 @@ msgstr "Última actualización por"
 msgid "Last Updated on"
 msgstr "Última actualización el"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
 msgid "Last position"
@@ -621,6 +626,8 @@ msgid ""
 "hora."
 msgstr ""
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__speed
 msgid "Speed"
@@ -647,6 +654,8 @@ msgstr "Llegadas a paradas"
 msgid "Stop Count"
 msgstr "Cantidad de paradas"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__status__stopped
 msgid "Stopped"
@@ -1012,6 +1021,8 @@ msgstr "Minutos en movimiento"
 msgid "No reports for %(minutes)d min"
 msgstr "Sin reportes hace %(minutes)d min"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__offline
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
@@ -1050,6 +1061,8 @@ msgstr "Exceso de velocidad"
 msgid "Start Time"
 msgstr "Hora de inicio"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__state
 msgid "State"
@@ -1994,6 +2007,8 @@ msgstr "Inferido"
 msgid "Last Arrival"
 msgstr "Última llegada"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_service_leg__line_id
 msgid "Line"
@@ -2337,7 +2352,263 @@ msgstr "Cerrar sesión de la tableta"
 msgid "Traffic"
 msgstr "Tráfico"
 
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__sos
 msgid "Emergency (SOS)"
 msgstr "Emergencia (SOS)"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "%s s ago"
+msgstr "hace %s s"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "%s min ago"
+msgstr "hace %s min"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "%s h ago"
+msgstr "hace %s h"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "On route"
+msgstr "En ruta"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Could not update. Retrying every 10 seconds."
+msgstr "No se pudo actualizar. Reintentamos cada 10 segundos."
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Loading…"
+msgstr "Cargando…"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Live"
+msgstr "En vivo"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Updated %s"
+msgstr "Actualizado %s"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Show on the map"
+msgstr "Ver en el mapa"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_kanban
+msgid "Mark as seen"
+msgstr "Marcar como atendido"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "All lines"
+msgstr "Todas las líneas"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Filter buses"
+msgstr "Filtrar buses"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "All"
+msgstr "Todos"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "With alert"
+msgstr "Con alerta"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Show every bus"
+msgstr "Ver todos los buses"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Show or hide the panel"
+msgstr "Mostrar u ocultar el panel"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Selected bus"
+msgstr "Bus seleccionado"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Last 4 hours"
+msgstr "Últimas 4 horas"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Open the bus"
+msgstr "Abrir el bus"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Needs attention"
+msgstr "Atención"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Nothing needs attention right now."
+msgstr "Nada requiere atención ahora."
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "New passenger messages"
+msgstr "Mensajes nuevos de pasajeros"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Open the messages"
+msgstr "Abrir los mensajes"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Warn me in this browser when an SOS arrives"
+msgstr "Avisarme en este navegador cuando llegue un SOS"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Search a bus, plate, driver or line"
+msgstr "Buscar un bus, placa, chofer o línea"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "Bus, plate, driver or line"
+msgstr "Bus, placa, chofer o línea"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#, python-format
+msgid "No bus matches this filter."
+msgstr "Ningún bus coincide con este filtro."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__acknowledged_by
+msgid "Seen by"
+msgstr "Atendido por"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__acknowledged_at
+msgid "Seen at"
+msgstr "Atendido a las"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__state__seen
+msgid "Seen"
+msgstr "Atendido"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_incident.py:0
+#, python-format
+msgid "Only the transport team can mark an incident as seen."
+msgstr "Solo el equipo de transporte puede marcar un incidente como atendido."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
+msgid "Not seen yet"
+msgstr "Sin atender"
+

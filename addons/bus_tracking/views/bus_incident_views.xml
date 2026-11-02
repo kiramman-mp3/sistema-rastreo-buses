@@ -9,8 +9,10 @@
                 <field name="vehicle_id"/>
                 <field name="route_id"/>
                 <field name="user_id"/>
-                <field name="kind"/>
+                <field name="kind" widget="badge" decoration-danger="kind == 'sos'"/>
                 <field name="note"/>
+                <field name="state" widget="badge" decoration-warning="state == 'open'" decoration-success="state == 'seen'"/>
+                <field name="acknowledged_by" optional="show"/>
             </tree>
         </field>
     </record>
@@ -20,6 +22,11 @@
         <field name="model">bus.incident</field>
         <field name="arch" type="xml">
             <form create="0" edit="0">
+                <header>
+                    <button name="action_acknowledge" type="object" string="Mark as seen" class="btn-primary"
+                            attrs="{'invisible': [('state', '=', 'seen')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
@@ -33,6 +40,8 @@
                             <field name="create_date"/>
                             <field name="latitude"/>
                             <field name="longitude"/>
+                            <field name="acknowledged_by"/>
+                            <field name="acknowledged_at"/>
                         </group>
                     </group>
                     <group string="Note">
@@ -40,6 +49,38 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="view_bus_incident_kanban" model="ir.ui.view">
+        <field name="name">bus.incident.kanban</field>
+        <field name="model">bus.incident</field>
+        <field name="arch" type="xml">
+            <kanban create="0" default_group_by="state" records_draggable="0" group_create="0" class="o_bus_kanban">
+                <field name="kind"/>
+                <field name="state"/>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <field name="user_id"/>
+                <field name="note"/>
+                <field name="create_date"/>
+                <field name="acknowledged_by"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_bus_kcard #{record.kind.raw_value == 'sos' ? 'o_bus_kcard_sos' : ''}">
+                            <strong class="o_bus_kcard_title"><field name="kind"/> · <field name="vehicle_id"/></strong>
+                            <div class="text-muted"><field name="route_id"/><t t-if="record.user_id.raw_value"> · <field name="user_id"/></t></div>
+                            <div t-if="record.note.raw_value" class="o_bus_kcard_note"><field name="note"/></div>
+                            <div class="o_bus_kcard_foot">
+                                <span class="text-muted"><field name="create_date" widget="datetime"/></span>
+                                <button t-if="record.state.raw_value == 'open'" name="action_acknowledge" type="object"
+                                        class="btn btn-sm btn-primary">Mark as seen</button>
+                                <span t-else="" class="text-muted"><field name="acknowledged_by"/></span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
@@ -52,6 +93,9 @@
                 <field name="route_id"/>
                 <field name="user_id"/>
                 <field name="note"/>
+                <filter name="open" string="Not seen yet" domain="[('state', '=', 'open')]"/>
+                <filter name="sos" string="SOS" domain="[('kind', '=', 'sos')]"/>
+                <separator/>
                 <filter name="today" string="Today"
                         domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
                 <separator/>
@@ -72,7 +116,7 @@
     <record id="action_bus_incident" model="ir.actions.act_window">
         <field name="name">Incidents</field>
         <field name="res_model">bus.incident</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_today': 1}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{}</field>
     </record>
 </odoo>
