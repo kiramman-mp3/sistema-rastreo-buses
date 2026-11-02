@@ -15,6 +15,8 @@ class TestHttp(HttpCase):
     def setUp(self):
         super().setUp()
         self.env['ir.config_parameter'].set_param('bus_tracking.webhook_secret', 's3cret')
+        # These tests are about the webhook itself, not about shifts (see test_ingest).
+        self.env['ir.config_parameter'].set_param('bus_tracking.accept_without_shift', '1')
         self.bus = self.env['bus.vehicle'].create({'name': 'Bus 1', 'traccar_device_id': 7})
         self.body = json.dumps({
             'position': traccar_position(7, '2026-10-26T12:00:00Z', -33.47, -70.62, speed_knots=5.0),
