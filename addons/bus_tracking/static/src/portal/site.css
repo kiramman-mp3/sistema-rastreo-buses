@@ -421,10 +421,9 @@ button.parada:hover {
     transform: scale(1.35);
 }
 
-.parada[aria-pressed="true"] .nombre::after {
+.parada[aria-pressed="true"]::after {
     content: attr(data-mia);
-    display: inline-block;
-    margin-left: 0.5rem;
+    justify-self: end;
     padding: 0 0.45rem;
     border-radius: var(--radio);
     background: var(--senal);
