@@ -38,9 +38,8 @@
 	reverse_proxy traccar:5055
 }
 
-# Traccar's own admin panel is not exposed: Odoo creates devices through its API.
-# If you need the panel, point a DNS name at this server, uncomment and reload the proxy.
-# traccar.example.com {
-# 	import security_headers
-# 	reverse_proxy traccar:8082
-# }
+# Traccar web and admin interface
+{$TRACCAR_DOMAIN} {
+	import security_headers
+	reverse_proxy traccar:8082
+}
