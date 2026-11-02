@@ -17,9 +17,15 @@ export default function Select() {
   const actions = useSessionActions();
   const { vehicles, routes, driver } = session.snapshot;
 
-  const [vehicleId, setVehicleId] = useState<number | null>(vehicles.find((bus) => bus.available)?.id ?? null);
+  const usable = (bus: (typeof vehicles)[number]) => bus.available && bus.has_gps !== false;
+  const [pickedVehicle, setVehicleId] = useState<number | null>(null);
+  const [pickedRoute, setRouteId] = useState<number | null>(null);
+  // Derived, not stored: the list can arrive after the screen opened (started without signal).
+  const vehicleId = vehicles.some((bus) => bus.id === pickedVehicle) ? pickedVehicle : (vehicles.find(usable)?.id ?? null);
   const selectedBus = vehicles.find((bus) => bus.id === vehicleId);
-  const [routeId, setRouteId] = useState<number | null>(selectedBus?.route_id ?? routes[0]?.id ?? null);
+  const routeId = routes.some((route) => route.id === pickedRoute)
+    ? pickedRoute
+    : (selectedBus?.route_id ?? routes[0]?.id ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const offline = session.snapshot.offline;
@@ -54,7 +60,9 @@ export default function Select() {
       if (err instanceof NetworkError) setError(t('network'));
       else if (err instanceof GpsPermissionError) setError(t('gpsPermission'));
       else if (err instanceof ApiError && err.code === 'no_gps') setError(t('noGps'));
-      else setError(t('conflict'));
+      else if (err instanceof ApiError && err.code === 'no_gps_url') setError(t('noGpsUrl'));
+      else if (err instanceof ApiError && err.code === 'conflict') setError(t('conflict'));
+      else setError(t('serverError'));
     } finally {
       setBusy(false);
     }
@@ -106,23 +114,27 @@ export default function Select() {
               return (
                 <Pressable
                   key={bus.id}
-                  disabled={!bus.available}
+                  disabled={!usable(bus)}
                   onPress={() => {
                     setVehicleId(bus.id);
                     if (bus.route_id) setRouteId(bus.route_id);
                   }}
                   accessibilityRole="radio"
-                  accessibilityState={{ checked: on, disabled: !bus.available }}
+                  accessibilityState={{ checked: on, disabled: !usable(bus) }}
                   style={[
                     styles.option,
-                    { backgroundColor: on ? palette.ink : palette.panel, opacity: bus.available ? 1 : 0.45 },
+                    { backgroundColor: on ? palette.ink : palette.panel, opacity: usable(bus) ? 1 : 0.45 },
                   ]}
                 >
                   <Txt bold size="data" color={on ? palette.ground : palette.ink}>
                     {bus.name}
                   </Txt>
                   <Txt size="small" color={on ? palette.ground : palette.ink2}>
-                    {bus.available ? bus.plate : `${bus.plate} · ${t('busTaken')}`}
+                    {!bus.available
+                      ? `${bus.plate} · ${t('busTaken')}`
+                      : bus.has_gps === false
+                        ? `${bus.plate} · ${t('busNoGps')}`
+                        : bus.plate}
                   </Txt>
                 </Pressable>
               );
