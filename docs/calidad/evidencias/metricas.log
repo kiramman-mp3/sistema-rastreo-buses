@@ -1,11 +1,11 @@
 {
  "cobertura": {
-  "sentencias": 1144,
-  "perdidas": 58,
-  "ramas": 268,
-  "ramas_parciales": 13,
-  "porcentaje": 93.83852691218131,
-  "solo_lineas": 94.93006993006993,
+  "sentencias": 1853,
+  "perdidas": 96,
+  "ramas": 494,
+  "ramas_parciales": 52,
+  "porcentaje": 92.84192586280358,
+  "solo_lineas": 94.81921208850513,
   "archivos": [
    {
     "archivo": "__init__.py",
@@ -25,7 +25,7 @@
    },
    {
     "archivo": "controllers/__init__.py",
-    "sentencias": 6,
+    "sentencias": 7,
     "perdidas": 0,
     "ramas": 0,
     "ramas_parciales": 0,
@@ -33,35 +33,43 @@
    },
    {
     "archivo": "controllers/complaints.py",
-    "sentencias": 97,
+    "sentencias": 100,
     "perdidas": 0,
-    "ramas": 22,
+    "ramas": 24,
     "ramas_parciales": 0,
     "cobertura": 100.0
+   },
+   {
+    "archivo": "controllers/driver_api.py",
+    "sentencias": 197,
+    "perdidas": 16,
+    "ramas": 70,
+    "ramas_parciales": 17,
+    "cobertura": 87.64044943820225
    },
    {
     "archivo": "controllers/landing.py",
-    "sentencias": 18,
+    "sentencias": 24,
     "perdidas": 3,
-    "ramas": 4,
+    "ramas": 6,
     "ramas_parciales": 0,
-    "cobertura": 77.27272727272727
+    "cobertura": 83.33333333333333
    },
    {
     "archivo": "controllers/main.py",
-    "sentencias": 57,
-    "perdidas": 5,
-    "ramas": 14,
-    "ramas_parciales": 2,
-    "cobertura": 90.14084507042253
+    "sentencias": 88,
+    "perdidas": 1,
+    "ramas": 22,
+    "ramas_parciales": 3,
+    "cobertura": 96.36363636363636
    },
    {
     "archivo": "controllers/portal.py",
-    "sentencias": 106,
-    "perdidas": 0,
-    "ramas": 16,
-    "ramas_parciales": 0,
-    "cobertura": 100.0
+    "sentencias": 174,
+    "perdidas": 6,
+    "ramas": 44,
+    "ramas_parciales": 3,
+    "cobertura": 94.95412844036697
    },
    {
     "archivo": "controllers/push.py",
@@ -74,14 +82,14 @@
    {
     "archivo": "controllers/stops.py",
     "sentencias": 18,
-    "perdidas": 9,
+    "perdidas": 2,
     "ramas": 4,
-    "ramas_parciales": 0,
-    "cobertura": 40.90909090909091
+    "ramas_parciales": 2,
+    "cobertura": 81.81818181818181
    },
    {
     "archivo": "models/__init__.py",
-    "sentencias": 10,
+    "sentencias": 14,
     "perdidas": 0,
     "ramas": 0,
     "ramas_parciales": 0,
@@ -89,11 +97,11 @@
    },
    {
     "archivo": "models/bus_alert.py",
-    "sentencias": 130,
+    "sentencias": 125,
     "perdidas": 14,
-    "ramas": 62,
+    "ramas": 60,
     "ramas_parciales": 4,
-    "cobertura": 85.41666666666667
+    "cobertura": 84.86486486486487
    },
    {
     "archivo": "models/bus_complaint.py",
@@ -104,36 +112,52 @@
     "cobertura": 98.50746268656717
    },
    {
-    "archivo": "models/bus_position.py",
-    "sentencias": 23,
+    "archivo": "models/bus_driver_token.py",
+    "sentencias": 61,
+    "perdidas": 1,
+    "ramas": 8,
+    "ramas_parciales": 1,
+    "cobertura": 97.10144927536231
+   },
+   {
+    "archivo": "models/bus_incident.py",
+    "sentencias": 54,
     "perdidas": 0,
-    "ramas": 2,
-    "ramas_parciales": 0,
-    "cobertura": 100.0
+    "ramas": 12,
+    "ramas_parciales": 1,
+    "cobertura": 98.48484848484848
+   },
+   {
+    "archivo": "models/bus_position.py",
+    "sentencias": 32,
+    "perdidas": 0,
+    "ramas": 8,
+    "ramas_parciales": 1,
+    "cobertura": 97.5
    },
    {
     "archivo": "models/bus_push.py",
-    "sentencias": 74,
+    "sentencias": 81,
     "perdidas": 4,
     "ramas": 8,
     "ramas_parciales": 0,
-    "cobertura": 95.1219512195122
+    "cobertura": 95.50561797752809
    },
    {
     "archivo": "models/bus_route.py",
-    "sentencias": 98,
-    "perdidas": 3,
-    "ramas": 18,
-    "ramas_parciales": 1,
-    "cobertura": 96.55172413793103
+    "sentencias": 123,
+    "perdidas": 4,
+    "ramas": 32,
+    "ramas_parciales": 2,
+    "cobertura": 96.12903225806451
    },
    {
     "archivo": "models/bus_route_record.py",
-    "sentencias": 25,
+    "sentencias": 30,
     "perdidas": 1,
-    "ramas": 4,
+    "ramas": 8,
     "ramas_parciales": 1,
-    "cobertura": 93.10344827586206
+    "cobertura": 94.73684210526316
    },
    {
     "archivo": "models/bus_run.py",
@@ -144,30 +168,4 @@
     "cobertura": 100.0
    },
    {
-    "archivo": "models/bus_vehicle.py",
-    "sentencias": 123,
-    "perdidas": 4,
-    "ramas": 38,
-    "ramas_parciales": 2,
-    "cobertura": 96.27329192546584
-   },
-   {
-    "archivo": "models/geo.py",
-    "sentencias": 65,
-    "perdidas": 0,
-    "ramas": 22,
-    "ramas_parciales": 0,
-    "cobertura": 100.0
-   },
-   {
-    "archivo": "models/portal_i18n.py",
-    "sentencias": 12,
-    "perdidas": 0,
-    "ramas": 4,
-    "ramas_parciales": 0,
-    "cobertura": 100.0
-   },
-   {
-    "archivo": "models/res_config_settings.py",
-    "sentencias": 24,
-    "perdida
+    "archivo": "models/b
