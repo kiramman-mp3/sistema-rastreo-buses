@@ -4,7 +4,7 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 
 ## Qué necesitas
 
-- Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app.
+- Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app: la pantalla se adapta al celular y funciona de pie o acostado.
 - Datos móviles o Wi-Fi del bus.
 - Tu **Credencial QR de Chofer** asignada por el administrador en Odoo (menú *Choferes*), o tu usuario y contraseña de chofer. Esa cuenta sólo sirve en la tableta: no abre el panel de Odoo. No es el identificador de Traccar: ese dato no se escribe a mano.
 - La app instalada como APK (no hace falta Play Store). Expo Go no sirve: el GPS de fondo necesita el APK de desarrollo o de producción.
