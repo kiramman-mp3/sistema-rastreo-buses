@@ -193,4 +193,3 @@ class TestHttp(HttpCase):
         self.assertEqual(self.rpc('/bus_tracking/incident/ack', incident_id=incident.id)['result']['ok'], True)
         self.assertTrue(incident.acknowledged_at)
         self.assertEqual(self.rpc('/bus_tracking/incident/ack', incident_id=999999)['result'], {'ok': False})
-
