@@ -262,11 +262,16 @@ export function tf(key: Message, values: Record<string, string | number>): strin
   return t(key).replace(/\{(\w+)\}/g, (all, name: string) => (name in values ? String(values[name]) : all));
 }
 
+function capitalize(text: string): string {
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+}
+
+/** As a title: some labels are shared with the portal, where they read in the middle of a sentence. */
 export function alertLabel(kind: string): string {
-  if (kind === 'speeding') return t('alert_speeding');
-  if (kind === 'offline') return t('alert_offline');
-  if (kind === 'long_stop') return t('alert_long_stop');
-  if (kind === 'off_route') return t('alert_off_route');
+  if (kind === 'speeding') return capitalize(t('alert_speeding'));
+  if (kind === 'offline') return capitalize(t('alert_offline'));
+  if (kind === 'long_stop') return capitalize(t('alert_long_stop'));
+  if (kind === 'off_route') return capitalize(t('alert_off_route'));
   return kind;
 }
 
