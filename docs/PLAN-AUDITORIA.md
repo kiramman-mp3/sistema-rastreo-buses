@@ -211,7 +211,8 @@ Tableta:
 - `docs/calidad/`: nuevos defectos DEF-011 en adelante (uno por hallazgo Crítico/Alto, con causa raíz), regenerar métricas con `qa/ejecutar_todo.sh`, actualizar `09-cumplimiento-iso.md` (seguridad: confidencialidad y autenticidad) y `GUION_DEFENSA.md`.
 - `BITACORA.md`: entrada de esta auditoría y de cada fase cerrada.
 
-### Fase 9. Cierre
+### Fase 9. Cierre — en parte (2026-11-02)
+Hecho: suite de Odoo con cobertura en base desechable (248 pruebas, 0 fallos, 92 % de cobertura), `jest`, `tsc`, `lint`, flake8 y `qa/traducciones.py`. La suite en vivo dio 44 de 47 y las 3 fallas eran comportamientos cambiados a propósito (campo `dir`, queja rápida, límite sólo fuera de caché): se actualizaron sus expectativas. La corrida de `qa/ejecutar_todo.sh` se cortó en la auditoría por falta de memoria del equipo, así que las evidencias de `docs/calidad/evidencias/` siguen siendo las del 28-oct. Falta: repetir esa corrida, accesibilidad y capturas, la prueba en tableta real y el merge a `main` (después del `push --force` del historial).
 - Suite completa de Odoo en base limpia, `jest`, `tsc`, `lint`, `qa/ejecutar_todo.sh`, `qa/accesibilidad.py`, capturas.
 - Prueba en una tableta real: turno completo de dos vueltas, corte de red, SOS sin señal, cierre del turno desde la oficina.
 - `develop` → `main` con `merge --no-ff` cuando todo esté en verde.
