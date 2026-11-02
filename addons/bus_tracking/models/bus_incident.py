@@ -23,6 +23,8 @@ class BusIncident(models.Model):
     route_id = fields.Many2one(related='shift_id.route_id', store=True, index=True)
     kind = fields.Selection(KINDS, required=True, index=True)
     note = fields.Char()
+    # When the driver pressed the button. An incident queued without signal reaches Odoo later.
+    reported_at = fields.Datetime(string="Reported at", default=fields.Datetime.now, index=True)
     latitude = fields.Float(digits=(10, 7))
     longitude = fields.Float(digits=(10, 7))
     notified = fields.Boolean(default=False, index=True)

@@ -130,6 +130,7 @@ export function createClient(options: ClientOptions) {
         body.lat = draft.lat;
         body.lon = draft.lon;
       }
+      if (draft.reported_at) body.reported_at = draft.reported_at;
       return post<{ id: number }>('/bus_tracking/driver/incident', body);
     },
   };

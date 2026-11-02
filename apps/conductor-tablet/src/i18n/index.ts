@@ -38,6 +38,7 @@ const es = {
   confirmEnd: '¿Terminar el turno?',
   confirmEndBody: 'Se deja de enviar el GPS de este bus.',
   cancel: 'Cancelar',
+  continue: 'Continuar',
   note: 'Nota (opcional)',
   queued: 'Sin red. El incidente se enviará al volver.',
   sent: 'Incidente enviado.',
@@ -109,6 +110,16 @@ const es = {
   gpsDevice: 'Dispositivo en Traccar',
   gpsRefresh: 'Actualizar',
   gpsOpen: 'Ver el estado del GPS',
+  endQueued: 'Turno terminado y GPS apagado. Avisamos a la central apenas haya señal.',
+  serverError: 'El servidor tuvo un problema. Inténtalo de nuevo en un momento.',
+  tooMany: 'Demasiados intentos. Espera un minuto y vuelve a probar.',
+  noGpsUrl: 'Falta la dirección del GPS en Odoo. Avisa al administrador.',
+  busNoGps: 'Sin GPS',
+  serverChange: 'Este código cambia el servidor a {url}. ¿Continuar?',
+  serverHttps: 'El servidor debe empezar con https://',
+  gpsLastError: 'Último error',
+  gpsServiceTitle: 'Buses UTA: GPS activo',
+  gpsServiceBody: 'Enviando la posición del bus',
 };
 
 const en: typeof es = {
@@ -148,6 +159,7 @@ const en: typeof es = {
   confirmEnd: 'End the shift?',
   confirmEndBody: 'This bus will stop sending GPS.',
   cancel: 'Cancel',
+  continue: 'Continue',
   note: 'Note (optional)',
   queued: 'Offline. The incident will send when the network returns.',
   sent: 'Incident sent.',
@@ -219,6 +231,16 @@ const en: typeof es = {
   gpsDevice: 'Traccar device',
   gpsRefresh: 'Refresh',
   gpsOpen: 'Show the GPS state',
+  endQueued: 'Shift ended and GPS off. We tell the office as soon as there is signal.',
+  serverError: 'The server had a problem. Try again in a moment.',
+  tooMany: 'Too many attempts. Wait a minute and try again.',
+  noGpsUrl: 'The GPS address is missing in Odoo. Tell the administrator.',
+  busNoGps: 'No GPS',
+  serverChange: 'This code changes the server to {url}. Continue?',
+  serverHttps: 'The server must start with https://',
+  gpsLastError: 'Last error',
+  gpsServiceTitle: 'Buses UTA: GPS on',
+  gpsServiceBody: 'Sending the bus position',
 };
 
 const qu: typeof es = {

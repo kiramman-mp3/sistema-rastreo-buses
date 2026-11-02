@@ -42,7 +42,8 @@ export default function Login() {
       if (err instanceof Error && err.message === 'bad_odoo_url') setError(t('qrBad'));
       else if (err instanceof NetworkError) setError(t('network'));
       else if (err instanceof AuthError || (err instanceof ApiError && err.status === 401)) setError(t('badCredentials'));
-      else setError(t('badCredentials'));
+      else if (err instanceof ApiError && err.status === 429) setError(t('tooMany'));
+      else setError(t('serverError'));
     } finally {
       setBusy(false);
     }

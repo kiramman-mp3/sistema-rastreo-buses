@@ -1,14 +1,24 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
-import { parseDriverBadge } from '../src/config/odooUrl';
-import { t } from '../src/i18n';
+import { normalizeOdooUrl, parseDriverBadge } from '../src/config/odooUrl';
+import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Action, Txt } from '../src/ui/cabin';
 import { useTheme } from '../src/ui/ThemeProvider';
+
+/** A QR can point the tablet at another server: the driver's password and the GPS would go there. */
+function confirmServer(url: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    Alert.alert(tf('serverChange', { url }), undefined, [
+      { text: t('cancel'), style: 'cancel', onPress: () => resolve(false) },
+      { text: t('continue'), onPress: () => resolve(true) },
+    ]);
+  });
+}
 
 export default function ScanScreen() {
   useLang();
@@ -25,6 +35,10 @@ export default function ScanScreen() {
 
     const badge = parseDriverBadge(data);
     if (badge) {
+      if (badge.odooUrl && badge.odooUrl !== session.snapshot.odooUrl && !(await confirmServer(badge.odooUrl))) {
+        setBusy(false);
+        return;
+      }
       try {
         await session.loginWithBadge(badge.token, badge.odooUrl);
         router.replace('/');
@@ -36,8 +50,18 @@ export default function ScanScreen() {
       }
     }
 
+    const url = normalizeOdooUrl(data);
+    if (!url) {
+      setError(data.trim().startsWith('http://') ? t('serverHttps') : t('qrBad'));
+      setBusy(false);
+      return;
+    }
+    if (url !== session.snapshot.odooUrl && !(await confirmServer(url))) {
+      setBusy(false);
+      return;
+    }
     try {
-      await session.setOdooUrl(data);
+      await session.setOdooUrl(url);
       router.back();
     } catch {
       setError(t('qrBad'));
