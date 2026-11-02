@@ -156,7 +156,7 @@
             <t t-set="title"><t t-esc="brand"/> | Universidad Técnica de Ambato</t>
             <t t-set="body_classname" t-value="'o_bus_landing'"/>
             <t t-set="head">
-                <meta name="description" content="Portal informativo oficial del sistema de transporte de la Universidad Técnica de Ambato (UTA). Monitoreo en tiempo real de rutas y paradas universitarias."/>
+                <meta name="description" content="Portal oficial de transporte de la Universidad Técnica de Ambato (UTA). Monitoreo en tiempo real de rutas y paradas universitarias."/>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
                 <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
                 <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
@@ -167,98 +167,146 @@
             <t t-call="bus_tracking.portal_header"/>
 
             <main>
-                <!-- Hero Section (Informative & Visual) -->
+                <!-- Hero Section Empático y Humano -->
                 <section class="hero-section">
                     <div class="hero-backdrop" style="background-image: url('/bus_tracking/static/img/landing/hero-bus.jpg');">
                         <div class="hero-overlay"></div>
                     </div>
                     <div class="wrap hero-wrap">
                         <div class="hero-text-block">
-                            <h1 class="hero-headline">Conectando tus sueños académicos en cada recorrido</h1>
-                            <p class="hero-subtext">Portal oficial de transporte de la Universidad Técnica de Ambato. Información en tiempo real sobre rutas, paradas y unidades universitarias que conectan los campus Huachi, Ingahurco y Querochaca con total puntualidad y seguridad.</p>
-                            <div class="hero-actions">
-                                <a href="/rutas" class="btn btn-hero-primary">
-                                    <span>Ver Rutas en Vivo</span>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                                    </svg>
-                                </a>
-                                <a href="/quejas" class="btn btn-hero-secondary">
-                                    <span>Buzón de Atención</span>
-                                </a>
+                            <!-- Live Network Status Pill Bar -->
+                            <div class="hero-network-banner">
+                                <span class="network-pulse"></span>
+                                <span class="network-status-text">
+                                    <strong>Red Operativa:</strong>
+                                    <t t-if="total_active_buses">
+                                        <t t-esc="total_active_buses"/> buses en servicio regular
+                                    </t>
+                                    <t t-else="">
+                                        Unidades en circulación regular
+                                    </t>
+                                    · Frecuencia: 8-12 min
+                                </span>
+                                <a href="/rutas" class="network-banner-link">Ver mapa en vivo →</a>
+                            </div>
+
+                            <h1 class="hero-headline">Muévete seguro hacia el campus</h1>
+                            <p class="hero-subtext">Consulta recorridos, horarios y buses en tiempo real sin complicaciones. Conectividad puntual entre facultades y campus universitarios para toda la comunidad académica.</p>
+
+                            <!-- Predictive Quick Search Box -->
+                            <div class="hero-search-card">
+                                <form action="/rutas" method="get" class="hero-search-form">
+                                    <div class="search-input-group">
+                                        <span class="search-field-icon">🔍</span>
+                                        <input type="text" name="q" id="hero-stop-search"
+                                               class="hero-search-input"
+                                               placeholder="¿A qué facultad o parada te diriges? Ej. Biblioteca, Huachi..."
+                                               list="stops-datalist" autocomplete="off"/>
+                                        <datalist id="stops-datalist">
+                                            <t t-foreach="stops" t-as="st">
+                                                <option t-att-value="st"/>
+                                            </t>
+                                        </datalist>
+                                        <button type="submit" class="btn btn-search-submit">
+                                            <span>Consultar</span>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <!-- Quick Touch Chips for Campuses -->
+                                <div class="hero-quick-chips">
+                                    <span class="quick-chips-label">Atajos directos:</span>
+                                    <a href="/rutas?campus=huachi" class="chip-item">🏛️ Campus Huachi</a>
+                                    <a href="/rutas?campus=ingahurco" class="chip-item">🏥 Campus Ingahurco</a>
+                                    <a href="/rutas?campus=querochaca" class="chip-item">🌿 Campus Querochaca</a>
+                                    <a href="/rutas" class="chip-item chip-all">🗺️ Todas las rutas</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Section "Nuestras Rutas Principales" -->
+                <!-- Section "Líneas Destacadas de la Red" -->
                 <section class="products-section" id="rutas">
                     <div class="wrap">
                         <div class="section-badge-header">
                             <span class="section-wings">人</span>
-                            <span class="section-badge-text">NUESTRAS RUTAS PRINCIPALES</span>
+                            <span class="section-badge-text">RED DE TRANSPORTE EN VIVO</span>
                             <span class="section-wings">人</span>
                         </div>
                         <h2 class="section-main-title">Conectividad directa entre los campus de Ambato</h2>
-                        <p class="section-subtext">Nuestra flota cubre los corredores universitarios neurálgicos, garantizando traslados rápidos, seguros y predecibles para toda la comunidad académica.</p>
+                        <p class="section-subtext">Nuestra flota cubre los corredores universitarios neurálgicos, garantizando traslados rápidos, seguros y predecibles para estudiantes, docentes y personal.</p>
 
                         <div class="products-grid">
-                            <!-- Route Card 1 -->
-                            <article class="product-card">
-                                <div class="product-media">
-                                    <img src="/bus_tracking/static/img/landing/route-huachi.jpg" alt="Ruta Troncal Huachi - Ingahurco" class="product-img" loading="lazy"/>
-                                    <div class="product-badge-float">
-                                        <span class="badge-code">R-01</span>
-                                        <span class="badge-status">Troncal</span>
+                            <t t-if="routes">
+                                <article t-foreach="routes" t-as="r" class="product-card route-live-card">
+                                    <div class="product-top-badge" t-attf-style="background-color: #{r['color'] or '#8B1D24'};">
+                                        <span class="route-card-code" t-esc="r['code']"/>
+                                        <span class="route-card-live-dot"></span>
                                     </div>
-                                </div>
-                                <div class="product-body">
-                                    <h3 class="product-title">Troncal Huachi – Ingahurco</h3>
-                                    <p class="product-desc">Enlace directo entre el Campus Matriz y el Campus de la Salud e Ingeniería. Conecta facultades principales con frecuencias cada 10 a 12 minutos.</p>
-                                    <a href="/rutas" class="product-link">
-                                        <span>Consultar paradas y unidades</span>
-                                        <span class="link-arrow">→</span>
-                                    </a>
-                                </div>
-                            </article>
-
-                            <!-- Route Card 2 -->
-                            <article class="product-card">
-                                <div class="product-media">
-                                    <img src="/bus_tracking/static/img/landing/route-quero.jpg" alt="Expreso Inter-Campus Querochaca" class="product-img" loading="lazy"/>
-                                    <div class="product-badge-float">
-                                        <span class="badge-code">R-02</span>
-                                        <span class="badge-status">Expreso</span>
+                                    <div class="product-body">
+                                        <div class="route-service-indicator">
+                                            <t t-if="r['buses_count']">
+                                                <span class="service-dot ok"></span>
+                                                <span class="service-text"><t t-esc="r['buses_count']"/> buses en servicio activo</span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="service-dot regular"></span>
+                                                <span class="service-text">Servicio programado</span>
+                                            </t>
+                                        </div>
+                                        <h3 class="product-title" t-esc="r['name']"/>
+                                        <p class="product-desc">Corredor universitario con paradas autorizadas, tiempos auditados y cobertura integral.</p>
+                                        <div class="route-card-footer">
+                                            <span class="route-frequency">⏱️ Frecuencia: ~10 min</span>
+                                            <a t-attf-href="/rutas/#{r['code']}" class="product-link">
+                                                <span>Ver recorrido y paradas</span>
+                                                <span class="link-arrow">→</span>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="product-body">
-                                    <h3 class="product-title">Expreso Inter-Campus Querochaca</h3>
-                                    <p class="product-desc">Ruta rápida hacia el cantón Cevallos y la Facultad de Ciencias Agropecuarias, brindando capacidad ampliada en horarios de entrada y salida.</p>
-                                    <a href="/rutas" class="product-link">
-                                        <span>Consultar paradas y unidades</span>
-                                        <span class="link-arrow">→</span>
-                                    </a>
-                                </div>
-                            </article>
-
-                            <!-- Route Card 3 -->
-                            <article class="product-card">
-                                <div class="product-media">
-                                    <img src="/bus_tracking/static/img/landing/route-circuito.jpg" alt="Circuito de Transferencia Urbana" class="product-img" loading="lazy"/>
-                                    <div class="product-badge-float">
-                                        <span class="badge-code">R-03</span>
-                                        <span class="badge-status">Circuito</span>
+                                </article>
+                            </t>
+                            <t t-else="">
+                                <!-- Fallback visual cards when no database routes configured -->
+                                <article class="product-card">
+                                    <div class="product-media">
+                                        <img src="/bus_tracking/static/img/landing/route-huachi.jpg" alt="Ruta Troncal Huachi - Ingahurco" class="product-img" loading="lazy"/>
+                                        <div class="product-badge-float">
+                                            <span class="badge-code">R-01</span>
+                                            <span class="badge-status">Troncal</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="product-body">
-                                    <h3 class="product-title">Circuito de Transferencia Urbana</h3>
-                                    <p class="product-desc">Articulación con el Terminal Terrestre de Ambato, el Mercado Mayorista y puntos clave para el arribo de estudiantes foráneos de toda la provincia.</p>
-                                    <a href="/rutas" class="product-link">
-                                        <span>Consultar paradas y unidades</span>
-                                        <span class="link-arrow">→</span>
-                                    </a>
-                                </div>
-                            </article>
+                                    <div class="product-body">
+                                        <h3 class="product-title">Troncal Huachi – Ingahurco</h3>
+                                        <p class="product-desc">Enlace directo entre el Campus Matriz y el Campus de la Salud e Ingeniería. Frecuencias cada 10 a 12 minutos.</p>
+                                        <a href="/rutas" class="product-link">
+                                            <span>Consultar paradas y unidades</span>
+                                            <span class="link-arrow">→</span>
+                                        </a>
+                                    </div>
+                                </article>
+                                <article class="product-card">
+                                    <div class="product-media">
+                                        <img src="/bus_tracking/static/img/landing/route-quero.jpg" alt="Expreso Inter-Campus Querochaca" class="product-img" loading="lazy"/>
+                                        <div class="product-badge-float">
+                                            <span class="badge-code">R-02</span>
+                                            <span class="badge-status">Expreso</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-body">
+                                        <h3 class="product-title">Expreso Inter-Campus Querochaca</h3>
+                                        <p class="product-desc">Ruta rápida hacia el cantón Cevallos y la Facultad de Ciencias Agropecuarias en horarios clave.</p>
+                                        <a href="/rutas" class="product-link">
+                                            <span>Consultar paradas y unidades</span>
+                                            <span class="link-arrow">→</span>
+                                        </a>
+                                    </div>
+                                </article>
+                            </t>
                         </div>
                     </div>
                 </section>
@@ -293,7 +341,7 @@
 
                                 <div class="about-actions">
                                     <a href="/rutas" class="btn btn-about-cta">Conocer Rutas y Horarios</a>
-                                    <a href="/quejas" class="btn btn-about-outline">Reglamento y Sugerencias</a>
+                                    <a href="/quejas" class="btn btn-about-outline">Atención y Sugerencias</a>
                                 </div>
                             </div>
                             <div class="about-right-media">
@@ -323,7 +371,6 @@
                         <p class="section-subtext">Comunicados operativos, mejoras de paradas y avisos de contingencia en tiempo real.</p>
 
                         <div class="news-grid">
-                            <!-- Story Card 1 -->
                             <article class="news-story-card">
                                 <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-evaluaciones.jpg');">
                                     <div class="story-overlay"></div>
@@ -342,7 +389,6 @@
                                 </div>
                             </article>
 
-                            <!-- Story Card 2 -->
                             <article class="news-story-card">
                                 <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-bahia.jpg');">
                                     <div class="story-overlay"></div>
@@ -361,7 +407,6 @@
                                 </div>
                             </article>
 
-                            <!-- Story Card 3 -->
                             <article class="news-story-card">
                                 <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-tablet.jpg');">
                                     <div class="story-overlay"></div>
@@ -371,8 +416,8 @@
                                         <span class="story-date">24 Octubre, 2026</span>
                                         <span class="story-tag">TECNOLOGÍA</span>
                                     </div>
-                                    <h3 class="story-title">Tabletas de telemetría GPS con soporte offline instaladas en toda la flota</h3>
-                                    <p class="story-snippet">Los choferes disponen ahora de una interfaz especializada con alerta de paradas próximas y registro satelital ininterrumpido.</p>
+                                    <h3 class="story-title">Telemetría GPS y mapa cinemático en tiempo real</h3>
+                                    <p class="story-snippet">La flota cuenta ahora con interpolación continua de buses y monitoreo en vivo para toda la comunidad.</p>
                                     <a href="/rutas" class="story-link">
                                         <span>Leer comunicado oficial</span>
                                         <span class="story-arrow">→</span>
@@ -414,7 +459,7 @@
                                             <div class="screen-progress-bar">
                                                 <div class="progress-fill" style="width: 28%;"></div>
                                             </div>
-                                            <div class="screen-eta">Hacia: Parada 2 · Arribo en 2 min</div>
+                                            <div class="screen-eta">Hacia: Parada 2 · Arribo en ~3 min</div>
                                         </div>
                                     </div>
                                 </div>
