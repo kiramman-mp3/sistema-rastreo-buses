@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
 
 from ..models.geo import simplify, thin
@@ -38,6 +38,12 @@ class TestRecordTrack(BusCase):
         return self.env['bus.route.record'].create({
             'route_id': self.route.id, 'vehicle_id': self.bus.id,
             'date_from': fields.Datetime.now() - timedelta(hours=1), 'date_to': fields.Datetime.now()})
+
+    def test_a_period_that_ends_before_it_starts_is_refused(self):
+        with self.assertRaises(ValidationError):
+            self.env['bus.route.record'].create({
+                'route_id': self.route.id, 'vehicle_id': self.bus.id,
+                'date_from': fields.Datetime.now(), 'date_to': fields.Datetime.now() - timedelta(hours=1)})
 
     def test_the_recorded_track_replaces_the_straight_line(self):
         self.assertEqual(len(self.route._map_lines()[0]['points']), 3)
