@@ -6,6 +6,8 @@ export type Vehicle = {
   plate: string;
   route_id: number | null;
   available: boolean;
+  /** False when the bus has no GPS device in Traccar yet: it cannot start a shift. */
+  has_gps?: boolean;
 };
 
 export type Route = { id: number; code: string; name: string; color: string };
@@ -58,6 +60,8 @@ export type StateResponse = {
   sos?: SosState | null;
   current_stop_id: number | null;
   next_stop_id: number | null;
+  /** 'back' once the bus reached the last stop; the stops then come in reverse order. */
+  direction?: 'forward' | 'back';
   stops: StopState[];
   alerts: Alert[];
 };
@@ -87,4 +91,6 @@ export type IncidentDraft = {
   note: string;
   lat: number | null;
   lon: number | null;
+  /** When the driver pressed the button (ISO, UTC). Odoo keeps it for incidents sent later. */
+  reported_at?: string;
 };
