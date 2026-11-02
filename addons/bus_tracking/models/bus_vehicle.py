@@ -1,12 +1,15 @@
 import base64
 import logging
+import math
 import secrets
 from datetime import timedelta
 from urllib.parse import urlencode
 
+from psycopg2 import IntegrityError
+
 from odoo import _, api, fields, models
-import math
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import mute_logger
 
 from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
 
@@ -128,16 +131,22 @@ class BusVehicle(models.Model):
             altitude = float(alt_raw) if alt_raw is not None else 0.0
         except (ValueError, TypeError):
             altitude = 0.0
-        record = self.env['bus.position'].create({
-            'vehicle_id': self.id,
-            'fix_time': fix_time,
-            'latitude': lat,
-            'longitude': lon,
-            'speed': speed,
-            'course': course,
-            'altitude': altitude,
-            'address': pos.get('address'),
-        })
+        try:
+            # The webhook and the cron can bring the same fix at once: the unique constraint
+            # decides, and the loser just skips it instead of failing the whole request.
+            with self.env.cr.savepoint(), mute_logger('odoo.sql_db'):
+                record = self.env['bus.position'].create({
+                    'vehicle_id': self.id,
+                    'fix_time': fix_time,
+                    'latitude': lat,
+                    'longitude': lon,
+                    'speed': speed,
+                    'course': course,
+                    'altitude': altitude,
+                    'address': pos.get('address'),
+                })
+        except IntegrityError:
+            return False
         if not self.last_fix_time or fix_time >= self.last_fix_time:
             self.write({
                 'last_latitude': lat,
@@ -182,7 +191,19 @@ class BusVehicle(models.Model):
         if not domain:
             return False
         vehicle = self.search(domain, limit=1)
-        return vehicle._apply_position(pos) if vehicle else False
+        if not vehicle or not vehicle._accepts_positions():
+            return False
+        return vehicle._apply_position(pos)
+
+    def _accepts_positions(self):
+        """A bus only reports while a driver has it on a shift: a tablet left on after the shift
+        closed must not keep drawing it on the map. A setting allows them for tests with curl."""
+        self.ensure_one()
+        icp = self.env['ir.config_parameter'].sudo()
+        if icp.get_param('bus_tracking.accept_without_shift') in ('1', 'True', 'true'):
+            return True
+        return bool(self.env['bus.shift'].sudo().search_count(
+            [('vehicle_id', '=', self.id), ('state', '=', 'active')]))
 
     # ------------------------------------------------------------------
     # Pull sync
@@ -192,7 +213,7 @@ class BusVehicle(models.Model):
         by_device = {p['deviceId']: p for p in positions if p.get('deviceId')}
         for bus in self.filtered('traccar_device_id'):
             pos = by_device.get(bus.traccar_device_id)
-            if pos:
+            if pos and bus._accepts_positions():
                 try:
                     bus._apply_position(pos)
                 except ValidationError:

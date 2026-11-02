@@ -52,7 +52,13 @@ class BusTraccarApi(models.AbstractModel):
             raise UserError(_("Traccar rejected the credentials."))
         if not resp.ok:
             raise UserError(_("Traccar error %(code)s: %(body)s", code=resp.status_code, body=resp.text[:200]))
-        return resp.json() if resp.content else {}
+        if not resp.content:
+            return {}
+        try:
+            return resp.json()
+        except ValueError:
+            # A proxy error page answered instead of Traccar.
+            raise UserError(_("Traccar did not answer with JSON: %s", resp.text[:200]))
 
     @api.model
     def _get(self, path, params=None, conf=None):

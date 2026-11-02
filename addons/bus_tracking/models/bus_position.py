@@ -3,6 +3,8 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
+from .utils import int_param
+
 
 class BusPosition(models.Model):
     _name = 'bus.position'
@@ -30,8 +32,7 @@ class BusPosition(models.Model):
 
     @api.model
     def _cron_cleanup(self, batch_size=5000):
-        icp = self.env['ir.config_parameter'].sudo()
-        days = int(icp.get_param('bus_tracking.retention_days') or 0)
+        days = int_param(self.env, 'bus_tracking.retention_days', 0)
         if days <= 0:
             return
         limit = fields.Datetime.now() - timedelta(days=days)

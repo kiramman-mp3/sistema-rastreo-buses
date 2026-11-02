@@ -7,8 +7,11 @@ from odoo import fields, http
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
-from ..models.utils import map_center
+from ..models.utils import int_param, map_center
 from .portal import line_positions
+
+MAX_TRACK_HOURS = 24
+_warned_query_secret = False
 
 _logger = logging.getLogger(__name__)
 
@@ -97,9 +100,17 @@ class BusTrackingController(http.Controller):
     @http.route('/bus_tracking/track', type='json', auth='user')
     def track(self, vehicle_id, hours=4):
         self._check_user()
+        try:
+            vehicle_id = int(vehicle_id)
+            hours = float(hours)
+        except (TypeError, ValueError):
+            raise ValidationError("vehicle_id and hours must be numbers.")
+        # At most one day: the map draws a recent trail, not the whole history.
+        if not 0 < hours <= MAX_TRACK_HOURS:
+            hours = MAX_TRACK_HOURS if hours > MAX_TRACK_HOURS else 4
         since = fields.Datetime.now() - timedelta(hours=hours)
         positions = request.env['bus.position'].search([
-            ('vehicle_id', '=', int(vehicle_id)),
+            ('vehicle_id', '=', vehicle_id),
             ('fix_time', '>=', since),
         ], order='fix_time asc')
         return [[p.latitude, p.longitude] for p in positions]
@@ -109,8 +120,14 @@ class BusTrackingController(http.Controller):
     def traccar_webhook(self, secret=None, **kwargs):
         env = request.env(su=True)
         expected = env['ir.config_parameter'].get_param('bus_tracking.webhook_secret')
-        # The header keeps the secret out of access logs; the query parameter is kept for older setups.
+        # The header keeps the secret out of access logs. The query parameter is deprecated: it is
+        # still accepted so older Traccar setups keep working, and will be removed in the next version.
         headers = request.httprequest.headers
+        global _warned_query_secret
+        if secret and not headers.get('X-Webhook-Secret') and not _warned_query_secret:
+            _warned_query_secret = True   # once per worker, not on every position
+            _logger.warning("Traccar webhook: the secret came in the URL and ends up in access logs; "
+                            "send it in the X-Webhook-Secret header (FORWARD_HEADER) instead.")
         secret = secret or headers.get('X-Webhook-Secret') or headers.get('Authorization', '').removeprefix('Bearer ')
         if not expected or not secret or not hmac.compare_digest(
                 expected.encode(), secret.encode()):
@@ -130,7 +147,7 @@ class BusTrackingController(http.Controller):
     def health(self, **kwargs):
         """Uptime-monitor endpoint: 200 while positions keep arriving, 503 once they go stale."""
         env = request.env(su=True)
-        stale_minutes = int(env['ir.config_parameter'].get_param('bus_tracking.stale_minutes') or 10)
+        stale_minutes = int_param(env, 'bus_tracking.stale_minutes', 10)
         status, code = 'ok', 200
         if stale_minutes > 0 and env['bus.vehicle'].search_count([('traccar_device_id', '!=', False)]):
             last = env['bus.vehicle'].search([('last_fix_time', '!=', False)], order='last_fix_time desc', limit=1)
