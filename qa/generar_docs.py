@@ -234,7 +234,7 @@ causa_txt = '\n\n'.join('### %s: %s\n\n- **Causa raíz:** %s\n- **Categoría:** 
 write('05-registro-de-defectos.md', '''
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y siguen **abiertos**. Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -250,11 +250,8 @@ Resumen: %(total)d registrados, %(cerrados)d cerrados (%(pct)s), %(abiertos)d ab
 
 ## 3. Qué falta para cerrar los abiertos
 
-1. Validar en `_apply_position` la latitud (−90 a 90), la longitud (−180 a 180) y el tipo de cada campo; responder 400 y no guardar.
-2. Capturar el error de formato en `parse_traccar_dt` y responder 400.
-3. Agregar una restricción `@api.constrains` de rango en `bus.position`.
-4. Portar E7, E8 y E9 a `addons/bus_tracking/tests/test_http.py` para que la suite de Odoo los proteja, y volver a ejecutar `qa/ejecutar_todo.sh`.
-5. Limpiar las posiciones inválidas ya guardadas en las bases de desarrollo.
+1. DEF-013: hacer `git push --force-with-lease origin main develop` con el historial ya reescrito, pedir a todos que vuelvan a clonar y **cambiar la contraseña del admin** en el servidor (quien vio el commit viejo la conoce).
+2. Agregar una revisión de secretos antes de cada commit (por ejemplo `gitleaks` en el CI) para que no se repita.
 ''' % dict(tabla=md_table(['ID', 'Fecha', 'Detectado por', 'Defecto', 'Ubicación', 'Estado'], def_rows), total=len(dq.DEFECTOS), cerrados=cerrados,
            pct=pct(100.0 * cerrados / len(dq.DEFECTOS), 0), abiertos=len(dq.DEFECTOS) - cerrados, dens=n(len(dq.DEFECTOS) / (M['lineas']['python'] / 1000), 1),
            kloc=n(M['lineas']['python'] / 1000, 3), causas=causa_txt))
@@ -282,7 +279,7 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 %(t2)s
 
-**Lectura:** con solo 10 defectos la distribución es pareja; destacan la configuración y la validación de la entrada. Los de configuración ya están cerrados; los de validación siguen abiertos.
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Queda abierto uno de seguridad (DEF-013).
 
 ## 3. Problemas encontrados durante la construcción (%(np)d)
 

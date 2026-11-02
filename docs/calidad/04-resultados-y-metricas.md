@@ -15,7 +15,7 @@ Generado por `qa/generar_docs.py` con los datos de la ejecución del 28-oct-2026
 | Capacidad de ingesta (100 buses, un reporte cada 10 s) | ≥ 10 req/s | 28,3 req/s | Sí |
 | Cobertura de código (sentencias y ramas) | ≥ 80 % | 93,8 % | Sí |
 | Cobertura de rutas HTTP | 100 % | 100,0 % | Sí |
-| Defectos cerrados | ≥ 90 % | 100,0 % | Sí |
+| Defectos cerrados | ≥ 90 % | 96,2 % | Sí |
 | Posiciones con datos imposibles | 0 | 1 | **No** |
 | Integridad concurrente (P6: 20 envíos iguales) | 1 guardada | 1 guardada | Sí |
 
