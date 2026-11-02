@@ -130,6 +130,9 @@
                 return;
             }
             known.marker.options.title = label;
+            // options.title is only read when the marker is created: the element keeps the old one.
+            var element = known.marker.getElement();
+            if (element) { element.setAttribute("title", label); }
             if (known.status !== bus.status) {
                 known.marker.setIcon(busIcon(bus));
                 known.status = bus.status;
