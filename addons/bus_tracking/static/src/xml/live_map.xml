@@ -1,190 +1,146 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="bus_tracking.LiveMap" owl="1">
-        <div class="o_bus_live_map">
-            <!-- Fullscreen map canvas -->
-            <div class="o_bus_map" t-ref="map"/>
+        <div class="o_bus_live">
+            <!-- An SOS is impossible to miss: a red band across the top until someone marks it seen. -->
+            <div t-foreach="sosOpen" t-as="sos" t-key="sos.id" class="o_bus_sos" role="alert">
+                <strong>Emergency (SOS)</strong>
+                <span><t t-esc="sos.vehicle_name"/><t t-if="sos.route_name"> · <t t-esc="sos.route_name"/></t><t t-if="sos.driver"> · <t t-esc="sos.driver"/></t></span>
+                <span class="o_bus_sos_age" t-esc="sosAge(sos)"/>
+                <button class="o_bus_sos_btn" t-on-click="() => this.goTo({ vehicleId: sos.vehicle_id })">Show on the map</button>
+                <button class="o_bus_sos_btn o_bus_sos_btn_main" t-on-click="() => this.acknowledge(sos.id)">Mark as seen</button>
+            </div>
 
-            <!-- Floating Top HUD -->
-            <div class="o_bus_hud_top">
-                <div class="o_bus_hud_inner">
-                    <!-- Brand & Route Filter -->
-                    <div class="o_bus_hud_section o_bus_hud_route">
-                        <span class="o_bus_hud_label">Línea:</span>
-                        <select class="o_bus_hud_select" t-on-change="onRouteChange">
-                            <option value="">Todas las rutas</option>
+            <div class="o_bus_live_body">
+                <div class="o_bus_map" t-ref="map"/>
+
+                <!-- Toolbar: line, filters that count, sync state -->
+                <div class="o_bus_bar">
+                    <label class="o_bus_bar_line">
+                        <span class="visually-hidden">Line</span>
+                        <select t-on-change="onRouteChange">
+                            <option value="">All lines</option>
                             <option t-foreach="state.routes" t-as="route" t-key="route.id"
                                     t-att-value="route.id" t-esc="route.code + ' · ' + route.name"/>
                         </select>
-                        <button t-if="state.pathKey" class="o_bus_hud_btn_subtle ms-2" t-on-click="resetPaths" title="Restablecer vista general">
-                            <i class="fa fa-undo me-1"/> Trazado completo
-                        </button>
+                    </label>
+                    <div class="o_bus_filters" role="group" aria-label="Filter buses">
+                        <button t-attf-class="o_bus_filter #{state.filter == 'all' ? 'is-on' : ''}" t-att-aria-pressed="state.filter == 'all' ? 'true' : 'false'"
+                                t-on-click="() => this.setFilter('all')">All <b t-esc="counts.all"/></button>
+                        <button t-attf-class="o_bus_filter #{state.filter == 'moving' ? 'is-on' : ''}" t-att-aria-pressed="state.filter == 'moving' ? 'true' : 'false'"
+                                t-on-click="() => this.setFilter('moving')"><i class="o_bus_dot o_bus_dot_moving"/>On route <b t-esc="counts.moving"/></button>
+                        <button t-attf-class="o_bus_filter #{state.filter == 'stopped' ? 'is-on' : ''}" t-att-aria-pressed="state.filter == 'stopped' ? 'true' : 'false'"
+                                t-on-click="() => this.setFilter('stopped')"><i class="o_bus_dot o_bus_dot_stopped"/>Stopped <b t-esc="counts.stopped"/></button>
+                        <button t-attf-class="o_bus_filter #{state.filter == 'offline' ? 'is-on' : ''}" t-att-aria-pressed="state.filter == 'offline' ? 'true' : 'false'"
+                                t-on-click="() => this.setFilter('offline')"><i class="o_bus_dot o_bus_dot_offline"/>No signal <b t-esc="counts.offline"/></button>
+                        <button t-attf-class="o_bus_filter #{state.filter == 'alert' ? 'is-on' : ''}" t-att-aria-pressed="state.filter == 'alert' ? 'true' : 'false'"
+                                t-on-click="() => this.setFilter('alert')"><i class="o_bus_dot o_bus_dot_alert"/>With alert <b t-esc="counts.alert"/></button>
                     </div>
-
-                    <div class="o_bus_hud_divider"/>
-
-                    <!-- Quick Status Filters -->
-                    <div class="o_bus_hud_section o_bus_hud_filters">
-                        <button t-attf-class="o_bus_pill #{state.statusFilter == 'all' ? 'active' : ''}"
-                                t-on-click="() => this.setStatusFilter('all')">
-                            Todos <span class="o_bus_pill_badge" t-esc="state.vehicles.length"/>
-                        </button>
-                        <button t-attf-class="o_bus_pill #{state.statusFilter == 'moving' ? 'active' : ''}"
-                                t-on-click="() => this.setStatusFilter('moving')">
-                            <span class="o_bus_dot ok"/> En ruta <span class="o_bus_pill_badge" t-esc="movingCount"/>
-                        </button>
-                        <button t-attf-class="o_bus_pill #{state.statusFilter == 'stopped' ? 'active' : ''}"
-                                t-on-click="() => this.setStatusFilter('stopped')">
-                            <span class="o_bus_dot warn"/> Detenidos
-                        </button>
-                        <button t-if="delayedCount > 0"
-                                t-attf-class="o_bus_pill #{state.statusFilter == 'delayed' ? 'active alert' : 'alert'}"
-                                t-on-click="() => this.setStatusFilter('delayed')">
-                            <span class="o_bus_dot danger"/> Alertas <span class="o_bus_pill_badge" t-esc="delayedCount"/>
-                        </button>
-                    </div>
-
-                    <div class="o_bus_hud_divider d-none d-lg-block"/>
-
-                    <!-- Live Sync Indicator & Actions -->
-                    <div class="o_bus_hud_section o_bus_hud_meta ms-auto">
-                        <div class="o_bus_sync_indicator">
-                            <span class="o_bus_sync_pulse"/>
-                            <span class="o_bus_sync_text" t-esc="state.lastSyncFormatted"/>
-                        </div>
-                        <button class="o_bus_hud_icon_btn" t-on-click="fitAll" title="Enfocar toda la flota">
-                            <i class="fa fa-crosshairs"/>
-                        </button>
-                        <button t-attf-class="o_bus_hud_icon_btn #{state.sidebarOpen ? 'active' : ''}"
-                                t-on-click="toggleSidebar" title="Mostrar/ocultar lista de unidades">
-                            <i class="fa fa-bars"/>
-                        </button>
-                    </div>
-                </div>
-
-                <div t-if="state.error" class="o_bus_hud_error">
-                    <i class="fa fa-exclamation-triangle me-2"/>
-                    <span t-esc="state.error"/>
-                </div>
-            </div>
-
-            <!-- Floating Selected Vehicle Card -->
-            <div t-if="selectedVehicle" class="o_bus_selected_card">
-                <div class="o_bus_card_header">
-                    <div class="d-flex align-items-center">
-                        <div class="o_bus_card_icon" t-attf-style="background-color: #{selectedVehicle.color || '#8B1D24'};">
-                            <i class="fa fa-bus"/>
-                        </div>
-                        <div class="ms-2">
-                            <div class="o_bus_card_title" t-esc="selectedVehicle.name"/>
-                            <div class="o_bus_card_sub">
-                                <span class="badge text-bg-light border" t-esc="selectedVehicle.plate or 'Sin placa'"/>
-                                <span class="ms-1" t-if="selectedVehicle.route_name" t-esc="'· ' + selectedVehicle.route_name"/>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="o_bus_card_close" t-on-click="closeSelectedCard">
-                        <i class="fa fa-times"/>
+                    <span t-attf-class="o_bus_sync #{state.error ? 'is-error' : ''}" t-esc="syncText" aria-live="polite"/>
+                    <button class="o_bus_icon_btn" t-on-click="() => this.fitAll()" title="Show every bus" aria-label="Show every bus">
+                        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                    </button>
+                    <button class="o_bus_icon_btn" t-on-click="() => this.state.panelOpen = !this.state.panelOpen"
+                            t-att-aria-expanded="state.panelOpen ? 'true' : 'false'" title="Show or hide the panel" aria-label="Show or hide the panel">
+                        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
                     </button>
                 </div>
 
-                <div class="o_bus_card_body">
-                    <div class="o_bus_stat_grid">
-                        <div class="o_bus_stat_item">
-                            <span class="o_bus_stat_label">Velocidad</span>
-                            <span class="o_bus_stat_val"><t t-esc="selectedVehicle.speed"/> <small>km/h</small></span>
+                <!-- Selected bus: who, where on its line, how fresh -->
+                <section t-if="selected" class="o_bus_card" aria-label="Selected bus">
+                    <header>
+                        <span class="o_bus_chip" t-attf-style="background: #{selected.color}" t-esc="selectedRoute ? selectedRoute.code : ''"/>
+                        <div class="o_bus_card_title">
+                            <strong t-esc="selected.name"/>
+                            <span><t t-esc="selected.plate"/><t t-if="selected.driver"> · <t t-esc="selected.driver"/></t></span>
                         </div>
-                        <div class="o_bus_stat_item">
-                            <span class="o_bus_stat_label">Estado</span>
-                            <span class="o_bus_stat_val">
-                                <span t-attf-class="o_bus_dot #{selectedVehicle.connected ? 'ok' : 'danger'}"/>
-                                <t t-esc="movementLabel(selectedVehicle.status)"/>
+                        <button class="o_bus_icon_btn" t-on-click="closeCard" aria-label="Close">
+                            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2"/></svg>
+                        </button>
+                    </header>
+                    <dl class="o_bus_card_facts">
+                        <div><dt>State</dt><dd t-attf-class="o_bus_state_#{statusOf(selected)}" t-esc="labels[statusOf(selected)]"/></div>
+                        <div><dt>Speed</dt><dd><t t-esc="selected.speed"/> km/h</dd></div>
+                        <div><dt>Last position</dt><dd t-esc="fixAge(selected)"/></div>
+                    </dl>
+                    <ol t-if="selectedRoute and selectedRoute.stops.length" class="o_bus_card_line" t-attf-style="--c: #{selectedRoute.color}">
+                        <li t-foreach="selectedRoute.stops" t-as="stop" t-key="stop_index"
+                            t-attf-class="#{lineStatus(selected, stop_index)}" t-att-title="stop.name">
+                            <span class="o_bus_card_stop"/>
+                            <span class="o_bus_card_stop_name" t-esc="stop.name"/>
+                        </li>
+                    </ol>
+                    <div t-if="selected.alerts.length" class="o_bus_card_alerts">
+                        <span t-foreach="selected.alerts" t-as="kind" t-key="kind" class="o_bus_tag_alert" t-esc="state.alertLabels[kind] or kind"/>
+                    </div>
+                    <footer>
+                        <button class="btn btn-secondary" t-on-click="showTrack">Last 4 hours</button>
+                        <button class="btn btn-primary" t-on-click="() => this.openVehicle(selected.id)">Open the bus</button>
+                    </footer>
+                </section>
+
+                <!-- Side panel: what needs attention first, then the fleet -->
+                <aside t-attf-class="o_bus_panel #{state.panelOpen ? 'is-open' : ''}">
+                    <div class="o_bus_tabs" role="tablist">
+                        <button role="tab" t-att-aria-selected="state.tab == 'atencion' ? 'true' : 'false'"
+                                t-attf-class="o_bus_tab #{state.tab == 'atencion' ? 'is-on' : ''}" t-on-click="() => this.state.tab = 'atencion'">
+                            Needs attention <b t-attf-class="#{attentionCount ? 'is-hot' : ''}" t-esc="attentionCount"/>
+                        </button>
+                        <button role="tab" t-att-aria-selected="state.tab == 'flota' ? 'true' : 'false'"
+                                t-attf-class="o_bus_tab #{state.tab == 'flota' ? 'is-on' : ''}" t-on-click="() => this.state.tab = 'flota'">
+                            Fleet <b t-esc="filteredVehicles.length"/>
+                        </button>
+                    </div>
+
+                    <div t-if="state.tab == 'atencion'" class="o_bus_panel_body" role="tabpanel">
+                        <p t-if="!attention.length and !state.newComplaints" class="o_bus_empty">Nothing needs attention right now.</p>
+                        <article t-foreach="attention" t-as="item" t-key="item.key" t-attf-class="o_bus_item o_bus_item_l#{item.level}">
+                            <div class="o_bus_item_head">
+                                <strong t-esc="item.title"/>
+                                <span t-if="item.age !== null" t-esc="incidentAge(item)"/>
+                            </div>
+                            <p class="o_bus_item_meta"><t t-esc="item.bus"/><t t-if="item.route"> · <t t-esc="item.route"/></t></p>
+                            <p t-if="item.note" class="o_bus_item_note" t-esc="item.note"/>
+                            <div class="o_bus_item_actions">
+                                <button class="btn btn-sm btn-secondary" t-on-click="() => this.goTo(item)">Show on the map</button>
+                                <button t-if="item.incidentId" class="btn btn-sm btn-primary" t-on-click="() => this.acknowledge(item.incidentId)">Mark as seen</button>
+                            </div>
+                        </article>
+                        <article t-if="state.newComplaints" class="o_bus_item o_bus_item_l3">
+                            <div class="o_bus_item_head">
+                                <strong>New passenger messages</strong>
+                                <span t-esc="state.newComplaints"/>
+                            </div>
+                            <div class="o_bus_item_actions">
+                                <button class="btn btn-sm btn-secondary" t-on-click="openComplaints">Open the messages</button>
+                            </div>
+                        </article>
+                        <button class="o_bus_link" t-on-click="askNotifications">Warn me in this browser when an SOS arrives</button>
+                    </div>
+
+                    <div t-else="" class="o_bus_panel_body" role="tabpanel">
+                        <label class="o_bus_search">
+                            <span class="visually-hidden">Search a bus, plate, driver or line</span>
+                            <input type="search" placeholder="Bus, plate, driver or line" t-model="state.search" t-on-input="onSearch"/>
+                        </label>
+                        <p t-if="!filteredVehicles.length" class="o_bus_empty">No bus matches this filter.</p>
+                        <button t-foreach="filteredVehicles" t-as="v" t-key="v.id" t-on-click="() => this.select(v.id)"
+                                t-attf-class="o_bus_row #{v.id === state.selectedId ? 'is-selected' : ''}">
+                            <span class="o_bus_row_bar" t-attf-style="background: #{v.color}"/>
+                            <span class="o_bus_row_main">
+                                <strong t-esc="v.name"/>
+                                <span><t t-esc="v.route_name"/><t t-if="v.driver"> · <t t-esc="v.driver"/></t></span>
+                                <span t-if="v.alerts.length" class="o_bus_row_alerts">
+                                    <t t-foreach="v.alerts" t-as="kind" t-key="kind"><span class="o_bus_tag_alert" t-esc="state.alertLabels[kind] or kind"/></t>
+                                </span>
                             </span>
-                        </div>
-                        <div class="o_bus_stat_item">
-                            <span class="o_bus_stat_label">Conductor</span>
-                            <span class="o_bus_stat_val text-truncate" t-esc="selectedVehicle.driver or 'No asignado'"/>
-                        </div>
-                        <div class="o_bus_stat_item">
-                            <span class="o_bus_stat_label">Parada cercana</span>
-                            <span class="o_bus_stat_val text-truncate" t-esc="selectedVehicle.stop or 'En trayecto'"/>
-                        </div>
-                    </div>
-
-                    <div t-if="selectedVehicle.alerts.length" class="o_bus_card_alerts mt-2">
-                        <span t-foreach="selectedVehicle.alerts" t-as="kind" t-key="kind"
-                              class="badge text-bg-danger me-1">
-                            <i class="fa fa-warning me-1"/> <t t-esc="state.alertLabels[kind] or kind"/>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="o_bus_card_actions">
-                    <button class="btn btn-sm btn-outline-secondary flex-grow-1 me-2"
-                            t-on-click="() => this.selectVehicle(selectedVehicle)">
-                        <i class="fa fa-map-marker me-1"/> Enfocar unidad
-                    </button>
-                    <button class="btn btn-sm btn-primary flex-grow-1"
-                            t-on-click="() => this.openVehicleForm(selectedVehicle.id)">
-                        <i class="fa fa-external-link me-1"/> Ver registro
-                    </button>
-                </div>
-            </div>
-
-            <!-- Floating Collapsible Fleet Drawer -->
-            <div t-attf-class="o_bus_fleet_drawer #{state.sidebarOpen ? 'is-open' : ''}">
-                <div class="o_bus_drawer_header">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0 fw-bold">Flota Activa</h6>
-                        <span class="badge text-bg-secondary" t-esc="filteredVehicles.length + ' de ' + state.vehicles.length"/>
-                    </div>
-                    <div class="o_bus_search_input_wrap">
-                        <i class="fa fa-search o_bus_search_icon"/>
-                        <input type="text" class="o_bus_search_input"
-                               placeholder="Buscar unidad, placa o chofer..."
-                               t-model="state.searchQuery"/>
-                        <button t-if="state.searchQuery" class="o_bus_search_clear"
-                                t-on-click="() => this.state.searchQuery = ''">
-                            <i class="fa fa-times-circle"/>
+                            <span class="o_bus_row_side">
+                                <span t-attf-class="o_bus_state_#{statusOf(v)}" t-esc="labels[statusOf(v)]"/>
+                                <span class="o_bus_row_age" t-esc="fixAge(v)"/>
+                            </span>
                         </button>
                     </div>
-                </div>
-
-                <div class="o_bus_drawer_list">
-                    <div t-if="!filteredVehicles.length" class="p-4 text-center text-muted">
-                        <i class="fa fa-bus fa-2x mb-2 text-black-50"/>
-                        <div>No se encontraron unidades para este filtro.</div>
-                    </div>
-                    <div t-foreach="filteredVehicles" t-as="v" t-key="v.id"
-                         t-attf-class="o_bus_unit_row #{v.id === state.selectedId ? 'is-selected' : ''}"
-                         t-on-click="() => this.selectVehicle(v)">
-                        <div class="o_bus_unit_indicator" t-attf-style="background-color: #{v.color || '#8B1D24'};"/>
-                        <div class="o_bus_unit_content">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="o_bus_unit_name"><t t-esc="v.name"/></span>
-                                <span t-attf-class="o_bus_speed_tag #{v.speed > 0 ? 'is-moving' : ''}">
-                                    <t t-esc="v.speed"/> km/h
-                                </span>
-                            </div>
-                            <div class="o_bus_unit_meta">
-                                <span t-if="v.plate" class="text-uppercase fw-semibold" t-esc="v.plate"/>
-                                <span t-if="v.driver" t-esc="' · ' + v.driver"/>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                <span class="o_bus_unit_stop text-truncate" t-esc="v.stop or (v.route_name or 'En servicio')"/>
-                                <span t-attf-class="o_bus_status_badge #{v.connected ? (v.status === 'moving' ? 'moving' : 'stopped') : 'offline'}">
-                                    <t t-esc="movementLabel(v.status)"/>
-                                </span>
-                            </div>
-                            <div t-if="v.alerts.length" class="mt-1">
-                                <span t-foreach="v.alerts" t-as="kind" t-key="kind"
-                                      class="badge text-bg-danger me-1">
-                                    <t t-esc="state.alertLabels[kind] or kind"/>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </aside>
             </div>
         </div>
     </t>

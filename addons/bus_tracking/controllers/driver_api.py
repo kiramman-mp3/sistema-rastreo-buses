@@ -219,8 +219,17 @@ class BusDriverApi(http.Controller):
             ('vehicle_id', '=', bus.id),
             '|', ('state', '=', 'open'), ('start_time', '>=', since),
         ])
+        sos = request.env['bus.incident'].sudo().search(
+            [('shift_id', '=', shift.id), ('kind', '=', 'sos')], order='create_date desc', limit=1)
         return json_response({
             'shift': self._shift_payload(shift),
+            # The last SOS of this shift and whether someone in the office saw it.
+            'sos': {
+                'id': sos.id,
+                'sent_at': utc_z(sos.create_date),
+                'seen_at': utc_z(sos.acknowledged_at),
+                'seen_by': sos.acknowledged_by.name or None,
+            } if sos else None,
             'current_stop_id': bus.current_stop_id.id or None,
             'next_stop_id': next_stop_id,
             'stops': [{

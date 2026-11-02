@@ -1,662 +1,728 @@
-/* ==========================================================================
-   Bus Tracking: Live Map OWL 2.0 Component Styles
-   ========================================================================== */
+/* Live map of the Odoo panel. Tokens from css/brand.css. Floating panels are the only things with a
+   shadow (they float over the map); states always carry a word, colour is never alone. */
 
-.o_bus_live_map {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #F8FAFC;
-    font-family: var(--bus-font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-}
-
-.o_bus_live_map .o_bus_map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    background: #F1F5F9;
-}
-
-/* --------------------------------------------------------------------------
-   Floating Top HUD Bar
-   -------------------------------------------------------------------------- */
-.o_bus_hud_top {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    right: 14px;
-    z-index: 1000;
-    pointer-events: none;
+.o_bus_live {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    height: 100%;
+    font-family: var(--texto);
+    color: var(--tinta);
 }
 
-.o_bus_hud_inner {
-    pointer-events: auto;
+.o_bus_live_body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
+.o_bus_map {
+    position: absolute;
+    inset: 0;
+    background: var(--papel-2);
+}
+
+.o_bus_live .leaflet-container {
+    font: inherit;
+}
+
+/* ---------- SOS band ---------- */
+
+.o_bus_sos {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.90);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(226, 232, 240, 0.85);
-    border-radius: 14px;
-    padding: 8px 16px;
-    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-    gap: 12px;
+    gap: 0.75rem 1.25rem;
     flex-wrap: wrap;
+    padding: 0.75rem 1.25rem;
+    background: var(--peligro);
+    color: #fff;
+    font-size: 1.0625rem;
+    animation: o_bus_sos_in 240ms var(--facil) both;
 }
 
-.o_bus_hud_section {
+.o_bus_sos strong {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+.o_bus_sos_age {
+    opacity: 0.9;
+}
+
+.o_bus_sos_btn {
+    min-height: 40px;
+    padding: 0 1rem;
+    border: 2px solid #fff;
+    border-radius: var(--radio);
+    background: transparent;
+    color: #fff;
+    font-weight: 700;
+}
+
+.o_bus_sos_btn:first-of-type {
+    margin-left: auto;
+}
+
+.o_bus_sos_btn_main {
+    background: #fff;
+    color: var(--peligro);
+}
+
+@keyframes o_bus_sos_in {
+    from {
+        transform: translateY(-100%);
+    }
+}
+
+/* ---------- Toolbar ---------- */
+
+.o_bus_bar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 412px;
+    z-index: 500;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    padding: 0.5rem;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--bus-shadow-lg);
 }
 
-.o_bus_hud_label {
-    font-size: 0.8rem;
+.o_bus_bar_line select {
+    height: 36px;
+    width: 11rem;
+    padding: 0 0.6rem;
+    border: 1px solid #C2CBC8;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    color: var(--tinta);
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--bus-muted, #64748B);
 }
 
-.o_bus_hud_select {
-    border: 1px solid var(--bus-line, #E2E8F0);
-    background-color: #FFFFFF;
-    color: var(--bus-ink, #0F172A);
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 8px;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.o_bus_filters {
+    display: flex;
+    gap: 0.15rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 
-.o_bus_hud_select:focus {
-    border-color: var(--bus-uta-primary, #8B1D24);
-    box-shadow: 0 0 0 3px rgba(139, 29, 36, 0.12);
-}
-
-.o_bus_hud_btn_subtle {
-    border: none;
-    background: transparent;
-    color: var(--bus-muted, #64748B);
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.o_bus_hud_btn_subtle:hover {
-    background: var(--bus-line, #E2E8F0);
-    color: var(--bus-ink, #0F172A);
-}
-
-.o_bus_hud_divider {
-    width: 1px;
-    height: 24px;
-    background-color: var(--bus-line, #E2E8F0);
-}
-
-/* Filter Pills */
-.o_bus_pill {
+.o_bus_filter {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border: 1px solid transparent;
+    gap: 0.4rem;
+    height: 36px;
+    padding: 0 0.7rem;
+    border: 0;
+    border-radius: var(--radio);
     background: transparent;
-    color: var(--bus-slate-800, #1E293B);
-    cursor: pointer;
-    transition: background-color 0.15s ease, transform 0.1s ease;
+    color: var(--tinta);
+    font-weight: 700;
+    font-size: 0.875rem;
+    white-space: nowrap;
 }
 
-.o_bus_pill:hover {
-    background: rgba(15, 23, 42, 0.05);
+.o_bus_filter:hover {
+    background: var(--papel);
 }
 
-.o_bus_pill:active {
-    transform: scale(0.97);
+.o_bus_filter b {
+    min-width: 1.5rem;
+    padding: 0 0.3rem;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
 }
 
-.o_bus_pill.active {
-    background: var(--bus-uta-primary, #8B1D24);
-    color: #FFFFFF;
+.o_bus_filter.is-on {
+    background: var(--tinta);
+    color: #fff;
 }
 
-.o_bus_pill.active .o_bus_pill_badge {
-    background: rgba(255, 255, 255, 0.25);
-    color: #FFFFFF;
+.o_bus_filter.is-on b {
+    background: rgba(255, 255, 255, 0.18);
 }
 
-.o_bus_pill.alert {
-    color: #DC2626;
+.o_bus_dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }
 
-.o_bus_pill.alert.active {
-    background: #DC2626;
-    color: #FFFFFF;
+.o_bus_dot_moving { background: var(--ok); }
+.o_bus_dot_stopped { background: var(--alerta); border-radius: 2px; }
+.o_bus_dot_offline { background: transparent; border: 2px solid var(--tinta-2); }
+.o_bus_dot_alert { background: var(--peligro); clip-path: polygon(50% 0, 100% 100%, 0 100%); border-radius: 0; }
+
+.o_bus_sync {
+    flex: none;
+    margin-left: auto;
+    white-space: nowrap;
+    color: var(--tinta-2);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
 }
 
-.o_bus_pill_badge {
-    background: var(--bus-line, #E2E8F0);
-    color: var(--bus-ink, #0F172A);
-    font-size: 0.72rem;
-    padding: 1px 6px;
-    border-radius: 10px;
+.o_bus_sync.is-error {
+    color: var(--peligro);
     font-weight: 700;
 }
 
-/* Status Dots */
-.o_bus_dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.o_bus_dot.ok { background-color: var(--transit-on-time, #059669); }
-.o_bus_dot.warn { background-color: var(--transit-delayed, #D97706); }
-.o_bus_dot.danger { background-color: var(--transit-critical, #DC2626); }
-
-/* Live Sync Indicator */
-.o_bus_sync_indicator {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--bus-muted, #64748B);
-    padding: 4px 8px;
-    border-radius: 6px;
-    background: rgba(15, 23, 42, 0.03);
-}
-
-.o_bus_sync_pulse {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background-color: var(--transit-on-time, #059669);
-    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
-    animation: oBusSyncPulseAnim 2s infinite;
-}
-
-@keyframes oBusSyncPulseAnim {
-    0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.6); }
-    70% { box-shadow: 0 0 0 6px rgba(5, 150, 105, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
-}
-
-.o_bus_hud_icon_btn {
-    border: 1px solid var(--bus-line, #E2E8F0);
-    background: #FFFFFF;
-    color: var(--bus-slate-800, #1E293B);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-}
-
-.o_bus_hud_icon_btn:hover {
-    background: var(--bus-paper, #F8FAFC);
-    border-color: var(--bus-line-dark, #CBD5E1);
-}
-
-.o_bus_hud_icon_btn:active {
-    transform: scale(0.95);
-}
-
-.o_bus_hud_icon_btn.active {
-    background: var(--bus-slate-800, #1E293B);
-    border-color: var(--bus-slate-800, #1E293B);
-    color: #FFFFFF;
-}
-
-.o_bus_hud_error {
-    pointer-events: auto;
-    background: #FEF2F2;
-    border: 1px solid #FCA5A5;
-    color: #991B1B;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    font-weight: 500;
-}
-
-/* --------------------------------------------------------------------------
-   Floating Collapsible Fleet Drawer (Right Side)
-   -------------------------------------------------------------------------- */
-.o_bus_fleet_drawer {
-    position: absolute;
-    top: 76px;
-    right: 14px;
-    bottom: 14px;
-    width: 330px;
-    max-width: calc(100vw - 28px);
-    z-index: 1000;
-    pointer-events: auto;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(226, 232, 240, 0.85);
-    border-radius: 16px;
-    box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.10), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    transform: translateX(360px);
-    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.o_bus_fleet_drawer.is-open {
-    transform: translateX(0);
-}
-
-.o_bus_drawer_header {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--bus-line, #E2E8F0);
-    background: rgba(255, 255, 255, 0.5);
-}
-
-.o_bus_search_input_wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.o_bus_search_icon {
-    position: absolute;
-    left: 10px;
-    color: var(--bus-muted, #64748B);
-    font-size: 0.85rem;
-    pointer-events: none;
-}
-
-.o_bus_search_input {
-    width: 100%;
-    border: 1px solid var(--bus-line, #E2E8F0);
-    background: #FFFFFF;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    padding: 6px 30px 6px 32px;
-    outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.o_bus_search_input:focus {
-    border-color: var(--bus-uta-primary, #8B1D24);
-    box-shadow: 0 0 0 3px rgba(139, 29, 36, 0.10);
-}
-
-.o_bus_search_clear {
-    position: absolute;
-    right: 8px;
+.o_bus_icon_btn {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: var(--radio);
     background: transparent;
-    border: none;
-    color: var(--bus-muted, #64748B);
-    cursor: pointer;
-    padding: 2px;
+    color: var(--tinta);
 }
 
-.o_bus_drawer_list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 0;
+.o_bus_icon_btn:hover {
+    background: var(--papel);
 }
 
-/* Individual Unit Row in Drawer */
-.o_bus_unit_row {
+.o_bus_live :focus-visible {
+    outline: 3px solid var(--tinta);
+    outline-offset: 1px;
+    box-shadow: 0 0 0 5px var(--senal);
+}
+
+/* ---------- Bus markers ---------- */
+
+.o_bus_mk {
     position: relative;
-    display: flex;
-    padding: 10px 14px 10px 18px;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-    transition: background-color 0.15s ease;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
 }
 
-.o_bus_unit_row:hover {
-    background-color: var(--bus-lluvia, #F1F5F9);
+.o_bus_mk_rumbo {
+    position: absolute;
+    inset: 0;
+    transition: transform 600ms var(--facil);
 }
 
-.o_bus_unit_row.is-selected {
-    background-color: #F8FAFC;
-}
-
-.o_bus_unit_row.is-selected::after {
+.o_bus_mk_rumbo::before {
     content: "";
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: var(--bus-uta-primary, #8B1D24);
+    left: 50%;
+    top: -2px;
+    margin-left: -7px;
+    border: 7px solid transparent;
+    border-bottom: 10px solid var(--tinta);
+    border-top: 0;
 }
 
-.o_bus_unit_indicator {
+.o_bus_mk_cuerpo {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--c, var(--granate));
+    border-radius: 50%;
+    background: var(--tinta);
+    color: #fff;
+}
+
+.o_bus_mk_stopped .o_bus_mk_cuerpo { background: var(--alerta); }
+.o_bus_mk_offline .o_bus_mk_cuerpo { background: #8A979B; }
+.o_bus_mk_offline .o_bus_mk_rumbo { display: none; }
+
+.o_bus_mk.con-alerta .o_bus_mk_cuerpo {
+    box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--peligro);
+}
+
+.o_bus_mk.sos .o_bus_mk_cuerpo {
+    background: var(--peligro);
+    animation: o_bus_sos_blink 1s steps(2, start) infinite;
+}
+
+@keyframes o_bus_sos_blink {
+    to {
+        box-shadow: 0 0 0 4px #fff, 0 0 0 10px var(--peligro);
+    }
+}
+
+.o_bus_mk_nombre {
     position: absolute;
-    left: 0;
-    top: 8px;
-    bottom: 8px;
-    width: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 0.35rem;
+    border-radius: var(--radio);
+    background: var(--tinta);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-.o_bus_unit_content {
+.o_bus_inc {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 3px solid #fff;
+    border-radius: var(--radio);
+    background: var(--alerta);
+    color: #fff;
+    font-weight: 800;
+    transform: rotate(45deg);
+}
+
+.o_bus_inc.sos {
+    background: var(--peligro);
+}
+
+/* ---------- Selected bus card ---------- */
+
+.o_bus_card {
+    position: absolute;
+    left: 12px;
+    bottom: 24px;
+    z-index: 500;
+    width: min(440px, calc(100% - 24px));
+    padding: 1rem;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--bus-shadow-lg);
+}
+
+.o_bus_card header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.o_bus_chip {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.5rem;
+    height: 2rem;
+    padding: 0 0.4rem;
+    border-radius: var(--radio);
+    color: #fff;
+    font-family: var(--display);
+    font-weight: 700;
+}
+
+.o_bus_card_title {
+    display: grid;
     flex: 1;
     min-width: 0;
 }
 
-.o_bus_unit_name {
-    font-family: var(--bus-font-display);
+.o_bus_card_title strong {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    letter-spacing: -0.015em;
+}
+
+.o_bus_card_title span {
+    color: var(--tinta-2);
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_bus_card_facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin: 0.85rem 0;
+}
+
+.o_bus_card_facts div {
+    padding: 0.5rem 0.6rem;
+    border-radius: var(--radio);
+    background: var(--papel);
+}
+
+.o_bus_card_facts dt {
+    color: var(--tinta-2);
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+.o_bus_card_facts dd {
+    margin: 0;
     font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--bus-ink, #0F172A);
+    font-variant-numeric: tabular-nums;
 }
 
-.o_bus_speed_tag {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--bus-muted, #64748B);
-    background: var(--bus-line, #E2E8F0);
-    padding: 2px 6px;
-    border-radius: 6px;
+/* the bus's line, laid flat: passed stops filled, the one it is at in signal yellow */
+.o_bus_card_line {
+    display: flex;
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0 0 2.4rem;
 }
 
-.o_bus_speed_tag.is-moving {
-    background: #ECFDF5;
-    color: #065F46;
+.o_bus_card_line li {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
-.o_bus_unit_meta {
-    font-size: 0.78rem;
-    color: var(--bus-muted, #64748B);
-    margin-top: 2px;
-}
-
-.o_bus_unit_stop {
-    font-size: 0.78rem;
-    color: var(--bus-slate-800, #1E293B);
-    max-width: 170px;
-}
-
-.o_bus_status_badge {
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 10px;
-}
-
-.o_bus_status_badge.moving {
-    background: #ECFDF5;
-    color: #065F46;
-}
-
-.o_bus_status_badge.stopped {
-    background: #FFFBEB;
-    color: #92400E;
-}
-
-.o_bus_status_badge.offline {
-    background: #F1F5F9;
-    color: #64748B;
-}
-
-/* --------------------------------------------------------------------------
-   Floating Selected Vehicle Detail Card (Bottom-Left)
-   -------------------------------------------------------------------------- */
-.o_bus_selected_card {
+.o_bus_card_line li::before {
+    content: "";
     position: absolute;
-    bottom: 24px;
-    left: 20px;
-    width: 340px;
-    max-width: calc(100vw - 40px);
-    z-index: 1000;
-    pointer-events: auto;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 16px 32px -6px rgba(15, 23, 42, 0.12), 0 8px 12px -6px rgba(15, 23, 42, 0.05);
-    animation: oBusCardPopIn 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    top: 6px;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--c);
 }
 
-@keyframes oBusCardPopIn {
-    0% {
-        opacity: 0;
-        transform: scale(0.96) translateY(6px);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+.o_bus_card_line li:first-child::before { left: 50%; }
+.o_bus_card_line li:last-child::before { right: 50%; }
+
+.o_bus_card_stop {
+    position: relative;
+    z-index: 1;
+    width: 17px;
+    height: 17px;
+    border: 4px solid var(--c);
+    border-radius: 50%;
+    background: #fff;
 }
 
-.o_bus_card_header {
+.o_bus_card_line li.pasada .o_bus_card_stop {
+    background: var(--c);
+}
+
+.o_bus_card_line li.aqui .o_bus_card_stop {
+    width: 21px;
+    height: 21px;
+    margin-top: -2px;
+    border-color: var(--tinta);
+    background: var(--senal);
+}
+
+.o_bus_card_stop_name {
+    position: absolute;
+    top: 22px;
+    width: 5.5rem;
+    color: var(--tinta-2);
+    font-size: 0.75rem;
+    line-height: 1.15;
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.o_bus_card_line li:nth-child(even) .o_bus_card_stop_name {
+    display: none;
+}
+
+.o_bus_card_line li.aqui .o_bus_card_stop_name {
+    display: -webkit-box;
+    color: var(--tinta);
+    font-weight: 700;
+}
+
+.o_bus_card_alerts {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.o_bus_tag_alert {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--radio);
+    background: #F6E3E1;
+    color: var(--peligro);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.o_bus_card footer {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.o_bus_card footer .btn {
+    flex: 1;
+}
+
+/* ---------- Side panel ---------- */
+
+.o_bus_panel {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 500;
+    display: none;
+    flex-direction: column;
+    width: 388px;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--bus-shadow-lg);
+    overflow: hidden;
+}
+
+.o_bus_panel.is-open {
+    display: flex;
+}
+
+.o_bus_tabs {
+    display: flex;
+    background: var(--papel);
+}
+
+.o_bus_tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 48px;
+    border: 0;
+    background: transparent;
+    color: var(--tinta-2);
+    font-weight: 700;
+}
+
+.o_bus_tab.is-on {
+    background: var(--blanco);
+    color: var(--tinta);
+}
+
+.o_bus_tab b {
+    min-width: 1.5rem;
+    padding: 0 0.35rem;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+    color: var(--tinta);
+    font-variant-numeric: tabular-nums;
+}
+
+.o_bus_tab b.is-hot {
+    background: var(--peligro);
+    color: #fff;
+}
+
+.o_bus_panel_body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+}
+
+.o_bus_empty {
+    margin: 1rem 0.25rem;
+    color: var(--tinta-2);
+}
+
+.o_bus_item {
+    padding: 0.75rem 0.85rem;
+    border-left: 5px solid var(--tinta-2);
+    border-radius: var(--radio);
+    background: var(--papel);
+}
+
+.o_bus_item_l0 { border-left-color: var(--peligro); background: #F6E3E1; }
+.o_bus_item_l1 { border-left-color: var(--alerta); }
+.o_bus_item_l2 { border-left-color: var(--granate); }
+.o_bus_item_l3 { border-left-color: var(--ok); }
+
+.o_bus_item_head {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
+    gap: 0.5rem;
 }
 
-.o_bus_card_icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    font-size: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.o_bus_card_title {
-    font-family: var(--bus-font-display);
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: var(--bus-ink, #0F172A);
-    line-height: 1.2;
-}
-
-.o_bus_card_sub {
-    font-size: 0.78rem;
-    color: var(--bus-muted, #64748B);
-    margin-top: 2px;
-}
-
-.o_bus_card_close {
-    background: transparent;
-    border: none;
-    color: var(--bus-muted, #64748B);
-    font-size: 0.9rem;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
-    transition: background-color 0.15s ease;
-}
-
-.o_bus_card_close:hover {
-    background: var(--bus-line, #E2E8F0);
-    color: var(--bus-ink, #0F172A);
-}
-
-.o_bus_stat_grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    background: var(--bus-paper, #F8FAFC);
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--bus-line, #E2E8F0);
-}
-
-.o_bus_stat_item {
-    display: flex;
-    flex-direction: column;
-}
-
-.o_bus_stat_label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--bus-muted, #64748B);
-}
-
-.o_bus_stat_val {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--bus-ink, #0F172A);
-    margin-top: 1px;
-}
-
-.o_bus_card_actions {
-    display: flex;
-    margin-top: 12px;
-    gap: 8px;
-}
-
-.o_bus_card_actions .btn {
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.8rem;
-    transition: transform 0.1s ease;
-}
-
-.o_bus_card_actions .btn:active {
-    transform: scale(0.97);
-}
-
-/* --------------------------------------------------------------------------
-   Kinematic Bus Marker (Leaflet DivIcon)
-   -------------------------------------------------------------------------- */
-.o_bus_marker_container {
-    background: transparent !important;
-    border: none !important;
-}
-
-.o_bus_marker_wrap {
-    position: relative;
-    width: 42px;
-    height: 54px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Radar pulse when unit is actively moving */
-.o_bus_pulse {
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    pointer-events: none;
-    opacity: 0;
-}
-
-.o_bus_pulse.is-moving {
-    animation: oBusRadarPulse 2.4s infinite;
-    background-color: var(--unit-color, #8B1D24);
-}
-
-@keyframes oBusRadarPulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.55;
-    }
-    100% {
-        transform: scale(2.4);
-        opacity: 0;
-    }
-}
-
-/* Pin circular body */
-.o_bus_pin {
-    position: relative;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--unit-color, #8B1D24);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
-    border: 2.5px solid #FFFFFF;
-    transition: transform 0.15s ease;
-}
-
-.o_bus_pin.is-disconnected {
-    border-color: #EF4444;
-    filter: grayscale(0.5);
-}
-
-.o_bus_pin:hover {
-    transform: scale(1.12);
-}
-
-.o_bus_core {
-    font-size: 0.85rem;
-}
-
-/* Heading arrow orbiting the pin */
-.o_bus_arrow {
-    position: absolute;
-    top: -9px;
-    left: 50%;
-    width: 14px;
-    height: 14px;
-    margin-left: -7px;
-    pointer-events: none;
-    transform-origin: 7px 25px; /* Centers rotation around the pin core */
-    transition: transform 0.12s linear;
-}
-
-.o_bus_arrow_svg {
-    width: 14px;
-    height: 14px;
-    color: var(--unit-color, #8B1D24);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
-}
-
-/* Identification pill below the marker */
-.o_bus_badge_label {
-    margin-top: 3px;
-    background: rgba(15, 23, 42, 0.85);
-    color: #FFFFFF;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 4px;
+.o_bus_item_head span {
+    color: var(--tinta-2);
+    font-size: 0.875rem;
     white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    pointer-events: none;
-    letter-spacing: 0.02em;
 }
 
-/* Clean Tooltip for Route & Stop Points */
-.o_bus_tip {
-    font-family: var(--bus-font-body);
-    font-size: 0.78rem;
-    color: var(--bus-ink, #0F172A);
-    padding: 2px 4px;
+.o_bus_item_meta,
+.o_bus_item_note {
+    margin: 0.15rem 0 0;
+    font-size: 0.9375rem;
+}
+
+.o_bus_item_note {
+    color: var(--tinta-2);
+}
+
+.o_bus_item_actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+}
+
+.o_bus_link {
+    justify-self: start;
+    margin-top: 0.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--granate);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.o_bus_search input {
+    width: 100%;
+    height: 40px;
+    padding: 0 0.75rem;
+    border: 1px solid #C2CBC8;
+    border-radius: var(--radio);
+}
+
+.o_bus_row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 0.6rem 0.6rem 0;
+    border: 0;
+    border-radius: var(--radio);
+    background: transparent;
+    color: var(--tinta);
+    text-align: left;
+}
+
+.o_bus_row:hover {
+    background: var(--papel);
+}
+
+.o_bus_row.is-selected {
+    background: var(--papel-2);
+}
+
+.o_bus_row_bar {
+    flex: none;
+    width: 5px;
+    border-radius: 3px;
+}
+
+.o_bus_row_main {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+}
+
+.o_bus_row_main > span {
+    color: var(--tinta-2);
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.o_bus_row_alerts {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-top: 0.2rem;
+    white-space: normal !important;
+}
+
+.o_bus_row_side {
+    display: grid;
+    justify-items: end;
+    align-content: start;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.o_bus_row_age {
+    color: var(--tinta-2);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
+.o_bus_state_moving { color: var(--ok); }
+.o_bus_state_stopped { color: var(--alerta); }
+.o_bus_state_offline { color: var(--tinta-2); }
+
+/* Odoo sets small buttons in capitals; here they read as sentences. */
+.o_bus_live .btn,
+.o_bus_kanban .btn {
+    text-transform: none !important;   /* Odoo's own rule is more specific */
+    letter-spacing: 0 !important;
+}
+
+@media (max-width: 1399px) {
+    .o_bus_filter {
+        padding: 0 0.5rem;
+    }
+
+    .o_bus_sync {
+        max-width: 9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* ---------- Smaller screens: the panel becomes a sheet at the bottom ---------- */
+
+@media (max-width: 1199px) {
+    .o_bus_bar {
+        right: 12px;
+    }
+
+    .o_bus_panel {
+        top: auto;
+        left: 12px;
+        width: auto;
+        height: 42%;
+    }
+
+    .o_bus_card {
+        bottom: calc(42% + 24px);
+    }
+}
+
+@media (max-width: 767px) {
+    .o_bus_bar {
+        flex-wrap: wrap;
+    }
+
+    .o_bus_bar_line select {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .o_bus_bar_line {
+        flex: 1 1 100%;
+    }
+
+    .o_bus_sync {
+        margin-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .o_bus_sos,
+    .o_bus_mk.sos .o_bus_mk_cuerpo {
+        animation: none;
+    }
+
+    .o_bus_mk_rumbo {
+        transition: none;
+    }
 }
