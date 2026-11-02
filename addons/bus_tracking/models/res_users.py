@@ -3,7 +3,7 @@ import logging
 from urllib.parse import urlencode
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -94,8 +94,14 @@ class ResUsers(models.Model):
         for user in self:
             user.driver_badge_active = user.id in users_with_token and bool(user.driver_badge_qr)
 
+    def _check_badge_manager(self):
+        # The buttons are hidden in the view, but the methods can be called over RPC.
+        if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_manager')):
+            raise AccessError(_("Solo los administradores pueden emitir o revocar credenciales QR."))
+
     def action_generate_driver_badge(self):
         self.ensure_one()
+        self._check_badge_manager()
         if not self.has_group('bus_tracking.group_bus_driver'):
             raise UserError(_("El usuario debe pertenecer al grupo de Choferes para tener una credencial QR."))
 
@@ -115,6 +121,7 @@ class ResUsers(models.Model):
         return True
 
     def action_revoke_driver_badge(self):
+        self._check_badge_manager()
         for user in self:
             self.env['bus.driver.token']._revoke_badge(user)
             user.sudo().write({
