@@ -3,30 +3,35 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { gpsPermissionSnapshot } from '../src/gps/permissions';
-import { locationQueue, readLastSent } from '../src/gps/store';
+import { locationQueue, readLastError, readLastSent } from '../src/gps/store';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Action, Txt } from '../src/ui/cabin';
 import { useTheme } from '../src/ui/ThemeProvider';
 
-type Facts = { foreground: boolean; background: boolean; queue: number; last: string };
+type Facts = { foreground: boolean; background: boolean; queue: number; last: string; error: string | null };
 
 function stamp(at: number, lat: number, lon: number) {
   return `${new Date(at).toLocaleTimeString()} · ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 }
 
 async function loadFacts(): Promise<Facts> {
-  const [permissions, queue, sent] = await Promise.all([
+  const [permissions, queue, sent, failed] = await Promise.all([
     gpsPermissionSnapshot(),
     locationQueue.size(),
     readLastSent(),
+    readLastError(),
   ]);
+  // Only a failure newer than the last good send still explains anything.
+  const error =
+    failed && (!sent || failed.at > sent.at) ? `${new Date(failed.at).toLocaleTimeString()} · ${failed.error}` : null;
   return {
     foreground: permissions.foreground === 'granted',
     background: permissions.background === 'granted',
     queue,
     last: sent ? stamp(sent.at, sent.lat, sent.lon) : t('gpsNone'),
+    error,
   };
 }
 
@@ -57,6 +62,7 @@ export default function GpsScreen() {
         [t('gpsQueue'), String(facts.queue), facts.queue === 0],
         [t('gpsLast'), facts.last, null],
         [t('gpsDevice'), session.snapshot.gps?.uniqueId ?? '-', null],
+        ...(facts.error ? [[t('gpsLastError'), facts.error, false] as [string, string, boolean]] : []),
       ]
     : [];
 
