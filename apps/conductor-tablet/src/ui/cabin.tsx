@@ -1,13 +1,16 @@
 /**
- * Building blocks of the cabin screens. Rules: nothing the driver reads is smaller than 20 px, every
- * control is at least 72 px tall, states carry a word and a shape, never colour alone, no emoji.
+ * Building blocks of the cabin screens. Rules: nothing the driver reads is smaller than 20 px on a tablet (16 px on a phone), every
+ * control is at least 72 px tall (56 px on a phone), states carry a word and a shape, never colour alone, no emoji.
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   AccessibilityInfo,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -17,10 +20,55 @@ import {
 } from 'react-native';
 
 import type { GpsHealth } from '../gps/health';
-import { fonts, sizes } from './theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useLayout } from './layout';
+import { sizes, fonts } from './theme';
 import { useTheme } from './ThemeProvider';
 
+/** Tablet control height; phones use `useLayout().hit`. */
 export const HIT = 72;
+
+type ScreenProps = {
+  children: ReactNode;
+  /** Let the content scroll (forms, lists that may not fit on a phone). */
+  scroll?: boolean;
+  style?: StyleProp<ViewStyle>;
+};
+
+/**
+ * The frame of every cabin screen: ground colour, padding that keeps clear of notches, cut-outs and
+ * the system bars in either orientation, and (when `scroll`) room for the keyboard.
+ */
+export function Screen({ children, scroll, style }: ScreenProps) {
+  const { palette } = useTheme();
+  const { gutter, gap } = useLayout();
+  const insets = useSafeAreaInsets();
+  const frame = {
+    paddingTop: insets.top + gutter,
+    paddingBottom: insets.bottom + gutter,
+    paddingLeft: insets.left + gutter,
+    paddingRight: insets.right + gutter,
+    gap,
+  };
+  if (!scroll) {
+    return <View style={[styles.screen, { backgroundColor: palette.ground }, frame, style]}>{children}</View>;
+  }
+  return (
+    <KeyboardAvoidingView
+      style={[styles.screen, { backgroundColor: palette.ground }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[styles.scrollContent, frame, style]}
+        showsVerticalScrollIndicator={false}
+      >
+        {children}
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
 
 type TxtProps = {
   children: ReactNode;
@@ -35,6 +83,7 @@ type TxtProps = {
 
 export function Txt({ children, size = 'body', bold, dim, color, style, lines, fit }: TxtProps) {
   const { palette } = useTheme();
+  const px = useLayout().sizes[size];
   return (
     <Text
       numberOfLines={lines}
@@ -46,8 +95,8 @@ export function Txt({ children, size = 'body', bold, dim, color, style, lines, f
           color: color ?? (dim ? palette.ink2 : palette.ink),
           fontFamily: bold ? fonts.bold : fonts.text,
           fontWeight: bold ? '700' : '400',
-          fontSize: sizes[size],
-          lineHeight: Math.round(sizes[size] * (size === 'stop' || size === 'title' ? 1.05 : 1.3)),
+          fontSize: px,
+          lineHeight: Math.round(px * (size === 'stop' || size === 'title' ? 1.05 : 1.3)),
         },
         style,
       ]}
@@ -69,6 +118,7 @@ type ActionProps = {
 
 export function Action({ label, sub, onPress, kind = 'neutral', disabled, style, accessibilityHint }: ActionProps) {
   const { palette } = useTheme();
+  const { hit, phone } = useLayout();
   const bg = kind === 'accent' ? palette.accent : kind === 'quiet' ? 'transparent' : palette.panel;
   const fg = kind === 'accent' ? palette.onAccent : palette.ink;
   return (
@@ -81,6 +131,7 @@ export function Action({ label, sub, onPress, kind = 'neutral', disabled, style,
       accessibilityState={{ disabled: !!disabled }}
       style={({ pressed }) => [
         styles.action,
+        { minHeight: hit, paddingHorizontal: phone ? 14 : 20 },
         { backgroundColor: bg, borderColor: kind === 'quiet' ? palette.ink2 : bg, opacity: disabled ? 0.35 : 1 },
         pressed && !disabled && { transform: [{ scale: 0.97 }] },
         style,
@@ -191,6 +242,12 @@ export function SosButton({ onFire, title, hint, holding, status }: SosProps) {
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   action: {
     minHeight: HIT,
     paddingHorizontal: 20,
