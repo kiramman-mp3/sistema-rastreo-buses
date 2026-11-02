@@ -942,7 +942,7 @@ Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de ll
 
 - Pruebas con 5 personas por perfil (`docs/calidad/12-validacion-ux.md`, §5).
 - La cabina en una tableta física: lectura a 1 m al sol y de noche, vibración, TalkBack.
-- Recorrer el panel con teclado y lector de pantalla.
+- Probar el panel con lector de pantalla (el recorrido con teclado se hizo el 2026-11-02 y se corrigieron tres problemas; ver `docs/calidad/12-validacion-ux.md`).
 - Que la universidad entregue teléfono y correo oficiales, fotos propias de sus buses y apruebe el nombre y la marca.
 - Las coordenadas de `scripts/dev_seed.py` son aproximadas y solo sirven para desarrollo.
 - No se desplegó en Azure ni se fusionó `develop` en `main`.
