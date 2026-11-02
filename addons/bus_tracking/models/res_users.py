@@ -36,16 +36,15 @@ class ResUsers(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        # Drivers only use the tablet API, so they are portal users: they cannot open the Odoo
+        # backend nor read the company's contacts and users. The form sends the default internal
+        # groups along, so they are replaced, not added to.
         driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
-        internal_group = self.env.ref('base.group_user', raise_if_not_found=False)
+        portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         for vals in vals_list:
-            if vals.get('is_bus_driver', self.env.context.get('default_is_bus_driver')):
-                groups = list(vals.get('groups_id', []))
-                if driver_group:
-                    groups.append((4, driver_group.id))
-                if internal_group:
-                    groups.append((4, internal_group.id))
-                vals['groups_id'] = groups
+            if driver_group and portal_group and vals.get(
+                    'is_bus_driver', self.env.context.get('default_is_bus_driver')):
+                vals['groups_id'] = [(6, 0, [portal_group.id, driver_group.id])]
             if vals.get('driver_password'):
                 vals['password'] = vals.pop('driver_password')
         return super(ResUsers, self.with_context(no_reset_password=True)).create(vals_list)
@@ -72,18 +71,13 @@ class ResUsers(models.Model):
         return [('groups_id', 'not in', [driver_group.id])]
 
     def _inverse_is_bus_driver(self):
+        # Only the Driver role changes; the user type is left alone (new drivers are created
+        # as portal users in `create`).
         driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
-        internal_group = self.env.ref('base.group_user', raise_if_not_found=False)
         if not driver_group:
             return
         for user in self:
-            if user.is_bus_driver:
-                groups = [(4, driver_group.id)]
-                if internal_group and internal_group not in user.groups_id:
-                    groups.append((4, internal_group.id))
-                user.write({'groups_id': groups})
-            else:
-                user.write({'groups_id': [(3, driver_group.id)]})
+            user.write({'groups_id': [(4 if user.is_bus_driver else 3, driver_group.id)]})
 
     @api.depends('driver_badge_qr')
     def _compute_driver_badge_active(self):
