@@ -72,11 +72,22 @@ class TestPassengerPortal(HttpCase):
         resp, data = self.buses()
         self.assertEqual(resp.headers['Content-Type'], 'application/json')
         self.assertEqual(len(data['buses']), 1)
-        self.assertEqual(sorted(data['buses'][0]), ['course', 'lat', 'lon', 'name', 'status'])
+        self.assertEqual(sorted(data['buses'][0]), ['after', 'at', 'course', 'lat', 'lon', 'name', 'status'])
         self.assertEqual(data['buses'][0]['name'], 'Bus 12')
         self.assertEqual(data['buses'][0]['status'], 'moving')
         for secret in ('ZZZZ-99', 'Pedro Secreto', 'b-supersecretid00', 'speed', 'plate', 'driver'):
             self.assertNotIn(secret, resp.text)
+
+    def test_feed_places_each_bus_on_the_line(self):
+        terminal, plaza = self.route.stop_ids
+        self.bus._apply_position(traccar_position(
+            5, (self.now - timedelta(minutes=3)).strftime('%Y-%m-%dT%H:%M:%SZ'), terminal.latitude, terminal.longitude))
+        _, data = self.buses()
+        self.assertEqual((data['buses'][0]['at'], data['buses'][0]['after']), (0, 0))
+        portal.cache.clear()
+        self.report(self.bus, 1)        # left the terminal, not yet at the plaza
+        _, data = self.buses()
+        self.assertEqual((data['buses'][0]['at'], data['buses'][0]['after']), (None, 0))
 
     def test_feed_hides_stale_and_foreign_buses(self):
         stale = self.env['bus.vehicle'].create({'name': 'Viejo', 'route_id': self.route.id, 'traccar_device_id': 6})
