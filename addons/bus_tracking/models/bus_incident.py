@@ -77,4 +77,5 @@ class BusIncident(models.Model):
                 'tag': 'bus-incident',
             }
             push._send_to_managers(payload)
-        pending.write({'notified': True})
+            # Marked one by one: whatever happens to the next one, this one is never sent twice.
+            incident.notified = True
