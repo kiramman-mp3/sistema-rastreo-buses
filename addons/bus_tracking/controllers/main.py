@@ -68,7 +68,7 @@ class BusTrackingController(http.Controller):
             'note': incident.note or '',
             'lat': incident.latitude or None,
             'lon': incident.longitude or None,
-            'time': fields.Datetime.to_string(incident.create_date),
+            'time': fields.Datetime.to_string(incident.reported_at or incident.create_date),
         } for incident in env['bus.incident']._open_for_map()]
         new_complaints = env['bus.complaint'].search_count([('state', '=', 'new')])
         routes = [{

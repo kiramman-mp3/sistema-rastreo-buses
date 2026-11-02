@@ -10,6 +10,7 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
+from ..models.utils import parse_traccar_dt
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
@@ -139,6 +140,8 @@ class BusDriverApi(http.Controller):
                 'plate': bus.plate or '',
                 'route_id': bus.route_id.id or None,
                 'available': busy.get(bus.id, user.id) == user.id,
+                # A bus without a GPS device in Traccar cannot start a shift (no_gps).
+                'has_gps': bool(bus.sudo().traccar_unique_id),
             } for bus in env['bus.vehicle'].search([])],
             'routes': [{
                 'id': route.id,
@@ -163,11 +166,16 @@ class BusDriverApi(http.Controller):
         env = request.env(user=user.id)
         bus = env['bus.vehicle'].browse(vehicle_id)
         route = env['bus.route'].browse(route_id)
-        if not bus.exists() or not route.exists():
+        # Archived buses and routes are kept for history only.
+        if not bus.exists() or not route.exists() or not bus.active or not route.active:
             return json_response({'error': 'bad_request'}, 400)
         unique_id = bus.sudo().traccar_unique_id
         if not unique_id:
             return json_response({'error': 'no_gps'}, 409)
+        # Without it the tablet has nowhere to send positions: better refuse than a silent shift.
+        gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').strip().rstrip('/')
+        if not gps_url:
+            return json_response({'error': 'no_gps_url'}, 409)
         Shift = env['bus.shift'].sudo()
         with mute_logger('odoo.sql_db'):
             try:
@@ -177,7 +185,6 @@ class BusDriverApi(http.Controller):
             except IntegrityError:
                 return json_response({'error': 'conflict'}, 409)
         shift._assign_vehicle()
-        gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').rstrip('/')
         return json_response({
             'shift': self._shift_payload(shift),
             'traccar_unique_id': unique_id,
@@ -204,16 +211,8 @@ class BusDriverApi(http.Controller):
         if not shift:
             return json_response({'error': 'no_shift'}, 409)
         bus = shift.vehicle_id.sudo()
-        stops = shift.route_id.stop_ids
-        arrivals = request.env['bus.stop.arrival'].sudo().search([
-            ('vehicle_id', '=', bus.id),
-            ('stop_id', 'in', stops.ids),
-            ('arrival_time', '>=', shift.start),
-        ], order='arrival_time desc')
-        arrived = {}
-        for arrival in arrivals:
-            arrived.setdefault(arrival.stop_id.id, utc_z(arrival.arrival_time))
-        next_stop_id = next((stop.id for stop in stops if stop.id not in arrived), None)
+        trip = shift._trip_progress()
+        arrived = trip['arrived']
         since = fields.Datetime.now() - timedelta(hours=2)
         alerts = request.env['bus.alert'].sudo().search([
             ('vehicle_id', '=', bus.id),
@@ -226,18 +225,20 @@ class BusDriverApi(http.Controller):
             # The last SOS of this shift and whether someone in the office saw it.
             'sos': {
                 'id': sos.id,
-                'sent_at': utc_z(sos.create_date),
+                'sent_at': utc_z(sos.reported_at or sos.create_date),
                 'seen_at': utc_z(sos.acknowledged_at),
                 'seen_by': sos.acknowledged_by.name or None,
             } if sos else None,
             'current_stop_id': bus.current_stop_id.id or None,
-            'next_stop_id': next_stop_id,
+            'next_stop_id': trip['next_stop'].id or None,
+            # 'back' once the bus reached the last stop: the stops come in the order it travels them.
+            'direction': trip['direction'],
             'stops': [{
                 'id': stop.id,
                 'name': stop.name,
                 'sequence': stop.sequence,
-                'arrived_at': arrived.get(stop.id),
-            } for stop in stops],
+                'arrived_at': utc_z(arrived.get(stop.id)),
+            } for stop in trip['stops']],
             'alerts': [{
                 'id': alert.id,
                 'kind': alert.kind,
@@ -301,7 +302,14 @@ class BusDriverApi(http.Controller):
                 return json_response({'error': 'bad_request'}, 400)
         else:
             lat = lon = False
+        # The tablet sends when the driver pressed the button; it is kept only when it falls
+        # inside this shift and not in the future, so a wrong tablet clock cannot reorder things.
+        now = fields.Datetime.now()
+        reported_at = parse_traccar_dt(body.get('reported_at'))
+        if not reported_at or not (shift.start - timedelta(minutes=1) <= reported_at <= now + timedelta(minutes=1)):
+            reported_at = now
         incident = request.env['bus.incident'].sudo().create({
+            'reported_at': min(reported_at, now),
             'shift_id': shift.id,
             'vehicle_id': shift.vehicle_id.id,
             'kind': kind,

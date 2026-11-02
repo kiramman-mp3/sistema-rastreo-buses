@@ -1,4 +1,4 @@
-import { classifyStops, clock } from './progress';
+import { classifyStops, clock, sosPhase } from './progress';
 
 const stops = [
   { id: 3, name: 'Terminal', sequence: 30, arrived_at: null },
@@ -23,5 +23,32 @@ describe('stop progress', () => {
 
   test('shows the UTC clock from the arrival stamp', () => {
     expect(clock('2026-10-30T15:04:00Z')).toBe('15:04');
+  });
+
+  test('walks the stops backwards on the way back', () => {
+    const view = classifyStops(stops, 2, 'back');
+    expect(view.map((stop) => stop.name)).toEqual(['Terminal', 'Mercado', 'Hospital']);
+    expect(view[1].status).toBe('next');
+  });
+});
+
+describe('sos phase', () => {
+  const at = '2026-10-30T15:00:00.000Z';
+  const delivered = { id: 1, sent_at: '2026-10-30T15:00:00Z', seen_at: null, seen_by: null };
+
+  test('the server wins once it has the sos the driver pressed', () => {
+    expect(sosPhase(delivered, { status: 'queued', at })).toBe('sent');
+    expect(sosPhase({ ...delivered, seen_at: '2026-10-30T15:02:00Z', seen_by: 'Ana' }, { status: 'queued', at })).toBe('seen');
+  });
+
+  test('an older sos on the server does not hide a new one still queued', () => {
+    const older = { ...delivered, sent_at: '2026-10-30T14:00:00Z', seen_at: '2026-10-30T14:01:00Z' };
+    expect(sosPhase(older, { status: 'queued', at })).toBe('queued');
+  });
+
+  test('without a local press the server state is shown', () => {
+    expect(sosPhase(delivered, null)).toBe('sent');
+    expect(sosPhase(null, null)).toBeNull();
+    expect(sosPhase(null, { status: 'sending', at })).toBe('sending');
   });
 });

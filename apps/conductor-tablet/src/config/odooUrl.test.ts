@@ -19,6 +19,15 @@ describe('Odoo URL from QR or typing', () => {
     expect(normalizeOdooUrl('org.traccar.client://config?url=https://gps.example&id=bus-1')).toBeNull();
   });
 
+  test('only accepts plain http for a server on the local network', () => {
+    expect(normalizeOdooUrl('http://evil.example.com')).toBeNull();
+    expect(normalizeOdooUrl('ftp://odoo.example.com')).toBeNull();
+    expect(normalizeOdooUrl('http://localhost:8070')).toBe('http://localhost:8070');
+    expect(normalizeOdooUrl('http://192.168.1.20:8069/web')).toBe('http://192.168.1.20:8069');
+    expect(normalizeOdooUrl('http://10.0.2.2:8069')).toBe('http://10.0.2.2:8069');
+    expect(normalizeOdooUrl('http://172.40.0.1')).toBeNull();
+  });
+
   describe('parseDriverBadge', () => {
     test('parses uta-buses://login deep link with token, odoo, and driver', () => {
       const qr = 'uta-buses://login?odoo=https%3A%2F%2Fbusesuta2340.eastus2.cloudapp.azure.com&token=secret-token-123&driver=Carlos+Mendoza';
