@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Institutional UTA Transit emblem -->
+    <!-- Brand mark: a stretch of line with three stops; the middle one is "you are here". -->
     <template id="brand_mark">
-        <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false" class="uta-brand-icon" width="40" height="40">
-            <defs>
-                <linearGradient id="utaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#8B1D24"/>
-                    <stop offset="100%" stop-color="#5E1217"/>
-                </linearGradient>
-            </defs>
-            <rect width="40" height="40" rx="10" fill="url(#utaGrad)"/>
-            <!-- Stylized transit bus silhouette in crisp white -->
-            <path d="M11 11C11 9.34315 12.3431 8 14 8H26C27.6569 8 29 9.34315 29 11V23C29 24.6569 27.6569 26 26 26H14C12.3431 26 11 24.6569 11 23V11Z" fill="#FFFFFF"/>
-            <rect x="13" y="11" width="14" height="6.5" rx="1.5" fill="#8B1D24"/>
-            <circle cx="15" cy="21.5" r="1.5" fill="#D97706"/>
-            <circle cx="25" cy="21.5" r="1.5" fill="#D97706"/>
-            <rect x="18" y="21" width="4" height="1.5" rx="0.75" fill="#0F172A"/>
-            <rect x="13.5" y="26" width="3" height="4" rx="1.5" fill="#FFFFFF"/>
-            <rect x="23.5" y="26" width="3" height="4" rx="1.5" fill="#FFFFFF"/>
+        <svg viewBox="0 0 44 24" width="44" height="24" aria-hidden="true" focusable="false" class="marca-linea">
+            <rect x="4" y="9" width="36" height="6" fill="#7A1A22"/>
+            <circle cx="6" cy="12" r="4.5" fill="#FFFFFF" stroke="#7A1A22" stroke-width="3"/>
+            <circle cx="22" cy="12" r="6" fill="#FFC62B" stroke="#172025" stroke-width="3"/>
+            <circle cx="38" cy="12" r="4.5" fill="#FFFFFF" stroke="#7A1A22" stroke-width="3"/>
         </svg>
     </template>
 
