@@ -6,6 +6,12 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 
 from .geo import PathMeasure
 
+# Measured lines per route, per worker. The deviation alert needs one on every position of every
+# bus; decoding up to 1,500 points each time was the cost. The key changes whenever the route,
+# its track or any of its stops is edited, so a stale line is never used.
+_MEASURES = {}
+_MEASURES_MAX = 64
+
 
 class BusRoute(models.Model):
     _name = 'bus.route'
@@ -52,6 +58,19 @@ class BusRoute(models.Model):
             return []
         length = PathMeasure(points).length / 1000.0
         return [{'name': self.name, 'km': round(length, 1), 'points': points}]
+
+    def _path_measure(self):
+        """The measured line of `_map_lines`, or None when the route has no line."""
+        self.ensure_one()
+        stops = self.stop_ids
+        key = (self.env.cr.dbname, self.id, self.write_date, len(stops),
+               max(stops.mapped('write_date'), default=None))
+        if key not in _MEASURES:
+            lines = self._map_lines()
+            if len(_MEASURES) >= _MEASURES_MAX:
+                _MEASURES.clear()
+            _MEASURES[key] = PathMeasure(lines[0]['points']) if lines else None
+        return _MEASURES[key]
 
     def action_record_track(self):
         self.ensure_one()
