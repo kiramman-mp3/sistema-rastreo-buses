@@ -28,7 +28,8 @@ services:
       - ./config/odoo.conf:/etc/odoo/odoo.conf
 
   traccar:
-    image: traccar/traccar:latest
+    # Pinned: the forwarding settings changed between versions (see README). Verified with 6.16.0.
+    image: traccar/traccar:6.16.0
     restart: unless-stopped
     depends_on:
       - odoo
@@ -46,13 +47,6 @@ services:
     volumes:
       - traccar-data:/opt/traccar/data
       - traccar-logs:/opt/traccar/logs
-
-  # Development mailbox: catches every email Odoo sends. Web UI on http://localhost:8025
-  mailpit:
-    image: axllent/mailpit:latest
-    restart: unless-stopped
-    ports:
-      - "${MAILPIT_PORT:-8025}:8025"
 
 volumes:
   db-data:

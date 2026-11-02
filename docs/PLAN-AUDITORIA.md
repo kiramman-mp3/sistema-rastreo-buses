@@ -195,7 +195,7 @@ Tableta:
 - `docs: describe the kichwa draft correctly`.
 - Prueba: script de `qa/` que falla si `es.po` tiene entradas vacías o referencias a modelos inexistentes.
 
-### Fase 7. `ci/pipeline-completo` y `chore/scripts-produccion` (OPS-01 a OPS-04, SEC-05)
+### Fase 7. `ci/pipeline-completo` y `chore/scripts-produccion` (OPS-01 a OPS-04, SEC-05) — hecha (`clean-azure-db.sh` pasa a `scripts/reset-prod.sh`; SEC-05 se hizo en la fase 1; Traccar fijado en 6.16.0)
 - `ci: run the odoo test suite against postgres` (servicio `postgres:15` + contenedor `odoo:16.0` con `pywebpush`).
 - `ci: lint the tablet app` y `ci: run flake8 with the full rule set on python 3.9` (corregir lo que salga en commits `style:` aparte).
 - `fix: rewrite the azure reset script on top of init-prod` con confirmación explícita, sin secretos y guardando la contraseña de Traccar generada; o eliminarlo si no se usa.
