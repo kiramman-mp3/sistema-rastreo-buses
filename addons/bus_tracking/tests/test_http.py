@@ -146,3 +146,23 @@ class TestHttp(HttpCase):
         resp = self.url_open('/', allow_redirects=False)
         self.assertEqual(resp.status_code, 303)
         self.assertIn('/web', resp.headers['Location'])
+
+    def track(self, **params):
+        self.authenticate('admin', 'admin')
+        return self.url_open('/bus_tracking/track', data=json.dumps(
+            {'jsonrpc': '2.0', 'method': 'call', 'params': params}),
+            headers={'Content-Type': 'application/json'}).json()
+
+    def test_track_is_bounded_and_validated(self):
+        self.bus._apply_position(traccar_position(
+            7, fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'), -33.47, -70.62))
+        self.assertEqual(self.track(vehicle_id=self.bus.id, hours=10 ** 9)['result'], [[-33.47, -70.62]])
+        self.assertEqual(len(self.track(vehicle_id=self.bus.id, hours='nan')['result']), 1)
+        bad = self.track(vehicle_id='x')
+        self.assertIn('error', bad)
+        self.assertNotIn('Overflow', json.dumps(bad))
+
+    def test_webhook_still_accepts_the_secret_in_the_url_for_now(self):
+        self.assertEqual(self.post().status_code, 200)
+        self.assertEqual(self.positions(), 1)
+
