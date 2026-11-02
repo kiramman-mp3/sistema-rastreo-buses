@@ -7,12 +7,14 @@ import { GpsPermissionError } from '../src/gps/types';
 import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, HIT, Txt } from '../src/ui/cabin';
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Select() {
   useLang();
   const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const actions = useSessionActions();
   const { vehicles, routes, driver } = session.snapshot;
@@ -82,9 +84,9 @@ export default function Select() {
   }
 
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+    <Screen>
       <View style={styles.head}>
-        <View>
+        <View style={styles.headText}>
           <Txt size="body" dim>
             {tf('selectHello', { name: driver?.name ?? '' })}
           </Txt>
@@ -103,7 +105,7 @@ export default function Select() {
         </View>
       ) : null}
 
-      <View style={styles.columns}>
+      <View style={[styles.columns, !layout.wide && styles.columnsStack, { gap: layout.gap }]}>
         <View style={styles.column}>
           <Txt size="small" dim>
             {t('chooseBus')}
@@ -123,7 +125,7 @@ export default function Select() {
                   accessibilityState={{ checked: on, disabled: !usable(bus) }}
                   style={[
                     styles.option,
-                    { backgroundColor: on ? palette.ink : palette.panel, opacity: usable(bus) ? 1 : 0.45 },
+                    { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel, opacity: usable(bus) ? 1 : 0.45 },
                   ]}
                 >
                   <Txt bold size="data" color={on ? palette.ground : palette.ink}>
@@ -155,7 +157,7 @@ export default function Select() {
                   onPress={() => setRouteId(route.id)}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: on }}
-                  style={[styles.option, styles.routeOption, { backgroundColor: on ? palette.ink : palette.panel }]}
+                  style={[styles.option, styles.routeOption, { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel }]}
                 >
                   <View style={[styles.chip, { backgroundColor: route.color || palette.accent }]}>
                     <Txt bold size="body" color="#FFFFFF">
@@ -187,15 +189,13 @@ export default function Select() {
         kind="accent"
         disabled={busy || !vehicleId || !routeId}
       />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    padding: 24,
-    gap: 16,
+  headText: {
+    flexShrink: 1,
   },
   head: {
     flexDirection: 'row',
@@ -215,7 +215,9 @@ const styles = StyleSheet.create({
   columns: {
     flex: 1,
     flexDirection: 'row',
-    gap: 24,
+  },
+  columnsStack: {
+    flexDirection: 'column',
   },
   column: {
     flex: 1,
@@ -226,7 +228,6 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   option: {
-    minHeight: HIT + 8,
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 10,
