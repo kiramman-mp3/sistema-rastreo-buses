@@ -17,7 +17,8 @@ class BusRouteRecord(models.TransientModel):
 
     route_id = fields.Many2one('bus.route', required=True, ondelete='cascade')
     vehicle_id = fields.Many2one('bus.vehicle', string="Bus", required=True)
-    date_from = fields.Datetime(string="From", required=True, default=lambda self: fields.Datetime.now() - timedelta(hours=2))
+    date_from = fields.Datetime(string="From", required=True,
+                                default=lambda self: fields.Datetime.now() - timedelta(hours=2))
     date_to = fields.Datetime(string="Until", required=True, default=fields.Datetime.now)
 
     @api.constrains('date_from', 'date_to')
@@ -43,7 +44,8 @@ class BusRouteRecord(models.TransientModel):
             'tag': 'display_notification',
             'params': {
                 'title': _("Track recorded"),
-                'message': _("%(points)s points from %(positions)s positions.", points=len(points), positions=len(positions)),
+                'message': _("%(points)s points from %(positions)s positions.",
+                             points=len(points), positions=len(positions)),
                 'type': 'success',
                 'sticky': False,
                 'next': {'type': 'ir.actions.act_window_close'},

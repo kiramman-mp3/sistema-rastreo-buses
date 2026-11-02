@@ -12,7 +12,7 @@ import sys
 
 import graficos
 from common import OUT, load_json
-from informe_lib import (BODY, CONTENT_W, H1, H2, H3, REF, PageBreak, Report, Spacer, bullets, console, figure, fmt, numbered,
+from informe_lib import (BODY, H1, H2, H3, REF, PageBreak, Report, Spacer, bullets, console, figure, fmt, numbered,
                          p, pct, table, thousands)
 
 SALIDA = sys.argv[1] if len(sys.argv) > 1 else os.path.join(OUT, os.pardir, 'Informe_calidad_rastreo_buses.pdf')

@@ -28,6 +28,7 @@ JS_STRINGS = ('status_moving', 'status_stopped', 'status_offline', 'updated', 'u
 def js_strings(strings):
     return json.dumps({key: strings[key] for key in JS_STRINGS})
 
+
 _HEX_COLOR = re.compile(r'^#[0-9a-fA-F]{6}$')
 
 
@@ -114,7 +115,8 @@ def portal_context(**values):
         request.httprequest.accept_languages,
         requested=request.params.get('lang'),
         remembered=request.httprequest.cookies.get(LANG_COOKIE))
-    values.update(lang=lang, site_lang=lang, s=STRINGS[lang], asset_v=asset_version(), line_i18n=js_strings(STRINGS[lang]),
+    values.update(lang=lang, site_lang=lang, s=STRINGS[lang], asset_v=asset_version(),
+                  line_i18n=js_strings(STRINGS[lang]),
                   brand=brand_name(request.env(su=True)),
                   contact=public_contact(request.env(su=True)),
                   languages={c: s['lang_name'] for c, s in STRINGS.items()})
@@ -234,7 +236,8 @@ class BusPortal(http.Controller):
             return request.redirect('/rutas/%s' % first.code)
         return request.redirect('/rutas')
 
-    @http.route(['/rutas/<string:code>', '/transporte/rutas/<string:code>'], type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/<string:code>', '/transporte/rutas/<string:code>'],
+                type='http', auth='public', methods=['GET'])
     def route_map(self, code, **kwargs):
         route = self._public_route(code)
         if not route:
@@ -260,7 +263,8 @@ class BusPortal(http.Controller):
         values['tile_url'] = tile_url(request.env(su=True))
         return render_portal('bus_tracking.portal_route', values)
 
-    @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'], type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'],
+                type='http', auth='public', methods=['GET'])
     def route_buses(self, code, **kwargs):
         # A whole campus behind one address (Wi-Fi, carrier NAT) polls the same line every ten
         # seconds: a cached answer costs nothing, so only the requests that reach the database count.
