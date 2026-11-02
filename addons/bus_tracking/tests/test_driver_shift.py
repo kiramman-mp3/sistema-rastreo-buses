@@ -180,6 +180,21 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual(self.env['bus.incident'].browse(resp.json()['id']).kind, 'sos')
         self.assertGreater(self.env['ir.cron.trigger'].search_count([('cron_id', '=', cron.id)]), before)
 
+    def test_the_tablet_learns_when_the_office_saw_its_sos(self):
+        token = self.token()
+        self.start(token)
+        self.assertIsNone(self.post(STATE, token=token).json()['sos'])
+        sos_id = self.post(INCIDENT, {'kind': 'sos'}, token=token).json()['id']
+        sos = self.post(STATE, token=token).json()['sos']
+        self.assertEqual((sos['id'], sos['seen_at']), (sos_id, None))
+        manager = self.env['res.users'].create({
+            'name': 'Despacho', 'login': 'despacho',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_user').id])]})
+        self.env['bus.incident'].browse(sos_id).with_user(manager).action_acknowledge()
+        sos = self.post(STATE, token=token).json()['sos']
+        self.assertTrue(sos['seen_at'])
+        self.assertEqual(sos['seen_by'], 'Despacho')
+
     def test_a_driver_does_not_see_another_driver_shift_in_me(self):
         self.start(self.token('chofer2'))
         data = self.post(ME, token=self.token()).json()

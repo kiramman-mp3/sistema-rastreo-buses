@@ -8,7 +8,15 @@
             <t t-set="brand" t-value="request.env['ir.config_parameter'].sudo().get_param('bus_tracking.brand_name') or 'Buses UTA'"/>
             <div class="o_bus_login_shell">
                 <aside class="o_bus_login_visual">
-                    <p class="o_bus_login_quote">Buen día.<br/>Veamos por dónde van tus buses.</p>
+                    <!-- Ecuador has no daylight saving: UTC-5 all year. -->
+                    <t t-set="ec_hour" t-value="(datetime.datetime.utcnow().hour + 19) % 24"/>
+                    <p class="o_bus_login_quote">
+                        <t t-if="5 &lt;= ec_hour &lt; 12">Buenos días.</t>
+                        <t t-elif="12 &lt;= ec_hour &lt; 19">Buenas tardes.</t>
+                        <t t-else="">Buenas noches.</t>
+                        <br/>Veamos cómo van los buses.
+                    </p>
+                    <p class="o_bus_login_credit">Ambato desde lo alto. Foto: Martín Vasco, CC BY-SA 4.0</p>
                 </aside>
                 <main class="o_bus_login_panel">
                     <div class="o_bus_login_card">
@@ -17,12 +25,7 @@
                             <span t-esc="brand"/>
                         </a>
                         <t t-out="0"/>
-                        <div class="o_bus_login_footer" t-if="not disable_footer">
-                            <t t-if="not disable_database_manager">
-                                <a href="/web/database/manager">Manage Databases</a>
-                            </t>
-                            <a href="https://www.odoo.com?utm_source=db&amp;utm_medium=auth" target="_blank">Powered by Odoo</a>
-                        </div>
+                        <p class="o_bus_login_footer">Los choferes ingresan desde la tableta del bus, no desde aquí.</p>
                     </div>
                 </main>
             </div>
@@ -31,8 +34,8 @@
 
     <template id="login" inherit_id="web.login" name="Bus Tracking login">
         <xpath expr="//form[hasclass('oe_login_form')]" position="before">
-            <h1 class="o_bus_login_title">Bienvenido de vuelta</h1>
-            <p class="o_bus_login_sub">Entra para ver dónde están tus buses.</p>
+            <h1 class="o_bus_login_title">Ingreso del personal</h1>
+            <p class="o_bus_login_sub">Para quien coordina el servicio de transporte.</p>
         </xpath>
     </template>
 </odoo>
