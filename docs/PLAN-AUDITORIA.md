@@ -167,7 +167,7 @@ Tableta:
 - `chore: drop the microphone permission and duplicated permissions`.
 - Pruebas: `session.test.ts` (no_shift detiene GPS, fin de turno con 409, credencial no se guarda como sesión, cambio de servidor pide https); `runtime.test.ts` nuevo (timeout, error guardado, cola con ejecuciones concurrentes); `secureStore.test.ts` (no escribe en `AsyncStorage`); `progress.test.ts` (segunda vuelta). Backend: `test_driver_shift.py` (segunda vuelta, `no_gps_url`, ruta archivada, `reported_at`).
 
-### Fase 4. `fix/portal-y-panel` (PORT-01, PORT-02, PAN-01 a PAN-05, BE-05, BE-14, SEC-11, SEC-12)
+### Fase 4. `fix/portal-y-panel` (PORT-01, PORT-02, PAN-01 a PAN-05, BE-05, BE-14, SEC-11, SEC-12) — hecha (PAN-01: Odoo 16 ya recarga la ficha al cerrar el selector; sólo faltaba traducirlo)
 - `fix: let a whole campus follow a line without hitting the rate limit` (límite sólo en fallos de caché o subirlo a unas 600/min; medirlo con `qa/auditoria.py`).
 - `fix: forget idle addresses in the rate limiter`.
 - `feat: count stops in the direction the bus travels` (enviar el sentido del viaje en el feed, sin exponer ids).
