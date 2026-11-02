@@ -6,6 +6,7 @@ from odoo import api, fields, models
 
 TOKEN_TTL = timedelta(days=30)
 BADGE_TTL = timedelta(days=365)
+BADGE_LABEL = 'badge_qr'
 
 
 def hash_token(raw):
@@ -35,20 +36,25 @@ class BusDriverToken(models.Model):
         self.sudo().create({
             'token_hash': hash_token(raw),
             'user_id': user.id,
-            'device_label': (device_label or '')[:80],
+            # A session must never pass for a badge, whatever label the tablet sends.
+            'device_label': '' if device_label == BADGE_LABEL else (device_label or '')[:80],
             'expires': fields.Datetime.now() + TOKEN_TTL,
         })
         return raw
 
     @api.model
     def _user_for(self, raw):
-        """The driver the token belongs to, or an empty recordset when it is unknown,
-        expired, or its user lost the driver role."""
+        """The driver the session token belongs to, or an empty recordset when it is unknown,
+        expired, or its user lost the driver role. A badge is not a session: it only buys one
+        through `login_badge`, so a copied badge cannot be used against the API directly."""
         users = self.env['res.users']
         if not raw:
             return users
         token = self.sudo().search([
-            ('token_hash', '=', hash_token(raw)), ('expires', '>', fields.Datetime.now())], limit=1)
+            ('token_hash', '=', hash_token(raw)),
+            ('device_label', '!=', BADGE_LABEL),
+            ('expires', '>', fields.Datetime.now()),
+        ], limit=1)
         user = token.user_id
         if user.active and user.has_group('bus_tracking.group_bus_driver'):
             return user
@@ -59,13 +65,13 @@ class BusDriverToken(models.Model):
         """Create or replace a long-lived credential badge token for `user`."""
         self.sudo().search([
             ('user_id', '=', user.id),
-            ('device_label', '=', 'badge_qr'),
+            ('device_label', '=', BADGE_LABEL),
         ]).unlink()
         raw = secrets.token_urlsafe(32)
         self.sudo().create({
             'token_hash': hash_token(raw),
             'user_id': user.id,
-            'device_label': 'badge_qr',
+            'device_label': BADGE_LABEL,
             'expires': fields.Datetime.now() + BADGE_TTL,
         })
         return raw
@@ -75,7 +81,7 @@ class BusDriverToken(models.Model):
         """Revoke badge token(s) for user."""
         self.sudo().search([
             ('user_id', '=', user.id),
-            ('device_label', '=', 'badge_qr'),
+            ('device_label', '=', BADGE_LABEL),
         ]).unlink()
 
     @api.model
@@ -86,7 +92,7 @@ class BusDriverToken(models.Model):
             return users
         token = self.sudo().search([
             ('token_hash', '=', hash_token(raw)),
-            ('device_label', '=', 'badge_qr'),
+            ('device_label', '=', BADGE_LABEL),
             ('expires', '>', fields.Datetime.now()),
         ], limit=1)
         user = token.user_id
@@ -96,11 +102,15 @@ class BusDriverToken(models.Model):
 
     @api.model
     def _revoke(self, raw):
-        self.sudo().search([('token_hash', '=', hash_token(raw))]).unlink()
+        """Drop one session. Signing out of the tablet never takes the driver's badge with it."""
+        self.sudo().search([
+            ('token_hash', '=', hash_token(raw)), ('device_label', '!=', BADGE_LABEL)]).unlink()
 
     @api.model
-    def _revoke_user(self, user):
-        self.sudo().search([('user_id', '=', user.id)]).unlink()
+    def _revoke_sessions(self, user):
+        """Sign every tablet of `user` out. The badge stays: it is a card the driver carries, and
+        a manager revokes it on purpose from the driver's form, which also clears its QR image."""
+        self.sudo().search([('user_id', '=', user.id), ('device_label', '!=', BADGE_LABEL)]).unlink()
 
     @api.model
     def _cron_purge(self):

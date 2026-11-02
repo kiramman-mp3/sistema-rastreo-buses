@@ -113,8 +113,8 @@ Severidad: **Crítica** (explotable hoy o pérdida de datos/servicio), **Alta** 
 
 ## 2. Decisiones del equipo
 
-1. **SEC-03**: rotar ya la contraseña del administrador (obligatorio). ¿Reescribir también el historial de Git para quitarla? Hacerlo obliga a `push --force` y a que todos vuelvan a clonar; sin rotar la contraseña no sirve de nada. *Pendiente.*
-2. **SEC-05**: ¿choferes como usuarios de portal (sin acceso a `/web`) o internos con el backend bloqueado? Recomendado: portal; la API ya usa `sudo()` donde hace falta. *Pendiente de confirmar: los choferes sólo entran por la app de la tableta.*
+1. **SEC-03**: rotar ya la contraseña del administrador (obligatorio). ¿Reescribir también el historial de Git para quitarla? Hacerlo obliga a `push --force` y a que todos vuelvan a clonar; sin rotar la contraseña no sirve de nada. **Decidido (2026-11-02): quitarla del historial.** Hecho en local en `main` y `develop` (el script ahora pide `ADMIN_PASSWORD`); falta el `push --force` de ambas ramas, que hace el equipo.
+2. **SEC-05**: ¿choferes como usuarios de portal (sin acceso a `/web`) o internos con el backend bloqueado? Recomendado: portal; la API ya usa `sudo()` donde hace falta. **Decidido (2026-11-02): portal.** Hecho en la fase 1, con migración `16.0.1.2.0` para los choferes existentes.
 3. **SEC-06**: posiciones de un bus sin turno: ¿descartarlas o guardarlas marcadas y fuera del mapa? Recomendado: descartarlas, con un ajuste para desactivarlo en pruebas con `curl`. **Decidido (2026-11-02): descartarlas.**
 4. **TAB-02**: terminar turno sin red: ¿se apaga el GPS y se encola el cierre, o se exige red? Recomendado: apagar el GPS, encolar el cierre y que el cron de turnos viejos haga de red de seguridad. **Decidido (2026-11-02): la opción recomendada.**
 
@@ -126,7 +126,7 @@ Cada fase es una rama desde `develop` que se integra con `merge --no-ff` cuando 
 - Rotar la contraseña del admin de Odoo de producción y revisar accesos recientes (SEC-03).
 - Decidir los puntos de la sección 2.
 
-### Fase 1. `fix/credenciales-chofer` (SEC-01, SEC-02, SEC-04, SEC-13, BE-15)
+### Fase 1. `fix/credenciales-chofer` (SEC-01, SEC-02, SEC-04, SEC-05, SEC-13, BE-15) — hecha
 - `fix: require managers to issue or revoke driver badges`: comprobar `group_bus_manager` en ambos métodos.
 - `fix: keep the badge link and QR readable only by managers`: `groups='bus_tracking.group_bus_manager'` en `driver_badge_qr`/`driver_badge_link`; mejor aún, no guardar el enlace: generarlo al emitir y mostrarlo una sola vez en un asistente.
 - `fix: stop badge tokens from working as session tokens`: `_user_for` excluye `badge_qr`; `login_badge` sólo acepta credenciales; el logout nunca revoca la credencial.

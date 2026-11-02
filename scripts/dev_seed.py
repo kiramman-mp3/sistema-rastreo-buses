@@ -122,7 +122,7 @@ if first_run:
         driver = Users.create({
             'name': 'Luis Pacheco', 'login': 'chofer1', 'password': 'chofer1',
             'tz': 'America/Guayaquil', 'lang': 'es_EC',
-            'groups_id': [(6, 0, [env.ref('base.group_user').id, env.ref('bus_tracking.group_bus_driver').id])],
+            'groups_id': [(6, 0, [env.ref('base.group_portal').id, env.ref('bus_tracking.group_bus_driver').id])],
         })
     bus01 = Vehicle.search([('plate', '=', 'TAA-1021')], limit=1)
     shift = env['bus.shift'].create({'user_id': driver.id, 'vehicle_id': bus01.id,
@@ -146,7 +146,7 @@ if not Users2.search([('login', '=', 'chofer2')], limit=1):
     Users2.create({
         'name': 'María Torres', 'login': 'chofer2', 'password': 'chofer2',
         'tz': 'America/Guayaquil', 'lang': 'es_EC',
-        'groups_id': [(6, 0, [env.ref('base.group_user').id, env.ref('bus_tracking.group_bus_driver').id])],
+        'groups_id': [(6, 0, [env.ref('base.group_portal').id, env.ref('bus_tracking.group_bus_driver').id])],
     })
 
 # Make the admin's panel Spanish and in Ecuador's time zone.
