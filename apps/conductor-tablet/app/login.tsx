@@ -6,15 +6,17 @@ import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Txt } from '../src/ui/cabin';
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
-import { fonts, sizes } from '../src/ui/theme';
+import { fonts } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Login() {
   useLang();
   const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -49,11 +51,22 @@ export default function Login() {
     }
   }
 
-  const field = [styles.input, { backgroundColor: palette.field, color: palette.ink, borderColor: palette.ink2 }];
+  const field = [
+    styles.input,
+    {
+      backgroundColor: palette.field,
+      color: palette.ink,
+      borderColor: palette.ink2,
+      minHeight: layout.phone ? 52 : 64,
+      fontSize: layout.sizes.body,
+    },
+  ];
+  // Side by side when there is width; stacked (and centred) on a phone in portrait.
+  const side = layout.wide;
 
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
-      <View style={styles.intro}>
+    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? 48 : layout.gap * 2 }]}>
+      <View style={[styles.intro, !side && styles.introStack]}>
         <Pressable onLongPress={() => setShowServer((v) => !v)} accessibilityLabel="Buses UTA" style={styles.brand}>
           <LineMark />
           <Txt bold size="data">
@@ -71,7 +84,7 @@ export default function Login() {
         </View>
       </View>
 
-      <View style={[styles.card, { backgroundColor: palette.panel }]}>
+      <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? 18 : 28 }]}>
         <Action label={t('scanDriverBadge')} onPress={() => router.push('/scan')} kind="accent" />
         <Txt size="small" dim style={styles.or}>
           {t('orManualLogin')}
@@ -126,21 +139,28 @@ export default function Login() {
           disabled={busy || !login || !password}
         />
       </View>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   page: {
-    flex: 1,
+    justifyContent: 'center',
+  },
+  pageSide: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 48,
-    paddingHorizontal: 56,
+  },
+  pageStack: {
+    flexDirection: 'column',
   },
   intro: {
     flex: 1,
     gap: 14,
+  },
+  introStack: {
+    flex: 0,
+    alignItems: 'center',
   },
   brand: {
     flexDirection: 'row',
@@ -153,22 +173,26 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   card: {
-    flex: 1,
-    maxWidth: 560,
-    padding: 28,
     borderRadius: 8,
     gap: 14,
+  },
+  cardSide: {
+    flex: 1,
+    maxWidth: 560,
+  },
+  cardStack: {
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
   },
   or: {
     textAlign: 'center',
     marginVertical: 4,
   },
   input: {
-    minHeight: 64,
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 18,
-    fontSize: sizes.body,
     fontFamily: fonts.text,
   },
   server: {
