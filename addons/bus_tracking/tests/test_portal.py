@@ -72,11 +72,22 @@ class TestPassengerPortal(HttpCase):
         resp, data = self.buses()
         self.assertEqual(resp.headers['Content-Type'], 'application/json')
         self.assertEqual(len(data['buses']), 1)
-        self.assertEqual(sorted(data['buses'][0]), ['course', 'lat', 'lon', 'name', 'status'])
+        self.assertEqual(sorted(data['buses'][0]), ['after', 'at', 'course', 'lat', 'lon', 'name', 'status'])
         self.assertEqual(data['buses'][0]['name'], 'Bus 12')
         self.assertEqual(data['buses'][0]['status'], 'moving')
         for secret in ('ZZZZ-99', 'Pedro Secreto', 'b-supersecretid00', 'speed', 'plate', 'driver'):
             self.assertNotIn(secret, resp.text)
+
+    def test_feed_places_each_bus_on_the_line(self):
+        terminal, plaza = self.route.stop_ids
+        self.bus._apply_position(traccar_position(
+            5, (self.now - timedelta(minutes=3)).strftime('%Y-%m-%dT%H:%M:%SZ'), terminal.latitude, terminal.longitude))
+        _, data = self.buses()
+        self.assertEqual((data['buses'][0]['at'], data['buses'][0]['after']), (0, 0))
+        portal.cache.clear()
+        self.report(self.bus, 1)        # left the terminal, not yet at the plaza
+        _, data = self.buses()
+        self.assertEqual((data['buses'][0]['at'], data['buses'][0]['after']), (None, 0))
 
     def test_feed_hides_stale_and_foreign_buses(self):
         stale = self.env['bus.vehicle'].create({'name': 'Viejo', 'route_id': self.route.id, 'traccar_device_id': 6})
@@ -122,6 +133,13 @@ class TestPassengerPortal(HttpCase):
         self.assertTrue(limiter.allow('ip', now=12))
 
     # -- language ----------------------------------------------------------------------
+    def test_page_language_and_the_current_choice_are_marked(self):
+        html = self.url_open('/rutas').text
+        self.assertIn('<html lang="es-EC"', html)
+        self.assertRegex(html, r'value="es"[^>]*aria-current="true"')
+        english = self.url_open('/rutas?lang=en').text
+        self.assertIn('<html lang="en"', english)
+
     def test_language_follows_the_browser_then_the_choice(self):
         self.assertIn('Elige tu ruta', self.url_open('/rutas').text)
         english = self.url_open('/rutas', headers={'Accept-Language': 'en-US,en;q=0.9'}).text
@@ -155,12 +173,13 @@ class TestPassengerPortal(HttpCase):
     def test_public_assets_are_versioned_so_browsers_never_keep_stale_copies(self):
         for url in ('/rutas', '/rutas/L1', '/'):
             html = self.url_open(url).text
-            self.assertRegex(html, r'landing\.css\?v=\d+', url)
+            self.assertRegex(html, r'site\.css\?v=\d+', url)
         self.assertRegex(self.url_open('/rutas/L1').text, r'portal_map\.js\?v=\d+')
 
     def test_no_invented_numbers_when_no_bus_reports(self):
         html = self.url_open('/rutas').text
-        self.assertIn('Ahora no hay buses con señal', html)
+        self.assertIn('Sin buses con señal', html)
+        self.assertIn('Ahora no hay buses con señal', self.url_open('/').text)
         for invented in ('8 buses', 'Frecuencia', 'min</span>', 'Accesible'):
             self.assertNotIn(invented, html)
 

@@ -62,7 +62,7 @@ class BusComplaints(http.Controller):
         value = request.env(su=True)['ir.config_parameter'].get_param('bus_tracking.complaint_retention_days')
         return int(value) if value not in (False, None, '') else 90
 
-    def _form_values(self, post=None, errors=None, selected_route=None):
+    def _form_values(self, post=None, errors=None, selected_route=None, text=None):
         routes = public_routes()
         post = post or {}
         values = portal_context(
@@ -76,7 +76,7 @@ class BusComplaints(http.Controller):
                 'route': post.get('route') or selected_route or '',
                 'bus': post.get('bus') or '',
                 'kind': post.get('kind') or 'other',
-                'description': post.get('description') or '',
+                'description': post.get('description') or _clean(text, MAX_DESCRIPTION),
                 'email': post.get('email') or '',
                 'phone': post.get('phone') or '',
             },
@@ -95,8 +95,9 @@ class BusComplaints(http.Controller):
 
     # ------------------------------------------------------------------
     @http.route(['/quejas', '/transporte/quejas'], type='http', auth='public', methods=['GET'])
-    def form(self, ruta=None, **kwargs):
-        return render_portal('bus_tracking.complaint_form', self._form_values(selected_route=ruta))
+    def form(self, ruta=None, texto=None, **kwargs):
+        # `texto` comes from the one-field box on the home page.
+        return render_portal('bus_tracking.complaint_form', self._form_values(selected_route=ruta, text=texto))
 
     @http.route(['/quejas', '/transporte/quejas'], type='http', auth='public', methods=['POST'])
     def submit(self, **post):

@@ -19,13 +19,20 @@ RATE_LIMIT = 60          # requests per IP and window, per worker process
 RATE_WINDOW = 60.0
 LANG_COOKIE = 'bus_lang'
 # The only strings the page's script needs.
-JS_STRINGS = ('status_moving', 'status_stopped', 'status_offline', 'updated', 'update_error', 'stops', 'path_all')
+JS_STRINGS = ('status_moving', 'status_stopped', 'status_offline', 'updated', 'update_error', 'stops', 'path_all',
+              'live', 'searching', 'updated_min', 'stale', 'rate', 'mine_tag', 'bus_at_mine', 'bus_one_stop',
+              'bus_n_stops', 'none_coming', 'position_unknown', 'bus_between', 'bus_at', 'no_buses',
+              'featured_hint', 'pick_stop_hint')
+
+
+def js_strings(strings):
+    return json.dumps({key: strings[key] for key in JS_STRINGS})
 
 _HEX_COLOR = re.compile(r'^#[0-9a-fA-F]{6}$')
 
 
 _STATIC = os.path.join(os.path.dirname(__file__), os.pardir, 'static', 'src')
-_VERSIONED = ('css/brand.css', 'landing/landing.css', 'portal/portal.css', 'portal/portal_map.js',
+_VERSIONED = ('css/brand.css', 'portal/site.css', 'portal/pages.css', 'portal/site.js', 'portal/portal_map.js',
               'portal/complaint.js')
 
 
@@ -92,7 +99,7 @@ def portal_context(**values):
         request.httprequest.accept_languages,
         requested=request.params.get('lang'),
         remembered=request.httprequest.cookies.get(LANG_COOKIE))
-    values.update(lang=lang, s=STRINGS[lang], asset_v=asset_version(),
+    values.update(lang=lang, site_lang=lang, s=STRINGS[lang], asset_v=asset_version(), line_i18n=js_strings(STRINGS[lang]),
                   brand=brand_name(request.env(su=True)),
                   contact=public_contact(request.env(su=True)),
                   languages={c: s['lang_name'] for c, s in STRINGS.items()})
@@ -105,6 +112,29 @@ def render_portal(template, values, status=200):
     if request.params.get('lang') in STRINGS:
         response.set_cookie(LANG_COOKIE, values['lang'], max_age=365 * 24 * 3600, samesite='Lax')
     return response
+
+
+# An arrival older than this does not say where the bus is now on the line.
+ARRIVAL_MEMORY = timedelta(hours=3)
+
+
+def line_positions(route, buses):
+    """Where each bus is on the drawn line, as stop indexes: `at` when it is inside a stop's radius,
+    `after` for the last stop it reached (it is between that stop and the next). Only indexes leave
+    the server: no times, no ids."""
+    index = {stop.id: i for i, stop in enumerate(route.stop_ids)}
+    since = fields.Datetime.now() - ARRIVAL_MEMORY
+    arrivals = route.env['bus.stop.arrival'].sudo().search(
+        [('vehicle_id', 'in', buses.ids), ('stop_id', 'in', route.stop_ids.ids), ('arrival_time', '>=', since)],
+        order='arrival_time desc')
+    last = {}
+    for arrival in arrivals:
+        last.setdefault(arrival.vehicle_id.id, index.get(arrival.stop_id.id))
+    positions = {}
+    for bus in buses:
+        at = index.get(bus.current_stop_id.id) if bus.current_stop_id else None
+        positions[bus.id] = (at, at if at is not None else last.get(bus.id))
+    return positions
 
 
 def public_routes():
@@ -151,7 +181,7 @@ class BusPortal(http.Controller):
                 'matching_stops': [s.name for s in r.stop_ids if query and fold(query) in fold(s.name)][:3],
             })
         return render_portal('bus_tracking.portal_routes', portal_context(
-            routes=items, total_active_buses=total_active_buses, query=query))
+            routes=items, total_active_buses=total_active_buses, query=query, active_nav='rutas'))
 
     @http.route(['/rutas/detalle', '/transporte/rutas/detalle'], type='http', auth='public', methods=['GET'])
     def route_detail_alias(self, **kwargs):
@@ -173,12 +203,15 @@ class BusPortal(http.Controller):
                 'name': route.name,
                 'color': safe_color(route.color),
                 'buses_count': len(buses),
+                'stops': [s['name'] for s in stops],
+                'stops_json': json.dumps([s['name'] for s in stops]),
             },
+            active_nav='rutas',
             stops=stops,
             stops_json=json.dumps(stops),
             paths_json=json.dumps(route._map_lines(), separators=(',', ':'))
         )
-        values['json_i18n'] = json.dumps({key: values['s'][key] for key in JS_STRINGS})
+        values['json_i18n'] = values['line_i18n']
         values['center_json'] = json.dumps(list(map_center(request.env(su=True))))
         return render_portal('bus_tracking.portal_route', values)
 
@@ -191,6 +224,8 @@ class BusPortal(http.Controller):
             route = self._public_route(code)
             if not route:
                 return request.not_found()
+            buses = self._fresh_buses(route)
+            where = line_positions(route, buses)
             body = json.dumps({
                 'generated_at': fields.Datetime.to_string(fields.Datetime.now()),
                 'buses': [{
@@ -199,7 +234,9 @@ class BusPortal(http.Controller):
                     'lon': bus.last_longitude,
                     'course': round(bus.last_course),
                     'status': bus.status if bus.connected else 'offline',
-                } for bus in self._fresh_buses(route)],
+                    'at': where[bus.id][0],
+                    'after': where[bus.id][1],
+                } for bus in buses],
             })
             cache.put(code, body)
         return Response(body, content_type='application/json',
