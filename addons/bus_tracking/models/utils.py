@@ -29,6 +29,29 @@ def map_center(env):
     return (lat, lon) if -90 <= lat <= 90 and -180 <= lon <= 180 else DEFAULT_MAP_CENTER
 
 
+PHONE_CHARS = re.compile(r'^[0-9+()\-\s]{6,30}$')
+EMAIL_SHAPE = re.compile(r'^[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,}$')
+
+
+def public_contact(env):
+    """Phone and email the university wants passengers to see. Empty means: show no contact at all.
+    Nothing is invented: a value only appears when someone typed it in Settings."""
+    icp = env['ir.config_parameter'].sudo()
+    phone = (icp.get_param('bus_tracking.contact_phone') or '').strip()
+    email = (icp.get_param('bus_tracking.contact_email') or '').strip()
+    return {
+        'phone': phone if PHONE_CHARS.match(phone) else '',
+        'phone_href': re.sub(r'[^0-9+]', '', phone) if PHONE_CHARS.match(phone) else '',
+        'email': email if EMAIL_SHAPE.match(email) else '',
+    }
+
+
+def fold(text):
+    """Lowercase without accents, so "Pillaro" finds "Píllaro"."""
+    text = unicodedata.normalize('NFKD', text or '')
+    return ''.join(c for c in text if not unicodedata.combining(c)).lower().strip()
+
+
 def safe_http_url(value):
     value = (value or '').strip()
     return value if value.lower().startswith(('http://', 'https://')) and ' ' not in value else ''

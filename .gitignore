@@ -10,3 +10,4 @@ apps/*/.expo/
 *.apk
 dist-mobile/
 .taste-skill/
+/assets/
