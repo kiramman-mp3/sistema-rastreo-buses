@@ -10,6 +10,7 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
+from ..models.utils import parse_traccar_dt
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
@@ -224,7 +225,7 @@ class BusDriverApi(http.Controller):
             # The last SOS of this shift and whether someone in the office saw it.
             'sos': {
                 'id': sos.id,
-                'sent_at': utc_z(sos.create_date),
+                'sent_at': utc_z(sos.reported_at or sos.create_date),
                 'seen_at': utc_z(sos.acknowledged_at),
                 'seen_by': sos.acknowledged_by.name or None,
             } if sos else None,
@@ -301,7 +302,14 @@ class BusDriverApi(http.Controller):
                 return json_response({'error': 'bad_request'}, 400)
         else:
             lat = lon = False
+        # The tablet sends when the driver pressed the button; it is kept only when it falls
+        # inside this shift and not in the future, so a wrong tablet clock cannot reorder things.
+        now = fields.Datetime.now()
+        reported_at = parse_traccar_dt(body.get('reported_at'))
+        if not reported_at or not (shift.start - timedelta(minutes=1) <= reported_at <= now + timedelta(minutes=1)):
+            reported_at = now
         incident = request.env['bus.incident'].sudo().create({
+            'reported_at': min(reported_at, now),
             'shift_id': shift.id,
             'vehicle_id': shift.vehicle_id.id,
             'kind': kind,
