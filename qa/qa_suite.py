@@ -444,9 +444,8 @@ def e15(ctx):
     time.sleep(3.2)
     before = complaint_count(ctx)
     r = complaint(session, csrf, token, 'QA-E15 descripción suficientemente larga', website='http://spam')
-    check(r.status_code == 400 and complaint_count(ctx) == before, 'HTTP %s' % r.status_code)
-    check('Enviar otra vez' in r.text or 'Send again' in r.text, 'sin el aviso de reenviar')
-    return dict(obtenido='HTTP 400; nada guardado', mensaje='Revisa tu reporte y pulsa Enviar otra vez')
+    check(r.status_code == 303 and complaint_count(ctx) == before, 'HTTP %s' % r.status_code)
+    return dict(obtenido='HTTP 303; nada guardado', mensaje='Redirección a gracias sin folio')
 
 
 @case('E16', 'Error', 'No guardar un envío demasiado rápido (menos de 3 s) y pedir reenviarlo',
@@ -456,8 +455,9 @@ def e16(ctx):
     csrf, token = form(session)
     before = complaint_count(ctx)
     r = complaint(session, csrf, token, 'QA-E16 descripción suficientemente larga')
-    check(r.status_code == 303 and complaint_count(ctx) == before, 'HTTP %s' % r.status_code)
-    return dict(obtenido='HTTP 303; nada guardado', mensaje='Redirección a gracias sin folio')
+    check(r.status_code == 400 and complaint_count(ctx) == before, 'HTTP %s' % r.status_code)
+    check('Enviar otra vez' in r.text or 'Send again' in r.text, 'sin el aviso de reenviar')
+    return dict(obtenido='HTTP 400; nada guardado', mensaje='Revisa tu reporte y pulsa Enviar otra vez')
 
 
 @case('E17', 'Error', 'Escapar lo que escribió la persona al volver a mostrar el formulario',
