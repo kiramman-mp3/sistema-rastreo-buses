@@ -109,8 +109,17 @@ body.o_bus_login {
     --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--granate-osc);
     min-height: 48px;
+    border-color: var(--granate) !important;    /* Odoo's frontend sets these directly */
     border-radius: var(--radio);
+    background-color: var(--granate) !important;
+    color: #fff !important;
     font-weight: 700;
+}
+
+.o_bus_login .oe_login_form .btn-primary:hover,
+.o_bus_login .oe_login_form .btn-primary:focus {
+    border-color: var(--granate-osc) !important;
+    background-color: var(--granate-osc) !important;
 }
 
 .o_bus_login .oe_login_form .btn-link {
