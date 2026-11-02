@@ -903,3 +903,47 @@ Transformación de la experiencia de usuario y arquitectura frontend del sistema
 
 - Jornada de campo con tableta física montada en bus y chofer real.
 - Build de producción en EAS con el nuevo layout de cabina.
+
+
+## 2026-11-02: rediseño de experiencia (fases 26 a 31) y corrección de la bitácora anterior
+
+Plan y hallazgos en `docs/PLAN-UX.md`; identidad en `docs/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
+
+### Corrección de la entrada del 2026-11-01
+
+Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de llegada "probabilísticos" (eran minutos calculados con el número de parada), una barra de cadencia (datos fijos que pedían acelerar a un bus fuera de ruta), contrastes AAA "verificados" (sin medición) y objetivos táctiles de 72 px (había botones de 46 px). Además, `develop` tenía 4 pruebas en fallo y 2 con error, aunque la entrada del 2026-10-30 decía "247 tests, 0 fallos". El detalle está en `docs/PLAN.md`, sección de las fases 23 a 25.
+
+### Qué se hizo
+
+1. **Fase 26, verdad y fallos críticos** (`fix/tablet-cabina-segura`, `fix/pruebas-base`, `fix/portal-datos-reales`):
+   - Tableta: sin barra de cadencia ni confirmación de llegada falsa; SOS como tipo de incidente propio (`sos`), con aviso push inmediato; la hoja de incidentes vuelve a ser accesible; abrir la app sin señal ya no cierra la sesión.
+   - Portal: fuera noticias, cifras, teléfono, redes y fotos generadas por IA; los cinco motivos reales de queja (dos se guardaban como "Otro"); búsqueda por parada sin tildes; teléfono y correo configurables en Ajustes.
+   - Pruebas base: el grupo Manager ya no implica el de chofer (los administradores podían entrar a la tableta y dejaban de ver los turnos ajenos), con migración `16.0.1.1.0`; credencial QR que se recalcula.
+2. **Fase 27, sistema de diseño** (`chore/sistema-diseno`): tokens papel, tinta, granate y señal en web, panel y tableta; Bricolage Grotesque y Atkinson Hyperlegible cargadas de verdad; marca de la línea con tres paradas; `qa/contraste.py`.
+3. **Fase 28, portal** (`feature/portal-pasajero-v2`): portada con la línea con más buses en vivo; "mi parada" con conteo de paradas (nunca minutos), recordada en el teléfono; el JSON público agrega solo el tramo de la línea; lista de líneas, quejas en una columna, boleto con el folio; seis fotos reales de Ambato de Wikimedia Commons con crédito; todo el texto en `portal_i18n.py`; `<html lang>` e idioma activo correctos (antes Odoo los pisaba con `en_US`).
+4. **Fase 29, panel** (`feature/panel-operacion`): cola de Atención (SOS, incidentes, alertas, mensajes nuevos), banda de SOS, acuse de incidentes (`acknowledged_by`, `acknowledged_at`) visible en la tableta, filtros con contador, animación lineal que se detiene sola, kanban de incidentes y mensajes, menús Operación y Flota, ícono de la app, login con saludo según la hora de Ecuador y foto de Ambato. Se regeneró `i18n/bus_tracking.pot`: Odoo descartaba las traducciones que no estaban en la plantilla.
+5. **Fase 30, tableta** (`feature/tablet-cabina-v2`): tema día y noche; próxima parada a 60 px con la franja de la línea; estado real del GPS a partir de la última muestra, la cola y los permisos; bloqueo en marcha salvo SOS; SOS con acuse de la central; hoja de incidentes, login y selección rehechos sin emojis y con textos de 20 px o más. Se corrigieron dos fallos previos: tras el login un chofer con turno abierto caía en la selección de bus, y el refresco del turno se reiniciaba con cada cambio de estado (pedía `/driver/state` sin parar).
+6. **Fase 31, validación** (`chore/validacion-ux`): inspector de diseño, `qa/accesibilidad.py` (axe-core), capturas antes y después en `docs/calidad/evidencias/ux/`, protocolo de pruebas con personas.
+7. Entorno local: `scripts/dev_seed.py`, `qa/capturas_ui.py`, `qa/capturas_tablet.py` (la app en modo web contra el Odoo local).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite Odoo en base limpia (`--test-tags /bus_tracking`) | 213 pruebas, 0 fallos, 0 errores (antes del trabajo: 4 fallos y 2 errores) |
+| Tableta: Jest | 13 suites, 56 pruebas PASS |
+| Tableta: `tsc --noEmit` y `expo lint --no-cache` | Sin errores |
+| Contraste de tokens (`qa/contraste.py`) | 20 de 20 pares cumplen |
+| Accesibilidad del portal (axe, WCAG 2.1 A/AA, 7 páginas × 2 tamaños) | 0 problemas |
+| Inspector de diseño de la portada (1440, 768, 390 px) | 0 fallos, 1 advertencia (sin video, justificada) |
+| Flujos en navegador | Mi parada, SOS y su acuse, bloqueo en marcha e idiomas comprobados con capturas |
+
+### Pendiente o sin confirmar
+
+- Pruebas con 5 personas por perfil (`docs/calidad/12-validacion-ux.md`, §5).
+- La cabina en una tableta física: lectura a 1 m al sol y de noche, vibración, TalkBack.
+- Recorrer el panel con teclado y lector de pantalla.
+- Que la universidad entregue teléfono y correo oficiales, fotos propias de sus buses y apruebe el nombre y la marca.
+- Las coordenadas de `scripts/dev_seed.py` son aproximadas y solo sirven para desarrollo.
+- No se desplegó en Azure ni se fusionó `develop` en `main`.
+
