@@ -8,6 +8,7 @@ from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
 from ..models.utils import map_center
+from .portal import line_positions
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +28,11 @@ class BusTrackingController(http.Controller):
             alerts.setdefault(alert.vehicle_id.id, []).append(alert.kind)
         alert_labels = dict(env['bus.alert']._fields['kind']._description_selection(env))
         vehicles = []
-        for bus in env['bus.vehicle'].search([('last_fix_time', '!=', False)]):
+        buses = env['bus.vehicle'].search([('last_fix_time', '!=', False)])
+        positions = {}
+        for route in buses.mapped('route_id'):
+            positions.update(line_positions(route, buses.filtered(lambda b, r=route: b.route_id == r)))
+        for bus in buses:
             vehicles.append({
                 'id': bus.id,
                 'name': bus.name,
@@ -45,7 +50,24 @@ class BusTrackingController(http.Controller):
                 'connected': bus.connected,
                 'stop': bus.current_stop_id.name or '',
                 'alerts': alerts.get(bus.id, []),
+                'at': positions.get(bus.id, (None, None))[0],
+                'after': positions.get(bus.id, (None, None))[1],
             })
+        kinds = dict(env['bus.incident']._fields['kind']._description_selection(env))
+        incidents = [{
+            'id': incident.id,
+            'kind': incident.kind,
+            'label': kinds.get(incident.kind, incident.kind),
+            'vehicle_id': incident.vehicle_id.id,
+            'vehicle_name': incident.vehicle_id.name,
+            'route_name': incident.route_id.name or '',
+            'driver': incident.user_id.name or '',
+            'note': incident.note or '',
+            'lat': incident.latitude or None,
+            'lon': incident.longitude or None,
+            'time': fields.Datetime.to_string(incident.create_date),
+        } for incident in env['bus.incident']._open_for_map()]
+        new_complaints = env['bus.complaint'].search_count([('state', '=', 'new')])
         routes = [{
             'id': r.id,
             'name': r.name,
@@ -60,7 +82,17 @@ class BusTrackingController(http.Controller):
             } for s in r.stop_ids],
         } for r in env['bus.route'].search([])]
         return {'vehicles': vehicles, 'routes': routes, 'alert_labels': alert_labels,
+                'incidents': incidents, 'new_complaints': new_complaints,
                 'map_center': list(map_center(env))}
+
+    @http.route('/bus_tracking/incident/ack', type='json', auth='user')
+    def acknowledge_incident(self, incident_id):
+        self._check_user()
+        incident = request.env['bus.incident'].browse(int(incident_id)).exists()
+        if not incident:
+            return {'ok': False}
+        incident.action_acknowledge()
+        return {'ok': True, 'by': request.env.user.name}
 
     @http.route('/bus_tracking/track', type='json', auth='user')
     def track(self, vehicle_id, hours=4):
