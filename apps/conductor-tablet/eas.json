@@ -41,10 +41,11 @@
         "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
       }
     },
-    "altstore": {
+    "ios-altstore": {
       "distribution": "internal",
       "ios": {
-        "simulator": false
+        "withoutCredentials": true,
+        "config": "unsigned-ipa.yml"
       },
       "env": {
         "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
