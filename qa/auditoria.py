@@ -210,8 +210,10 @@ def main():
                      'tiempo': elapsed, 'nota': getattr(probe, 'note', '')})
 
     # Does a forged X-Forwarded-For defeat the per-address limit when Odoo is reached without a proxy?
+    # A line that does not exist: cached answers of a real line never count towards the limit.
     time.sleep(62)
-    spoof_codes = [requests.get(BASE + '/rutas/QA1/buses.json', headers=spoofed(), timeout=30).status_code for _ in range(70)]
+    spoof_codes = [requests.get(BASE + '/rutas/QA-NOPE/buses.json', headers=spoofed(), timeout=30).status_code
+                   for _ in range(70)]
 
     # A position with impossible coordinates answers 200 (that status is allowed), so the damage is counted in the data.
     stored_invalid = int(psql(OUT_OF_RANGE)) - invalid_before
