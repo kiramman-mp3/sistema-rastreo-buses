@@ -188,7 +188,7 @@ Tableta:
 - `fix: ask to wait instead of silently dropping a very fast complaint`.
 - Pruebas para cada restricción; prueba de rendimiento simple (1.000 posiciones con trazado de 1.500 puntos, comparar antes y después en la bitácora).
 
-### Fase 6. `chore/traducciones` (BE-12, TAB-11, PORT-03)
+### Fase 6. `chore/traducciones` (BE-12, TAB-11, PORT-03) — hecha (TAB-11 se hizo en la fase 3; quedan en español sólo los menús, que ya eran español en origen)
 - `refactor: write driver texts in English and translate them in es.po`.
 - `chore: regenerate the pot and es.po from the module` (quitar los seis modelos borrados, completar las 24 vacías).
 - `fix: translate the gps service notification`.
