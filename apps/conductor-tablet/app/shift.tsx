@@ -164,7 +164,7 @@ export default function ShiftScreen() {
   const problem = (
     <Action
       label={t('actionProblem')}
-      sub={t('actionProblemSub')}
+      sub={stackedActions ? undefined : t('actionProblemSub')}
       onPress={() => router.push('/incident')}
       disabled={locked}
       style={stackedActions ? undefined : styles.actionWide}
@@ -181,11 +181,28 @@ export default function ShiftScreen() {
     />
   );
 
+  const modeButton = (
+    <Pressable
+      onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
+      onLongPress={() => setChoice('auto')}
+      accessibilityRole="button"
+      accessibilityLabel={palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+      style={[styles.mode, { borderColor: palette.ink2 }]}
+    >
+      <Txt bold size="small">
+        {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+      </Txt>
+      {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
+    </Pressable>
+  );
+  // On a phone in portrait the header has two rows: bus and day/night on top, GPS and time below.
+  const tallHeader = layout.phone && !layout.landscape;
+
   return (
     <Screen>
       {/* Header: bus and line, real GPS state, time, day or night */}
       <View style={[styles.header, { backgroundColor: palette.panel }]}>
-        <View style={styles.identity}>
+        <View style={[styles.identity, tallHeader && styles.identityTall]}>
           <View style={[styles.chip, { backgroundColor: color }]}>
             <Txt bold size="body" color="#FFFFFF">
               {route?.code ?? ''}
@@ -200,7 +217,8 @@ export default function ShiftScreen() {
             </Txt>
           </View>
         </View>
-        <View style={[styles.headerRight, { gap: layout.phone ? 12 : 24 }]}>
+        {tallHeader ? modeButton : null}
+        <View style={[styles.headerRight, tallHeader && styles.headerRightFull, { columnGap: layout.phone ? 12 : 24 }]}>
           <Pressable
             onPress={() => router.push('/gps')}
             disabled={locked}
@@ -213,25 +231,14 @@ export default function ShiftScreen() {
           <Txt bold size="data">
             {currentTime}
           </Txt>
-          <Pressable
-            onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
-            onLongPress={() => setChoice('auto')}
-            accessibilityRole="button"
-            accessibilityLabel={palette.mode === 'day' ? t('modeNight') : t('modeDay')}
-            style={[styles.mode, { borderColor: palette.ink2 }]}
-          >
-            <Txt bold size="small">
-              {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
-            </Txt>
-            {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
-          </Pressable>
+          {tallHeader ? null : modeButton}
         </View>
       </View>
 
       <View style={[styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}>
         {/* Where the bus goes next; it scrolls if a notice makes it taller than its room */}
         <ScrollView
-          style={side ? styles.left : [styles.top, { maxHeight: Math.round(layout.height * 0.4) }]}
+          style={side ? styles.left : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
           contentContainerStyle={styles.leftContent}
           showsVerticalScrollIndicator={false}
         >
@@ -248,7 +255,7 @@ export default function ShiftScreen() {
                 .join(' · ')}
             </Txt>
           ) : null}
-          {afterStop ? (
+          {afterStop && !(layout.phone && showStrip) ? (
             <Txt size="body">
               {t('cabinAfter')}: {afterStop.name}
             </Txt>
@@ -330,7 +337,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flexGrow: 1,
     flexShrink: 1,
+    flexBasis: 220,
+  },
+  identityTall: {
+    flexBasis: 140,
   },
   identityText: {
     flexShrink: 1,
@@ -345,8 +357,14 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
+    justifyContent: 'space-between',
     flexShrink: 1,
+    rowGap: 4,
+  },
+  headerRightFull: {
+    flexBasis: '100%',
   },
   gpsTap: {
     minHeight: 48,
@@ -368,6 +386,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    minHeight: 0,
   },
   bodySide: {
     flexDirection: 'row',
@@ -376,7 +395,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   left: {
-    flex: 4,
+    flexGrow: 4,
+    flexShrink: 1,
+    flexBasis: 0,
   },
   top: {
     flexGrow: 0,
@@ -407,7 +428,7 @@ const styles = StyleSheet.create({
   },
   mapStack: {
     flex: 1,
-    minHeight: 160,
+    minHeight: 0,
   },
   lockNote: {
     paddingHorizontal: 16,
