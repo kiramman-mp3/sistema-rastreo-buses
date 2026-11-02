@@ -11,6 +11,7 @@ x-logging: &logging
 
 services:
   db:
+    profiles: ["local-db"]
     image: ${POSTGRES_IMAGE:-postgres:15}
     restart: unless-stopped
     environment:
@@ -33,12 +34,10 @@ services:
         ODOO_IMAGE: ${ODOO_IMAGE:-odoo:16.0}
     image: rastreo-odoo:16.0
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
-      HOST: db
-      USER: odoo
+      HOST: ${DB_HOST:-db}
+      PORT: ${DB_PORT:-5432}
+      USER: ${DB_USER:-odoo}
       PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env.prod}
     volumes:
       - odoo-data:/var/lib/odoo
@@ -60,15 +59,13 @@ services:
     image: ${TRACCAR_IMAGE:-traccar/traccar:latest}
     restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
       odoo:
         condition: service_healthy
     environment:
       CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
       DATABASE_DRIVER: org.postgresql.Driver
-      DATABASE_URL: jdbc:postgresql://db:5432/traccar
-      DATABASE_USER: traccar
+      DATABASE_URL: ${TRACCAR_DATABASE_URL:-jdbc:postgresql://db:5432/traccar}
+      DATABASE_USER: ${TRACCAR_DB_USER:-traccar}
       DATABASE_PASSWORD: ${TRACCAR_DB_PASSWORD:?set TRACCAR_DB_PASSWORD in .env.prod}
       FORWARD_TYPE: "json"
       FORWARD_RETRY_ENABLE: "true"
