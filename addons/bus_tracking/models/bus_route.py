@@ -148,7 +148,8 @@ class BusRouteStop(models.Model):
             raise UserError(_("That point is not on the map."))
         if not 5 <= radius <= 1000:
             raise UserError(_("The arrival radius must be between 5 and 1000 meters."))
-        values = {'name': name[:128], 'latitude': round(latitude, 7), 'longitude': round(longitude, 7), 'radius': radius}
+        values = {'name': name[:128], 'latitude': round(latitude, 7), 'longitude': round(longitude, 7),
+                  'radius': radius}
         if stop_id:
             stop = self.browse(int(stop_id)).exists()
             if not stop or stop.route_id.id != int(route_id):
