@@ -21,7 +21,7 @@ import { classifyStops } from '../src/shift/progress';
 import { useSession } from '../src/state/SessionContext';
 import { IncidentActions } from '../src/ui/IncidentActions';
 import { StopAlertCard } from '../src/ui/StopAlertCard';
-import { cockpitColors, cockpitHit } from '../src/ui/theme';
+import { cockpitColors } from '../src/ui/theme';
 
 export default function ShiftScreen() {
   useLang();
@@ -46,13 +46,14 @@ export default function ShiftScreen() {
   const alerts = shiftState?.alerts ?? [];
 
   // Coords for next stop to calculate live distance
+  const nextStopId = nextStop?.id ?? null;
+  const routeStops = routeMap?.stops;
   const nextStopCoords = useMemo(() => {
-    if (!nextStop || !routeMap?.stops) return null;
-    const found = routeMap.stops.find((s) => s.id === nextStop.id);
+    if (nextStopId === null || !routeStops) return null;
+    const found = routeStops.find((s) => s.id === nextStopId);
     return found ? { lat: found.lat, lon: found.lon } : null;
-  }, [nextStop, routeMap?.stops]);
+  }, [nextStopId, routeStops]);
 
-  // Live cockpit telemetry: 1-second digital clock & live distance calculation
   const { currentTime, distanceFormatted } = useCockpitTelemetry(busFix, nextStopCoords);
 
   useFocusEffect(
