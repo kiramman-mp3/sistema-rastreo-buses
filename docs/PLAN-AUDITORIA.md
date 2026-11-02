@@ -111,12 +111,12 @@ Severidad: **Crítica** (explotable hoy o pérdida de datos/servicio), **Alta** 
 | DOC-05 | Media | `PRODUCCION.md` no menciona `clean-azure-db.sh` ni `bootstrap-traccar.sh`, ni cómo rotar secretos, ni deja claro si la base es local o Supabase. | `docs/PRODUCCION.md` |
 | DOC-06 | Media | El registro de defectos y la autoevaluación ISO no recogen estos hallazgos; falta la entrada de la bitácora. | `docs/calidad/05-*.md`, `docs/calidad/09-*.md`, `docs/BITACORA.md` |
 
-## 2. Decisiones que necesita el equipo
+## 2. Decisiones del equipo
 
-1. **SEC-03**: rotar ya la contraseña del administrador (obligatorio). ¿Reescribir también el historial de Git para quitarla? Hacerlo obliga a `push --force` y a que todos vuelvan a clonar; sin rotar la contraseña no sirve de nada.
-2. **SEC-05**: ¿choferes como usuarios de portal (sin acceso a `/web`) o internos con el backend bloqueado? Recomendado: portal; la API ya usa `sudo()` donde hace falta.
-3. **SEC-06**: posiciones de un bus sin turno: ¿descartarlas o guardarlas marcadas y fuera del mapa? Recomendado: descartarlas, con un ajuste para desactivarlo en pruebas con `curl`.
-4. **TAB-02**: terminar turno sin red: ¿se apaga el GPS y se encola el cierre, o se exige red? Recomendado: apagar el GPS, encolar el cierre y que el cron de turnos viejos haga de red de seguridad.
+1. **SEC-03**: rotar ya la contraseña del administrador (obligatorio). ¿Reescribir también el historial de Git para quitarla? Hacerlo obliga a `push --force` y a que todos vuelvan a clonar; sin rotar la contraseña no sirve de nada. *Pendiente.*
+2. **SEC-05**: ¿choferes como usuarios de portal (sin acceso a `/web`) o internos con el backend bloqueado? Recomendado: portal; la API ya usa `sudo()` donde hace falta. *Pendiente de confirmar: los choferes sólo entran por la app de la tableta.*
+3. **SEC-06**: posiciones de un bus sin turno: ¿descartarlas o guardarlas marcadas y fuera del mapa? Recomendado: descartarlas, con un ajuste para desactivarlo en pruebas con `curl`. **Decidido (2026-11-02): descartarlas.**
+4. **TAB-02**: terminar turno sin red: ¿se apaga el GPS y se encola el cierre, o se exige red? Recomendado: apagar el GPS, encolar el cierre y que el cron de turnos viejos haga de red de seguridad. **Decidido (2026-11-02): la opción recomendada.**
 
 ## 3. Plan de implementación
 
