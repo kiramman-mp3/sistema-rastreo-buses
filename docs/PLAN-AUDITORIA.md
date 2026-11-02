@@ -134,7 +134,7 @@ Cada fase es una rama desde `develop` que se integra con `merge --no-ff` cuando 
 - `chore: replace the real Supabase project id with placeholders`.
 - Pruebas nuevas (`test_driver_badge.py`): un chofer o un usuario normal no puede emitir, revocar ni leer credenciales ajenas; una credencial no abre `/driver/me`; `login_badge` rechaza un token de sesión; el logout con sesión no toca la credencial.
 
-### Fase 2. `fix/ingesta-y-avisos` (BE-01, BE-02, BE-09, BE-11, SEC-06, SEC-09, SEC-10)
+### Fase 2. `fix/ingesta-y-avisos` (BE-01, BE-02, BE-09, BE-11, SEC-06, SEC-09, SEC-10) — hecha
 - `fix: ignore concurrent duplicate positions instead of failing`: `INSERT ... ON CONFLICT DO NOTHING` o `savepoint` + `IntegrityError`; el webhook responde 200 ante duplicados.
 - `fix: keep the push queue moving when a push service is unreachable`: capturar `requests.RequestException` por suscripción y marcar `notified` por registro.
 - `fix: report non-JSON answers from Traccar as a clear error`.
