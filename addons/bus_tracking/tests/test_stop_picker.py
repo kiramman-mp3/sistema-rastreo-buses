@@ -1,4 +1,4 @@
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
@@ -51,3 +51,28 @@ class TestStopPicker(BusCase):
             'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_user').id])]})
         with self.assertRaises(AccessError):
             self.env['bus.route.stop'].with_user(viewer)._save_from_map(self.route.id, False, 'X', 0, 0, 50)
+
+    def test_the_model_refuses_impossible_stops(self):
+        Stop = self.env['bus.route.stop']
+        base = {'route_id': self.route.id, 'name': 'X', 'latitude': -1.2, 'longitude': -78.6}
+        for wrong in ({'latitude': 95}, {'longitude': -190}, {'radius': 0}, {'radius': 5000}):
+            with self.assertRaises(ValidationError, msg=wrong):
+                Stop.create(dict(base, **wrong))
+        self.assertTrue(Stop.create(dict(base, radius=40)))
+
+    def test_route_colour_must_be_hex(self):
+        with self.assertRaises(ValidationError):
+            self.route.color = 'red'
+        self.route.color = '#AA00ff'
+        self.route.color = False
+
+    def test_the_measured_line_follows_stop_edits(self):
+        first = self.route._path_measure()
+        self.assertIs(self.route._path_measure(), first)
+        # An edit made later, in another request, changes the stop's write date.
+        self.stop['Plaza'].latitude = -33.47
+        self.env.flush_all()
+        self.env.cr.execute("UPDATE bus_route_stop SET write_date = write_date + interval '1 minute' WHERE id = %s",
+                            [self.stop['Plaza'].id])
+        self.stop['Plaza'].invalidate_recordset(['write_date'])
+        self.assertIsNot(self.route._path_measure(), first)
