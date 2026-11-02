@@ -41,16 +41,13 @@ jobs:
   backend-validation:
     name: Odoo Addon Lint & Translations
     runs-on: ubuntu-latest
+    # The odoo:16.0 image runs Python 3.9. setup-python has no 3.9 for Ubuntu 26.04 (ubuntu-latest
+    # since October 2026), so the job runs in the official Python 3.9 image instead.
+    container: python:3.9-slim
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      # The odoo:16.0 image runs Python 3.9: lint with the same version.
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
 
       - name: Install Linters
         run: |
@@ -98,7 +95,9 @@ jobs:
 
       - name: Run the bus_tracking tests
         run: |
+          # The image's entrypoint waits for Postgres at $HOST (default "db") before reading --db_host.
           docker run --rm --network host \
+            -e HOST=127.0.0.1 -e USER=odoo -e PASSWORD=odoo \
             -v "$PWD/addons:/mnt/extra-addons:ro" \
             rastreo-odoo:ci \
             odoo --db_host=127.0.0.1 --db_port=5432 --db_user=odoo --db_password=odoo \
