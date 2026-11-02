@@ -168,6 +168,10 @@ class BusDriverApi(http.Controller):
         unique_id = bus.sudo().traccar_unique_id
         if not unique_id:
             return json_response({'error': 'no_gps'}, 409)
+        # Without it the tablet has nowhere to send positions: better refuse than a silent shift.
+        gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').strip().rstrip('/')
+        if not gps_url:
+            return json_response({'error': 'no_gps_url'}, 409)
         Shift = env['bus.shift'].sudo()
         with mute_logger('odoo.sql_db'):
             try:
@@ -177,7 +181,6 @@ class BusDriverApi(http.Controller):
             except IntegrityError:
                 return json_response({'error': 'conflict'}, 409)
         shift._assign_vehicle()
-        gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').rstrip('/')
         return json_response({
             'shift': self._shift_payload(shift),
             'traccar_unique_id': unique_id,
