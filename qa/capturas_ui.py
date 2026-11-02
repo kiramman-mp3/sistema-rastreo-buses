@@ -34,6 +34,17 @@ def shoot(page, url, path, wait_ms, full=True, until='networkidle'):
     page.on('pageerror', lambda e: errors.append(str(e)))
     page.goto(url, wait_until=until)
     page.wait_for_timeout(wait_ms)
+    if full:
+        # Scroll like a person, so entrance animations and lazy pictures run before the full-page shot.
+        page.evaluate("""async () => {
+            const step = Math.round(window.innerHeight * 0.7);
+            for (let y = 0; y < document.body.scrollHeight; y += step) {
+                window.scrollTo(0, y);
+                await new Promise((r) => setTimeout(r, 140));
+            }
+            window.scrollTo(0, 0);
+        }""")
+        page.wait_for_timeout(900)
     page.screenshot(path=path, full_page=full)
     print('%-45s %s' % (os.path.basename(path), 'OK' if not errors else 'ERRORES: %s' % errors[:3]))
 
