@@ -57,8 +57,9 @@ ${LEAFLET_JS}
 (function() {
   const data = ${payload};
   const map = L.map('map', { zoomControl: true, attributionControl: false });
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb', {
+    maxZoom: 19,
+    subdomains: 'abcd'
   }).addTo(map);
 
   const routeColor = data.route.color || '#0D684D';
