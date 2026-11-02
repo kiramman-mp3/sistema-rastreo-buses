@@ -2612,3 +2612,9 @@ msgstr "Solo el equipo de transporte puede marcar un incidente como atendido."
 msgid "Not seen yet"
 msgstr "Sin atender"
 
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#, python-format
+msgid "Show %s on the map"
+msgstr "Ver %s en el mapa"
