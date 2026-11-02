@@ -8,8 +8,8 @@ import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
 
-// Carto Positron: clean, unobtrusive tiles with high map-contrast
-const CARTO_TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+// Carto Voyager: high-definition navigation basemap with official API key
+const CARTO_TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 const TILE_OPTIONS = {
     maxZoom: 19,
     subdomains: "abcd",
