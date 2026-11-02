@@ -662,8 +662,8 @@
 /* Odoo sets small buttons in capitals; here they read as sentences. */
 .o_bus_live .btn,
 .o_bus_kanban .btn {
-    text-transform: none;
-    letter-spacing: 0;
+    text-transform: none !important;   /* Odoo's own rule is more specific */
+    letter-spacing: 0 !important;
 }
 
 @media (max-width: 1399px) {
