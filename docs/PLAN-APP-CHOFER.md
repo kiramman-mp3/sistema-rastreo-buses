@@ -82,7 +82,8 @@ Carpeta `apps/conductor-tablet/`. Expo SDK vigente, TypeScript, `expo-router`.
 - Cliente de API con token en `expo-secure-store`. Un 401 cierra sesión y vuelve al login.
 - URL del servidor desde `EXPO_PUBLIC_ODOO_URL`, con valor por defecto para desarrollo.
 - Pantallas: Login, Selección de bus y ruta (buses con `available: false` aparecen deshabilitados), y recuperación del turno activo al abrir la app.
-- Tableta: orientación horizontal, textos y botones grandes, `expo-keep-awake`.
+- Tableta: textos y botones grandes, `expo-keep-awake`.
+- Pantallas adaptables: la app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto < 600 dp es teléfono) y decide: tamaños de texto (tableta 20-60 px, teléfono 16-40 px), alto mínimo de los controles (72 / 56 px), paneles lado a lado o apilados, y qué se oculta cuando falta altura. `Screen` (`src/ui/cabin.tsx`) cuida muescas, barras del sistema y teclado.
 - Herramientas: `tsc --noEmit`, `expo lint`, `jest-expo`.
 - `eas.json` con perfil `development` (APK).
 
