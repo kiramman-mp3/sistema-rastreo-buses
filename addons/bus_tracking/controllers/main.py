@@ -7,7 +7,7 @@ from odoo import fields, http
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
-from ..models.utils import map_center
+from ..models.utils import int_param, map_center
 from .portal import line_positions
 
 _logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ class BusTrackingController(http.Controller):
     def health(self, **kwargs):
         """Uptime-monitor endpoint: 200 while positions keep arriving, 503 once they go stale."""
         env = request.env(su=True)
-        stale_minutes = int(env['ir.config_parameter'].get_param('bus_tracking.stale_minutes') or 10)
+        stale_minutes = int_param(env, 'bus_tracking.stale_minutes', 10)
         status, code = 'ok', 200
         if stale_minutes > 0 and env['bus.vehicle'].search_count([('traccar_device_id', '!=', False)]):
             last = env['bus.vehicle'].search([('last_fix_time', '!=', False)], order='last_fix_time desc', limit=1)
