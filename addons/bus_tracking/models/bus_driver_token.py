@@ -107,8 +107,10 @@ class BusDriverToken(models.Model):
             ('token_hash', '=', hash_token(raw)), ('device_label', '!=', BADGE_LABEL)]).unlink()
 
     @api.model
-    def _revoke_user(self, user):
-        self.sudo().search([('user_id', '=', user.id)]).unlink()
+    def _revoke_sessions(self, user):
+        """Sign every tablet of `user` out. The badge stays: it is a card the driver carries, and
+        a manager revokes it on purpose from the driver's form, which also clears its QR image."""
+        self.sudo().search([('user_id', '=', user.id), ('device_label', '!=', BADGE_LABEL)]).unlink()
 
     @api.model
     def _cron_purge(self):
