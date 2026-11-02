@@ -10,6 +10,15 @@ export type LastSent = {
   error: string | null;
 };
 
+/** The last fix the GPS produced, sent or not: it tells whether the GPS works and how fast the bus goes. */
+export type LastSample = {
+  at: number;
+  lat: number;
+  lon: number;
+  speedKmh: number | null;
+};
+
+export const SAMPLE_KEY = 'uta.gps.sample';
 export const CREDS_KEY = 'uta.gps.creds';
 export const LAST_KEY = 'uta.gps.last';
 
@@ -46,9 +55,20 @@ export async function ingestLocations(
     battery: () => Promise<number | null>;
     http?: typeof fetch;
     onSent?: (last: LastSent) => Promise<void>;
+    onSample?: (sample: LastSample) => Promise<void>;
   },
 ): Promise<{ queued: number; sent: number }> {
   if (!locations.length) return { queued: 0, sent: 0 };
+  const newest = locations[locations.length - 1];
+  if (options.onSample && newest) {
+    const speed = newest.coords.speed;
+    await options.onSample({
+      at: newest.timestamp,
+      lat: newest.coords.latitude,
+      lon: newest.coords.longitude,
+      speedKmh: speed !== null && speed >= 0 ? Math.round(speed * 3.6) : null,
+    });
+  }
   const batt = await options.battery();
   for (const location of locations) {
     await options.queue.push(locationToFix(location, batt));
