@@ -43,6 +43,54 @@ class TestShiftCron(TransactionCase):
         self.assertEqual(shift.state, 'active')
 
 
+
+@tagged('post_install', '-at_install')
+class TestTripProgress(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.route = self.env['bus.route'].create({'name': 'R', 'code': 'R1', 'stop_ids': [
+            (0, 0, {'sequence': i, 'name': name, 'latitude': -1.2 - i / 100, 'longitude': -78.6})
+            for i, name in enumerate(['A', 'B', 'C'], start=1)]})
+        self.a, self.b, self.c = self.route.stop_ids
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus T', 'route_id': self.route.id})
+        self.shift = self.env['bus.shift'].create({
+            'user_id': make_driver(self.env).id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
+        self.shift.start = fields.Datetime.now() - timedelta(hours=3)
+
+    def arrive(self, stop, minutes_ago):
+        self.env['bus.stop.arrival'].create({
+            'vehicle_id': self.bus.id, 'stop_id': stop.id,
+            'arrival_time': fields.Datetime.now() - timedelta(minutes=minutes_ago)})
+
+    def test_first_trip_goes_forward(self):
+        self.arrive(self.a, 100)
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['direction'], 'forward')
+        self.assertEqual(trip['next_stop'], self.b)
+
+    def test_after_the_last_stop_the_bus_heads_back(self):
+        for stop, ago in ((self.a, 100), (self.b, 90), (self.c, 80)):
+            self.arrive(stop, ago)
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['direction'], 'back')
+        self.assertEqual(list(trip['stops']), [self.c, self.b, self.a])
+        self.assertEqual(trip['next_stop'], self.b)
+        self.assertEqual(set(trip['arrived']), {self.c.id})
+
+    def test_the_second_lap_has_a_next_stop_again(self):
+        for stop, ago in ((self.a, 100), (self.b, 90), (self.c, 80), (self.b, 70), (self.a, 60)):
+            self.arrive(stop, ago)
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['direction'], 'forward')
+        self.assertEqual(trip['next_stop'], self.b)
+
+    def test_arrivals_before_the_shift_do_not_count(self):
+        self.arrive(self.c, 300)
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['direction'], 'forward')
+        self.assertEqual(trip['next_stop'], self.a)
+
 @tagged('post_install', '-at_install')
 class TestDriverShiftApi(HttpCase):
 
@@ -200,3 +248,35 @@ class TestDriverShiftApi(HttpCase):
         data = self.post(ME, token=self.token()).json()
         self.assertIsNone(data['shift'])
         self.assertFalse(data['vehicles'][0]['available'])
+
+    def test_start_needs_the_gps_address(self):
+        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.gps_url', '')
+        resp = self.start(self.token())
+        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.json(), {'error': 'no_gps_url'})
+        self.assertFalse(self.env['bus.shift'].search_count([('vehicle_id', '=', self.bus.id)]))
+
+    def test_start_refuses_an_archived_route(self):
+        self.route.active = False
+        self.assertEqual(self.start(self.token()).status_code, 400)
+
+    def test_me_says_which_buses_have_gps(self):
+        self.env['bus.vehicle'].create({'name': 'Sin GPS', 'route_id': self.route.id})
+        vehicles = {v['name']: v for v in self.post(ME, token=self.token()).json()['vehicles']}
+        self.assertTrue(vehicles['Bus 1']['has_gps'])
+        self.assertFalse(vehicles['Sin GPS']['has_gps'])
+
+    def test_an_incident_keeps_the_time_it_was_reported(self):
+        token = self.token()
+        self.assertEqual(self.start(token).status_code, 200)
+        shift = self.env['bus.shift'].search([('user_id', '=', self.driver.id), ('state', '=', 'active')])
+        shift.start = fields.Datetime.now() - timedelta(hours=1)
+        pressed = (fields.Datetime.now() - timedelta(minutes=20)).replace(microsecond=0)
+        resp = self.post(INCIDENT, {'kind': 'sos', 'reported_at': pressed.isoformat() + 'Z'}, token=token)
+        self.assertEqual(resp.status_code, 200, resp.text)
+        self.assertEqual(self.env['bus.incident'].browse(resp.json()['id']).reported_at, pressed)
+        # A time before the shift or in the future is replaced by the time it arrived.
+        for wrong in ('2001-01-01T00:00:00Z', '2999-01-01T00:00:00Z', 'ayer'):
+            incident = self.env['bus.incident'].browse(
+                self.post(INCIDENT, {'kind': 'traffic', 'reported_at': wrong}, token=token).json()['id'])
+            self.assertGreater(incident.reported_at, pressed)
