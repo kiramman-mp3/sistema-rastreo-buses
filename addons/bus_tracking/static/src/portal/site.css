@@ -581,7 +581,7 @@ button.parada:hover {
 
 .pie .creditos {
     margin-top: 1.25rem;
-    max-width: none;
+    max-width: 62ch;
     font-size: 0.8125rem;
 }
 
