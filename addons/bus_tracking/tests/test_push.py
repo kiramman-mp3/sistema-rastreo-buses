@@ -187,3 +187,29 @@ class TestPushEndpoints(HttpCase):
             result = self.call('/bus_tracking/push/test')['result']
         self.assertEqual(result, {'sent': 2})
         self.assertEqual(calls, [('manager5', 'Test notification')])
+
+
+@tagged('post_install', '-at_install')
+class TestPushQueue(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.Sub = self.env['bus.push.subscription']
+        self.manager = self.env['res.users'].create({
+            'name': 'Mgr Queue', 'login': 'mgr_queue',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_manager').id])]})
+        self.Sub.create(new_device(self.manager)[2])
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus Q'})
+
+    def test_a_network_error_does_not_stop_the_queue_nor_repeat_it(self):
+        import requests
+        self.env['bus.alert'].search([]).write({'notified': True})
+        alert = self.env['bus.alert'].create({
+            'vehicle_id': self.bus.id, 'kind': 'speeding', 'start_time': '2026-10-26 12:00:00'})
+        with patch('pywebpush.webpush', side_effect=requests.ConnectionError('down')) as sent:
+            self.env['bus.alert']._cron_push()        # must not raise
+            self.assertTrue(alert.notified)
+            calls = sent.call_count
+            self.env['bus.alert']._cron_push()
+            self.assertEqual(sent.call_count, calls)
+        self.assertTrue(self.Sub.search([('user_id', '=', self.manager.id)]))

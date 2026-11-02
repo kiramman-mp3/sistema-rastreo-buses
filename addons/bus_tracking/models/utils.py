@@ -14,6 +14,18 @@ DEFAULT_MAP_CENTER = (-1.2417, -78.6167)    # Ambato, Tungurahua, Ecuador (appro
 LOCAL_TIMEZONE = 'America/Guayaquil'        # UTC-5, no daylight saving
 
 
+def int_param(env, key, default):
+    """A whole-number system parameter. A typo in Settings > Technical falls back to the
+    default instead of breaking the cron or the page that reads it."""
+    value = env['ir.config_parameter'].sudo().get_param(key)
+    if value in (False, None, ''):
+        return default
+    try:
+        return int(str(value).strip())
+    except ValueError:
+        return default
+
+
 def brand_name(env):
     value = env['ir.config_parameter'].sudo().get_param('bus_tracking.brand_name')
     return (value or '').strip() or DEFAULT_BRAND

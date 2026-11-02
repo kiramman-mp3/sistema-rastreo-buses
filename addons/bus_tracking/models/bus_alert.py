@@ -3,7 +3,7 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 
 from .geo import PathMeasure
-from .utils import MOVING_ABOVE_KMH
+from .utils import MOVING_ABOVE_KMH, int_param
 
 KINDS = [
     ('speeding', "Speeding"),
@@ -75,8 +75,7 @@ class BusAlert(models.Model):
     # ------------------------------------------------------------------
     @api.model
     def _param(self, key, default):
-        value = self.env['ir.config_parameter'].sudo().get_param('bus_tracking.' + key)
-        return int(value) if value not in (False, None, '') else default
+        return int_param(self.env, 'bus_tracking.' + key, default)
 
     @api.model
     def _open_alert(self, vehicle, kind, start_time, **vals):
@@ -192,4 +191,5 @@ class BusAlert(models.Model):
                 'tag': 'bus-alert',
             }
             push._send_to_managers(payload)
-        pending.write({'notified': True})
+            # Marked one by one: whatever happens to the next one, this one is never sent twice.
+            alert.notified = True
