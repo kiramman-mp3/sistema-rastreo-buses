@@ -246,6 +246,8 @@ def main():
         'posiciones_nuevas': odoo.search_count('bus.position', []) - before,
         'quejas_nuevas': odoo.search_count('bus.complaint', []) - complaints_before,
         'estados_5xx': sum(1 for r in rows if r['status'] >= 500),
+        # A 503 from /health when no bus reported recently is an expected answer, not an error.
+        'estados_5xx_inesperados': sum(1 for r in rows if r['status'] >= 500 and not r['ok']),
         'areas': areas, 'fallos_por_causa': by_note,
         'muestra_fallos': failures[:15],
         'tiempos': [round(r['tiempo'], 5) for r in rows],
