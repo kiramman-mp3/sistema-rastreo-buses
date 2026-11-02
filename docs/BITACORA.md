@@ -849,3 +849,49 @@ astreo-prod-db-1) verificados arriba y saludables.
 ### Pendiente
 
 - Finalización del build de producción en EAS Cloud y prueba de campo en tableta con GPS en recorrido real.
+
+
+## 2026-11-01: rediseño integral de producto y frontend (fases 23, 24 y 25)
+
+Transformación de la experiencia de usuario y arquitectura frontend del sistema aplicando los skills de diseño (`design-taste-frontend`, `impeccable`, `emil-design-eng`, `frontend-design`, `mobile-native`, `vercel-react-native-skills`).
+
+### Qué se hizo
+
+1. **Fase 23: Rediseño cinemático del mapa en vivo en OWL 2.0 (Odoo Backend)**:
+   - Componente OWL 2.0 desacoplado (`addons/bus_tracking/static/src/js/live_map.js` y `live_map.xml`).
+   - Interpolación continua a 60 fps mediante `requestAnimationFrame` con LERP para suavizar las posiciones GPS entre refrescos de 10s.
+   - Normalización angular por ángulo más corto (`normalizeAngleDiff`) para evitar saltos de 360° en la aguja de rumbo.
+   - Sustitución de tiles OSM por Carto Positron (`light_all`).
+   - Floating HUD translúcido superior con contadores de flota y filtros de estado sin parpadeo del DOM (`syncVehicles`). Drawer retráctil de flota y tarjeta flotante de bus seleccionado con métricas en tiempo real.
+   - Tokens de diseño SCSS/CSS unificados en `brand.css` y `live_map.css`.
+   - Integrada en `develop` vía `feature/owl-live-map` con `--no-ff`.
+
+2. **Fase 24: Portal público para pasajeros y comunidad universitaria (QWeb / CSS)**:
+   - Landing (`/transporte` y `/`): Hero empático, buscador predictivo con `<datalist>`, accesos rápidos a campus (Huachi, Ingahurco, Querochaca), barra de pulso de red activa y tarjetas de líneas destacadas.
+   - Directorio de rutas (`/transporte/rutas` y `/rutas`): Tarjetas visuales con color heráldico distintivo (Carmesí UTA `#7A1A22`, Ámbar `#D97706`), origen-destino, frecuencia pico y unidades activas.
+   - Ruta detalle (`/transporte/rutas/<id>` y `/rutas/<codigo>`): Diagrama de metro lineal vertical con estado en vivo, tiempos de llegada probabilísticos (ETA en rangos "4-7 min"), avisos de desvío y mapa con iconos orientados.
+   - Formulario de quejas (`/transporte/quejas` y `/quejas`): Flujo de 3 pasos con selección visual del motivo (Demora, Pérdida, Conducción, Sugerencia) y comprobante digital postal (`#UTA-XXXX`).
+   - Integrada en `develop` vía `feature/public-portal` con `--no-ff`.
+
+3. **Fase 25: App tableta de chofer en cabina (React Native / Expo Landscape)**:
+   - Optimización para montaje en tablero a 100 cm: orientación horizontal, paleta ultra oscura antirreflejos (`#0B0F17`, `#151D2A`), touch targets de mínimo 72px (`cockpitHit = 72`).
+   - Header de telemetría con reloj digital monoespaciado en tiempo real, identificador de bus/línea y estado GPS.
+   - Barra de cadencia/headway (`HeadwayBar.tsx`): semáforo de alto contraste con resorte suave (`A TIEMPO`, `ADELANTADO`, `RETRASADO`) para lectura periférica.
+   - Próximas paradas (`StopAlertCard.tsx`): parada inmediata en tipografía de 34px, distancia estimada en vivo por Haversine (`useCockpitTelemetry.ts`), confirmación táctil de 72px con háptica (`expo-haptics`) y riel de 2 paradas subsiguientes.
+   - Acciones de emergencia (`IncidentActions.tsx`): reporte de tráfico en 1 toque y botón SOS con pulsación sostenida obligatoria de 1.5s para evitar falsos accionamientos por vibración del vehículo.
+   - Integrada en `develop` vía `feature/driver-tablet-shift` con `--no-ff`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Sintaxis Python y validación AST en controladores Odoo | OK (0 errores) |
+| Validación de plantillas XML QWeb y OWL de Odoo | OK (0 errores) |
+| `npx tsc --noEmit` en `apps/conductor-tablet` | OK (0 errores TypeScript) |
+| `npm test` en `apps/conductor-tablet` (Jest) | 10 suites / 44 tests PASS |
+| Verificación de contrastes WCAG AAA en cabina y responsive web | OK |
+
+### Pendiente o sin confirmar
+
+- Jornada de campo con tableta física montada en bus y chofer real.
+- Build de producción en EAS con el nuevo layout de cabina.
