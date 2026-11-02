@@ -140,6 +140,15 @@ if first_run:
     ]:
         Complaint.create({'route_id': routes[code][0].id, 'kind': kind, 'description': text, 'lang': 'es'})
 
+# A second driver without a shift, to see the bus selection screen.
+Users2 = env['res.users'].with_context(no_reset_password=True)
+if not Users2.search([('login', '=', 'chofer2')], limit=1):
+    Users2.create({
+        'name': 'María Torres', 'login': 'chofer2', 'password': 'chofer2',
+        'tz': 'America/Guayaquil', 'lang': 'es_EC',
+        'groups_id': [(6, 0, [env.ref('base.group_user').id, env.ref('bus_tracking.group_bus_driver').id])],
+    })
+
 # Make the admin's panel Spanish and in Ecuador's time zone.
 env.ref('base.user_admin').write({'lang': 'es_EC', 'tz': 'America/Guayaquil'})
 env.cr.commit()
