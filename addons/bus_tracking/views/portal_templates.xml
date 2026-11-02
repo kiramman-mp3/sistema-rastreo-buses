@@ -34,23 +34,13 @@
                         <!-- Live Network Status Pill -->
                         <div class="portal-network-status-pill">
                             <span class="network-pulse"></span>
-                            <span><strong>Red Operativa:</strong> <t t-esc="total_active_buses or 8"/> buses en servicio activo · Frecuencia promedio en hora pico: 8-12 min</span>
+                            <span t-if="total_active_buses"><t t-esc="total_active_buses"/> buses con señal ahora</span>
+                            <span t-else="">Ahora no hay buses con señal</span>
                         </div>
                     </div>
                 </section>
 
                 <div class="wrap portal-content-body">
-                    <!-- Campus Quick Filter Tabs -->
-                    <div class="portal-campus-filters">
-                        <span class="filters-label">Filtrar por campus:</span>
-                        <div class="campus-tabs-row" id="campus-filter-tabs">
-                            <button class="campus-tab active" data-campus="all">Todas las líneas</button>
-                            <button class="campus-tab" data-campus="huachi">Campus Huachi</button>
-                            <button class="campus-tab" data-campus="ingahurco">Campus Ingahurco</button>
-                            <button class="campus-tab" data-campus="querochaca">Campus Querochaca</button>
-                        </div>
-                    </div>
-
                     <p t-if="not routes" class="vacio" t-esc="s['no_routes']"/>
 
                     <!-- Visual Grid of Spacious Route Cards -->
@@ -75,9 +65,7 @@
                                         <span class="terminal-badge"><t t-esc="r.get('last_stop', 'Destino')"/></span>
                                     </div>
                                     <div class="route-meta-pills">
-                                        <span class="meta-pill">⏱️ Frecuencia: ~10 min</span>
                                         <span class="meta-pill" t-if="r.get('stops_count')">📍 <t t-esc="r['stops_count']"/> paradas</span>
-                                        <span class="meta-pill">♿ Accesible</span>
                                     </div>
                                 </div>
                                 <div class="card-bottom-action">
@@ -105,27 +93,6 @@
             </main>
 
             <t t-call="bus_tracking.portal_footer"/>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    var tabs = document.querySelectorAll("#campus-filter-tabs .campus-tab");
-                    var cards = document.querySelectorAll("#routes-grid .route-premium-card");
-                    tabs.forEach(function (tab) {
-                        tab.addEventListener("click", function () {
-                            tabs.forEach(function (t) { t.classList.remove("active"); });
-                            tab.classList.add("active");
-                            var filter = tab.dataset.campus;
-                            cards.forEach(function (card) {
-                                if (filter === "all") {
-                                    card.style.display = "";
-                                } else {
-                                    var text = card.dataset.title + " " + card.dataset.code;
-                                    card.style.display = text.indexOf(filter) !== -1 ? "" : "none";
-                                }
-                            });
-                        });
-                    });
-                });
-            </script>
         </t>
     </template>
 
@@ -162,22 +129,13 @@
                             </div>
                             <div class="route-live-badge-top">
                                 <span class="live-dot-pulse"></span>
-                                <span>Rastreo Satelital Activo</span>
+                                <span>En vivo</span>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <div class="wrap portal-content-body">
-                    <!-- Route Notice / Desvío Banner en Lenguaje Humano -->
-                    <div class="route-notice-banner">
-                        <span class="notice-icon">🚧</span>
-                        <div class="notice-content">
-                            <strong>Aviso de Operación:</strong>
-                            <span>Los tiempos de arribo mostrados corresponden a estimaciones probabilísticas sujetas al tráfico habitual. Todas las unidades cuentan con monitoreo de velocidad.</span>
-                        </div>
-                    </div>
-
                     <!-- Split Layout: Itinerario Lineal + Viewport Mapa -->
                     <div class="route-split-layout">
                         <!-- Left Panel: Diagrama Metro Lineal Vertical -->
@@ -189,7 +147,7 @@
                                         <t t-esc="len(stops)"/> Paradas
                                     </span>
                                 </div>
-                                <p class="itinerary-subtitle">Estimaciones de arribo parada por parada</p>
+                                
                             </div>
 
                             <!-- Metro Vertical Rail -->
@@ -210,9 +168,6 @@
                                             </t>
                                             <t t-elif="st_index == len(stops) - 1">
                                                 <span class="eta-tag dest">Destino Final</span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="eta-tag in-route">Llega en <t t-esc="(st_index * 3) + 2"/>–<t t-esc="(st_index * 3) + 5"/> min</span>
                                             </t>
                                         </div>
                                     </div>
@@ -243,7 +198,7 @@
                                 <div class="map-floating-hud">
                                     <div class="hud-status-badge">
                                         <span class="live-dot-pulse"></span>
-                                        <span id="bus-status" aria-live="polite">Sincronizando satélite...</span>
+                                        <span id="bus-status" aria-live="polite">Buscando buses…</span>
                                     </div>
                                     <div id="path-picker" class="hud-path-picker" hidden="hidden">
                                         <select id="path-select" class="form-select form-select-sm"/>
@@ -320,25 +275,7 @@
 
                                 <div class="info-card-section">
                                     <h4>Compromiso de Respuesta</h4>
-                                    <p>Cada reporte es derivado de inmediato a la supervisión operativa. Te garantizamos revisión y seguimiento en un lapso de <strong>24 a 48 horas laborables</strong>.</p>
-                                </div>
-
-                                <div class="info-card-section">
-                                    <h4>Canales de Atención Directa</h4>
-                                    <ul class="contact-bullets">
-                                        <li>
-                                            <span class="bullet-icon">📞</span>
-                                            <span><strong>PBX Central:</strong> +593 (3) 284-8487 (Ext. 124)</span>
-                                        </li>
-                                        <li>
-                                            <span class="bullet-icon">✉️</span>
-                                            <span><strong>Email:</strong> transporte@uta.edu.ec</span>
-                                        </li>
-                                        <li>
-                                            <span class="bullet-icon">🏢</span>
-                                            <span><strong>Atención Presencial:</strong> Campus Huachi, Edificio Administrativo</span>
-                                        </li>
-                                    </ul>
+                                    <p>Una persona del equipo de transporte lee cada mensaje.</p>
                                 </div>
 
                                 <div class="info-card-section privacy-box">
@@ -362,7 +299,6 @@
                             <form class="formulario-empatico" method="post" action="/quejas" id="complaint-wizard">
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <input type="hidden" name="t" t-att-value="token"/>
-                                <input type="hidden" name="kind" id="complaint-kind-input" t-att-value="form['kind'] or 'other'"/>
 
                                 <div class="trampa" aria-hidden="true">
                                     <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
@@ -375,28 +311,14 @@
                                         <span class="step-title">¿Qué tipo de situación deseas reportar?</span>
                                     </div>
 
-                                    <div class="reason-cards-grid">
-                                        <div class="reason-card" data-kind="delay">
-                                            <span class="reason-icon">⏱️</span>
-                                            <strong class="reason-name">Demora en Servicio</strong>
-                                            <p class="reason-desc">El bus no pasó o tardó más de lo programado</p>
-                                        </div>
-                                        <div class="reason-card" data-kind="lost_item">
-                                            <span class="reason-icon">🧳</span>
-                                            <strong class="reason-name">Objeto Extraviado</strong>
-                                            <p class="reason-desc">Olvidé una pertenencia a bordo de la unidad</p>
-                                        </div>
-                                        <div class="reason-card" data-kind="conduct">
-                                            <span class="reason-icon">🛡️</span>
-                                            <strong class="reason-name">Atención o Conducción</strong>
-                                            <p class="reason-desc">Comentarios sobre el trato o la velocidad del bus</p>
-                                        </div>
-                                        <div class="reason-card" data-kind="other">
-                                            <span class="reason-icon">💡</span>
-                                            <strong class="reason-name">Sugerencia de Mejora</strong>
-                                            <p class="reason-desc">Propuesta de paradas, horarios o rutas</p>
-                                        </div>
-                                    </div>
+                                    <fieldset class="reason-cards-grid">
+                                        <legend class="visually-hidden" t-esc="s['field_kind']"/>
+                                        <label t-foreach="kinds" t-as="k" class="reason-card">
+                                            <input type="radio" name="kind" t-att-value="k[0]"
+                                                   t-att-checked="'checked' if form['kind'] == k[0] else None"/>
+                                            <strong class="reason-name" t-esc="s[k[1]]"/>
+                                        </label>
+                                    </fieldset>
                                 </div>
 
                                 <!-- PASO 2: Contexto y Detalles -->
@@ -515,13 +437,11 @@
                         <p class="thanks-lead">Gracias por ayudarnos a cuidar y mejorar el servicio de transporte universitario. Tu mensaje ha sido canalizado a la Dirección de Bienestar Universitario.</p>
 
                         <div t-if="folio" class="thanks-ticket-box">
-                            <span class="ticket-header-label">COMPROBANTE OFICIAL DE ATENCIÓN</span>
-                            <div class="folio-highlight">
+                                                        <div class="folio-highlight">
                                 <span class="folio-label">Número de Caso:</span>
                                 <strong class="folio-code" t-esc="folio"/>
                             </div>
-                            <p class="ticket-eta-note">Tiempo estimado de revisión operativa: <strong>24 a 48 horas</strong>.</p>
-                            <p t-if="not has_contact" class="ayuda thanks-no-contact">Enviaste este reporte de forma anónima. Puedes conservar este número de caso para cualquier consulta en Bienestar Universitario.</p>
+                            <p t-if="not has_contact" class="ayuda thanks-no-contact" t-esc="s['thanks_no_contact']"/>
                         </div>
 
                         <div class="thanks-actions-row">
