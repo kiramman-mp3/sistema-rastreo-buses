@@ -11,7 +11,7 @@ import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
 import { classifyStops } from '../src/shift/progress';
-import { useSession } from '../src/state/SessionContext';
+import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, SosButton, Txt } from '../src/ui/cabin';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
@@ -38,6 +38,7 @@ export default function ShiftScreen() {
   useLang();
   const { palette, choice, setChoice } = useTheme();
   const session = useSession();
+  const actions = useSessionActions();
   const { shift, vehicles, routes, shiftState, routeMap } = session.snapshot;
   const bus = vehicles.find((item) => item.id === shift?.vehicle_id);
   const route = routes.find((item) => item.id === shift?.route_id);
@@ -87,8 +88,8 @@ export default function ShiftScreen() {
       async function tick() {
         if (!live || AppState.currentState !== 'active') return;
         try {
-          await session.pullState();
-          if (!session.snapshot.routeMap) await session.loadRouteMap();
+          await actions.pullState();
+          if (!actions.snapshot.routeMap) await actions.loadRouteMap();
           if (live) setStale(false);
         } catch (error) {
           if (error instanceof ApiError && error.code === 'no_shift') {
@@ -103,9 +104,14 @@ export default function ShiftScreen() {
       return () => {
         live = false;
         clearInterval(id);
-        deactivateKeepAwake();
+        // on the web (previews) the lock may never have been granted, and it throws
+        try {
+          deactivateKeepAwake().catch(() => undefined);
+        } catch {
+          // nothing to release
+        }
       };
-    }, [session]),
+    }, [actions]),
   );
 
   function confirmEnd() {
