@@ -181,7 +181,7 @@ Tableta:
 - `refactor: read the tile address from one setting` y documentar CARTO y su atribución.
 - Pruebas: `test_portal.py` (20 consultas seguidas desde una IP con caché válida no dan 429; sentido del viaje), `test_driver_staff.py` (SOS de 30 h sigue en la cola), restricción de nombre único; recorrido de teclado actualizado en `docs/calidad/12-validacion-ux.md`.
 
-### Fase 5. `fix/validaciones-modelo` (BE-06, BE-07, BE-08, BE-13)
+### Fase 5. `fix/validaciones-modelo` (BE-06, BE-07, BE-08, BE-13) — hecha (caché del trazado: 1,53 s → 0,76 s por 1.000 posiciones con un trazado de 1.500 puntos)
 - `fix: validate stop coordinates, radius and route colour in the model`.
 - `fix: refuse a recording period that ends before it starts`.
 - `perf: cache the measured route line per route` (invalidar con `write_date`).

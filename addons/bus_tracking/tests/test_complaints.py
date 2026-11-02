@@ -225,10 +225,13 @@ class TestComplaintForm(HttpCase):
         self.assertTrue(resp.headers['Location'].endswith('/quejas/gracias'))
         self.assertEqual(self.count(), 0)
 
-    def test_posting_too_fast_stores_nothing(self):
+    def test_posting_too_fast_asks_to_send_again_and_keeps_the_text(self):
         with patch(MIN_FILL, 3):
             resp = self.submit()
-        self.assertTrue(resp.headers['Location'].endswith('/quejas/gracias'))
+        # Not a silent "thanks": a person who pasted the text from the home page would lose it.
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('pulsa Enviar otra vez', resp.text)
+        self.assertIn(LONG_TEXT, resp.text)
         self.assertEqual(self.count(), 0)
 
     def test_missing_or_forged_token_stores_nothing(self):

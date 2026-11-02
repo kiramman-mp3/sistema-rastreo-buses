@@ -104,10 +104,16 @@ class BusComplaints(http.Controller):
         if (request.httprequest.content_length or 0) > MAX_BODY_BYTES:
             return request.make_response('', status=413)
 
-        # Bots fill the hidden field, post instantly or forge the token: pretend it worked and store nothing.
+        # Bots fill the hidden field or forge the token: pretend it worked and store nothing.
         status = token_status(post.get('t'))
-        if post.get('website') or status in ('fast', 'invalid'):
+        if post.get('website') or status == 'invalid':
             return self._thanks()
+        if status == 'fast':
+            # Too fast for a person typing, but a text brought from the home page can be sent
+            # this quickly: ask to send again instead of dropping it while saying "thanks".
+            strings = portal_context()['s']
+            return render_portal('bus_tracking.complaint_form', self._form_values(
+                post, {'form': strings['err_fast']}), status=400)
         if status == 'expired':
             return self._reject_expired(post)
 
