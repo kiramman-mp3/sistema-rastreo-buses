@@ -10,6 +10,21 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      },
       "env": {
         "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
       }
@@ -18,6 +33,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
       },
       "env": {
         "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
