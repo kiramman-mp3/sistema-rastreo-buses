@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 
@@ -24,6 +24,21 @@ export default function Select() {
   const [error, setError] = useState('');
 
   const selectedRoute = routes.find((r) => r.id === routeId);
+  const offline = session.snapshot.offline;
+
+  // Opened without signal: keep asking until the server answers, then go to the shift if there is one.
+  useEffect(() => {
+    if (!offline) return undefined;
+    const id = setInterval(() => {
+      session
+        .refreshMe()
+        .then(() => {
+          if (session.snapshot.shift) router.replace('/shift');
+        })
+        .catch(() => undefined);
+    }, 10_000);
+    return () => clearInterval(id);
+  }, [offline, session]);
 
   async function executeStart() {
     if (!vehicleId || !routeId) return;
@@ -99,6 +114,12 @@ export default function Select() {
           style={styles.signOutBtn}
         />
       </View>
+
+      {offline ? (
+        <View style={styles.offlineBanner} accessibilityLiveRegion="polite">
+          <Text style={styles.offlineText}>{t('offlineRetry')}</Text>
+        </View>
+      ) : null}
 
       {/* Choose Bus Section */}
       <View style={styles.sectionCard}>
@@ -213,6 +234,18 @@ export default function Select() {
 }
 
 const styles = StyleSheet.create({
+  offlineBanner: {
+    backgroundColor: '#FFF4CC',
+    borderColor: '#8A6A00',
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 16,
+  },
+  offlineText: {
+    color: '#3D2E00',
+    fontSize: 20,
+    fontWeight: '700',
+  },
   page: {
     padding: 24,
     gap: 20,
