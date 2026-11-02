@@ -9,7 +9,7 @@ from .portal import asset_version, SHOW_BUSES_FOR, safe_color, portal_context
 
 class BusLanding(Home):
 
-    @http.route(['/', '/inicio', '/transporte'], type='http', auth='none')
+    @http.route(['/', '/transporte'], type='http', auth='none')
     def index(self, *args, **kw):
         # Visitors without a session see the landing; signed-in users go to the backend as usual.
         if request.db and not request.session.uid:
