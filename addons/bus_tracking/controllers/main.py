@@ -11,6 +11,7 @@ from ..models.utils import int_param, map_center
 from .portal import line_positions
 
 MAX_TRACK_HOURS = 24
+_warned_query_secret = False
 
 _logger = logging.getLogger(__name__)
 
@@ -119,8 +120,14 @@ class BusTrackingController(http.Controller):
     def traccar_webhook(self, secret=None, **kwargs):
         env = request.env(su=True)
         expected = env['ir.config_parameter'].get_param('bus_tracking.webhook_secret')
-        # The header keeps the secret out of access logs; the query parameter is kept for older setups.
+        # The header keeps the secret out of access logs. The query parameter is deprecated: it is
+        # still accepted so older Traccar setups keep working, and will be removed in the next version.
         headers = request.httprequest.headers
+        global _warned_query_secret
+        if secret and not headers.get('X-Webhook-Secret') and not _warned_query_secret:
+            _warned_query_secret = True   # once per worker, not on every position
+            _logger.warning("Traccar webhook: the secret came in the URL and ends up in access logs; "
+                            "send it in the X-Webhook-Secret header (FORWARD_HEADER) instead.")
         secret = secret or headers.get('X-Webhook-Secret') or headers.get('Authorization', '').removeprefix('Bearer ')
         if not expected or not secret or not hmac.compare_digest(
                 expected.encode(), secret.encode()):
