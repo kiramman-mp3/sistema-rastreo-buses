@@ -2,7 +2,6 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models
 
-from .geo import PathMeasure
 from .utils import MOVING_ABOVE_KMH, int_param
 
 KINDS = [
