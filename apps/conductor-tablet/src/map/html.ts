@@ -1,4 +1,5 @@
 import type { RouteMap } from '../api/types';
+import { LEAFLET_CSS, LEAFLET_JS } from './leafletAssets';
 
 export type MapBus = { lat: number; lon: number } | null;
 
@@ -8,9 +9,8 @@ export function buildMapHtml(route: RouteMap, bus: MapBus, nextStopId: number | 
 <html><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+${LEAFLET_CSS}
   html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; background: #e2e8f0; }
   .stop-marker-badge {
     background: #0D684D;
@@ -48,6 +48,9 @@ export function buildMapHtml(route: RouteMap, bus: MapBus, nextStopId: number | 
     z-index: 2000 !important;
   }
 </style>
+<script>
+${LEAFLET_JS}
+</script>
 </head><body>
 <div id="map"></div>
 <script>
