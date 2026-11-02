@@ -117,9 +117,12 @@
             return null;
         }
 
+        function heading(bus) { return bus.dir === -1 ? -1 : 1; }
+
         function place(bus) {
             if (bus.at !== null && bus.at !== undefined) { return fmt(t.bus_at, { a: stops[bus.at] }); }
-            if (bus.after < stops.length - 1) { return fmt(t.bus_between, { a: stops[bus.after], b: stops[bus.after + 1] }); }
+            var ahead = bus.after + heading(bus);
+            if (ahead >= 0 && ahead < stops.length) { return fmt(t.bus_between, { a: stops[bus.after], b: stops[ahead] }); }
             return fmt(t.bus_at, { a: stops[bus.after] });
         }
 
@@ -131,7 +134,8 @@
                 var index = where(bus);
                 if (index === null) { return; }
                 var atStop = bus.at !== null && bus.at !== undefined;
-                var left = mine - index;
+                // on the way back the bus meets the stops in reverse order
+                var left = heading(bus) * (mine - index);
                 // a bus that already left my stop is not coming to it
                 if (left < 0 || (left === 0 && !atStop)) { return; }
                 if (!best || left < best.left) { best = { bus: bus, left: left }; }
