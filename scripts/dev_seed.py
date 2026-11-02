@@ -70,6 +70,9 @@ def point_at(stops, t):
 
 ICP = env['ir.config_parameter'].sudo()
 ICP.set_param('bus_tracking.brand_name', 'Buses UTA')
+# Where the tablets send their GPS (Traccar's OsmAnd port). Without it no shift can start.
+if not ICP.get_param('bus_tracking.gps_url'):
+    ICP.set_param('bus_tracking.gps_url', 'http://localhost:5055')
 env.user.tz = 'America/Guayaquil'
 env.company.partner_id.tz = 'America/Guayaquil'
 

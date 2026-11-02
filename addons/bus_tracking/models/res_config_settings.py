@@ -1,4 +1,7 @@
+import re
+
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResConfigSettings(models.TransientModel):
@@ -59,6 +62,13 @@ class ResConfigSettings(models.TransientModel):
         help="Official email of the transport service. Leave it empty to show no email on the public pages.")
     tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_qr')
     tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_qr')
+
+    @api.constrains('bus_gps_url')
+    def _check_gps_url(self):
+        for settings in self:
+            value = (settings.bus_gps_url or '').strip()
+            if value and not re.match(r'^https?://[^\s/]+(:\d+)?(/\S*)?$', value):
+                raise ValidationError(_("The GPS address must look like https://gps.example.com."))
 
     @api.depends()
     def _compute_tablet_qr(self):
