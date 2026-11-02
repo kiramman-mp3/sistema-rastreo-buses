@@ -133,6 +133,13 @@ class TestPassengerPortal(HttpCase):
         self.assertTrue(limiter.allow('ip', now=12))
 
     # -- language ----------------------------------------------------------------------
+    def test_page_language_and_the_current_choice_are_marked(self):
+        html = self.url_open('/rutas').text
+        self.assertIn('<html lang="es-EC"', html)
+        self.assertRegex(html, r'value="es"[^>]*aria-current="true"')
+        english = self.url_open('/rutas?lang=en').text
+        self.assertIn('<html lang="en"', english)
+
     def test_language_follows_the_browser_then_the_choice(self):
         self.assertIn('Elige tu ruta', self.url_open('/rutas').text)
         english = self.url_open('/rutas', headers={'Accept-Language': 'en-US,en;q=0.9'}).text
@@ -166,12 +173,13 @@ class TestPassengerPortal(HttpCase):
     def test_public_assets_are_versioned_so_browsers_never_keep_stale_copies(self):
         for url in ('/rutas', '/rutas/L1', '/'):
             html = self.url_open(url).text
-            self.assertRegex(html, r'landing\.css\?v=\d+', url)
+            self.assertRegex(html, r'site\.css\?v=\d+', url)
         self.assertRegex(self.url_open('/rutas/L1').text, r'portal_map\.js\?v=\d+')
 
     def test_no_invented_numbers_when_no_bus_reports(self):
         html = self.url_open('/rutas').text
-        self.assertIn('Ahora no hay buses con señal', html)
+        self.assertIn('Sin buses con señal', html)
+        self.assertIn('Ahora no hay buses con señal', self.url_open('/').text)
         for invented in ('8 buses', 'Frecuencia', 'min</span>', 'Accesible'):
             self.assertNotIn(invented, html)
 

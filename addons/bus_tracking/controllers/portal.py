@@ -99,7 +99,7 @@ def portal_context(**values):
         request.httprequest.accept_languages,
         requested=request.params.get('lang'),
         remembered=request.httprequest.cookies.get(LANG_COOKIE))
-    values.update(lang=lang, s=STRINGS[lang], asset_v=asset_version(), line_i18n=js_strings(STRINGS[lang]),
+    values.update(lang=lang, site_lang=lang, s=STRINGS[lang], asset_v=asset_version(), line_i18n=js_strings(STRINGS[lang]),
                   brand=brand_name(request.env(su=True)),
                   contact=public_contact(request.env(su=True)),
                   languages={c: s['lang_name'] for c, s in STRINGS.items()})

@@ -9,7 +9,7 @@
     <template id="portal_routes" name="Passenger portal: routes">
         <t t-call="web.layout">
             <t t-set="title"><t t-esc="s['title_routes']"/> · <t t-esc="brand"/></t>
-            <t t-set="html_data" t-value="{'lang': lang}"/>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
             <t t-set="body_classname" t-value="'o_bus_site'"/>
             <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-call="bus_tracking.portal_header"/>
@@ -62,7 +62,7 @@
     <template id="portal_route" name="Passenger portal: one route">
         <t t-call="web.layout">
             <t t-set="title"><t t-esc="route['code']"/> <t t-esc="route['name']"/> · <t t-esc="brand"/></t>
-            <t t-set="html_data" t-value="{'lang': lang}"/>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
             <t t-set="body_classname" t-value="'o_bus_site'"/>
             <t t-set="head">
                 <t t-call="bus_tracking.site_head"/>
@@ -72,7 +72,7 @@
 
             <main id="contenido" class="pagina-ruta">
                 <div class="marco ruta-cabeza">
-                    <a class="volver" href="/rutas" t-esc="s['all_routes']"/>
+                    <a class="volver" href="/rutas" t-esc="s['search_all']"/>
                     <h1>
                         <span class="chip-linea" t-attf-style="background: #{route['color']}" t-esc="route['code']"/>
                         <t t-esc="route['name']"/>
@@ -109,7 +109,7 @@
     <template id="complaint_form" name="Passenger portal: complaint form">
         <t t-call="web.layout">
             <t t-set="title"><t t-esc="s['write_title']"/> · <t t-esc="brand"/></t>
-            <t t-set="html_data" t-value="{'lang': lang}"/>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
             <t t-set="body_classname" t-value="'o_bus_site'"/>
             <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-set="active_nav" t-value="'quejas'"/>
@@ -217,7 +217,7 @@
     <template id="complaint_thanks" name="Passenger portal: complaint received">
         <t t-call="web.layout">
             <t t-set="title"><t t-esc="s['thanks_title']"/> · <t t-esc="brand"/></t>
-            <t t-set="html_data" t-value="{'lang': lang}"/>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
             <t t-set="body_classname" t-value="'o_bus_site'"/>
             <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-set="active_nav" t-value="'quejas'"/>

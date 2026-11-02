@@ -39,7 +39,7 @@
                 <form t-if="languages and len(languages) &gt; 1" method="get" class="idiomas">
                     <t t-foreach="languages.items()" t-as="entry">
                         <button type="submit" name="lang" t-att-value="entry[0]" t-att-lang="entry[0]"
-                                t-att-aria-label="entry[1]" t-att-aria-current="'true' if entry[0] == lang else None">
+                                t-att-aria-label="entry[1]" t-att-aria-current="'true' if entry[0] == site_lang else None">
                             <span class="largo" t-esc="entry[1]"/><span class="corto" aria-hidden="true" t-esc="entry[0]"/>
                         </button>
                     </t>
@@ -89,7 +89,7 @@
     <template id="landing" name="Bus Tracking landing">
         <t t-call="web.layout">
             <t t-set="title"><t t-esc="brand"/> · <t t-esc="s['home_title']"/></t>
-            <t t-set="html_data" t-value="{'lang': lang}"/>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
             <t t-set="body_classname" t-value="'o_bus_site o_bus_landing'"/>
             <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-call="bus_tracking.portal_header"/>
@@ -166,7 +166,7 @@
                                 <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
                                 <span class="fragmento-nombre" t-esc="featured['name']"/>
                             </div>
-                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus='El bus' if lang != 'en' else 'The bus', n=2)"/>
+                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus='El bus' if site_lang != 'en' else 'The bus', n=2)"/>
                             <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
                                 <t t-foreach="featured['stops'][:5]" t-as="stop_name">
                                     <li t-if="stop_name_index == 1" class="demo-bus">
