@@ -286,7 +286,8 @@ export class BusLiveMap extends Component {
 
     drawRoutes(center) {
         const L = window.L;
-        const key = this.state.routeId + "|" + this.state.routes.map((r) => r.id).join(",");
+        // Stops and recorded tracks change too, not only the list of routes.
+        const key = this.state.routeId + "|" + JSON.stringify(this.state.routes);
         if (key === this.routesKey) {
             return;
         }
