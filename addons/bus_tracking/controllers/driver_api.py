@@ -139,6 +139,8 @@ class BusDriverApi(http.Controller):
                 'plate': bus.plate or '',
                 'route_id': bus.route_id.id or None,
                 'available': busy.get(bus.id, user.id) == user.id,
+                # A bus without a GPS device in Traccar cannot start a shift (no_gps).
+                'has_gps': bool(bus.sudo().traccar_unique_id),
             } for bus in env['bus.vehicle'].search([])],
             'routes': [{
                 'id': route.id,
@@ -163,7 +165,8 @@ class BusDriverApi(http.Controller):
         env = request.env(user=user.id)
         bus = env['bus.vehicle'].browse(vehicle_id)
         route = env['bus.route'].browse(route_id)
-        if not bus.exists() or not route.exists():
+        # Archived buses and routes are kept for history only.
+        if not bus.exists() or not route.exists() or not bus.active or not route.active:
             return json_response({'error': 'bad_request'}, 400)
         unique_id = bus.sudo().traccar_unique_id
         if not unique_id:
