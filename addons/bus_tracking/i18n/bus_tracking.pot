@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0-20250909\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 06:04+0000\n"
-"PO-Revision-Date: 2026-11-02 06:04+0000\n"
+"POT-Creation-Date: 2026-11-02 14:11+0000\n"
+"PO-Revision-Date: 2026-11-02 14:11+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1860,6 +1860,13 @@ msgstr ""
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_shift
 msgid "Shifts"
+msgstr ""
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/live_map.js:0
+#, python-format
+msgid "Show %s on the map"
 msgstr ""
 
 #. module: bus_tracking

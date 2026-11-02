@@ -42,8 +42,12 @@ La primera corrida dio además 2 fallos (un título de 3 líneas en móvil y una
 
 - **Pruebas con personas.** No se hicieron. El protocolo está en §5 y debe ejecutarse antes de dar el diseño por validado.
 - **Tableta física.** La cabina se revisó en modo web a 1280 × 800. Falta: lectura a 1 m al sol y de noche, guantes o dedos húmedos, vibración real, TalkBack.
-- **Panel con teclado y lector de pantalla.** axe no se corrió sobre el panel de Odoo (mediría también el código de Odoo) y tampoco se recorrió a mano con teclado: queda pendiente. Los botones solo con ícono del mapa tienen `aria-label`.
+- **Panel con lector de pantalla.** axe no se corrió sobre el panel de Odoo (mediría también el código de Odoo) y falta probarlo con NVDA o TalkBack. Sí se recorrió con teclado (ver abajo).
 - **Lighthouse.** No se corrió; el presupuesto de peso se midió a mano: fotos WebP de 23 a 182 KB, cargadas en diferido.
+
+### Recorrido con teclado del mapa del panel (2026-11-02)
+
+Con Playwright, tabulando desde el selector de línea: se llega a todos los controles en orden (línea, filtros, ver todos, panel, pestañas, cola de atención, mensajes, aviso del navegador, marcadores, zoom), todos con nombre y con anillo de foco visible. Se corrigieron tres cosas: los botones "Ver en el mapa" y "Marcar como atendido" se repetían con el mismo nombre (ahora dicen el bus y el motivo), las líneas y paradas de las rutas recibían foco sin nombre (ya no son interactivas) y los marcadores de incidente se anunciaban como "!" (ahora por su título, p. ej. "Emergencia (SOS) · Bus 01").
 
 ## 4. Corrida final de pruebas
 

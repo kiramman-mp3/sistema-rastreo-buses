@@ -7,8 +7,8 @@
                 <strong>Emergency (SOS)</strong>
                 <span><t t-esc="sos.vehicle_name"/><t t-if="sos.route_name"> · <t t-esc="sos.route_name"/></t><t t-if="sos.driver"> · <t t-esc="sos.driver"/></t></span>
                 <span class="o_bus_sos_age" t-esc="sosAge(sos)"/>
-                <button class="o_bus_sos_btn" t-on-click="() => this.goTo({ vehicleId: sos.vehicle_id })">Show on the map</button>
-                <button class="o_bus_sos_btn o_bus_sos_btn_main" t-on-click="() => this.acknowledge(sos.id)">Mark as seen</button>
+                <button class="o_bus_sos_btn" t-att-aria-label="showLabel(sos.vehicle_name)" t-on-click="() => this.goTo({ vehicleId: sos.vehicle_id })">Show on the map</button>
+                <button class="o_bus_sos_btn o_bus_sos_btn_main" t-att-aria-label="seenLabel(sos.label, sos.vehicle_name)" t-on-click="() => this.acknowledge(sos.id)">Mark as seen</button>
             </div>
 
             <div class="o_bus_live_body">
@@ -102,8 +102,8 @@
                             <p class="o_bus_item_meta"><t t-esc="item.bus"/><t t-if="item.route"> · <t t-esc="item.route"/></t></p>
                             <p t-if="item.note" class="o_bus_item_note" t-esc="item.note"/>
                             <div class="o_bus_item_actions">
-                                <button class="btn btn-sm btn-secondary" t-on-click="() => this.goTo(item)">Show on the map</button>
-                                <button t-if="item.incidentId" class="btn btn-sm btn-primary" t-on-click="() => this.acknowledge(item.incidentId)">Mark as seen</button>
+                                <button class="btn btn-sm btn-secondary" t-att-aria-label="showLabel(item.bus)" t-on-click="() => this.goTo(item)">Show on the map</button>
+                                <button t-if="item.incidentId" class="btn btn-sm btn-primary" t-att-aria-label="seenLabel(item.title, item.bus)" t-on-click="() => this.acknowledge(item.incidentId)">Mark as seen</button>
                             </div>
                         </article>
                         <article t-if="state.newComplaints" class="o_bus_item o_bus_item_l3">
