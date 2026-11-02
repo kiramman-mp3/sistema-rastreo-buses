@@ -159,7 +159,9 @@ const styles = StyleSheet.create({
   },
   bodyStack: {
     flexDirection: 'column',
-    flex: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
   },
   kinds: {
     flex: 1,
