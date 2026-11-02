@@ -13,14 +13,8 @@
     "android": {
       "package": "ec.edu.uta.buses.conductor",
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
-        "FOREGROUND_SERVICE",
-        "FOREGROUND_SERVICE_LOCATION",
-        "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_BACKGROUND_LOCATION",
@@ -29,6 +23,7 @@
         "android.permission.FOREGROUND_SERVICE_LOCATION",
         "android.permission.POST_NOTIFICATIONS"
       ],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
       "adaptiveIcon": {
         "backgroundColor": "#F4EFE4",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -51,7 +46,9 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Buses UTA lee el código QR de Odoo para guardar la dirección del servidor."
+          "cameraPermission": "Buses UTA lee el código QR de tu credencial o de Odoo.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
         }
       ],
       "expo-task-manager",
