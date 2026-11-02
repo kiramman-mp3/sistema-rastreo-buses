@@ -69,3 +69,20 @@ class TestTraccarSync(BusCase):
         with patch(REQUESTS_GET, return_value=fake_response({}, status=401)):
             with self.assertRaisesRegex(UserError, 'credentials'):
                 self.env['bus.traccar.api'].get_devices()
+
+    def test_cron_survives_an_html_error_page(self):
+        page = fake_response(None)
+        page.content = b'<html>Bad gateway</html>'
+        page.json.side_effect = ValueError('not json')
+        with patch(REQUESTS_GET, return_value=page):
+            self.env['bus.vehicle']._cron_sync_positions()  # must not raise
+            with self.assertRaisesRegex(UserError, 'JSON'):
+                self.env['bus.traccar.api'].get_devices()
+        self.assertFalse(self.env['bus.position'].search_count([]))
+
+    def test_cron_skips_buses_without_a_shift(self):
+        self.env['ir.config_parameter'].set_param('bus_tracking.accept_without_shift', '0')
+        positions = [traccar_position(7, '2026-10-26T12:00:00Z', -33.47, -70.62)]
+        with patch(REQUESTS_GET, return_value=fake_response(positions)):
+            self.env['bus.vehicle']._cron_sync_positions()
+        self.assertFalse(self.env['bus.position'].search_count([]))
