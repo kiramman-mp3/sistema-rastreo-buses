@@ -15,13 +15,13 @@ LOGOUT = '/bus_tracking/driver/logout'
 
 
 def make_driver(env, login='chofer1', password='clave-segura-1', groups='bus_tracking.group_bus_driver'):
-    # Internal user + the requested role. Odoo 16 will not authenticate a user
-    # that has only a custom group (they are treated as share users without a portal).
+    # Drivers are portal users, as the Drivers menu creates them; staff are internal users.
+    user_type = 'base.group_portal' if groups == 'bus_tracking.group_bus_driver' else 'base.group_user'
     return env['res.users'].with_context(no_reset_password=True).create({
         'name': 'Chofer Uno',
         'login': login,
         'password': password,
-        'groups_id': [(6, 0, [env.ref('base.group_user').id, env.ref(groups).id])],
+        'groups_id': [(6, 0, [env.ref(user_type).id, env.ref(groups).id])],
     })
 
 

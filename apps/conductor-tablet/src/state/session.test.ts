@@ -1,4 +1,4 @@
-import { AuthError, createClient, type TokenStore } from '../api/client';
+import { ApiError, AuthError, createClient, type TokenStore } from '../api/client';
 import { GpsPermissionError, type GpsController, type GpsStore } from '../gps/types';
 import { Session } from './session';
 
@@ -257,5 +257,16 @@ describe('session', () => {
     expect(session.snapshot.driver?.name).toBe('Chofer Uno');
     expect(session.snapshot.vehicles).toHaveLength(1);
     expect(session.snapshot.routes).toHaveLength(1);
+  });
+
+  test('loginWithBadge never keeps the badge as a session when the server rejects it', async () => {
+    const tokens = memoryStore(null);
+    const fetchMock = jest.fn(async () => json(404, { error: 'not_found' }));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client);
+    await expect(session.loginWithBadge('raw-badge-token-abc')).rejects.toBeInstanceOf(ApiError);
+    expect(await tokens.get()).toBeNull();
+    expect(session.snapshot.token).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
