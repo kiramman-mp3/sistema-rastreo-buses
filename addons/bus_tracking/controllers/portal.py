@@ -150,6 +150,35 @@ def line_positions(route, buses):
     return positions
 
 
+def line_directions(route, buses):
+    """Which way each bus travels the line: 1 towards the last stop, -1 back to the first. Read
+    from its last two different stops; reaching an end turns it around."""
+    index = {stop.id: i for i, stop in enumerate(route.stop_ids)}
+    last_index = len(route.stop_ids) - 1
+    since = fields.Datetime.now() - ARRIVAL_MEMORY
+    arrivals = route.env['bus.stop.arrival'].sudo().search(
+        [('vehicle_id', 'in', buses.ids), ('stop_id', 'in', route.stop_ids.ids), ('arrival_time', '>=', since)],
+        order='arrival_time desc, id desc')
+    seen = {}
+    for arrival in arrivals:
+        stops = seen.setdefault(arrival.vehicle_id.id, [])
+        i = index.get(arrival.stop_id.id)
+        if len(stops) < 2 and (not stops or stops[-1] != i):
+            stops.append(i)
+    directions = {}
+    for bus in buses:
+        stops = seen.get(bus.id, [])
+        if not stops:
+            directions[bus.id] = 1
+        elif stops[0] == last_index and last_index > 0:
+            directions[bus.id] = -1
+        elif stops[0] == 0 or len(stops) == 1:
+            directions[bus.id] = 1
+        else:
+            directions[bus.id] = 1 if stops[0] > stops[1] else -1
+    return directions
+
+
 def public_routes():
     return request.env(su=True)['bus.route'].search([('active', '=', True), ('public', '=', True)])
 
@@ -241,6 +270,7 @@ class BusPortal(http.Controller):
                 return request.not_found()
             buses = self._fresh_buses(route)
             where = line_positions(route, buses)
+            heading = line_directions(route, buses)
             body = json.dumps({
                 'generated_at': fields.Datetime.to_string(fields.Datetime.now()),
                 'buses': [{
@@ -251,6 +281,8 @@ class BusPortal(http.Controller):
                     'status': bus.status if bus.connected else 'offline',
                     'at': where[bus.id][0],
                     'after': where[bus.id][1],
+                    # 1 towards the last stop, -1 on the way back: the page counts stops that way.
+                    'dir': heading[bus.id],
                 } for bus in buses],
             })
             cache.put(code, body)
