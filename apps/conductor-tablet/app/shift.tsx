@@ -19,10 +19,9 @@ import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { classifyStops } from '../src/shift/progress';
 import { useSession } from '../src/state/SessionContext';
-import { HeadwayBar, type HeadwayStatus } from '../src/ui/HeadwayBar';
 import { IncidentActions } from '../src/ui/IncidentActions';
 import { StopAlertCard } from '../src/ui/StopAlertCard';
-import { cockpitColors, cockpitHit } from '../src/ui/theme';
+import { cockpitColors } from '../src/ui/theme';
 
 export default function ShiftScreen() {
   useLang();
@@ -33,8 +32,6 @@ export default function ShiftScreen() {
 
   const [stale, setStale] = useState(false);
   const [busFix, setBusFix] = useState<{ lat: number; lon: number } | null>(null);
-  const [trafficLoading, setTrafficLoading] = useState(false);
-  const [manualArrived, setManualArrived] = useState(false);
 
   const stops = useMemo(
     () => classifyStops(shiftState?.stops ?? [], shiftState?.next_stop_id ?? null),
@@ -49,27 +46,15 @@ export default function ShiftScreen() {
   const alerts = shiftState?.alerts ?? [];
 
   // Coords for next stop to calculate live distance
+  const nextStopId = nextStop?.id ?? null;
+  const routeStops = routeMap?.stops;
   const nextStopCoords = useMemo(() => {
-    if (!nextStop || !routeMap?.stops) return null;
-    const found = routeMap.stops.find((s) => s.id === nextStop.id);
+    if (nextStopId === null || !routeStops) return null;
+    const found = routeStops.find((s) => s.id === nextStopId);
     return found ? { lat: found.lat, lon: found.lon } : null;
-  }, [nextStop, routeMap?.stops]);
+  }, [nextStopId, routeStops]);
 
-  // Live cockpit telemetry: 1-second digital clock & live distance calculation
   const { currentTime, distanceFormatted } = useCockpitTelemetry(busFix, nextStopCoords);
-
-  // Dynamic Headway calculation based on alerts / status
-  const headwayStatus: HeadwayStatus = useMemo(() => {
-    if (alerts.some((a) => a.kind === 'speeding')) return 'ahead';
-    if (alerts.some((a) => a.kind === 'long_stop' || a.kind === 'off_route')) return 'delayed';
-    return 'on_time';
-  }, [alerts]);
-
-  const diffMinutes = useMemo(() => {
-    if (headwayStatus === 'ahead') return -3;
-    if (headwayStatus === 'delayed') return 5;
-    return 1;
-  }, [headwayStatus]);
 
   useFocusEffect(
     useCallback(() => {
@@ -119,28 +104,15 @@ export default function ShiftScreen() {
     ]);
   }
 
-  async function handleReportTraffic() {
-    setTrafficLoading(true);
-    try {
-      await session.reportIncident({
-        kind: 'traffic',
-        note: 'Congestión vial y demora reportada desde tableta de cabina',
-        lat: busFix?.lat ?? null,
-        lon: busFix?.lon ?? null,
-      });
-      Alert.alert('⚠️ Tráfico Reportado', 'La central de monitoreo ha sido notificada.');
-    } catch {
-      Alert.alert('Demora Registrada', 'La incidencia se transmitirá al recuperar señal.');
-    } finally {
-      setTrafficLoading(false);
-    }
+  function openIncidentSheet() {
+    router.push('/incident');
   }
 
   async function handleTriggerSOS() {
     try {
       await session.reportIncident({
-        kind: 'accident',
-        note: '🚨 ALERTA SOS DE EMERGENCIA DISPARADA DESDE CABINA',
+        kind: 'sos',
+        note: '',
         lat: busFix?.lat ?? null,
         lon: busFix?.lon ?? null,
       });
@@ -148,12 +120,6 @@ export default function ShiftScreen() {
     } catch {
       Alert.alert('Alerta SOS', 'Emergencia registrada localmente para retransmisión prioritaria.');
     }
-  }
-
-  function handleConfirmArrival() {
-    setManualArrived(true);
-    session.pullState().catch(() => {});
-    setTimeout(() => setManualArrived(false), 5000);
   }
 
   return (
@@ -165,12 +131,12 @@ export default function ShiftScreen() {
           <View style={styles.unitIdentityRow}>
             <View style={styles.busBadge}>
               <Text style={styles.busBadgeText}>
-                {bus?.name ? `BUS ${bus.name}` : `BUS #${shift?.vehicle_id ?? '01'}`}
+                {bus?.name ?? ''}
               </Text>
             </View>
             <View style={styles.routePill}>
               <Text style={styles.routePillText} numberOfLines={1}>
-                {route?.code ?? 'L-01'} · {route?.name ?? 'UTA TRANSIT'}
+                {route ? `${route.code} · ${route.name}` : ''}
               </Text>
             </View>
           </View>
@@ -194,21 +160,11 @@ export default function ShiftScreen() {
           contentContainerStyle={styles.panelScrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* 1. Headway / Cadence Bar */}
-          <HeadwayBar
-            status={headwayStatus}
-            diffMinutes={diffMinutes}
-            leadBusName="Bus #02"
-            targetIntervalMins={8}
-          />
-
           {/* 2. Immediate Stop Alert Card */}
           <StopAlertCard
             immediateStop={nextStop}
             subsequentStops={subsequentStops}
             distanceFormatted={distanceFormatted}
-            onConfirmArrival={handleConfirmArrival}
-            arrived={manualArrived}
           />
 
           {/* Active Operational Alerts Banner */}
@@ -231,9 +187,9 @@ export default function ShiftScreen() {
         {/* Quick Emergency / Incident Bar (Bottom Fixed Rail) */}
         <View style={styles.bottomActionsRail}>
           <IncidentActions
-            onReportTraffic={handleReportTraffic}
+            onReportTraffic={openIncidentSheet}
             onTriggerSOS={handleTriggerSOS}
-            trafficLoading={trafficLoading}
+            trafficLoading={false}
           />
 
           <View style={styles.auxiliaryRow}>
@@ -267,7 +223,7 @@ export default function ShiftScreen() {
         />
         <View style={styles.mapDriverWatermark}>
           <Text style={styles.watermarkText}>
-            CONDUCTOR: {driver?.name?.toUpperCase() ?? 'CONDUCTOR AUTORIZADO'} · UTA TRANSIT
+            {driver?.name ?? ''}
           </Text>
         </View>
       </View>

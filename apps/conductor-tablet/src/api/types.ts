@@ -71,7 +71,7 @@ export type RouteMap = {
   lines: { name: string; km: number; points: number[][] }[];
 };
 
-export type IncidentKind = 'breakdown' | 'traffic' | 'accident' | 'other';
+export type IncidentKind = 'breakdown' | 'traffic' | 'accident' | 'other' | 'sos';
 
 export type IncidentDraft = {
   kind: IncidentKind;

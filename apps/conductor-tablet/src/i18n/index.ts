@@ -2,6 +2,7 @@
 export type Lang = 'es' | 'en' | 'qu';
 
 const es = {
+  offlineRetry: 'Sin señal. Tu sesión sigue abierta y el GPS sigue guardando; reintentamos solos.',
   login: 'Entrar',
   user: 'Usuario',
   password: 'Contraseña',
@@ -77,6 +78,7 @@ const es = {
 };
 
 const en: typeof es = {
+  offlineRetry: 'No signal. You are still signed in and the GPS keeps saving; we retry on our own.',
   login: 'Sign in',
   user: 'User',
   password: 'Password',
