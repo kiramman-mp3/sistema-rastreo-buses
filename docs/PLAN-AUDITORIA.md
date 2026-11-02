@@ -144,7 +144,7 @@ Cada fase es una rama desde `develop` que se integra con `merge --no-ff` cuando 
 - `refactor: deprecate the webhook secret in the query string` (log de aviso; quitarlo en la versión siguiente).
 - Pruebas: dos inserciones simultáneas no dan 500 (simular el `IntegrityError` con `patch`); un `ConnectionError` no repite avisos ya enviados; cron sobrevive a HTML; parámetro `"abc"` usa el valor por defecto; posición sin turno descartada; `hours=10**9` y `vehicle_id="x"` dan error controlado.
 
-### Fase 3. `fix/turno-tableta` (BE-03, BE-04, BE-10, TAB-01 a TAB-10, SEC-07, SEC-08, SEC-14)
+### Fase 3. `fix/turno-tableta` (BE-03, BE-04, BE-10, TAB-01 a TAB-10, SEC-07, SEC-08, SEC-14) — hecha
 Backend:
 - `fix: compute the next stop from the current trip, not the whole shift`: usar el `bus.run` en curso (o la última llegada a un extremo) como inicio y respetar el sentido del regreso.
 - `fix: refuse to start a shift when the gps address is not configured` (409 `no_gps_url`) y validar el formato en Ajustes; `dev_seed.py` configura `gps_url`.
