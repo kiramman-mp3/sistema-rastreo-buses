@@ -72,7 +72,7 @@ class TestPassengerPortal(HttpCase):
         resp, data = self.buses()
         self.assertEqual(resp.headers['Content-Type'], 'application/json')
         self.assertEqual(len(data['buses']), 1)
-        self.assertEqual(sorted(data['buses'][0]), ['after', 'at', 'course', 'lat', 'lon', 'name', 'status'])
+        self.assertEqual(sorted(data['buses'][0]), ['after', 'at', 'course', 'dir', 'lat', 'lon', 'name', 'status'])
         self.assertEqual(data['buses'][0]['name'], 'Bus 12')
         self.assertEqual(data['buses'][0]['status'], 'moving')
         for secret in ('ZZZZ-99', 'Pedro Secreto', 'b-supersecretid00', 'speed', 'plate', 'driver'):
@@ -120,9 +120,41 @@ class TestPassengerPortal(HttpCase):
         self.assertNotEqual(self.buses()[1], first)
 
     def test_feed_is_rate_limited_per_address(self):
-        statuses = [self.buses()[0].status_code for _ in range(portal.RATE_LIMIT + 1)]
-        self.assertEqual(statuses[:portal.RATE_LIMIT], [200] * portal.RATE_LIMIT)
+        # Only requests that miss the cache count, such as lines that do not exist.
+        statuses = [self.buses('NOPE')[0].status_code for _ in range(portal.RATE_LIMIT + 1)]
+        self.assertEqual(statuses[:portal.RATE_LIMIT], [404] * portal.RATE_LIMIT)
         self.assertEqual(statuses[-1], 429)
+
+    def test_a_campus_behind_one_address_is_served_from_the_cache(self):
+        statuses = {self.buses()[0].status_code for _ in range(portal.RATE_LIMIT + 20)}
+        self.assertEqual(statuses, {200})
+
+    def test_rate_limiter_drops_quiet_addresses(self):
+        limiter = portal.RateLimiter(5, 10.0)
+        for i in range(100):
+            limiter.allow('ip-%d' % i, now=0)
+        self.assertEqual(len(limiter), 100)
+        limiter.allow('late', now=30)
+        self.assertEqual(len(limiter), 1)
+
+    def test_the_feed_says_which_way_each_bus_travels(self):
+        self.report(self.bus, 1)
+        terminal, plaza = self.route.stop_ids
+        Arrival = self.env['bus.stop.arrival']
+        Arrival.create({'vehicle_id': self.bus.id, 'stop_id': terminal.id,
+                        'arrival_time': self.now - timedelta(minutes=10)})
+        self.assertEqual(self.buses()[1]['buses'][0]['dir'], 1)
+        Arrival.create({'vehicle_id': self.bus.id, 'stop_id': plaza.id,
+                        'arrival_time': self.now - timedelta(minutes=5)})
+        portal.cache.clear()
+        # It reached the last stop: from there it heads back.
+        self.assertEqual(self.buses()[1]['buses'][0]['dir'], -1)
+
+    def test_the_route_page_takes_the_tiles_from_settings(self):
+        self.env['ir.config_parameter'].set_param('bus_tracking.tile_url', 'https://tiles.example.com/{z}/{x}/{y}.png')
+        self.assertIn('https://tiles.example.com/{z}/{x}/{y}.png', self.url_open('/rutas/L1').text)
+        self.env['ir.config_parameter'].set_param('bus_tracking.tile_url', 'http://insecure/{z}/{x}/{y}.png')
+        self.assertIn('basemaps.cartocdn.com', self.url_open('/rutas/L1').text)
 
     def test_rate_limiter_forgets_old_hits(self):
         limiter = portal.RateLimiter(2, 10.0)
