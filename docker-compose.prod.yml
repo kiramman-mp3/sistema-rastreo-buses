@@ -57,7 +57,7 @@ services:
     logging: *logging
 
   traccar:
-    image: ${TRACCAR_IMAGE:-traccar/traccar:latest}
+    image: ${TRACCAR_IMAGE:-traccar/traccar:6.16.0}
     restart: unless-stopped
     depends_on:
       odoo:
