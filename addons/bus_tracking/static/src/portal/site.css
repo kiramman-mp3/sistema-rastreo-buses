@@ -65,6 +65,11 @@ body.o_bus_site {
     border-radius: 2px;
 }
 
+/* `hidden` always wins over a component's display */
+.o_bus_site [hidden] {
+    display: none !important;
+}
+
 .sr-only,
 .visually-hidden {
     position: absolute !important;
@@ -174,6 +179,11 @@ body.o_bus_site {
     cursor: pointer;
 }
 
+.idiomas .corto {
+    display: none;
+    text-transform: uppercase;
+}
+
 .idiomas button[aria-current="true"] {
     background: var(--papel-2);
     color: var(--tinta);
@@ -183,6 +193,14 @@ body.o_bus_site {
 @media (max-width: 640px) {
     .cabecera .marco {
         gap: 0.25rem 1rem;
+    }
+
+    .idiomas .largo {
+        display: none;
+    }
+
+    .idiomas .corto {
+        display: inline;
     }
 
     .cabecera nav {

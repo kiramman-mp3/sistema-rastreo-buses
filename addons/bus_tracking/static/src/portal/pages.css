@@ -1,0 +1,819 @@
+/* Composition of each public page. Components are in portal/site.css, tokens in css/brand.css. */
+
+.lead {
+    margin-top: 1rem;
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+    line-height: 1.5;
+}
+
+.nota,
+.ayuda {
+    color: var(--tinta-2);
+    font-size: var(--t-1);
+}
+
+.o_bus_site h2 {
+    font-size: var(--t-4);
+}
+
+/* =================================================================== Home */
+
+.inicio-hero {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem 1.5rem;
+    align-items: start;
+    padding-top: clamp(1.5rem, 6vw, 5rem);
+}
+
+.hero-texto {
+    grid-column: 1 / span 6;
+    display: grid;
+    gap: 0;
+}
+
+.hero-texto h1 {
+    font-size: clamp(2.5rem, 1.2rem + 4.4vw, 4.75rem);
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+}
+
+.hero-texto .buscador {
+    margin-top: 2rem;
+}
+
+.hero-texto .total {
+    margin-top: 1.25rem;
+    font-weight: 700;
+}
+
+.fragmento {
+    grid-column: 8 / -1;
+    padding: 1.25rem 1.25rem 1rem;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+}
+
+.fragmento-cabeza {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.fragmento-nombre {
+    font-family: var(--display);
+    font-size: var(--t-3);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--tinta) !important;
+    text-decoration: none;
+}
+
+a.fragmento-nombre:hover {
+    text-decoration: underline;
+}
+
+.fragmento-cabeza .vivo {
+    margin-left: auto;
+}
+
+/* The answer to "how far is my bus": a sentence that becomes a yellow field once a stop is chosen. */
+.resumen {
+    max-width: none;
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    font-family: var(--display);
+    font-size: var(--t-3);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    transition: background-color var(--medio) var(--facil);
+}
+
+.resumen.con-parada {
+    background: var(--senal);
+}
+
+@media (max-width: 900px) {
+    .hero-texto,
+    .fragmento {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Lines: two-ended rows, nothing drawn between them. */
+
+.inicio-lineas {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-top: clamp(5rem, 12vw, 10rem);
+}
+
+.inicio-lineas h2 {
+    grid-column: 1 / span 3;
+}
+
+.inicio-lineas .filas {
+    grid-column: 4 / span 8;
+}
+
+.filas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.25rem;
+}
+
+.fila {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.4rem 1rem;
+    min-height: 4.5rem;
+    padding: 0.75rem;
+    border-radius: var(--radio);
+    color: var(--tinta) !important;
+    text-decoration: none;
+    transition: background-color var(--rapido) var(--facil);
+}
+
+.fila:hover {
+    background: var(--papel-2);
+}
+
+.fila-nombre {
+    display: grid;
+    gap: 0.1rem;
+}
+
+.fila-nombre strong {
+    font-family: var(--display);
+    font-size: var(--t-3);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+
+.fila-sub {
+    color: var(--tinta-2);
+    font-size: var(--t-1);
+}
+
+.fila-sub.coincide {
+    color: var(--tinta);
+    font-weight: 700;
+}
+
+.fila-valor {
+    color: var(--tinta-2);
+    font-size: var(--t-1);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.fila-valor.con-buses {
+    color: var(--ok);
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .inicio-lineas h2,
+    .inicio-lineas .filas {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 520px) {
+    .fila {
+        grid-template-columns: auto 1fr;
+    }
+
+    .fila-valor {
+        grid-column: 2;
+        text-align: left;
+    }
+}
+
+/* How it works: three statements, the stage beside them changes with each one. */
+
+.inicio-como {
+    margin-top: clamp(5rem, 12vw, 10rem);
+}
+
+.como {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.como-pasos {
+    grid-column: 1 / span 5;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.como-pasos li {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 44vh;
+}
+
+.como-pasos .frase {
+    font-family: var(--display);
+    font-size: var(--t-4);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--tinta-2);
+    transition: color var(--medio) var(--facil);
+}
+
+.como-pasos li.activo .frase {
+    color: var(--tinta);
+}
+
+.como-escenario {
+    grid-column: 7 / -1;
+    position: sticky;
+    top: 14vh;
+    align-self: start;
+    padding: 1.25rem;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+}
+
+.como-escenario .chip-linea {
+    transition: box-shadow var(--medio) var(--facil);
+}
+
+.como-escenario[data-estado="1"] .chip-linea {
+    box-shadow: 0 0 0 4px var(--papel-2), 0 0 0 8px var(--senal);
+}
+
+/* the answer and the bus only exist in the third state; they arrive with the line's own entrance */
+.como-escenario .resumen,
+.como-escenario .demo-bus {
+    display: none;
+    animation: llegar var(--medio) var(--facil) both;
+}
+
+.como-escenario[data-estado="3"] .resumen,
+.como-escenario[data-estado="3"] .demo-bus {
+    display: block;
+}
+
+.como-escenario[data-estado="3"] .resumen {
+    background: var(--senal);
+}
+
+.como-escenario[data-estado="1"] .demo-mia .punto {
+    background: var(--blanco);
+    border-color: var(--c);
+    transform: none;
+}
+
+.como-escenario[data-estado="1"] .demo-mia .nombre::after {
+    content: none;
+}
+
+.linea.demo .parada {
+    cursor: default;
+}
+
+@media (max-width: 900px) {
+    .como-pasos,
+    .como-escenario {
+        grid-column: 1 / -1;
+    }
+
+    .como-escenario {
+        position: static;
+        order: -1;
+    }
+
+    .como-pasos li {
+        min-height: 0;
+        padding-block: 1rem;
+    }
+
+    .como-pasos .frase {
+        color: var(--tinta);
+        font-size: var(--t-3);
+    }
+
+    /* on a phone the stage shows its final state; the steps read as a list below it */
+    .como-escenario .resumen,
+    .como-escenario .demo-bus {
+        display: block;
+    }
+
+    .como-escenario .resumen {
+        background: var(--senal);
+    }
+
+    .como-escenario .chip-linea {
+        box-shadow: none !important;
+    }
+
+    .como-escenario .demo-mia .punto {
+        background: var(--senal) !important;
+        border-color: var(--tinta) !important;
+        transform: scale(1.35) !important;
+    }
+
+    .como-escenario .demo-mia .nombre::after {
+        content: attr(data-mia) !important;
+    }
+}
+
+/* The city: photographs hung on a line like stops. */
+
+.inicio-ciudad {
+    margin-top: clamp(5rem, 12vw, 10rem);
+}
+
+.inicio-ciudad h2 + p {
+    margin-top: 0.75rem;
+    color: var(--tinta-2);
+}
+
+.ciudad {
+    --c: var(--granate);
+    position: relative;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.5rem 1.5rem;
+    margin: 2.5rem auto 0;
+}
+
+.ciudad figure {
+    margin: 0;
+}
+
+.ciudad img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--papel-2);
+}
+
+.ciudad li:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.ciudad li:first-child img {
+    aspect-ratio: auto;
+    height: calc(100% - 3.25rem);
+}
+
+.ciudad li:first-child figure {
+    height: 100%;
+}
+
+.ciudad figcaption {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 3.25rem;
+    font-weight: 700;
+}
+
+.ciudad figcaption .punto {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 5px solid var(--c);
+    border-radius: 50%;
+    background: var(--blanco);
+}
+
+@media (max-width: 760px) {
+    .ciudad {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+    }
+
+    .ciudad::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ciudad li,
+    .ciudad li:first-child {
+        flex: 0 0 82%;
+        scroll-snap-align: start;
+    }
+
+    .ciudad li:first-child img {
+        aspect-ratio: 4 / 3;
+        height: auto;
+    }
+}
+
+/* One field to start a message. */
+
+.inicio-escribir {
+    margin-top: clamp(5rem, 12vw, 10rem);
+}
+
+.escribir {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 40rem;
+}
+
+.escribir h2 {
+    font-size: var(--t-4);
+}
+
+.escribir h2 .suave {
+    display: block;
+    color: var(--tinta-2);
+}
+
+.buscador.grande {
+    max-width: none;
+}
+
+/* ============================================================ Lines page */
+
+.encabezado-pagina {
+    display: grid;
+    padding-top: clamp(1.5rem, 5vw, 4rem);
+    margin-bottom: 2.5rem;
+}
+
+.encabezado-pagina h1 {
+    font-size: var(--t-5);
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+}
+
+.encabezado-pagina .buscador {
+    margin-top: 1.75rem;
+}
+
+.pagina-lineas .filas {
+    max-width: 52rem;
+}
+
+.resultado-busqueda {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.resultado-busqueda h2 {
+    font-size: var(--t-3);
+}
+
+/* ============================================================= Route page */
+
+.ruta-cabeza {
+    display: grid;
+    gap: 0.75rem;
+    padding-top: clamp(1rem, 3vw, 2.5rem);
+    margin-bottom: 1.5rem;
+}
+
+.volver {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--toque);
+    font-weight: 700;
+}
+
+.ruta-cabeza h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-size: var(--t-4);
+}
+
+.ruta-cabeza h1 .chip-linea {
+    height: 2.5rem;
+    font-size: 1.25rem;
+}
+
+.ruta {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+    align-items: start;
+}
+
+.ruta-linea {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+}
+
+.ruta-mapa {
+    grid-column: 6 / -1;
+    grid-row: 1;
+    position: sticky;
+    top: 1rem;
+    height: calc(100svh - 2rem);
+    min-height: 26rem;
+}
+
+#bus-map {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+}
+
+.ruta-linea .resumen {
+    background: var(--papel-2);
+}
+
+.ruta-linea .resumen.con-parada {
+    background: var(--senal);
+}
+
+.ruta-linea .aviso {
+    margin-top: 1rem;
+}
+
+.reportar {
+    margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+    .ruta-linea,
+    .ruta-mapa {
+        grid-column: 1 / -1;
+    }
+
+    .ruta-mapa {
+        position: relative;
+        top: auto;
+        height: 42svh;
+        min-height: 16rem;
+    }
+
+    .ruta-linea {
+        grid-row: 2;
+    }
+}
+
+/* Leaflet markers drawn by portal_map.js */
+
+.o_bus_site .leaflet-container {
+    font: inherit;
+}
+
+.marcador-parada {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 4px solid var(--c, var(--granate));
+    border-radius: 50%;
+    background: var(--blanco);
+    color: var(--tinta);
+    font-size: 0;
+}
+
+.marcador-parada.mia {
+    width: 28px;
+    height: 28px;
+    border-color: var(--tinta);
+    background: var(--senal);
+}
+
+.marcador-bus {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+}
+
+.marcador-bus .rumbo {
+    position: absolute;
+    inset: 0;
+    transition: transform 600ms var(--facil);
+}
+
+.marcador-bus .rumbo::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -3px;
+    margin-left: -7px;
+    border: 7px solid transparent;
+    border-bottom: 10px solid var(--tinta);
+    border-top: 0;
+}
+
+.marcador-bus .cuerpo {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--blanco);
+    border-radius: 50%;
+    background: var(--tinta);
+    color: var(--blanco);
+}
+
+.marcador-bus.detenido .cuerpo {
+    background: var(--alerta);
+}
+
+.marcador-bus.sin-senal .cuerpo {
+    background: var(--tinta-2);
+}
+
+.marcador-bus .rotulo {
+    position: absolute;
+    top: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 0.35rem;
+    border-radius: var(--radio);
+    background: var(--tinta);
+    color: var(--blanco);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ======================================================== Write to transport */
+
+.pagina-escribir {
+    max-width: calc(46rem + 2 * var(--margen));
+}
+
+.pagina-escribir .encabezado-pagina h1 {
+    font-size: var(--t-4);
+}
+
+.formulario {
+    display: grid;
+    gap: 2rem;
+}
+
+.formulario fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.formulario legend {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    font-family: var(--display);
+    font-size: var(--t-3);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.motivos {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.motivo {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 56px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radio);
+    background: var(--papel-2);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color var(--rapido) var(--facil), color var(--rapido) var(--facil);
+}
+
+.motivo input {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    accent-color: var(--granate);
+}
+
+.motivo:hover {
+    background: #D5DCD9;
+}
+
+.motivo:has(input:checked) {
+    background: var(--tinta);
+    color: var(--blanco);
+}
+
+.motivo:has(input:checked) input {
+    accent-color: var(--senal);
+}
+
+.dos-columnas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.contacto .ayuda {
+    margin-bottom: 1rem;
+}
+
+.privacidad {
+    color: var(--tinta-2);
+    font-size: var(--t-1);
+}
+
+.enviar {
+    justify-self: start;
+    min-height: 56px;
+    padding-inline: 2rem;
+}
+
+.trampa {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.aviso ul {
+    margin: 0.25rem 0 0;
+    padding-left: 1.25rem;
+}
+
+.pagina-escribir .aviso {
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .dos-columnas {
+        grid-template-columns: 1fr;
+    }
+
+    .enviar {
+        justify-self: stretch;
+    }
+}
+
+/* ============================================================== Received */
+
+.pagina-gracias {
+    max-width: calc(46rem + 2 * var(--margen));
+    padding-top: clamp(2rem, 6vw, 5rem);
+}
+
+.pagina-gracias h1 {
+    font-size: var(--t-5);
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+}
+
+/* the reference number on the yellow of a stop sign: the one thing to keep */
+.boleto {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 2.5rem;
+    padding: 1.5rem 1.75rem;
+    border-radius: var(--radio);
+    background: var(--senal);
+    color: var(--tinta);
+}
+
+.boleto .folio {
+    font-family: var(--display);
+    font-size: var(--t-5);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    user-select: all;
+}
+
+.pagina-gracias .nota {
+    margin-top: 1.25rem;
+}
+
+.pagina-gracias .acciones {
+    margin-top: 2rem;
+}
