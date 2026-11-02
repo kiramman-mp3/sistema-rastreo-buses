@@ -9,7 +9,7 @@ from datetime import timedelta
 from odoo import fields, http
 from odoo.http import Response, request
 
-from ..models.utils import brand_name, fold, map_center, public_contact
+from ..models.utils import brand_name, fold, map_center, public_contact, tile_url
 from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
@@ -255,6 +255,7 @@ class BusPortal(http.Controller):
         )
         values['json_i18n'] = values['line_i18n']
         values['center_json'] = json.dumps(list(map_center(request.env(su=True))))
+        values['tile_url'] = tile_url(request.env(su=True))
         return render_portal('bus_tracking.portal_route', values)
 
     @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'], type='http', auth='public', methods=['GET'])

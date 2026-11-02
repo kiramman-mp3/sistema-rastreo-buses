@@ -8,6 +8,7 @@ import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl
 
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
+// Until the server says otherwise (Settings > Map tiles).
 const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 const TILE_OPTIONS = {
     maxZoom: 19,
@@ -135,6 +136,9 @@ export class BusLiveMap extends Component {
             this.state.newComplaints = data.new_complaints || 0;
             this.state.error = null;
             this.state.lastSync = Date.now();
+            if (data.tile_url && data.tile_url !== this.tiles._url) {
+                this.tiles.setUrl(data.tile_url);
+            }
             this.syncVehicles();
             this.drawRoutes(data.map_center);
             this.syncIncidents();
@@ -277,7 +281,7 @@ export class BusLiveMap extends Component {
         const L = window.L;
         this.map = L.map(this.mapRef.el, { zoomControl: false }).setView(DEFAULT_CENTER, 13);
         L.control.zoom({ position: "bottomright" }).addTo(this.map);
-        L.tileLayer(TILES, TILE_OPTIONS).addTo(this.map);
+        this.tiles = L.tileLayer(TILES, TILE_OPTIONS).addTo(this.map);
         this.routeLayer = L.layerGroup().addTo(this.map);
         this.trackLayer = L.layerGroup().addTo(this.map);
         this.incidentLayer = L.layerGroup().addTo(this.map);

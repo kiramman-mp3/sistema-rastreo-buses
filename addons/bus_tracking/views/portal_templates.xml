@@ -84,7 +84,7 @@
                     <div class="ruta-mapa">
                         <div id="bus-map" role="region" t-att-aria-label="s['map_label']"
                              t-att-data-code="route['code']" t-att-data-color="route['color']"
-                             t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json"
+                             t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json" t-att-data-tiles="tile_url"
                              t-att-data-i18n="json_i18n"/>
                     </div>
 

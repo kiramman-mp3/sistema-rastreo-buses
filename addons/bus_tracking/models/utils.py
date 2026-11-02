@@ -14,6 +14,16 @@ DEFAULT_MAP_CENTER = (-1.2417, -78.6167)    # Ambato, Tungurahua, Ecuador (appro
 LOCAL_TIMEZONE = 'America/Guayaquil'        # UTC-5, no daylight saving
 
 
+# Map tiles: CARTO Voyager (OpenStreetMap data). A third-party service with its own terms and key;
+# change it in Settings > Map tiles. Leaflet fills in {s}, {z}, {x}, {y} and {r}.
+DEFAULT_TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb'
+
+
+def tile_url(env):
+    value = (env['ir.config_parameter'].sudo().get_param('bus_tracking.tile_url') or '').strip()
+    return value if value.startswith('https://') and '{z}' in value else DEFAULT_TILE_URL
+
+
 def int_param(env, key, default):
     """A whole-number system parameter. A typo in Settings > Technical falls back to the
     default instead of breaking the cron or the page that reads it."""
