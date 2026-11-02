@@ -204,16 +204,8 @@ class BusDriverApi(http.Controller):
         if not shift:
             return json_response({'error': 'no_shift'}, 409)
         bus = shift.vehicle_id.sudo()
-        stops = shift.route_id.stop_ids
-        arrivals = request.env['bus.stop.arrival'].sudo().search([
-            ('vehicle_id', '=', bus.id),
-            ('stop_id', 'in', stops.ids),
-            ('arrival_time', '>=', shift.start),
-        ], order='arrival_time desc')
-        arrived = {}
-        for arrival in arrivals:
-            arrived.setdefault(arrival.stop_id.id, utc_z(arrival.arrival_time))
-        next_stop_id = next((stop.id for stop in stops if stop.id not in arrived), None)
+        trip = shift._trip_progress()
+        arrived = trip['arrived']
         since = fields.Datetime.now() - timedelta(hours=2)
         alerts = request.env['bus.alert'].sudo().search([
             ('vehicle_id', '=', bus.id),
@@ -231,13 +223,15 @@ class BusDriverApi(http.Controller):
                 'seen_by': sos.acknowledged_by.name or None,
             } if sos else None,
             'current_stop_id': bus.current_stop_id.id or None,
-            'next_stop_id': next_stop_id,
+            'next_stop_id': trip['next_stop'].id or None,
+            # 'back' once the bus reached the last stop: the stops come in the order it travels them.
+            'direction': trip['direction'],
             'stops': [{
                 'id': stop.id,
                 'name': stop.name,
                 'sequence': stop.sequence,
-                'arrived_at': arrived.get(stop.id),
-            } for stop in stops],
+                'arrived_at': utc_z(arrived.get(stop.id)),
+            } for stop in trip['stops']],
             'alerts': [{
                 'id': alert.id,
                 'kind': alert.kind,
