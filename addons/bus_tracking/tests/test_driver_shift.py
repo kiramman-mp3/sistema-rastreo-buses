@@ -170,6 +170,16 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual(incident.vehicle_id, self.bus)
         self.assertEqual(incident.user_id, self.driver)
 
+    def test_sos_is_its_own_kind_and_wakes_the_push_cron(self):
+        token = self.token()
+        self.start(token)
+        cron = self.env.ref('bus_tracking.cron_push_incidents')
+        before = self.env['ir.cron.trigger'].search_count([('cron_id', '=', cron.id)])
+        resp = self.post(INCIDENT, {'kind': 'sos', 'lat': -1.24, 'lon': -78.62}, token=token)
+        self.assertEqual(resp.status_code, 200, resp.text)
+        self.assertEqual(self.env['bus.incident'].browse(resp.json()['id']).kind, 'sos')
+        self.assertGreater(self.env['ir.cron.trigger'].search_count([('cron_id', '=', cron.id)]), before)
+
     def test_a_driver_does_not_see_another_driver_shift_in_me(self):
         self.start(self.token('chofer2'))
         data = self.post(ME, token=self.token()).json()

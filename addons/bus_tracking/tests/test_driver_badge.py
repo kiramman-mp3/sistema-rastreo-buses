@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from odoo import fields
+from odoo.exceptions import AccessDenied
 from odoo.tests import HttpCase, TransactionCase, tagged
 
 from ..controllers.driver_api import login_limiter
@@ -57,14 +58,14 @@ class TestDriverBadge(TransactionCase):
             'driver_password': 'mi-clave-secreta',
         })
         self.assertTrue(new_driver.is_bus_driver)
-        uid = self.env['res.users'].authenticate(
-            self.env.cr.dbname, 'chofer_pwd', 'mi-clave-secreta', {'interactive': False})
-        self.assertEqual(uid, new_driver.id)
+        # authenticate() opens its own cursor and cannot see this test's uncommitted user,
+        # so the password is checked directly.
+        new_driver.with_user(new_driver)._check_credentials('mi-clave-secreta', {'interactive': False})
 
         new_driver.write({'driver_password': 'otra-clave-nueva'})
-        uid_new = self.env['res.users'].authenticate(
-            self.env.cr.dbname, 'chofer_pwd', 'otra-clave-nueva', {'interactive': False})
-        self.assertEqual(uid_new, new_driver.id)
+        new_driver.with_user(new_driver)._check_credentials('otra-clave-nueva', {'interactive': False})
+        with self.assertRaises(AccessDenied):
+            new_driver.with_user(new_driver)._check_credentials('mi-clave-secreta', {'interactive': False})
 
 
 

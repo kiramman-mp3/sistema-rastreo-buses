@@ -19,7 +19,9 @@
     <record id="group_bus_manager" model="res.groups">
         <field name="name">Manager</field>
         <field name="category_id" ref="module_category_bus_tracking"/>
-        <field name="implied_ids" eval="[(4, ref('group_bus_user')), (4, ref('group_bus_driver'))]"/>
+        <!-- Managers are not drivers: implying Driver would let any manager sign in on a tablet and would
+             apply the "own shifts only" rule to them, hiding everyone else's shifts. -->
+        <field name="implied_ids" eval="[(6, 0, [ref('group_bus_user')])]"/>
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 

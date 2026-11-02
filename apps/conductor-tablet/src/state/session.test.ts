@@ -86,6 +86,45 @@ describe('session', () => {
     expect(await tokens.get()).toBeNull();
   });
 
+  test('boot without signal keeps the session and the GPS instead of logging out', async () => {
+    const tokens = memoryStore('saved');
+    const gps = gpsMock();
+    const stored = gpsMemory();
+    await stored.set({ uniqueId: 'dev-9', url: 'http://gps:5055' });
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: () => Promise.reject(new TypeError('Network request failed')),
+    });
+    const session = new Session(tokens, client, gps, stored);
+    await session.boot();
+    expect(session.snapshot.ready).toBe(true);
+    expect(session.snapshot.token).toBe('saved');
+    expect(session.snapshot.offline).toBe(true);
+    expect(gps.started).toEqual(['dev-9@http://gps:5055']);
+    expect(await tokens.get()).toBe('saved');
+  });
+
+  test('refreshMe after an offline start loads the shift', async () => {
+    const tokens = memoryStore('saved');
+    let online = false;
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: () =>
+        online
+          ? json(200, { ...me, shift: { id: 9, vehicle_id: 1, route_id: 2, start: '2026-10-30T15:00:00Z' } })
+          : Promise.reject(new TypeError('Network request failed')),
+    });
+    const session = new Session(tokens, client);
+    await session.boot();
+    expect(session.snapshot.offline).toBe(true);
+    online = true;
+    await session.refreshMe();
+    expect(session.snapshot.offline).toBe(false);
+    expect(session.snapshot.shift?.id).toBe(9);
+  });
+
   test('login stores the token and loads /me', async () => {
     const tokens = memoryStore();
     const fetchMock = jest.fn(async (url: string) => {
