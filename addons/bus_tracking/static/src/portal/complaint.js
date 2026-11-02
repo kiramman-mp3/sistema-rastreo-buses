@@ -1,7 +1,25 @@
 (function () {
     "use strict";
 
-    // Progressive enhancement: without this script the bus list shows every bus with its route.
+    // 1. Interactive Visual Reason Cards (Paso 1)
+    var kindInput = document.getElementById("complaint-kind-input");
+    var reasonCards = document.querySelectorAll(".reason-card");
+
+    if (reasonCards.length && kindInput) {
+        var initialKind = kindInput.value || "other";
+        reasonCards.forEach(function (card) {
+            if (card.dataset.kind === initialKind) {
+                card.classList.add("active");
+            }
+            card.addEventListener("click", function () {
+                reasonCards.forEach(function (c) { c.classList.remove("active"); });
+                card.classList.add("active");
+                kindInput.value = card.dataset.kind;
+            });
+        });
+    }
+
+    // 2. Progressive enhancement for bus filtering by route
     var routeSelect = document.getElementById("complaint-route");
     var busSelect = document.getElementById("complaint-bus");
     if (!routeSelect || !busSelect) {

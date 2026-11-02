@@ -125,38 +125,55 @@ class BusPortal(http.Controller):
         return route.vehicle_ids.filtered(lambda b: b.last_fix_time and b.last_fix_time >= limit)
 
     # ------------------------------------------------------------------
-    @http.route('/rutas', type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas', '/transporte/rutas'], type='http', auth='public', methods=['GET'])
     def routes(self, **kwargs):
         routes = public_routes()
-        items = [{
-            'code': r.code,
-            'name': r.name,
-            'color': safe_color(r.color),
-            'buses': len(self._fresh_buses(r)),
-        } for r in routes]
-        return render_portal('bus_tracking.portal_routes', portal_context(routes=items))
+        total_active_buses = 0
+        items = []
+        for r in routes:
+            fresh_count = len(self._fresh_buses(r))
+            total_active_buses += fresh_count
+            items.append({
+                'code': r.code,
+                'name': r.name,
+                'color': safe_color(r.color),
+                'buses': fresh_count,
+                'stops_count': len(r.stop_ids),
+                'first_stop': r.stop_ids[:1].name if r.stop_ids else 'Terminal',
+                'last_stop': r.stop_ids[-1:].name if r.stop_ids else 'Destino',
+            })
+        return render_portal('bus_tracking.portal_routes', portal_context(routes=items, total_active_buses=total_active_buses))
 
-    @http.route('/rutas/detalle', type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/detalle', '/transporte/rutas/detalle'], type='http', auth='public', methods=['GET'])
     def route_detail_alias(self, **kwargs):
         first = public_routes()[:1]
         if first:
             return request.redirect('/rutas/%s' % first.code)
         return request.redirect('/rutas')
 
-    @http.route('/rutas/<string:code>', type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/<string:code>', '/transporte/rutas/<string:code>'], type='http', auth='public', methods=['GET'])
     def route_map(self, code, **kwargs):
         route = self._public_route(code)
         if not route:
             return request.not_found()
         stops = [{'name': s.name, 'lat': s.latitude, 'lon': s.longitude} for s in route.stop_ids]
+        buses = self._fresh_buses(route)
         values = portal_context(
-            route={'code': route.code, 'name': route.name, 'color': safe_color(route.color)},
-            stops_json=json.dumps(stops), paths_json=json.dumps(route._map_lines(), separators=(',', ':')))
+            route={
+                'code': route.code,
+                'name': route.name,
+                'color': safe_color(route.color),
+                'buses_count': len(buses),
+            },
+            stops=stops,
+            stops_json=json.dumps(stops),
+            paths_json=json.dumps(route._map_lines(), separators=(',', ':'))
+        )
         values['json_i18n'] = json.dumps({key: values['s'][key] for key in JS_STRINGS})
         values['center_json'] = json.dumps(list(map_center(request.env(su=True))))
         return render_portal('bus_tracking.portal_route', values)
 
-    @http.route('/rutas/<string:code>/buses.json', type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'], type='http', auth='public', methods=['GET'])
     def route_buses(self, code, **kwargs):
         if not limiter.allow(request.httprequest.remote_addr):
             return Response(status=429, headers=[('Retry-After', '30')])

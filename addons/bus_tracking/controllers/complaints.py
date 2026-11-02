@@ -94,11 +94,11 @@ class BusComplaints(http.Controller):
         return request.redirect('/quejas/gracias' + query, code=303)
 
     # ------------------------------------------------------------------
-    @http.route('/quejas', type='http', auth='public', methods=['GET'])
+    @http.route(['/quejas', '/transporte/quejas'], type='http', auth='public', methods=['GET'])
     def form(self, ruta=None, **kwargs):
         return render_portal('bus_tracking.complaint_form', self._form_values(selected_route=ruta))
 
-    @http.route('/quejas', type='http', auth='public', methods=['POST'])
+    @http.route(['/quejas', '/transporte/quejas'], type='http', auth='public', methods=['POST'])
     def submit(self, **post):
         if (request.httprequest.content_length or 0) > MAX_BODY_BYTES:
             return request.make_response('', status=413)
@@ -153,7 +153,7 @@ class BusComplaints(http.Controller):
         return render_portal('bus_tracking.complaint_form', self._form_values(
             post, {'form': strings['err_expired']}), status=400)
 
-    @http.route('/quejas/gracias', type='http', auth='public', methods=['GET'])
+    @http.route(['/quejas/gracias', '/transporte/quejas/gracias'], type='http', auth='public', methods=['GET'])
     def thanks(self, f=None, c='1', **kwargs):
         return render_portal('bus_tracking.complaint_thanks', portal_context(
             folio=f if f and FOLIO_RE.match(f) else None, has_contact=(c != '0')))
