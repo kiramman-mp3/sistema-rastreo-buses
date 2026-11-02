@@ -9,7 +9,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ec.edu.uta.buses.conductor"
+      "bundleIdentifier": "ec.edu.uta.buses.conductor",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "ec.edu.uta.buses.conductor",
