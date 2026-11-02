@@ -58,9 +58,9 @@ El sistema está ajustado para la Universidad Técnica de Ambato (zona horaria d
 
 ## Menú del panel
 
-- **Mapa en vivo**.
-- **Administración de Buses**: *Buses* (GPS en Traccar), *Recorridos*, *Rutas*, *Turnos* e *Incidentes*.
-- **Quejas**: solo se leen y se cambian de estado; las crea el pasajero desde el portal público.
+- **Mapa en vivo**: buses en vivo, filtros con contador (en ruta, detenidos, sin señal, con alerta) y una cola de **Atención** con SOS, incidentes, alertas y mensajes nuevos. Un SOS aparece como banda roja hasta que alguien lo marca como atendido; la tableta del chofer ve quién lo atendió.
+- **Operación**: *Incidentes* (kanban: sin atender / atendido), *Mensajes de pasajeros* (kanban por estado) y *Turnos*.
+- **Flota**: *Buses* (GPS en Traccar), *Recorridos*, *Rutas* y *Choferes*.
 - **Reportes**: *Velocidad*, *Sin señal*, *Paradas largas*, *Desvíos de ruta* y *Llegada a paradas*.
 - **Configuración**: *Ajustes* y *Notificaciones en este dispositivo*.
 
@@ -68,13 +68,29 @@ El desvío de ruta se mide contra la línea que une las paradas de la ruta, en o
 
 ## Portal de pasajeros
 
-Sin login: `/rutas` lista las rutas marcadas como *Visible to passengers* y `/rutas/<código>` muestra el mapa con sus buses en vivo (solo nombre, posición, rumbo y estado). Español e inglés con selector. La landing (`/`) lleva a este portal.
+Sin login. La portada (`/`) muestra la línea con más buses en vivo sobre sus paradas, el buscador por parada y todas las líneas. `/rutas` lista las rutas marcadas como *Visible to passengers* (`/rutas?q=pillaro` busca por parada, sin importar tildes) y `/rutas/<código>` muestra la línea de paradas y el mapa: el pasajero toca **su parada** y la página dice cuántas paradas le faltan al bus más cercano (cuenta paradas, nunca promete minutos). Solo se publican nombre, posición, rumbo, estado y el tramo de la línea donde va el bus; nunca placa, chofer ni velocidad. Español e inglés con selector y un borrador de kichwa. Teléfono y correo de contacto solo aparecen si se configuran en *Ajustes*. Identidad y reglas de diseño en `docs/DISENO.md`.
 
 Quejas: `/quejas` es el formulario público (contacto opcional, con protección contra abuso). Llegan a `Bus Tracking > Quejas` con estados, responsable y nota interna; los datos de contacto solo los ven los administradores y se borran a los 90 días de resuelta la queja (ajustable).
 
 ## Calidad
 
 Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/GUION_DEFENSA.md`.
+
+## Desarrollo local con datos y capturas
+
+```bash
+cp .env.example .env                      # ODOO_PORT=8070 si el 8069 está ocupado
+docker compose up -d --build db odoo
+MSYS_NO_PATHCONV=1 docker compose run --rm odoo odoo -d buses -i bus_tracking --load-language=es_EC --without-demo=all --stop-after-init --no-http
+docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo < scripts/dev_seed.py
+```
+
+`scripts/dev_seed.py` crea 4 líneas de Ambato con paradas aproximadas, 6 buses, los choferes `chofer1` (con turno abierto) y `chofer2`, y algunas quejas; cada nueva ejecución mueve los buses. Solo para desarrollo.
+
+- Capturas del portal y del panel: `python qa/capturas_ui.py --out <carpeta>` (Playwright).
+- Capturas de la tableta: `cd apps/conductor-tablet && EXPO_PUBLIC_ODOO_URL=http://localhost:8070 npx expo start --web --port 8081`, luego `python qa/capturas_tablet.py --out <carpeta>`.
+- Contraste de los colores: `python qa/contraste.py`. Accesibilidad del portal (axe): `python qa/accesibilidad.py`.
+- Con una sola base de datos las páginas públicas funcionan sin sesión; si hay bases de prueba creadas, bórralas o Odoo no sabrá cuál usar.
 
 ## Producción
 

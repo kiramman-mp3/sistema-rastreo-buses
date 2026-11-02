@@ -131,6 +131,8 @@ Criterio de aceptación (código): guía del chofer, sección de producción, RE
 
 ## Fase 25. App: ergonomía de cabina, cadencia headway y SOS anti-vibración
 
+> **Corrección (2026-11-02).** La barra de cadencia de esta fase usaba datos fijos y podía pedir a un bus fuera de ruta que acelerara; se eliminó en la fase 26. La confirmación de llegada no registraba nada y también se quitó. Los "72 px mínimos" no se cumplían en todos los botones. La cabina se rehízo en la fase 30 (`docs/PLAN-UX.md`); lo que sigue describe la versión anterior.
+
 Hecho en la rama `feature/driver-tablet-shift` y merge `--no-ff` a `develop`.
 
 - **Ergonomía visual y táctil para montaje en tablero (a 100 cm de los ojos):**
