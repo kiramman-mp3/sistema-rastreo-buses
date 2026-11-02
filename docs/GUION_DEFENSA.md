@@ -108,15 +108,18 @@ Puntos a destacar:
 
 | Qué | Cantidad | Resultado |
 |---|---|---|
-| Pruebas automatizadas de Odoo | 150 | 0 fallos |
-| Suite en vivo (12 funcionales, 22 de error, 7 de rendimiento, 1 de usabilidad) | 42 | 3 fallos |
-| Auditoría aleatoria con semilla fija | 1.000 peticiones | 57 fallos (5,7 %) |
-| Cobertura de código (sentencias y ramas) | 1.144 sentencias | **93,8 %** |
+| Pruebas automatizadas de Odoo | 250 | 0 fallos |
+| Pruebas de la app de tableta | 72 | 0 fallos |
+| Suite en vivo (14 funcionales, 25 de error, 7 de rendimiento, 1 de usabilidad) | 47 | 0 fallos |
+| Auditoría aleatoria con semilla fija | 1.000 peticiones | 0 fallos |
+| Cobertura de código (sentencias y ramas) | 1.853 sentencias | **92,8 %** |
+
+Cifras de la corrida del 2-nov-2026 (`qa/ejecutar_todo.sh`). La evaluación del 28-oct había dado 3 fallos en la suite y 57 en la auditoría, todos del webhook, ya corregidos.
 
 **Rendimiento** (servidor de un solo proceso):
 
-- Uso normal: **0,037 s** en promedio por petición.
-- Con 20 hilos simultáneos: p95 de 1,6 s y **39 peticiones por segundo**. Para 100 buses reportando cada 10 segundos se necesitan 10, es decir casi cuatro veces el margen.
+- Uso normal: **0,044 s** en promedio por petición.
+- Con 20 hilos simultáneos: p95 de 1,9 s y **40 peticiones por segundo**. Para 100 buses reportando cada 10 segundos se necesitan 10, es decir casi cuatro veces el margen.
 - **Integridad concurrente:** 20 envíos idénticos a la vez guardan 1; 60 de 60 envíos de un mismo bus se guardan.
 
 **Cuadro de mando:** de 12 metas, 8 se cumplen. Las 4 que no se cumplen son: respuestas 5xx (27), posiciones con datos imposibles (33), defectos cerrados (70 % contra la meta de 90 %) y cobertura de rutas HTTP (84,2 % contra 100 %: faltan `/bus_tracking/track`, `/bus_tracking/stop/load` y `/bus_tracking/stop/save`). Las tres primeras vienen de los defectos de la siguiente sección.
@@ -169,7 +172,7 @@ Puntos a destacar:
 
 ## 9. Cierre (1 min)
 
-*"Para resumir: el sistema resuelve el problema que pidió el cliente: el pasajero ve los buses y reporta quejas sin login, y la administración recibe alertas. Está medido, no solo afirmado: 248 pruebas de Odoo y 72 de la tableta sin fallos, 93,8 % de cobertura en la evaluación del 28 de octubre y 0,037 segundos de respuesta media. Y está documentado con honestidad: sabemos qué falla, por qué falla y cómo se arregla."*
+*"Para resumir: el sistema resuelve el problema que pidió el cliente: el pasajero ve los buses y reporta quejas sin login, y la administración recibe alertas. Está medido, no solo afirmado: 250 pruebas de Odoo y 72 de la tableta sin fallos, 1.000 peticiones aleatorias sin un error, 92,8 % de cobertura y 0,044 segundos de respuesta media. Y está documentado con honestidad: sabemos qué falla, por qué falla y cómo se arregla."*
 
 **Próximos pasos, en orden:**
 
@@ -237,15 +240,15 @@ No hay un cálculo en el proyecto. El plan recomienda una máquina virtual de 2 
 | Dato | Valor |
 |---|---|
 | Servicios de bus / líneas públicas | 11 / 4 (Troncal, Izamba, Pelileo, Píllaro) |
-| Pruebas de Odoo / tableta | 248 / 72, 0 fallos (2-nov) |
-| Suite en vivo | 42 casos, 3 fallos |
-| Auditoría aleatoria | 1.000 peticiones, 57 fallos (5,7 %) |
-| Fallos totales | 60 de 1.192 (5,03 %), todos del webhook |
-| Cobertura | 93,8 % |
-| Tiempo medio | 0,037 s |
-| Capacidad medida / necesaria | 39 req/s / 10 req/s |
+| Pruebas de Odoo / tableta | 250 / 72, 0 fallos (2-nov) |
+| Suite en vivo | 47 casos, 0 fallos (28-oct: 42 casos, 3 fallos) |
+| Auditoría aleatoria | 1.000 peticiones, 0 fallos (28-oct: 57) |
+| Fallos totales | 0 de 1.297 (28-oct: 60 de 1.192, todos del webhook) |
+| Cobertura | 92,8 % |
+| Tiempo medio | 0,044 s |
+| Capacidad medida / necesaria | 40 req/s / 10 req/s |
 | Defectos | 26 registrados, 25 cerrados, 1 abierto (DEF-013) |
-| Metas del cuadro de mando | 8 de 12 cumplidas |
+| Metas del cuadro de mando | 12 de 12 cumplidas (28-oct: 8 de 12) |
 | Política | 7 reglas |
 | Lluvia de ideas | 94 ideas |
 | ISO 25010 | 7 cumple, 19 parcial, 5 no evaluado |
