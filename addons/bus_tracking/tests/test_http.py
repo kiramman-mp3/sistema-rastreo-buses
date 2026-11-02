@@ -135,7 +135,7 @@ class TestHttp(HttpCase):
     def test_landing_is_public_and_login_is_themed(self):
         landing = self.url_open('/')
         self.assertEqual(landing.status_code, 200)
-        self.assertIn('Tu bus ya viene', landing.text)
+        self.assertIn('¿Dónde viene tu bus?', landing.text)
         self.assertIn('/web/login', landing.text)
         self.assertIn('o_bus_login_shell', self.url_open('/web/login').text)
 

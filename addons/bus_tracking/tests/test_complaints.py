@@ -163,6 +163,13 @@ class TestComplaintForm(HttpCase):
         self.assertFalse(self.env['bus.complaint'].search([]).has_contact)
         self.assertIn('no podremos responderte', self.url_open(resp.headers['Location']).text)
 
+    def test_every_kind_on_the_form_is_stored_as_chosen(self):
+        html = self.url_open('/quejas').text
+        for kind in ('delay', 'behavior', 'safety', 'cleanliness', 'other'):
+            self.assertIn('value="%s"' % kind, html)
+        for fake in ('lost_item', 'conduct'):
+            self.assertNotIn('value="%s"' % fake, html)
+
     def test_report_without_route_or_bus_is_fine(self):
         self.submit(route='', bus='')
         complaint = self.env['bus.complaint'].search([])
