@@ -7,7 +7,7 @@ import { locationQueue, readLastError, readLastSent } from '../src/gps/store';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Txt } from '../src/ui/cabin';
+import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 type Facts = { foreground: boolean; background: boolean; queue: number; last: string; error: string | null };
@@ -67,11 +67,13 @@ export default function GpsScreen() {
     : [];
 
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+    <Screen scroll>
       <View style={styles.head}>
-        <Txt bold size="title">
-          {t('gpsStatus')}
-        </Txt>
+        <View style={styles.headText}>
+          <Txt bold size="title">
+            {t('gpsStatus')}
+          </Txt>
+        </View>
         <View style={styles.headActions}>
           <Action label={t('gpsRefresh')} onPress={() => refresh().catch(() => undefined)} />
           <Action label={t('backToShift')} onPress={() => router.back()} kind="accent" />
@@ -80,26 +82,29 @@ export default function GpsScreen() {
       <View style={styles.rows}>
         {rows.map(([label, value, ok]) => (
           <View key={label} style={[styles.row, { backgroundColor: palette.panel }]}>
-            <Txt size="body" dim>
+            <Txt size="body" dim style={styles.label}>
               {label}
             </Txt>
-            <Txt bold size="body" color={ok === null ? palette.ink : ok ? palette.ok : palette.danger}>
+            <Txt bold size="body" color={ok === null ? palette.ink : ok ? palette.ok : palette.danger} style={styles.value}>
               {value}
             </Txt>
           </View>
         ))}
       </View>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, padding: 24, gap: 20 },
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  headActions: { flexDirection: 'row', gap: 12 },
+  head: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  headText: { flexShrink: 1 },
+  headActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  label: { flexShrink: 0 },
+  value: { flexShrink: 1, textAlign: 'right' },
   rows: { gap: 10 },
   row: {
     minHeight: 64,
+    paddingVertical: 8,
     borderRadius: 8,
     paddingHorizontal: 20,
     flexDirection: 'row',
