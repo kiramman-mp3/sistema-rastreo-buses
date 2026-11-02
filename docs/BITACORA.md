@@ -881,6 +881,14 @@ Transformación de la experiencia de usuario y arquitectura frontend del sistema
    - Acciones de emergencia (`IncidentActions.tsx`): reporte de tráfico en 1 toque y botón SOS con pulsación sostenida obligatoria de 1.5s para evitar falsos accionamientos por vibración del vehículo.
    - Integrada en `develop` vía `feature/driver-tablet-shift` con `--no-ff`.
 
+4. **Despliegue y actualización en producción (Azure)**:
+   - Integración de `develop` en `main` mediante `release: v1.3.0` (`commit 5e9a4b8`) y push a GitHub.
+   - Conexión a la VM `vm-buses` en Azure (`RG-BUSES-EASTUS2`, `Standard_B1ms`) vía Azure CLI.
+   - `git pull origin main` en `/home/azureuser/buses` con fast-forward de los 23 archivos modificados.
+   - Actualización del módulo en la base de Odoo: `docker compose run --rm odoo odoo -d buses -u bus_tracking --stop-after-init`.
+   - Reinicio de servicios Docker y verificación de salud de contenedores (`odoo: healthy`, `proxy: up`, `traccar: healthy`).
+   - Comprobación de endpoints públicos en `https://busesuta2340.eastus2.cloudapp.azure.com`: `/`, `/transporte`, `/transporte/rutas`, `/transporte/quejas` y `/bus_tracking/health` respondiendo HTTP/2 200 OK.
+
 ### Qué se verificó
 
 | Prueba | Resultado |
