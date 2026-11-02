@@ -1,3 +1,7 @@
+/* Route map of the public site. It does not ask the server: site.js owns the data of the line and
+   sends it here ("buses-uta:linea"), so the map and the stop list always show the same moment.
+   Buses glide linearly to their new position over the refresh interval, so they never stop and
+   start with a jolt; with reduced motion they jump. Tapping a stop on the map chooses it as "my stop". */
 (function () {
     "use strict";
 
@@ -5,95 +9,60 @@
     if (!el || !window.L) {
         return;
     }
+    var L = window.L;
     var code = el.dataset.code;
-    var color = el.dataset.color || "#8B1D24";
+    var color = el.dataset.color || "#7A1A22";
     var stops = JSON.parse(el.dataset.stops || "[]");
+    var paths = JSON.parse(el.dataset.paths || "[]");
     var t = JSON.parse(el.dataset.i18n || "{}");
-    var REFRESH_MS = 10000;
-
     var center = JSON.parse(el.dataset.center || "[-1.2417, -78.6167]");
-    var map = window.L.map(el, { zoomControl: false }).setView(center, 13);
-    window.L.control.zoom({ position: "bottomright" }).addTo(map);
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var GLIDE_MS = 9000;
 
-    // Carto Voyager Tiles: Clean, high-contrast navigation tiles with official API key
-    window.L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb", {
+    var map = L.map(el, { zoomControl: false, scrollWheelZoom: false }).setView(center, 13);
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb", {
         maxZoom: 19,
         subdomains: "abcd",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" rel="noopener">CARTO</a>',
     }).addTo(map);
 
     var points = stops.map(function (s) { return [s.lat, s.lon]; });
-    var paths = JSON.parse(el.dataset.paths || "[]");
-    var pathLayers = [];
-    var picker = document.getElementById("path-picker");
-    var pathSelect = document.getElementById("path-select");
-
-    function showPath(index) {
-        pathLayers.forEach(function (layer, i) {
-            var on = index < 0 || i === index;
-            layer.setStyle({ opacity: on ? (index < 0 ? 0.7 : 0.95) : 0, weight: on ? (index < 0 ? 5 : 6) : 0 });
-            layer.options.interactive = on;
-        });
-        if (pathSelect) {
-            pathSelect.value = String(index);
-        }
-        if (index >= 0 && pathLayers[index]) {
-            map.fitBounds(pathLayers[index].getBounds(), { padding: [40, 40] });
-        } else {
-            fit();
-        }
+    paths.forEach(function (path) {
+        L.polyline(path.points, { color: color, weight: 6, opacity: 0.9, lineJoin: "round" }).addTo(map);
+        points = points.concat(path.points);
+    });
+    if (!paths.length && points.length > 1) {
+        L.polyline(points, { color: color, weight: 6, opacity: 0.9, lineJoin: "round" }).addTo(map);
     }
 
-    if (paths.length && pathSelect) {
-        paths.forEach(function (path, i) {
-            var layer = window.L.polyline(path.points, { color: color, weight: 5, opacity: 0.7, lineJoin: "round" })
-                .bindTooltip(path.name + " · " + path.km + " km").addTo(map);
-            layer.on("click", function () { showPath(i); });
-            pathLayers.push(layer);
-            var option = document.createElement("option");
-            option.value = String(i);
-            option.textContent = path.name + " · " + path.km + " km";
-            pathSelect.appendChild(option);
-            points = points.concat(path.points);
+    function stopIcon(mine) {
+        return L.divIcon({
+            className: "",
+            iconSize: mine ? [28, 28] : [22, 22],
+            iconAnchor: mine ? [14, 14] : [11, 11],
+            html: '<span class="marcador-parada' + (mine ? " mia" : "") + '" style="--c:' + color + '"></span>',
         });
-        var all = document.createElement("option");
-        all.value = "-1";
-        all.textContent = t.path_all || "Trazado completo";
-        pathSelect.insertBefore(all, pathSelect.firstChild);
-        pathSelect.value = "-1";
-        pathSelect.addEventListener("change", function () { showPath(parseInt(pathSelect.value, 10)); });
-        var resetBtn = document.getElementById("path-reset");
-        if (resetBtn) {
-            resetBtn.addEventListener("click", function () { showPath(-1); });
-        }
-        if (picker) {
-            picker.hidden = false;
-        }
-    } else if (points.length > 1) {
-        window.L.polyline(points, { color: color, weight: 5, opacity: 0.75, lineJoin: "round" }).addTo(map);
     }
 
-    stops.forEach(function (s, index) {
-        var stopIcon = window.L.divIcon({
-            className: "stop-marker-container",
-            iconSize: [26, 26],
-            iconAnchor: [13, 13],
-            html: '<div class="stop-badge-marker" style="background:' + color + '"><span>' + (index + 1) + '</span></div>',
-        });
-        window.L.marker([s.lat, s.lon], { icon: stopIcon })
-            .bindTooltip((index + 1) + ". " + s.name, { direction: "top", offset: [0, -10] })
+    var stopMarkers = stops.map(function (stop, index) {
+        var marker = L.marker([stop.lat, stop.lon], { icon: stopIcon(false), title: stop.name, keyboard: true })
+            .bindTooltip(stop.name, { direction: "top", offset: [0, -12] })
             .addTo(map);
+        marker.on("click", function () {
+            document.dispatchEvent(new CustomEvent("buses-uta:elegir", { detail: { code: code, index: index } }));
+        });
+        return marker;
     });
 
-    var touched = false;
     function fit() {
         if (points.length) {
-            map.fitBounds(window.L.latLngBounds(points), { padding: [40, 40], maxZoom: 16 });
+            map.fitBounds(L.latLngBounds(points), { padding: [32, 32], maxZoom: 16 });
         }
     }
     fit();
-
-    ["mousedown", "touchstart", "wheel", "keydown"].forEach(function (name) {
+    var touched = false;
+    ["mousedown", "touchstart", "keydown"].forEach(function (name) {
         el.addEventListener(name, function () { touched = true; }, { passive: true });
     });
     if (window.ResizeObserver) {
@@ -102,140 +71,87 @@
             if (!touched) { fit(); }
         }).observe(el);
     }
-    window.addEventListener("load", function () {
-        map.invalidateSize();
-        if (!touched) { fit(); }
-    });
 
-    var busLayer = window.L.layerGroup().addTo(map);
-    var busMarkers = {};
-    var statusEl = document.getElementById("bus-status");
-    var listEl = document.getElementById("bus-list");
-    var emptyEl = document.getElementById("bus-empty");
-    var lastOk = null;
+    var BUS_SVG = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">' +
+        '<rect x="3" y="2" width="14" height="14" rx="3" fill="currentColor"/>' +
+        '<rect x="5" y="4.5" width="10" height="5" rx="1" fill="#172025" opacity="0.55"/>' +
+        '<rect x="5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/>' +
+        '<rect x="12.5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/></svg>';
+
+    function kind(bus) {
+        return bus.status === "moving" ? "" : (bus.status === "stopped" ? " detenido" : " sin-senal");
+    }
 
     function busIcon(bus) {
-        var ring = bus.status === "moving" ? "#0D684D" : bus.status === "stopped" ? "#D97706" : "#64748B";
-        var course = bus.course || 0;
-        return window.L.divIcon({
-            className: "bus-marker-container",
-            iconSize: [40, 52],
-            iconAnchor: [20, 26],
-            html: '<div class="o_bus_marker_wrap" style="--unit-color:' + color + ';">' +
-                  '  <div class="o_bus_pulse ' + (bus.status === "moving" ? "is-moving" : "") + '"></div>' +
-                  '  <div class="o_bus_pin ' + (bus.status !== "offline" ? "is-connected" : "is-disconnected") + '">' +
-                  '    <div class="o_bus_arrow" style="transform: rotate(' + course + 'deg);">' +
-                  '      <svg viewBox="0 0 24 24" class="o_bus_arrow_svg"><polygon points="12,2 19,13 12,9 5,13"/></svg>' +
-                  '    </div>' +
-                  '    <div class="o_bus_core"><i class="fa fa-bus"></i></div>' +
-                  '  </div>' +
-                  '  <div class="o_bus_badge_label">' + (bus.name || "Bus") + '</div>' +
-                  '</div>',
+        var name = String(bus.name || "").replace(/[&<>"]/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+        return L.divIcon({
+            className: "",
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+            html: '<span class="marcador-bus' + kind(bus) + '">' +
+                '<span class="rumbo" style="transform: rotate(' + (bus.course || 0) + 'deg)"></span>' +
+                '<span class="cuerpo">' + BUS_SVG + '</span>' +
+                '<span class="rotulo">' + name + "</span></span>",
         });
     }
 
-    function animateMarker(marker, targetLat, targetLon, duration) {
-        var current = marker.getLatLng();
-        var startLat = current.lat;
-        var startLon = current.lng;
-        if (Math.abs(startLat - targetLat) < 0.000001 && Math.abs(startLon - targetLon) < 0.000001) {
-            return;
-        }
-        var startTime = window.performance ? window.performance.now() : Date.now();
-        function frame(now) {
-            var timeNow = now || (window.performance ? window.performance.now() : Date.now());
-            var progress = Math.min((timeNow - startTime) / duration, 1);
-            var ease = 1 - Math.pow(1 - progress, 2);
-            var curLat = startLat + (targetLat - startLat) * ease;
-            var curLon = startLon + (targetLon - startLon) * ease;
-            marker.setLatLng([curLat, curLon]);
-            if (progress < 1) {
-                requestAnimationFrame(frame);
-            }
-        }
-        requestAnimationFrame(frame);
+    var buses = {};
+    var frame = null;
+
+    function glide() {
+        var now = performance.now();
+        var moving = false;
+        Object.keys(buses).forEach(function (name) {
+            var b = buses[name];
+            var p = Math.min((now - b.start) / GLIDE_MS, 1);
+            b.marker.setLatLng([b.from[0] + (b.to[0] - b.from[0]) * p, b.from[1] + (b.to[1] - b.from[1]) * p]);
+            if (p < 1) { moving = true; }
+        });
+        // the loop stops as soon as nothing is moving
+        frame = moving ? requestAnimationFrame(glide) : null;
     }
 
-    function render(buses) {
+    document.addEventListener("buses-uta:linea", function (event) {
+        var detail = event.detail || {};
+        if (detail.code !== code) { return; }
+        stopMarkers.forEach(function (marker, index) { marker.setIcon(stopIcon(index === detail.mine)); });
+
         var seen = {};
-        if (listEl) {
-            listEl.textContent = "";
-        }
-
-        buses.forEach(function (bus) {
+        (detail.buses || []).forEach(function (bus) {
             seen[bus.name] = true;
-            var label = t["status_" + (bus.status === "moving" || bus.status === "stopped" ? bus.status : "offline")] || bus.status;
-            var tooltipText = bus.name + ": " + label;
-
-            if (busMarkers[bus.name]) {
-                var m = busMarkers[bus.name];
-                animateMarker(m, bus.lat, bus.lon, 2000);
-                if (m._lastStatus !== bus.status) {
-                    m.setIcon(busIcon(bus));
-                    m._lastStatus = bus.status;
-                }
-                m.setTooltipContent(tooltipText);
+            var target = [bus.lat, bus.lon];
+            var label = bus.name + ": " + (t["status_" + (bus.status === "moving" || bus.status === "stopped" ? bus.status : "offline")] || "");
+            var known = buses[bus.name];
+            if (!known) {
+                var marker = L.marker(target, { icon: busIcon(bus), title: label, keyboard: false, zIndexOffset: 500 }).addTo(map);
+                buses[bus.name] = { marker: marker, from: target, to: target, start: 0, status: bus.status };
+                return;
+            }
+            known.marker.options.title = label;
+            if (known.status !== bus.status) {
+                known.marker.setIcon(busIcon(bus));
+                known.status = bus.status;
             } else {
-                var marker = window.L.marker([bus.lat, bus.lon], { icon: busIcon(bus), title: bus.name });
-                marker.bindTooltip(tooltipText, { direction: "top", offset: [0, -12] }).addTo(busLayer);
-                marker._lastStatus = bus.status;
-                busMarkers[bus.name] = marker;
+                var rumbo = known.marker.getElement() && known.marker.getElement().querySelector(".rumbo");
+                if (rumbo) { rumbo.style.transform = "rotate(" + (bus.course || 0) + "deg)"; }
             }
-
-            if (listEl) {
-                var li = document.createElement("li");
-                li.className = "bus-" + (bus.status === "moving" || bus.status === "stopped" ? bus.status : "offline");
-                var name = document.createElement("strong");
-                name.textContent = bus.name;
-                var state = document.createElement("span");
-                state.textContent = label;
-                li.appendChild(name);
-                li.appendChild(state);
-                listEl.appendChild(li);
+            var here = known.marker.getLatLng();
+            known.from = [here.lat, here.lng];
+            known.to = target;
+            known.start = performance.now();
+            if (reduce || document.hidden) {
+                known.marker.setLatLng(target);
+                known.from = target;
             }
         });
-
-        // Clean up buses that are no longer active
-        Object.keys(busMarkers).forEach(function (busName) {
-            if (!seen[busName]) {
-                busLayer.removeLayer(busMarkers[busName]);
-                delete busMarkers[busName];
+        Object.keys(buses).forEach(function (name) {
+            if (!seen[name]) {
+                map.removeLayer(buses[name].marker);
+                delete buses[name];
             }
         });
-
-        if (emptyEl) {
-            emptyEl.hidden = buses.length > 0;
-        }
-    }
-
-    function showAge() {
-        if (lastOk === null || !statusEl) {
-            return;
-        }
-        var secs = Math.round((Date.now() - lastOk) / 1000);
-        statusEl.textContent = secs < 3 ? "En vivo" : (t.updated || "Actualizado hace {s}s").replace("{s}", secs);
-    }
-
-    function refresh() {
-        fetch("/rutas/" + encodeURIComponent(code) + "/buses.json", { headers: { Accept: "application/json" } })
-            .then(function (r) {
-                if (!r.ok) { throw new Error(r.status); }
-                return r.json();
-            })
-            .then(function (data) {
-                render(data.buses);
-                lastOk = Date.now();
-                showAge();
-            })
-            .catch(function () {
-                if (statusEl) {
-                    statusEl.textContent = t.update_error || "Reconectando con satélite...";
-                }
-            });
-    }
-
-    refresh();
-    setInterval(function () { if (!document.hidden) { refresh(); } }, REFRESH_MS);
-    setInterval(showAge, 1000);
-    document.addEventListener("visibilitychange", function () { if (!document.hidden) { refresh(); } });
+        if (!reduce && !frame) { frame = requestAnimationFrame(glide); }
+    });
 }());
