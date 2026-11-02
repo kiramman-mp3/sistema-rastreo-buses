@@ -5,6 +5,7 @@ import * as TaskManager from 'expo-task-manager';
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
 import { flushFixes, ingestLocations } from './runtime';
 import { gpsStore, locationQueue, writeLastError, writeLastSample, writeLastSent } from './store';
+import { t } from '../i18n';
 import type { GpsController } from './types';
 
 export const GPS_TASK = 'uta-bus-location';
@@ -35,8 +36,8 @@ export const liveGps: GpsController = {
       deferredUpdatesInterval: 10_000,
       pausesUpdatesAutomatically: false,
       foregroundService: {
-        notificationTitle: 'Buses UTA',
-        notificationBody: 'Enviando la posición del bus',
+        notificationTitle: t('gpsServiceTitle'),
+        notificationBody: t('gpsServiceBody'),
         notificationColor: '#B91C1C',
         killServiceOnDestroy: false,
       },
