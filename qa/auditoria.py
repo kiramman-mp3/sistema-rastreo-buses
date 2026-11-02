@@ -202,9 +202,9 @@ def main():
         began = time.perf_counter()
         try:
             response = requests.request(probe.method, probe.url, timeout=60, allow_redirects=False, **probe.kwargs)
-            status, text = response.status_code, response.text[:300]
-        except requests.RequestException as exc:
-            status, text = 0, repr(exc)
+            status = response.status_code
+        except requests.RequestException:
+            status = 0
         elapsed = time.perf_counter() - began
         rows.append({'area': probe.area, 'status': status, 'esperado': sorted(probe.expected), 'ok': status in probe.expected,
                      'tiempo': elapsed, 'nota': getattr(probe, 'note', '')})
