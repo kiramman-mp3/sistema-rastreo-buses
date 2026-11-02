@@ -1006,3 +1006,516 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   Phase 2: Directorio Visual, Diagrama Metro e Interacciones Empáticas
+   ========================================================================== */
+
+/* Network Status Pill on Routes Banner */
+.portal-network-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    color: var(--bus-slate-800, #1E293B);
+    margin-top: 14px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+}
+
+.portal-network-status-pill .network-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--transit-on-time, #059669);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+    animation: oBusSyncPulseAnim 2s infinite;
+}
+
+/* Campus Filters */
+.portal-campus-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.filters-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bus-muted, #64748B);
+}
+
+.campus-tabs-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.campus-tab {
+    border: 1px solid var(--bus-line, #E2E8F0);
+    background: #FFFFFF;
+    color: var(--bus-slate-800, #1E293B);
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.campus-tab:hover {
+    background: var(--bus-paper, #F8FAFC);
+    border-color: var(--bus-line-dark, #CBD5E1);
+}
+
+.campus-tab:active {
+    transform: scale(0.96);
+}
+
+.campus-tab.active {
+    background: var(--bus-uta-primary, #8B1D24);
+    border-color: var(--bus-uta-primary, #8B1D24);
+    color: #FFFFFF;
+}
+
+/* Visual Routes Grid */
+.routes-visual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 22px;
+    margin-bottom: 40px;
+}
+
+.route-premium-card {
+    position: relative;
+    background: #FFFFFF;
+    border: 1px solid var(--bus-line, #E2E8F0);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.route-premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -6px rgba(15, 23, 42, 0.10);
+}
+
+.card-color-stripe {
+    height: 6px;
+    width: 100%;
+}
+
+.card-inner-pad {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.route-terminals-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.terminal-badge {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--bus-slate-800, #1E293B);
+    background: var(--bus-paper, #F8FAFC);
+    border: 1px solid var(--bus-line, #E2E8F0);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.terminal-sep {
+    color: var(--bus-muted, #64748B);
+    font-weight: 700;
+}
+
+.route-meta-pills {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.meta-pill {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--bus-muted, #64748B);
+    background: var(--bus-line, #F1F5F9);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.card-bottom-action {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--bus-line, #E2E8F0);
+}
+
+.btn-card-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--bus-uta-primary, #8B1D24);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.btn-card-action:hover {
+    color: var(--bus-uta-dark, #5E1217);
+}
+
+.btn-card-action .action-arrow {
+    transition: transform 0.15s ease;
+}
+
+.btn-card-action:hover .action-arrow {
+    transform: translateX(4px);
+}
+
+/* Route Notice Banner */
+.route-notice-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 22px;
+}
+
+.notice-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.notice-content {
+    font-size: 0.85rem;
+    color: #92400E;
+    line-height: 1.45;
+}
+
+/* Route Split Layout (Metro Rail + Map) */
+.route-split-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 22px;
+    margin-bottom: 40px;
+    align-items: stretch;
+}
+
+.route-itinerary-panel {
+    background: #FFFFFF;
+    border: 1px solid var(--bus-line, #E2E8F0);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 8px -2px rgba(15, 23, 42, 0.05);
+    max-height: 680px;
+}
+
+.itinerary-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--bus-line, #E2E8F0);
+    background: #F8FAFC;
+}
+
+.itinerary-title {
+    font-family: var(--bus-font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--bus-ink, #0F172A);
+    margin: 0;
+}
+
+.itinerary-subtitle {
+    font-size: 0.78rem;
+    color: var(--bus-muted, #64748B);
+    margin: 4px 0 0;
+}
+
+.metro-rail-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 20px;
+}
+
+.metro-stop-item {
+    display: flex;
+    gap: 14px;
+    position: relative;
+}
+
+.metro-rail-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 26px;
+    flex-shrink: 0;
+}
+
+.metro-stop-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 3px solid #8B1D24;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    z-index: 2;
+}
+
+.dot-inner-number {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--bus-ink, #0F172A);
+}
+
+.metro-rail-line {
+    flex: 1;
+    width: 3px;
+    min-height: 32px;
+    margin-top: -2px;
+    margin-bottom: -2px;
+    opacity: 0.45;
+}
+
+.metro-stop-info {
+    flex: 1;
+    padding-bottom: 18px;
+}
+
+.metro-stop-info .stop-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--bus-ink, #0F172A);
+    display: block;
+    line-height: 1.3;
+}
+
+.metro-stop-info .stop-meta-eta {
+    margin-top: 3px;
+}
+
+.eta-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.eta-tag.in-route {
+    background: #ECFDF5;
+    color: #065F46;
+}
+
+.eta-tag.origin {
+    background: #EFF6FF;
+    color: #1E40AF;
+}
+
+.eta-tag.dest {
+    background: #FEF2F2;
+    color: #991B1B;
+}
+
+.itinerary-footer-action {
+    padding: 14px 20px;
+    border-top: 1px solid var(--bus-line, #E2E8F0);
+    background: #F8FAFC;
+}
+
+.route-map-viewport {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--bus-line, #E2E8F0);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    display: flex;
+    flex-direction: column;
+}
+
+.route-map-viewport .map-viewport-container {
+    position: relative;
+    height: 520px;
+    width: 100%;
+}
+
+.route-map-viewport #bus-map {
+    height: 100% !important;
+    width: 100%;
+}
+
+.map-floating-hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 1000;
+    pointer-events: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hud-status-badge {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--bus-slate-800, #1E293B);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+}
+
+.hud-path-picker {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    border-radius: 10px;
+    padding: 4px 6px;
+    display: flex;
+    gap: 4px;
+}
+
+.telemetry-list-wrap-bottom {
+    background: #FFFFFF;
+    padding: 12px 18px;
+    border-top: 1px solid var(--bus-line, #E2E8F0);
+}
+
+/* 3-Step Guided Wizard for Complaints */
+.wizard-step-section {
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--bus-line, #E2E8F0);
+}
+
+.step-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.step-number {
+    background: var(--bus-uta-primary, #8B1D24);
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+}
+
+.step-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--bus-ink, #0F172A);
+}
+
+.step-hint {
+    font-size: 0.8rem;
+    color: var(--bus-muted, #64748B);
+    margin: -6px 0 14px 0;
+}
+
+.reason-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.reason-card {
+    border: 1.5px solid var(--bus-line, #E2E8F0);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    background: #FFFFFF;
+    transition: all 0.15s ease;
+}
+
+.reason-card:hover {
+    border-color: var(--bus-uta-primary, #8B1D24);
+    background: var(--bus-paper, #F8FAFC);
+}
+
+.reason-card:active {
+    transform: scale(0.98);
+}
+
+.reason-card.active {
+    border-color: var(--bus-uta-primary, #8B1D24);
+    background: var(--bus-uta-light, #FDF2F2);
+    box-shadow: 0 0 0 3px rgba(139, 29, 36, 0.12);
+}
+
+.reason-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.reason-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--bus-ink, #0F172A);
+    display: block;
+}
+
+.reason-desc {
+    font-size: 0.76rem;
+    color: var(--bus-muted, #64748B);
+    margin: 4px 0 0;
+    line-height: 1.35;
+}
+
+.ticket-eta-note {
+    font-size: 0.84rem;
+    color: #475569;
+    margin: 8px 0 0;
+}
+
+@media (max-width: 960px) {
+    .route-split-layout {
+        grid-template-columns: 1fr;
+    }
+    .route-itinerary-panel {
+        max-height: 440px;
+    }
+    .reason-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
