@@ -15,8 +15,8 @@
     var map = window.L.map(el, { zoomControl: false }).setView(center, 13);
     window.L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // Carto Positron Tiles: Clean, high-contrast, low-distraction
-    window.L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    // Carto Voyager Tiles: Clean, high-contrast navigation tiles with official API key
+    window.L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb", {
         maxZoom: 19,
         subdomains: "abcd",
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
