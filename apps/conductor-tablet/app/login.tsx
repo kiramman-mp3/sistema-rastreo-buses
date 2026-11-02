@@ -36,7 +36,8 @@ export default function Login() {
     try {
       await session.setOdooUrl(odooUrl);
       await session.login(login.trim(), password);
-      router.replace(session.snapshot.shift ? '/shift' : '/select');
+      // `session.snapshot` here is the one of the last render: let the index route decide with the new one.
+      router.replace('/');
     } catch (err) {
       if (err instanceof Error && err.message === 'bad_odoo_url') setError(t('qrBad'));
       else if (err instanceof NetworkError) setError(t('network'));
@@ -120,7 +121,7 @@ export default function Login() {
         <Action
           label={busy ? t('loading') : t('login')}
           onPress={submit}
-          kind="neutral"
+          kind="quiet"
           disabled={busy || !login || !password}
         />
       </View>
