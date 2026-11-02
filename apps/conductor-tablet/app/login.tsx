@@ -159,8 +159,9 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   introStack: {
-    flex: 0,
-    alignItems: 'center',
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
   },
   brand: {
     flexDirection: 'row',
