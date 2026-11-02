@@ -26,6 +26,16 @@
                             </div>
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_tile_url"/>
+                                <div class="text-muted">
+                                    Map tiles for the panel, the passenger pages and the tablet.
+                                    Empty uses CARTO Voyager (OpenStreetMap data).
+                                </div>
+                                <field name="bus_tile_url" placeholder="https://{s}.example.com/{z}/{x}/{y}.png"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
                                 <field name="bus_accept_without_shift"/>
                             </div>
