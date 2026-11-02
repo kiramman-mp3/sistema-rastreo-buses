@@ -74,7 +74,8 @@ class TestComplaintModel(TransactionCase):
         self.assertEqual(complaint.contact_email, 'a@example.org')
 
     def test_contact_data_is_only_readable_by_managers(self):
-        group = lambda xmlid: self.env.ref(xmlid).id
+        def group(xmlid):
+            return self.env.ref(xmlid).id
         viewer = self.env['res.users'].create({
             'name': 'Viewer', 'login': 'viewer2',
             'groups_id': [(6, 0, [group('base.group_user'), group('bus_tracking.group_bus_user')])]})

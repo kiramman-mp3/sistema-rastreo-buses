@@ -8,7 +8,7 @@ on:
 
 jobs:
   mobile-tablet-app:
-    name: Conductor Tablet (Expo/TS/Jest)
+    name: Conductor Tablet (Expo/TS/Jest/ESLint)
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,10 @@ jobs:
         working-directory: apps/conductor-tablet
         run: npm ci
 
+      - name: Lint
+        working-directory: apps/conductor-tablet
+        run: npm run lint
+
       - name: TypeScript Typecheck
         working-directory: apps/conductor-tablet
         run: npm run typecheck
@@ -35,17 +39,18 @@ jobs:
         run: npm test
 
   backend-validation:
-    name: Odoo Addon Syntax & Code Check
+    name: Odoo Addon Lint & Translations
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # The odoo:16.0 image runs Python 3.9: lint with the same version.
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.9'
 
       - name: Install Linters
         run: |
@@ -53,7 +58,59 @@ jobs:
           pip install flake8
 
       - name: Check Python Syntax (Compileall)
-        run: python -m compileall addons/bus_tracking
+        run: python -m compileall -q addons/bus_tracking
 
-      - name: Flake8 Critical Errors Check
-        run: flake8 addons/bus_tracking --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Flake8 (module, full rule set from .flake8)
+        run: flake8 addons/bus_tracking scripts/dev_seed.py --count --statistics
+
+      - name: Flake8 (qa scripts, errors only)
+        run: flake8 qa --select=E9,F --count --show-source
+
+      - name: Spanish translation is complete and current
+        run: python -X utf8 qa/traducciones.py
+
+  odoo-tests:
+    name: Odoo Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U odoo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Same image as development: odoo:16.0 plus pywebpush.
+      - name: Build the Odoo image
+        run: docker build -t rastreo-odoo:ci docker/odoo
+
+      - name: Run the bus_tracking tests
+        run: |
+          docker run --rm --network host \
+            -v "$PWD/addons:/mnt/extra-addons:ro" \
+            rastreo-odoo:ci \
+            odoo --db_host=127.0.0.1 --db_port=5432 --db_user=odoo --db_password=odoo \
+              --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons \
+              -d buses_ci -i bus_tracking --test-enable --test-tags /bus_tracking \
+              --stop-after-init --without-demo=all --no-http 2>&1 | tee odoo-tests.log
+          # Odoo does not always exit with an error when a test fails: read its summary line.
+          grep -E "odoo.tests.result: 0 failed, 0 error\(s\) of [0-9]+ tests" odoo-tests.log
+
+      - name: Keep the log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odoo-tests-log
+          path: odoo-tests.log

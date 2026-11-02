@@ -43,7 +43,6 @@ class TestShiftCron(TransactionCase):
         self.assertEqual(shift.state, 'active')
 
 
-
 @tagged('post_install', '-at_install')
 class TestTripProgress(TransactionCase):
 
@@ -90,6 +89,7 @@ class TestTripProgress(TransactionCase):
         trip = self.shift._trip_progress()
         self.assertEqual(trip['direction'], 'forward')
         self.assertEqual(trip['next_stop'], self.a)
+
 
 @tagged('post_install', '-at_install')
 class TestDriverShiftApi(HttpCase):
@@ -237,7 +237,8 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual((sos['id'], sos['seen_at']), (sos_id, None))
         manager = self.env['res.users'].create({
             'name': 'Despacho', 'login': 'despacho',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_user').id])]})
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_user').id])]})
         self.env['bus.incident'].browse(sos_id).with_user(manager).action_acknowledge()
         sos = self.post(STATE, token=token).json()['sos']
         self.assertTrue(sos['seen_at'])

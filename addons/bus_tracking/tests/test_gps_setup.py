@@ -70,11 +70,15 @@ class TestGpsSetup(BusCase):
     # -- the identifier is a credential ---------------------------------------
     def test_identifier_is_hidden_from_regular_users_and_visible_to_managers(self):
         Users = self.env['res.users']
-        group = lambda xmlid: self.env.ref(xmlid).id
+
+        def group(xmlid):
+            return self.env.ref(xmlid).id
         viewer = Users.create({
-            'name': 'Viewer', 'login': 'viewer', 'groups_id': [(6, 0, [group('base.group_user'), group('bus_tracking.group_bus_user')])]})
+            'name': 'Viewer', 'login': 'viewer', 'groups_id': [(6, 0, [group('base.group_user'),
+                                                                       group('bus_tracking.group_bus_user')])]})
         manager = Users.create({
-            'name': 'Manager', 'login': 'manager', 'groups_id': [(6, 0, [group('base.group_user'), group('bus_tracking.group_bus_manager')])]})
+            'name': 'Manager', 'login': 'manager', 'groups_id': [(6, 0, [group('base.group_user'),
+                                                                         group('bus_tracking.group_bus_manager')])]})
         self.assertEqual(self.bus.with_user(viewer).name, 'Bus 1')
         with self.assertRaises(AccessError):
             self.bus.with_user(viewer).traccar_unique_id

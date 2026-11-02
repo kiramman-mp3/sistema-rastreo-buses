@@ -94,7 +94,8 @@ class TestIngest(BusCase):
         for minute, (name, lat, lon) in enumerate(STOPS):
             self.bus._apply_position(traccar_position(7, '2026-10-26T12:%02d:00Z' % (minute * 5), lat, lon))
             # a point between stops, so the bus leaves each radius
-            self.bus._apply_position(traccar_position(7, '2026-10-26T12:%02d:30Z' % (minute * 5), lat - 0.002, lon + 0.004))
+            when = '2026-10-26T12:%02d:30Z' % (minute * 5)
+            self.bus._apply_position(traccar_position(7, when, lat - 0.002, lon + 0.004))
         arrivals = self.env['bus.stop.arrival'].search(
             [('vehicle_id', '=', self.bus.id)], order='arrival_time asc')
         self.assertEqual(arrivals.mapped('stop_id.name'), [s[0] for s in STOPS])
@@ -204,4 +205,3 @@ class TestIngest(BusCase):
         with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
             self.env['bus.vehicle'].create({'name': self.bus.name})
             self.env.flush_all()
-

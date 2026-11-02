@@ -38,12 +38,12 @@ class BusLanding(Home):
                 'stops_json': json.dumps([s.name for s in r.stop_ids]),
             })
         # The line drawn in the first screen: the one with most buses right now, else the first one.
-        featured = max(lines, key=lambda l: l['buses']) if lines else None
+        featured = max(lines, key=lambda line: line['buses']) if lines else None
         return portal_context(
             lines=lines,
             featured=featured,
             featured_json=json.dumps(featured) if featured else '',
-            total_buses=sum(l['buses'] for l in lines),
-            stop_names=sorted({name for l in lines for name in l['stops']}),
+            total_buses=sum(line['buses'] for line in lines),
+            stop_names=sorted({name for line in lines for name in line['stops']}),
             active_nav='inicio',
         )
