@@ -9,6 +9,11 @@ Guía para instalar y operar el sistema en un servidor. Todo lo de esta página 
 - Puertos abiertos hacia internet: solo 80 y 443. Los celulares también entran por HTTPS (443).
 - Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza. El panel de Traccar no se expone.
 
+### Base de datos: local o Supabase
+
+- **Local (recomendado para empezar)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual.
+- **Externa (Supabase u otra)**: pon `DB_HOST`, `DB_USER`, `TRACCAR_DATABASE_URL` y `TRACCAR_DB_USER` del proveedor (el ejemplo trae marcadores `TU_PROYECTO`). Las bases y los usuarios se crean en la consola del proveedor, los respaldos los hace el proveedor y `reset-prod.sh` se niega a correr.
+
 ## Instalación
 
 ```bash
@@ -24,6 +29,7 @@ La segunda ejecución:
 2. Crea la base de datos `traccar` y su usuario en Postgres.
 3. Crea la base de Odoo con el módulo instalado y el idioma de `ODOO_LANG`, fija una contraseña aleatoria para el usuario `admin` (se muestra una sola vez) y carga el secreto del webhook y la URL de Traccar.
 4. Levanta todos los servicios.
+5. Crea el administrador de Traccar (contraseña aleatoria guardada en Odoo), cierra el registro abierto de Traccar y guarda en Odoo la **dirección del GPS** (`https://<GPS_DOMAIN>`). Sin esa dirección ningún chofer puede iniciar turno.
 
 Es seguro repetirla: no sobrescribe `.env.prod`, la configuración ni las bases existentes.
 
@@ -98,17 +104,40 @@ Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y
 4. `docker compose --env-file .env.prod -f docker-compose.prod.yml run --rm odoo odoo -d <ODOO_DB> -u bus_tracking --stop-after-init`
 5. `docker compose --env-file .env.prod -f docker-compose.prod.yml up -d`
 
-Antes de la primera puesta en marcha real, fija las versiones de `ODOO_IMAGE`, `POSTGRES_IMAGE` y `TRACCAR_IMAGE` en `.env.prod` (por defecto Traccar usa `latest`), para que una actualización nunca ocurra por sorpresa.
+Antes de la primera puesta en marcha real, fija las versiones de `ODOO_IMAGE` y `POSTGRES_IMAGE` en `.env.prod`. Traccar ya viene fijado en `traccar/traccar:6.16.0` (la versión con la que se verificó el reenvío); prueba una nueva en desarrollo antes de cambiar `TRACCAR_IMAGE`.
+
+La versión 16.0.1.2.0 del módulo convierte a los choferes existentes en usuarios de portal y la 16.0.1.3.0 rellena la hora de los incidentes viejos; las dos corren solas en el paso 4.
+
+## Empezar de cero
+
+`scripts/reset-prod.sh` borra la base de Odoo, sus archivos y la base de Traccar, y vuelve a correr `init-prod.sh`. **Se pierde todo**: buses, rutas, turnos, posiciones y quejas. Antes de borrar pide escribir el nombre de la base (o `CONFIRM=<base>` sin terminal) y hace un respaldo con `backup.sh`. No lleva contraseñas escritas: las nuevas se generan y se muestran una vez. Sólo funciona con la base local.
+
+`scripts/bootstrap-traccar.sh` sirve si Traccar se reinstaló aparte y Odoo perdió sus credenciales: crea otro administrador con contraseña aleatoria y la guarda en Odoo.
+
+## Cambiar secretos
+
+Si un secreto se filtra (por ejemplo, quedó en un commit), cámbialo; borrarlo del historial no basta.
+
+| Secreto | Cómo se cambia |
+|---|---|
+| Contraseña del `admin` de Odoo | En Odoo: *Ajustes > Usuarios > Administrator > Cambiar contraseña*. Revisa en *Ajustes > Técnico > Registros* los accesos recientes. |
+| Contraseña maestra de Odoo | Genera otro hash como lo hace `init-prod.sh` y reemplaza `admin_passwd` en `config/odoo.prod.conf`; reinicia Odoo. |
+| `WEBHOOK_SECRET` | Cámbialo en `.env.prod` y en *Ajustes > Webhook secret* de Odoo al mismo valor; `docker compose ... up -d traccar odoo`. |
+| `DB_PASSWORD` / `TRACCAR_DB_PASSWORD` | `ALTER ROLE ... PASSWORD` en Postgres, luego el mismo valor en `.env.prod`, y `up -d`. |
+| Administrador de Traccar | `bootstrap-traccar.sh` no lo cambia si ya existe: cámbialo en el panel de Traccar por el proxy y guárdalo en los Ajustes de Odoo. |
+| Credencial QR de un chofer | *Choferes > chofer > Revocar credencial* y *Generar credencial QR*. |
 
 ## Choferes: usuarios, tokens y tabletas
 
-Cada chofer es un usuario interno de Odoo (`base.group_user` + `group_bus_driver`). No abre el panel por sí solo. La contraseña la restablece un gestor en Odoo.
+Cada chofer es un **usuario de portal** de Odoo (`base.group_portal` + `group_bus_driver`), creado desde *Flota > Choferes*: entra a la API de la tableta, pero no al panel de Odoo, ni ve contactos o usuarios. La contraseña la restablece un gestor en Odoo.
 
-La tableta no usa API keys de Odoo. Tras `/bus_tracking/driver/login` guarda un token hasheado (`bus.driver.token`, 30 días, cron de purga). Un 401 en la app borra el token local.
+La tableta no usa API keys de Odoo. Tras `/bus_tracking/driver/login` guarda un token (en Odoo sólo su huella; `bus.driver.token`, 30 días, cron de purga) en el almacén seguro de Android. Un 401 en la app borra el token local.
+
+La **credencial QR** (365 días) sólo sirve para pedir una sesión en `/bus_tracking/driver/login_badge`; no abre la API por sí sola y una sesión no puede renovarse por ese camino. Sólo los administradores la generan, la revocan o ven su enlace. La app sólo acepta servidores `https://` (o de la red local en desarrollo) y pide confirmar si un QR cambia el servidor.
 
 El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`).
 
-Si se pierde una tableta o hay que echar a alguien del turno: en el usuario o en Turnos, acción **Cerrar sesión de la tableta**. Revoca tokens y cierra el turno; el GPS de esa app se detiene en el próximo 401 o al cerrar sesión.
+Si se pierde una tableta o hay que echar a alguien del turno: en Turnos, acción **Cerrar sesión de la tableta**. Revoca las sesiones (no la credencial QR) y cierra el turno; la app apaga el GPS en la siguiente consulta y Odoo descarta cualquier posición de ese bus mientras no haya otro turno. Si se perdió también la credencial, revócala en *Choferes*.
 
 APK (sin Play Store):
 
