@@ -7,8 +7,9 @@ import { readLastSample, readLastSent } from '../src/gps/store';
 import { t, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, HIT, Txt } from '../src/ui/cabin';
-import { fonts, sizes } from '../src/ui/theme';
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
+import { fonts } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 const KINDS: { key: IncidentKind; label: Message }[] = [
@@ -21,6 +22,7 @@ const KINDS: { key: IncidentKind; label: Message }[] = [
 export default function IncidentScreen() {
   useLang();
   const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const [kind, setKind] = useState<IncidentKind | null>(null);
   const [note, setNote] = useState('');
@@ -49,16 +51,18 @@ export default function IncidentScreen() {
   }
 
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+    <Screen scroll>
       <View style={styles.head}>
-        <Txt bold size="title">
-          {t('actionProblem')}
-        </Txt>
+        <View style={styles.headText}>
+          <Txt bold size="title">
+            {t('actionProblem')}
+          </Txt>
+        </View>
         <Action label={t('backToShift')} onPress={() => router.back()} kind="quiet" />
       </View>
 
-      <View style={styles.body}>
-        <View style={styles.kinds} accessibilityRole="radiogroup" accessibilityLabel={t('incidentWhat')}>
+      <View style={[styles.body, !layout.wide && styles.bodyStack, { gap: layout.gap + 8 }]}>
+        <View style={[styles.kinds, { gap: layout.gap }]} accessibilityRole="radiogroup" accessibilityLabel={t('incidentWhat')}>
           <Txt size="small" dim>
             {t('incidentWhat')}
           </Txt>
@@ -75,7 +79,7 @@ export default function IncidentScreen() {
                 accessibilityState={{ checked: on }}
                 style={[
                   styles.kind,
-                  { backgroundColor: on ? palette.ink : palette.panel },
+                  { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel },
                 ]}
               >
                 <View style={[styles.radio, { borderColor: on ? palette.signal : palette.ink2 }]}>
@@ -102,7 +106,13 @@ export default function IncidentScreen() {
             multiline
             style={[
               styles.input,
-              { backgroundColor: palette.field, color: palette.ink, borderColor: palette.ink2 },
+              {
+                backgroundColor: palette.field,
+                color: palette.ink,
+                borderColor: palette.ink2,
+                fontSize: layout.sizes.body,
+                minHeight: layout.short ? 96 : 160,
+              },
             ]}
           />
           <Txt size="small" dim>
@@ -125,19 +135,17 @@ export default function IncidentScreen() {
             onPress={submit}
             kind="accent"
             disabled={busy || !kind}
-            style={styles.send}
+            style={layout.wide ? styles.send : undefined}
           />
         </View>
       </View>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    padding: 24,
-    gap: 20,
+  headText: {
+    flexShrink: 1,
   },
   head: {
     flexDirection: 'row',
@@ -148,14 +156,15 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     flexDirection: 'row',
-    gap: 24,
+  },
+  bodyStack: {
+    flexDirection: 'column',
+    flex: 0,
   },
   kinds: {
     flex: 1,
-    gap: 12,
   },
   kind: {
-    minHeight: HIT + 8,
     borderRadius: 8,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -180,11 +189,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   input: {
-    minHeight: 160,
     borderWidth: 2,
     borderRadius: 8,
     padding: 16,
-    fontSize: sizes.body,
     fontFamily: fonts.text,
     textAlignVertical: 'top',
   },
