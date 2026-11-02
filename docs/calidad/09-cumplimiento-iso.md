@@ -26,14 +26,14 @@ Ocho características y sus subcaracterísticas.
 | | Disponibilidad | No evaluado | Hay `/health` y healthchecks; no se midió en un servidor real |
 | | Tolerancia a fallos | Parcial | Cron de respaldo del webhook; sobrevive a errores de Traccar (`test_cron_survives_traccar_errors`); falla ante datos mal formados |
 | | Capacidad de recuperación | Cumple | Respaldo y restauración (en base paralela y completa) probados |
-| Seguridad | Confidencialidad | Parcial | Privacidad por diseño, contacto restringido y borrado a 90 días; sin 2FA ni límite de login |
-| | Integridad | Parcial | Restricciones únicas, `@api.constrains` en quejas, P6 y P7 correctos; coordenadas imposibles guardadas (DEF-008) |
+| Seguridad | Confidencialidad | Parcial | Privacidad por diseño, contacto restringido y borrado a 90 días, límite de login de la tableta, choferes de portal sin acceso al panel, credencial QR legible sólo por administradores y token de la tableta sólo en el almacén seguro (auditoría del 2-nov). En contra: una contraseña de producción quedó en el historial público (DEF-013, abierto) y no hay 2FA |
+| | Integridad | Parcial | Restricciones únicas (también nombre del bus), `@api.constrains` en quejas, paradas, color y posiciones; duplicados concurrentes sin error (DEF-019); posiciones de buses sin turno descartadas (DEF-017). Falta repetir la auditoría en vivo con el código nuevo |
 | | No repudio | No evaluado | |
 | | Responsabilidad (accountability) | No evaluado | Odoo guarda autor y fecha de cada registro; no se evaluó como control |
-| | Autenticidad | Parcial | Secreto del webhook en tiempo constante y login de Odoo; el identificador del celular es la única credencial del GPS |
+| | Autenticidad | Parcial | Secreto del webhook en tiempo constante (por URL, obsoleto), login de Odoo, permisos comprobados en el método y no sólo en la vista (DEF-011), credencial QR separada de la sesión (DEF-015) y la app sólo acepta servidores https o confirma el cambio; el identificador del celular sigue siendo la única credencial del GPS |
 | Mantenibilidad | Modularidad | Cumple | Un modelo y un controlador por responsabilidad |
 | | Reusabilidad | Parcial | `RateLimiter`, `TtlCache` y `geo` compartidos entre portal y quejas |
-| | Analizabilidad | Parcial | Bitácora y pruebas con nombres descriptivos; sin análisis estático |
+| | Analizabilidad | Parcial | Bitácora y pruebas con nombres descriptivos; flake8 con todas las reglas en el CI y chequeo de traducciones; sin pylint-odoo ni SonarQube |
 | | Modificabilidad | Cumple | Umbrales, marca, mapa y retención se cambian en Ajustes; cobertura de 93,8 % protege los cambios |
 | | Capacidad de ser probado | Cumple | 150 + 42 pruebas y la auditoría; los límites en memoria exigen reiniciar para medir |
 | Portabilidad | Adaptabilidad | Parcial | Configurable por Ajustes e idiomas por diccionario |
@@ -128,9 +128,9 @@ Autoevaluación contra las 22 áreas de proceso. **No es una evaluación SCAMPI.
 
 ## 5. Qué hace falta para subir de nivel
 
-1. Cerrar DEF-008 a DEF-010 y portar sus pruebas (Eficiencia, Fiabilidad, Integridad).
+1. Cerrar DEF-013 (push del historial limpio y cambio de la contraseña) y agregar una revisión de secretos en el CI (Confidencialidad).
 2. Medir uso de CPU y memoria, y repetir la carga con varios procesos (Eficiencia).
 3. Probar un celular y un Traccar reales y hacer pruebas de usabilidad con pasajeros (Validación, Usabilidad, Compatibilidad).
-4. Configurar flake8, pylint-odoo y SonarQube (Analizabilidad).
+4. Sumar pylint-odoo y SonarQube al flake8 que ya corre en el CI (Analizabilidad).
 5. Escribir una matriz requisito-prueba y nombrar a una persona de QA independiente (REQM y PPQA de CMMI).
 6. Plan de mitigación de riesgos (RSKM) y versionado semántico con notas de versión (Mantenimiento).

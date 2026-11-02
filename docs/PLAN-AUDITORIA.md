@@ -203,7 +203,7 @@ Tableta:
 - `chore: remove mailpit from the dev stack` (o configurarlo de verdad).
 - `feat: create drivers as portal users` (según decisión 2) con migración para los existentes y prueba de que un chofer no entra a `/web`.
 
-### Fase 8. `docs/actualizacion-auditoria` (DOC-01 a DOC-06)
+### Fase 8. `docs/actualizacion-auditoria` (DOC-01 a DOC-06) — hecha
 - README: modelos reales, menú *Choferes* y credencial QR, teselas CARTO, quitar Mailpit, `gps_url` como paso obligatorio de la puesta en marcha.
 - `GUIA-CHOFER.md`: qué pasa al revocar la tableta, fila "GPS esperando: el administrador no configuró la dirección del GPS".
 - `PRODUCCION.md`: scripts de reinicio y bootstrap, rotación de secretos, base local o Supabase.
