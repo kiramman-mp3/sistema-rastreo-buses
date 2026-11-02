@@ -1,73 +1,94 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Alert,
-  AppState,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, AppState, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { ApiError, NetworkError } from '../src/api/client';
-import { readLastSent } from '../src/gps/store';
-import { useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
-import { alertLabel, t } from '../src/i18n';
+import { calculateDistanceMeters, useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
+import { useGpsHealth } from '../src/gps/useGpsHealth';
+import { alertLabel, t, tf, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
+import { createMotionLock } from '../src/shift/motion';
 import { classifyStops } from '../src/shift/progress';
 import { useSession } from '../src/state/SessionContext';
-import { IncidentActions } from '../src/ui/IncidentActions';
-import { StopAlertCard } from '../src/ui/StopAlertCard';
-import { cockpitColors } from '../src/ui/theme';
+import { Action, GpsBadge, SosButton, Txt } from '../src/ui/cabin';
+import { StopStrip } from '../src/ui/StopStrip';
+import { useTheme } from '../src/ui/ThemeProvider';
+
+const GPS_LABEL: Record<string, Message> = {
+  sending: 'gpsSending',
+  saving: 'gpsSaving',
+  waiting: 'gpsWaiting',
+  off: 'gpsOff',
+};
+
+function localTime(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const when = new Date(iso);
+  return isNaN(when.getTime()) ? '' : `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+}
+
+function distance(meters: number | null): string | null {
+  if (meters === null) return null;
+  return meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
+}
 
 export default function ShiftScreen() {
   useLang();
+  const { palette, choice, setChoice } = useTheme();
   const session = useSession();
-  const { shift, vehicles, routes, driver, shiftState, routeMap } = session.snapshot;
+  const { shift, vehicles, routes, shiftState, routeMap } = session.snapshot;
   const bus = vehicles.find((item) => item.id === shift?.vehicle_id);
   const route = routes.find((item) => item.id === shift?.route_id);
-
+  const gps = useGpsHealth();
   const [stale, setStale] = useState(false);
-  const [busFix, setBusFix] = useState<{ lat: number; lon: number } | null>(null);
+  const [sosLocal, setSosLocal] = useState<'sending' | 'queued' | 'sent' | null>(null);
+
+  // A small state machine kept across renders; it only reads the last GPS sample.
+  const [lock] = useState(() => createMotionLock());
+  const locked = useMemo(() => lock(gps.speedKmh, gps.sampleAt, gps.readAt), [lock, gps.speedKmh, gps.sampleAt, gps.readAt]);
 
   const stops = useMemo(
     () => classifyStops(shiftState?.stops ?? [], shiftState?.next_stop_id ?? null),
     [shiftState?.stops, shiftState?.next_stop_id],
   );
+  const nextIndex = stops.findIndex((s) => s.status === 'next');
+  const nextStop = nextIndex >= 0 ? stops[nextIndex] : null;
+  const afterStop = nextIndex >= 0 ? stops[nextIndex + 1] ?? null : null;
+  const left = nextIndex >= 0 ? stops.length - nextIndex : 0;
 
-  const nextStop = useMemo(() => stops.find((s) => s.status === 'next') || null, [stops]);
-  const subsequentStops = useMemo(
-    () => stops.filter((s) => s.status === 'later'),
-    [stops],
+  const busFix = useMemo(
+    () => (gps.lat !== null && gps.lon !== null ? { lat: gps.lat, lon: gps.lon } : null),
+    [gps.lat, gps.lon],
   );
-  const alerts = shiftState?.alerts ?? [];
+  const { currentTime } = useCockpitTelemetry(busFix, null);
+  const nextCoords = routeMap?.stops.find((s) => s.id === nextStop?.id);
+  const meters = busFix && nextCoords ? calculateDistanceMeters(busFix.lat, busFix.lon, nextCoords.lat, nextCoords.lon) : null;
 
-  // Coords for next stop to calculate live distance
-  const nextStopId = nextStop?.id ?? null;
-  const routeStops = routeMap?.stops;
-  const nextStopCoords = useMemo(() => {
-    if (nextStopId === null || !routeStops) return null;
-    const found = routeStops.find((s) => s.id === nextStopId);
-    return found ? { lat: found.lat, lon: found.lon } : null;
-  }, [nextStopId, routeStops]);
+  const alert = (shiftState?.alerts ?? []).find((a) => a.state === 'open') ?? null;
 
-  const { currentTime, distanceFormatted } = useCockpitTelemetry(busFix, nextStopCoords);
+  const serverSos = shiftState?.sos ?? null;
+  let sosStatus: string | null = null;
+  if (serverSos?.seen_at) {
+    sosStatus = tf('sosSeen', { by: serverSos.seen_by ?? '', time: localTime(serverSos.seen_at) });
+  } else if (sosLocal === 'sending') {
+    sosStatus = t('sosSending');
+  } else if (sosLocal === 'queued') {
+    sosStatus = t('sosQueued');
+  } else if (serverSos || sosLocal === 'sent') {
+    sosStatus = t('sosSent');
+  }
 
   useFocusEffect(
     useCallback(() => {
       let live = true;
-      activateKeepAwakeAsync();
-
+      activateKeepAwakeAsync().catch(() => undefined);
       async function tick() {
         if (!live || AppState.currentState !== 'active') return;
         try {
           await session.pullState();
           if (!session.snapshot.routeMap) await session.loadRouteMap();
-          const last = await readLastSent();
-          if (live && last) setBusFix({ lat: last.lat, lon: last.lon });
           if (live) setStale(false);
         } catch (error) {
           if (error instanceof ApiError && error.code === 'no_shift') {
@@ -77,7 +98,6 @@ export default function ShiftScreen() {
           if (error instanceof NetworkError && live) setStale(true);
         }
       }
-
       tick();
       const id = setInterval(tick, 12_000);
       return () => {
@@ -104,319 +124,243 @@ export default function ShiftScreen() {
     ]);
   }
 
-  function openIncidentSheet() {
-    router.push('/incident');
-  }
-
-  async function handleTriggerSOS() {
+  async function fireSos() {
+    setSosLocal('sending');
     try {
-      await session.reportIncident({
-        kind: 'sos',
-        note: '',
-        lat: busFix?.lat ?? null,
-        lon: busFix?.lon ?? null,
-      });
-      Alert.alert('🚨 ALERTA SOS DISPARADA', 'Central de seguridad y operaciones notificada de emergencia.');
+      const result = await session.reportIncident({ kind: 'sos', note: '', lat: gps.lat, lon: gps.lon });
+      setSosLocal(result === 'queued' ? 'queued' : 'sent');
+      session.pullState().catch(() => undefined);
     } catch {
-      Alert.alert('Alerta SOS', 'Emergencia registrada localmente para retransmisión prioritaria.');
+      setSosLocal('queued');
     }
   }
 
-  return (
-    <View style={styles.cockpitPage}>
-      {/* Left Control & Telemetry Panel (Cockpit Rail) */}
-      <View style={styles.cockpitPanel}>
-        {/* Cockpit Top Header: Unit & System Time */}
-        <View style={styles.topHeader}>
-          <View style={styles.unitIdentityRow}>
-            <View style={styles.busBadge}>
-              <Text style={styles.busBadgeText}>
-                {bus?.name ?? ''}
-              </Text>
-            </View>
-            <View style={styles.routePill}>
-              <Text style={styles.routePillText} numberOfLines={1}>
-                {route ? `${route.code} · ${route.name}` : ''}
-              </Text>
-            </View>
-          </View>
+  const color = route?.color || palette.line;
+  const health = stale && gps.health === 'sending' ? 'saving' : gps.health;
 
-          <View style={styles.clockTelemetryWrap}>
-            <Text style={styles.digitalClock} accessibilityLabel={`Hora actual: ${currentTime}`}>
-              {currentTime || '--:--:--'}
-            </Text>
-            <View style={styles.gpsIndicatorRow}>
-              <View style={[styles.gpsDot, stale ? styles.gpsDotStale : styles.gpsDotLive]} />
-              <Text style={[styles.gpsText, stale && styles.gpsTextStale]}>
-                {stale ? 'GPS RECONECTANDO' : 'GPS ACTIVO'}
-              </Text>
-            </View>
+  return (
+    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+      {/* Header: bus and line, real GPS state, time, day or night */}
+      <View style={[styles.header, { backgroundColor: palette.panel }]}>
+        <View style={styles.identity}>
+          <View style={[styles.chip, { backgroundColor: color }]}>
+            <Txt bold size="body" color="#FFFFFF">
+              {route?.code ?? ''}
+            </Txt>
+          </View>
+          <View style={styles.identityText}>
+            <Txt bold size="body">
+              {bus?.name ?? ''}
+            </Txt>
+            <Txt size="small" dim lines={1}>
+              {route?.name ?? ''}
+            </Txt>
           </View>
         </View>
-
-        {/* Scrollable Ergonomic Cockpit Body */}
-        <ScrollView
-          style={styles.panelScroll}
-          contentContainerStyle={styles.panelScrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* 2. Immediate Stop Alert Card */}
-          <StopAlertCard
-            immediateStop={nextStop}
-            subsequentStops={subsequentStops}
-            distanceFormatted={distanceFormatted}
-          />
-
-          {/* Active Operational Alerts Banner */}
-          {alerts.length > 0 ? (
-            <View style={styles.alertsBox}>
-              <Text style={styles.alertsTitle}>ALERTAS OPERATIVAS ACTIVAS:</Text>
-              {alerts.map((alert) => (
-                <View key={alert.id} style={styles.alertRow}>
-                  <Text style={styles.alertIcon}>⚠️</Text>
-                  <Text style={styles.alertDetail}>
-                    {alertLabel(alert.kind)}
-                    {alert.detail ? ` · ${alert.detail}` : ''}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
-        </ScrollView>
-
-        {/* Quick Emergency / Incident Bar (Bottom Fixed Rail) */}
-        <View style={styles.bottomActionsRail}>
-          <IncidentActions
-            onReportTraffic={openIncidentSheet}
-            onTriggerSOS={handleTriggerSOS}
-            trafficLoading={false}
-          />
-
-          <View style={styles.auxiliaryRow}>
-            <Pressable
-              onPress={() => router.push('/gps')}
-              style={styles.auxBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Ver diagnóstico de telemetría GPS"
-            >
-              <Text style={styles.auxBtnText}>🛰️ DIAGNÓSTICO GPS</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={confirmEnd}
-              style={[styles.auxBtn, styles.endShiftBtn]}
-              accessibilityRole="button"
-              accessibilityLabel="Finalizar turno de conducción"
-            >
-              <Text style={styles.endShiftText}>🛑 FINALIZAR TURNO</Text>
-            </Pressable>
-          </View>
+        <View style={styles.headerRight}>
+          <Pressable
+            onPress={() => router.push('/gps')}
+            disabled={locked}
+            accessibilityRole="button"
+            accessibilityHint={t('gpsOpen')}
+            style={styles.gpsTap}
+          >
+            <GpsBadge health={health} label={tf(GPS_LABEL[health], { n: gps.queued })} />
+          </Pressable>
+          <Txt bold size="data">
+            {currentTime}
+          </Txt>
+          <Pressable
+            onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
+            onLongPress={() => setChoice('auto')}
+            accessibilityRole="button"
+            accessibilityLabel={palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+            style={[styles.mode, { borderColor: palette.ink2 }]}
+          >
+            <Txt bold size="small">
+              {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+            </Txt>
+            {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
+          </Pressable>
         </View>
       </View>
 
-      {/* Right Map Viewport */}
-      <View style={styles.mapViewport}>
-        <RouteMapView
-          route={routeMap}
-          bus={busFix}
-          nextStopId={shiftState?.next_stop_id ?? null}
-        />
-        <View style={styles.mapDriverWatermark}>
-          <Text style={styles.watermarkText}>
-            {driver?.name ?? ''}
-          </Text>
+      <View style={styles.body}>
+        {/* Left: where the bus goes next */}
+        <View style={styles.left}>
+          <Txt size="small" dim>
+            {t('cabinNext')}
+          </Txt>
+          <Txt bold size="stop" lines={2} fit>
+            {nextStop ? nextStop.name : t('noNextStop')}
+          </Txt>
+          {nextStop ? (
+            <Txt size="body" dim>
+              {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
+                .filter(Boolean)
+                .join(' · ')}
+            </Txt>
+          ) : null}
+          {afterStop ? (
+            <Txt size="body">
+              {t('cabinAfter')}: {afterStop.name}
+            </Txt>
+          ) : null}
+
+          <View style={styles.strip}>
+            <StopStrip stops={stops} color={color} />
+          </View>
+
+          {alert ? (
+            <View style={[styles.notice, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
+              <Txt bold size="body" color={palette.danger}>
+                {alertLabel(alert.kind)}
+              </Txt>
+              {alert.detail ? <Txt size="small">{alert.detail}</Txt> : null}
+            </View>
+          ) : null}
+
+          {sosStatus ? (
+            <View
+              style={[styles.notice, { borderColor: serverSos?.seen_at ? palette.ok : palette.danger }]}
+              accessibilityLiveRegion="assertive"
+            >
+              <Txt bold size="body" color={serverSos?.seen_at ? palette.ok : palette.danger}>
+                {sosStatus}
+              </Txt>
+            </View>
+          ) : null}
         </View>
+
+        {/* Right: the map */}
+        <View style={[styles.map, { backgroundColor: palette.panel }]}>
+          <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
+        </View>
+      </View>
+
+      {/* Bottom: three actions; only SOS works while the bus moves */}
+      {locked ? (
+        <View style={[styles.lockNote, { backgroundColor: palette.signal }]} accessibilityLiveRegion="polite">
+          <Txt bold size="body" color={palette.onSignal}>
+            {t('lockedMoving')}
+          </Txt>
+        </View>
+      ) : null}
+      <View style={styles.actions}>
+        <Action
+          label={t('actionProblem')}
+          sub={t('actionProblemSub')}
+          onPress={() => router.push('/incident')}
+          disabled={locked}
+          style={styles.actionWide}
+        />
+        <View style={styles.actionWide}>
+          <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />
+        </View>
+        <Action label={t('endShift')} onPress={confirmEnd} kind="quiet" disabled={locked} style={styles.actionNarrow} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  cockpitPage: {
+  page: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: cockpitColors.bg,
   },
-  cockpitPanel: {
-    width: 460,
-    backgroundColor: cockpitColors.surface,
-    borderRightWidth: 2,
-    borderRightColor: cockpitColors.surfaceBorder,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-  },
-  topHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 14,
-    borderBottomWidth: 1.5,
-    borderBottomColor: cockpitColors.surfaceBorder,
-    backgroundColor: cockpitColors.surfaceElevated,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-  },
-  unitIdentityRow: {
-    flex: 1,
-    gap: 6,
-  },
-  busBadge: {
-    backgroundColor: cockpitColors.brandUTA,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#B91C1C',
-  },
-  busBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  routePill: {
-    marginTop: 2,
-  },
-  routePillText: {
-    color: cockpitColors.textMuted,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  clockTelemetryWrap: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  digitalClock: {
-    fontFamily: 'monospace',
-    color: cockpitColors.textBright,
-    fontSize: 26,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  gpsIndicatorRow: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  gpsDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  gpsDotLive: {
-    backgroundColor: cockpitColors.onTime,
-  },
-  gpsDotStale: {
-    backgroundColor: cockpitColors.delayed,
-  },
-  gpsText: {
-    color: cockpitColors.onTime,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  gpsTextStale: {
-    color: cockpitColors.delayed,
-  },
-  panelScroll: {
-    flex: 1,
-  },
-  panelScrollContent: {
-    padding: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     gap: 16,
   },
-  alertsBox: {
-    backgroundColor: '#2A1215',
-    borderWidth: 1.5,
-    borderColor: '#DC2626',
-    borderRadius: 14,
-    padding: 14,
-    gap: 8,
-  },
-  alertsTitle: {
-    color: '#F87171',
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 0.6,
-  },
-  alertRow: {
+  identity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 14,
+    flexShrink: 1,
   },
-  alertIcon: {
-    fontSize: 16,
+  identityText: {
+    flexShrink: 1,
   },
-  alertDetail: {
-    flex: 1,
-    color: '#FECACA',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  bottomActionsRail: {
-    padding: 16,
-    borderTopWidth: 1.5,
-    borderTopColor: cockpitColors.surfaceBorder,
-    backgroundColor: cockpitColors.surfaceElevated,
-    gap: 12,
-  },
-  auxiliaryRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  auxBtn: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: cockpitColors.surfaceBorder,
-    minHeight: 46,
-    borderRadius: 10,
+  chip: {
+    minWidth: 56,
+    height: 44,
+    paddingHorizontal: 10,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  auxBtnText: {
-    color: cockpitColors.textMuted,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
   },
-  endShiftBtn: {
-    backgroundColor: 'rgba(220, 38, 38, 0.1)',
-    borderColor: 'rgba(220, 38, 38, 0.4)',
+  gpsTap: {
+    minHeight: 48,
+    justifyContent: 'center',
   },
-  endShiftText: {
-    color: '#F87171',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  mode: {
+    minHeight: 48,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  mapViewport: {
+  modeDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  body: {
     flex: 1,
-    position: 'relative',
-    backgroundColor: '#0A0E14',
+    flexDirection: 'row',
+    gap: 20,
+    paddingHorizontal: 24,
+    paddingTop: 20,
   },
-  mapDriverWatermark: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    backgroundColor: 'rgba(11, 15, 23, 0.85)',
-    borderWidth: 1,
-    borderColor: cockpitColors.surfaceBorder,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  left: {
+    flex: 4,
+    gap: 8,
+  },
+  strip: {
+    marginTop: 18,
+    marginBottom: 6,
+  },
+  notice: {
+    marginTop: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderLeftWidth: 8,
+    borderWidth: 2,
+    gap: 4,
+  },
+  map: {
+    flex: 6,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  lockNote: {
+    marginHorizontal: 24,
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 8,
   },
-  watermarkText: {
-    color: cockpitColors.textMuted,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  actions: {
+    flexDirection: 'row',
+    gap: 16,
+    padding: 24,
+    paddingTop: 16,
+  },
+  actionWide: {
+    flex: 3,
+  },
+  actionNarrow: {
+    flex: 2,
   },
 });
