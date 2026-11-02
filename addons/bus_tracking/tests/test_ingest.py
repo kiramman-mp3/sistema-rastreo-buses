@@ -10,6 +10,10 @@ from .common import STOPS, BusCase, traccar_position
 @tagged('post_install', '-at_install')
 class TestIngest(BusCase):
 
+    def setUp(self):
+        super().setUp()
+        self.env['ir.config_parameter'].set_param('bus_tracking.accept_without_shift', '1')
+
     def test_position_is_stored_and_speed_converted(self):
         rec = self.bus._apply_position(
             traccar_position(7, '2026-10-26T12:00:00.000+00:00', -33.47, -70.62, speed_knots=10.0))

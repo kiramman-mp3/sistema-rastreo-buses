@@ -13,6 +13,10 @@ class ResConfigSettings(models.TransientModel):
     bus_gps_url = fields.Char(
         string="GPS address for the phones", config_parameter='bus_tracking.gps_url',
         help="Public HTTPS address the drivers' phones send their position to, e.g. https://gps.example.com.")
+    bus_accept_without_shift = fields.Boolean(
+        string="Accept positions without a shift", config_parameter='bus_tracking.accept_without_shift',
+        help="Only for tests with curl or a GPS without the app. Normally a bus only reports while a "
+             "driver has it on an open shift.")
     traccar_webhook_secret = fields.Char(string="Webhook secret", config_parameter='bus_tracking.webhook_secret')
     bus_position_retention_days = fields.Integer(
         string="Keep positions (days)", config_parameter='bus_tracking.retention_days', default=30,
