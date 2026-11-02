@@ -10,174 +10,230 @@
         </svg>
     </template>
 
-    <!-- Shared Institutional Navigation Header -->
-    <template id="portal_header" name="UTA Public Portal Header">
-        <header class="site-header">
-            <div class="wrap header-inner">
-                <a class="header-brand marca" href="/" t-attf-aria-label="#{brand}, inicio">
+    <!-- Shared head of every public page. The inline line only marks that scripts run, so
+         entrances can hide content without ever hiding it from a browser without script. -->
+    <template id="site_head" name="Public site head">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+        <meta name="theme-color" content="#F1F3F2"/>
+        <meta name="description" t-att-content="s['home_lead']"/>
+        <link rel="preload" href="/bus_tracking/static/fonts/atkinson-400.woff2" as="font" type="font/woff2" crossorigin=""/>
+        <link rel="preload" href="/bus_tracking/static/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin=""/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/site.css?v=#{asset_v}"/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/pages.css?v=#{asset_v}"/>
+        <script>document.documentElement.classList.add('js');</script>
+    </template>
+
+    <template id="portal_header" name="Public site header">
+        <a class="saltar" href="#contenido" t-esc="s['skip']"/>
+        <header class="cabecera">
+            <div class="marco">
+                <a class="marca" href="/" t-att-aria-label="brand">
                     <t t-call="bus_tracking.brand_mark"/>
-                    <div class="brand-text">
-                        <span class="brand-title"><t t-esc="brand"/></span>
-                        <span class="brand-sub">Universidad Técnica de Ambato</span>
-                    </div>
+                    <span t-esc="brand"/>
                 </a>
-                <nav class="header-nav" aria-label="Navegación principal">
-                    <a t-attf-class="nav-item #{'active' if active_nav == 'inicio' else ''}" href="/">Inicio</a>
-                    <a t-attf-class="nav-item #{'active' if active_nav == 'rutas' else ''}" href="/rutas">Rutas y Paradas</a>
-                    <a class="nav-item" href="/#nosotros">Sobre el Servicio</a>
-                    <a class="nav-item" href="/#novedades">Novedades</a>
-                    <a t-attf-class="nav-item #{'active' if active_nav == 'quejas' else ''}" href="/quejas">Atención / Quejas</a>
+                <nav t-att-aria-label="s['nav_lines']">
+                    <a href="/rutas" t-att-aria-current="'page' if active_nav == 'rutas' else None" t-esc="s['nav_lines']"/>
+                    <a href="/quejas" t-att-aria-current="'page' if active_nav == 'quejas' else None" t-esc="s['nav_write']"/>
                 </nav>
-                <div class="header-actions">
-                    <form t-if="languages and len(languages) &gt; 1" method="get" class="lang-form header-lang-form">
-                        <t t-foreach="languages.items()" t-as="entry">
-                            <button type="submit" name="lang" t-att-value="entry[0]"
-                                    t-attf-class="lang #{'activa' if entry[0] == lang else ''}"
-                                    t-att-lang="entry[0]" t-att-aria-current="'true' if entry[0] == lang else None"
-                                    t-esc="entry[1]"/>
-                        </t>
-                    </form>
-                    <a class="btn btn-header-login" href="/web/login">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
-                        </svg>
-                        <span>Ingreso del personal</span>
-                    </a>
-                </div>
+                <form t-if="languages and len(languages) &gt; 1" method="get" class="idiomas">
+                    <t t-foreach="languages.items()" t-as="entry">
+                        <button type="submit" name="lang" t-att-value="entry[0]" t-att-lang="entry[0]"
+                                t-att-aria-label="entry[1]" t-att-aria-current="'true' if entry[0] == site_lang else None">
+                            <span class="largo" t-esc="entry[1]"/><span class="corto" aria-hidden="true" t-esc="entry[0]"/>
+                        </button>
+                    </t>
+                </form>
             </div>
         </header>
     </template>
 
-    <!-- Shared Dark Institutional Footer -->
-    <template id="portal_footer" name="Public portal footer">
-        <footer class="footer-wrap">
-            <div class="wrap footer-columns-grid">
-                <div class="footer-nav-col">
-                    <span class="ribbon-name"><t t-esc="brand"/></span>
-                    <ul class="footer-links-list">
-                        <li><a href="/rutas">Rutas</a></li>
-                        <li><a href="/quejas">Escribir a transporte</a></li>
-                        <li t-if="contact and contact['phone']"><a t-attf-href="tel:#{contact['phone_href']}" t-esc="contact['phone']"/></li>
-                        <li t-if="contact and contact['email']"><a t-attf-href="mailto:#{contact['email']}" t-esc="contact['email']"/></li>
-                    </ul>
+    <template id="portal_footer" name="Public site footer">
+        <footer class="pie">
+            <div class="marco">
+                <div class="fila">
+                    <span t-esc="s['footer_what']"/>
+                    <nav t-att-aria-label="s['footer_what']">
+                        <a href="/rutas" t-esc="s['nav_lines']"/>
+                        <a href="/quejas" t-esc="s['nav_write']"/>
+                        <a t-if="contact and contact['phone']" t-attf-href="tel:#{contact['phone_href']}" t-esc="contact['phone']"/>
+                        <a t-if="contact and contact['email']" t-attf-href="mailto:#{contact['email']}" t-esc="contact['email']"/>
+                        <a href="/web/login" t-esc="s['staff']"/>
+                    </nav>
+                    <span class="fin"><t t-esc="datetime.date.today().year"/> · <t t-esc="brand"/></span>
                 </div>
+                <p class="creditos">
+                    <t t-esc="s['photos_credit']"/>
+                    <a href="https://commons.wikimedia.org/wiki/File:Ambato_Avenida_Atahualpa_seen_from_the_entrance_to_Mall_de_los_Andes.jpg" rel="noopener">Ymblanter</a> (CC BY-SA 4.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:VIENDO_AL_INTERCAMBIADOR_HUACHI_GRANDE_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a> (CC BY 3.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:Fachada_nocturna_del_Terminal_Terrestre_Sur_de_Ambato.jpg" rel="noopener">Martín Vasco</a> (CC BY-SA 4.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:COLISEO_UNIVERSITARIO_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a> (CC BY 3.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:Vista_panor%C3%A1mica_de_la_ciudad_de_Ambato,_Tungurahua,_Ecuador.jpg" rel="noopener">Martín Vasco</a> (CC BY-SA 4.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:Volc%C3%A1n_Tungurahua_Riobamba_-_Ecuador.jpg" rel="noopener">David Torres Costales</a> (CC BY-SA 3.0).
+                </p>
             </div>
         </footer>
     </template>
 
+    <!-- A line as a list of stops. Works without script (a plain list); site.js turns each stop into
+         a "my stop" button and places the live buses between the stops. -->
+    <template id="stop_line" name="Stop line">
+        <ol class="linea" t-attf-style="--c: #{line['color']}" t-att-data-linea="line['code']"
+            t-att-data-stops="line['stops_json']" t-att-data-i18n="line_i18n">
+            <li t-foreach="line['stops']" t-as="stop_name">
+                <span class="parada"><span class="punto"/><span class="nombre" t-esc="stop_name"/></span>
+            </li>
+        </ol>
+    </template>
+
     <template id="landing" name="Bus Tracking landing">
         <t t-call="web.layout">
-            <t t-set="title"><t t-esc="brand"/> | Universidad Técnica de Ambato</t>
-            <t t-set="body_classname" t-value="'o_bus_landing'"/>
-            <t t-set="head">
-                <meta name="description" content="Portal oficial de transporte de la Universidad Técnica de Ambato (UTA). Monitoreo en tiempo real de rutas y paradas universitarias."/>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
-                <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
-            </t>
-
-            <!-- Main Navigation Header -->
-            <t t-set="active_nav" t-value="'inicio'"/>
+            <t t-set="title"><t t-esc="brand"/> · <t t-esc="s['home_title']"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site o_bus_landing'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-call="bus_tracking.portal_header"/>
 
-            <main>
-                <!-- Hero Section Empático y Humano -->
-                <section class="hero-section">
-                    <div class="wrap hero-wrap">
-                        <div class="hero-text-block">
-                            <!-- Live Network Status Pill Bar -->
-                            <div class="hero-network-banner">
-                                <span class="network-pulse"></span>
-                                <span class="network-status-text">
-                                    <strong>Red Operativa:</strong>
-                                    <t t-if="total_active_buses">
-                                        <t t-esc="total_active_buses"/> buses en servicio regular
-                                    </t>
-                                    <t t-else="">
-                                        Ahora no hay buses con señal
-                                    </t>
+            <main id="contenido">
+                <!-- First screen: the question, the stop search, and the busiest line working. -->
+                <section class="marco inicio-hero">
+                    <div class="hero-texto">
+                        <h1 class="entra" t-esc="s['home_title']"/>
+                        <p class="lead entra" style="--i: 1" t-esc="s['home_lead']"/>
+                        <form action="/rutas" method="get" role="search" class="buscador entra" style="--i: 2">
+                            <label class="sr-only" for="buscar-parada" t-esc="s['search_label']"/>
+                            <input type="search" id="buscar-parada" name="q" list="paradas" autocomplete="off"
+                                   t-att-placeholder="s['search_placeholder']"/>
+                            <button class="boton" type="submit" t-esc="s['search_go']"/>
+                        </form>
+                        <datalist id="paradas">
+                            <option t-foreach="stop_names" t-as="name" t-att-value="name"/>
+                        </datalist>
+                        <p class="total entra" style="--i: 3">
+                            <t t-if="total_buses == 1" t-esc="s['buses_now_one']"/>
+                            <t t-elif="total_buses" t-esc="s['buses_now_total'].format(n=total_buses)"/>
+                            <t t-else="" t-esc="s['buses_now_none']"/>
+                        </p>
+                    </div>
+
+                    <div t-if="featured" class="fragmento entra" style="--i: 2" data-ui="">
+                        <div class="fragmento-cabeza">
+                            <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
+                            <a class="fragmento-nombre" t-attf-href="/rutas/#{featured['code']}" t-esc="featured['name']"/>
+                            <span class="vivo" data-vivo="" t-esc="s['searching']"/>
+                        </div>
+                        <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['featured_hint']"/>
+                        <t t-set="line" t-value="featured"/>
+                        <t t-call="bus_tracking.stop_line"/>
+                    </div>
+                    <div t-else="" class="aviso">
+                        <strong t-esc="s['no_routes']"/>
+                    </div>
+                </section>
+
+                <!-- Every line, as two-ended rows: name on the left, buses now on the right. -->
+                <section class="marco inicio-lineas" id="lineas" aria-labelledby="titulo-lineas">
+                    <h2 id="titulo-lineas" class="entra" t-esc="s['lines_title']"/>
+                    <ul class="filas">
+                        <li t-foreach="lines" t-as="l" class="entra" t-attf-style="--i: #{l_index}">
+                            <a class="fila" t-attf-href="/rutas/#{l['code']}">
+                                <span class="chip-linea" t-attf-style="background: #{l['color']}" t-esc="l['code']"/>
+                                <span class="fila-nombre">
+                                    <strong t-esc="l['name']"/>
+                                    <span t-if="l['stops']" class="fila-sub">
+                                        <t t-esc="s['line_from_to'].format(a=l['stops'][0], b=l['stops'][-1])"/> ·
+                                        <t t-esc="s['line_stops_n'].format(n=len(l['stops']))"/>
+                                    </span>
                                 </span>
-                                <a href="/rutas" class="network-banner-link">Ver mapa en vivo →</a>
+                                <span t-attf-class="fila-valor #{'con-buses' if l['buses'] else ''}"
+                                      t-esc="s['buses_in_service'].format(n=l['buses']) if l['buses'] else s['no_service']"/>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- How it works: three statements; the fragment beside them changes with each one. -->
+                <section t-if="featured" class="marco inicio-como" aria-labelledby="titulo-como">
+                    <h2 id="titulo-como" t-esc="s['how_title']"/>
+                    <div class="como">
+                        <ol class="como-pasos">
+                            <li data-paso="1"><p class="frase" t-esc="s['how_1']"/><p t-esc="s['how_1b']"/></li>
+                            <li data-paso="2"><p class="frase" t-esc="s['how_2']"/><p t-esc="s['how_2b']"/></li>
+                            <li data-paso="3"><p class="frase" t-esc="s['how_3']"/><p t-esc="s['how_3b']"/></li>
+                        </ol>
+                        <div class="como-escenario" data-ui="" data-estado="1" aria-hidden="true">
+                            <div class="fragmento-cabeza">
+                                <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
+                                <span class="fragmento-nombre" t-esc="featured['name']"/>
                             </div>
-
-                            <h1 class="hero-headline">¿Dónde viene tu bus?</h1>
-                            <p class="hero-subtext">Consulta recorridos, horarios y buses en tiempo real sin complicaciones. Conectividad puntual entre facultades y campus universitarios para toda la comunidad académica.</p>
-
-                            <!-- Predictive Quick Search Box -->
-                            <div class="hero-search-card">
-                                <form action="/rutas" method="get" class="hero-search-form">
-                                    <div class="search-input-group">
-                                        <span class="search-field-icon">🔍</span>
-                                        <input type="text" name="q" id="hero-stop-search"
-                                               class="hero-search-input"
-                                               placeholder="¿A qué facultad o parada te diriges? Ej. Biblioteca, Huachi..."
-                                               list="stops-datalist" autocomplete="off"/>
-                                        <datalist id="stops-datalist">
-                                            <t t-foreach="stops" t-as="st">
-                                                <option t-att-value="st"/>
-                                            </t>
-                                        </datalist>
-                                        <button type="submit" class="btn btn-search-submit">
-                                            <span>Consultar</span>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <path d="M5 12h14M12 5l7 7-7 7"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </form>
-
-                            </div>
+                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus='El bus' if site_lang != 'en' else 'The bus', n=2)"/>
+                            <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
+                                <t t-foreach="featured['stops'][:5]" t-as="stop_name">
+                                    <li t-if="stop_name_index == 1" class="demo-bus">
+                                        <span class="bus-en-linea"><span class="ficha"><t t-call="bus_tracking.bus_glyph"/></span></span>
+                                    </li>
+                                    <li t-att-class="'demo-mia' if stop_name_index == 3 else None">
+                                        <span class="parada" t-att-aria-pressed="'true' if stop_name_index == 3 else None"
+                                              t-att-data-mia="s['mine_tag']">
+                                            <span class="punto"/><span class="nombre" t-esc="stop_name"/>
+                                        </span>
+                                    </li>
+                                </t>
+                            </ol>
                         </div>
                     </div>
                 </section>
 
-                <!-- Section "Líneas Destacadas de la Red" -->
-                <section class="products-section" id="rutas">
-                    <div class="wrap">
-                        <div class="section-badge-header">
-                            <span class="section-wings">人</span>
-                            <span class="section-badge-text">RED DE TRANSPORTE EN VIVO</span>
-                            <span class="section-wings">人</span>
-                        </div>
-                        <h2 class="section-main-title">Conectividad directa entre los campus de Ambato</h2>
-                        <p class="section-subtext">Nuestra flota cubre los corredores universitarios neurálgicos, garantizando traslados rápidos, seguros y predecibles para estudiantes, docentes y personal.</p>
-
-                        <div class="products-grid">
-                            <t t-if="routes">
-                                <article t-foreach="routes" t-as="r" class="product-card route-live-card">
-                                    <div class="product-top-badge" t-attf-style="background-color: #{r['color'] or '#8B1D24'};">
-                                        <span class="route-card-code" t-esc="r['code']"/>
-                                        <span class="route-card-live-dot"></span>
-                                    </div>
-                                    <div class="product-body">
-                                        <div class="route-service-indicator">
-                                            <t t-if="r['buses_count']">
-                                                <span class="service-dot ok"></span>
-                                                <span class="service-text"><t t-esc="r['buses_count']"/> buses en servicio activo</span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="service-dot regular"></span>
-                                                <span class="service-text">Servicio programado</span>
-                                            </t>
-                                        </div>
-                                        <h3 class="product-title" t-esc="r['name']"/>
-                                                                                <div class="route-card-footer">
-                                            <a t-attf-href="/rutas/#{r['code']}" class="product-link">
-                                                <span>Ver recorrido y paradas</span>
-                                                <span class="link-arrow">→</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </article>
-                            </t>
-                        </div>
+                <!-- Photographs of the city, hung on the line like stops. -->
+                <section class="inicio-ciudad" aria-labelledby="titulo-ciudad">
+                    <div class="marco">
+                        <h2 id="titulo-ciudad" class="entra" t-esc="s['city_title']"/>
+                        <p class="entra" style="--i: 1" t-esc="s['city_lead']"/>
                     </div>
+                    <ol class="marco ciudad">
+                        <t t-foreach="[('av-atahualpa-mall', 'cap_atahualpa'), ('huachi-grande', 'cap_huachi'), ('terminal-sur', 'cap_terminal'), ('uta-edificio', 'cap_uta'), ('ambato-vista', 'cap_vista'), ('tungurahua', 'cap_tungurahua')]" t-as="photo">
+                            <li class="entra" t-attf-style="--i: #{photo_index}">
+                                <figure>
+                                    <img t-attf-src="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp"
+                                         t-attf-srcset="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/ambato/#{photo[0]}-1200.webp 1200w"
+                                         sizes="(min-width: 900px) 33vw, 80vw" loading="lazy" decoding="async"
+                                         t-att-alt="s[photo[1]]"/>
+                                    <figcaption><span class="punto"/><t t-esc="s[photo[1]]"/></figcaption>
+                                </figure>
+                            </li>
+                        </t>
+                    </ol>
                 </section>
 
+                <!-- One field: start a message to the transport team. -->
+                <section class="marco inicio-escribir" aria-labelledby="titulo-escribir">
+                    <form action="/quejas" method="get" class="escribir">
+                        <h2 id="titulo-escribir"><span class="suave" t-esc="s['write_q1']"/> <t t-esc="s['write_q2']"/></h2>
+                        <label class="sr-only" for="escribir-texto" t-esc="s['write_field']"/>
+                        <div class="buscador grande">
+                            <input type="text" id="escribir-texto" name="texto" maxlength="300"
+                                   t-att-placeholder="s['write_placeholder']" aria-describedby="escribir-nota"/>
+                            <button class="boton" type="submit" t-esc="s['write_go']"/>
+                        </div>
+                        <p id="escribir-nota" class="nota" t-esc="s['write_note']"/>
+                    </form>
+                </section>
             </main>
 
-            <!-- Dark Institutional Footer -->
             <t t-call="bus_tracking.portal_footer"/>
+            <script t-attf-src="/bus_tracking/static/src/portal/site.js?v=#{asset_v}" defer="defer"></script>
         </t>
+    </template>
+
+    <!-- The small bus drawn inside a chip on the line: a front view, no icon font needed. -->
+    <template id="bus_glyph">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+            <rect x="3" y="2" width="14" height="14" rx="3" fill="currentColor"/>
+            <rect x="5" y="4.5" width="10" height="5" rx="1" fill="#172025" opacity="0.55"/>
+            <circle cx="7" cy="12.5" r="1.3" fill="#172025" opacity="0.55"/>
+            <circle cx="13" cy="12.5" r="1.3" fill="#172025" opacity="0.55"/>
+            <rect x="5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/>
+            <rect x="12.5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/>
+        </svg>
     </template>
 </odoo>
