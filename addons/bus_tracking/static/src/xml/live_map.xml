@@ -1,43 +1,191 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="bus_tracking.LiveMap" owl="1">
-        <div class="o_bus_live_map d-flex">
-            <div class="o_bus_sidebar d-flex flex-column border-end bg-view">
-                <div class="p-2 border-bottom">
-                    <select class="form-select" t-on-change="onRouteChange">
-                        <option value="">All routes</option>
-                        <option t-foreach="state.routes" t-as="route" t-key="route.id"
-                                t-att-value="route.id" t-esc="route.code + ' · ' + route.name"/>
-                    </select>
-                    <button t-if="state.pathKey" class="btn btn-secondary btn-sm mt-2 w-100" t-on-click="resetPaths">
-                        Reset (show all routes)
-                    </button>
-                    <div t-if="state.error" class="text-danger small mt-1" t-esc="state.error"/>
+        <div class="o_bus_live_map">
+            <!-- Fullscreen map canvas -->
+            <div class="o_bus_map" t-ref="map"/>
+
+            <!-- Floating Top HUD -->
+            <div class="o_bus_hud_top">
+                <div class="o_bus_hud_inner">
+                    <!-- Brand & Route Filter -->
+                    <div class="o_bus_hud_section o_bus_hud_route">
+                        <span class="o_bus_hud_label">Línea:</span>
+                        <select class="o_bus_hud_select" t-on-change="onRouteChange">
+                            <option value="">Todas las rutas</option>
+                            <option t-foreach="state.routes" t-as="route" t-key="route.id"
+                                    t-att-value="route.id" t-esc="route.code + ' · ' + route.name"/>
+                        </select>
+                        <button t-if="state.pathKey" class="o_bus_hud_btn_subtle ms-2" t-on-click="resetPaths" title="Restablecer vista general">
+                            <i class="fa fa-undo me-1"/> Trazado completo
+                        </button>
+                    </div>
+
+                    <div class="o_bus_hud_divider"/>
+
+                    <!-- Quick Status Filters -->
+                    <div class="o_bus_hud_section o_bus_hud_filters">
+                        <button t-attf-class="o_bus_pill #{state.statusFilter == 'all' ? 'active' : ''}"
+                                t-on-click="() => this.setStatusFilter('all')">
+                            Todos <span class="o_bus_pill_badge" t-esc="state.vehicles.length"/>
+                        </button>
+                        <button t-attf-class="o_bus_pill #{state.statusFilter == 'moving' ? 'active' : ''}"
+                                t-on-click="() => this.setStatusFilter('moving')">
+                            <span class="o_bus_dot ok"/> En ruta <span class="o_bus_pill_badge" t-esc="movingCount"/>
+                        </button>
+                        <button t-attf-class="o_bus_pill #{state.statusFilter == 'stopped' ? 'active' : ''}"
+                                t-on-click="() => this.setStatusFilter('stopped')">
+                            <span class="o_bus_dot warn"/> Detenidos
+                        </button>
+                        <button t-if="delayedCount > 0"
+                                t-attf-class="o_bus_pill #{state.statusFilter == 'delayed' ? 'active alert' : 'alert'}"
+                                t-on-click="() => this.setStatusFilter('delayed')">
+                            <span class="o_bus_dot danger"/> Alertas <span class="o_bus_pill_badge" t-esc="delayedCount"/>
+                        </button>
+                    </div>
+
+                    <div class="o_bus_hud_divider d-none d-lg-block"/>
+
+                    <!-- Live Sync Indicator & Actions -->
+                    <div class="o_bus_hud_section o_bus_hud_meta ms-auto">
+                        <div class="o_bus_sync_indicator">
+                            <span class="o_bus_sync_pulse"/>
+                            <span class="o_bus_sync_text" t-esc="state.lastSyncFormatted"/>
+                        </div>
+                        <button class="o_bus_hud_icon_btn" t-on-click="fitAll" title="Enfocar toda la flota">
+                            <i class="fa fa-crosshairs"/>
+                        </button>
+                        <button t-attf-class="o_bus_hud_icon_btn #{state.sidebarOpen ? 'active' : ''}"
+                                t-on-click="toggleSidebar" title="Mostrar/ocultar lista de unidades">
+                            <i class="fa fa-bars"/>
+                        </button>
+                    </div>
                 </div>
-                <div class="o_bus_list flex-grow-1 overflow-auto">
-                    <div t-if="!filteredVehicles.length" class="p-3 text-muted">No positions yet.</div>
+
+                <div t-if="state.error" class="o_bus_hud_error">
+                    <i class="fa fa-exclamation-triangle me-2"/>
+                    <span t-esc="state.error"/>
+                </div>
+            </div>
+
+            <!-- Floating Selected Vehicle Card -->
+            <div t-if="selectedVehicle" class="o_bus_selected_card">
+                <div class="o_bus_card_header">
+                    <div class="d-flex align-items-center">
+                        <div class="o_bus_card_icon" t-attf-style="background-color: #{selectedVehicle.color || '#8B1D24'};">
+                            <i class="fa fa-bus"/>
+                        </div>
+                        <div class="ms-2">
+                            <div class="o_bus_card_title" t-esc="selectedVehicle.name"/>
+                            <div class="o_bus_card_sub">
+                                <span class="badge text-bg-light border" t-esc="selectedVehicle.plate or 'Sin placa'"/>
+                                <span class="ms-1" t-if="selectedVehicle.route_name" t-esc="'· ' + selectedVehicle.route_name"/>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="o_bus_card_close" t-on-click="closeSelectedCard">
+                        <i class="fa fa-times"/>
+                    </button>
+                </div>
+
+                <div class="o_bus_card_body">
+                    <div class="o_bus_stat_grid">
+                        <div class="o_bus_stat_item">
+                            <span class="o_bus_stat_label">Velocidad</span>
+                            <span class="o_bus_stat_val"><t t-esc="selectedVehicle.speed"/> <small>km/h</small></span>
+                        </div>
+                        <div class="o_bus_stat_item">
+                            <span class="o_bus_stat_label">Estado</span>
+                            <span class="o_bus_stat_val">
+                                <span t-attf-class="o_bus_dot #{selectedVehicle.connected ? 'ok' : 'danger'}"/>
+                                <t t-esc="movementLabel(selectedVehicle.status)"/>
+                            </span>
+                        </div>
+                        <div class="o_bus_stat_item">
+                            <span class="o_bus_stat_label">Conductor</span>
+                            <span class="o_bus_stat_val text-truncate" t-esc="selectedVehicle.driver or 'No asignado'"/>
+                        </div>
+                        <div class="o_bus_stat_item">
+                            <span class="o_bus_stat_label">Parada cercana</span>
+                            <span class="o_bus_stat_val text-truncate" t-esc="selectedVehicle.stop or 'En trayecto'"/>
+                        </div>
+                    </div>
+
+                    <div t-if="selectedVehicle.alerts.length" class="o_bus_card_alerts mt-2">
+                        <span t-foreach="selectedVehicle.alerts" t-as="kind" t-key="kind"
+                              class="badge text-bg-danger me-1">
+                            <i class="fa fa-warning me-1"/> <t t-esc="state.alertLabels[kind] or kind"/>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="o_bus_card_actions">
+                    <button class="btn btn-sm btn-outline-secondary flex-grow-1 me-2"
+                            t-on-click="() => this.selectVehicle(selectedVehicle)">
+                        <i class="fa fa-map-marker me-1"/> Enfocar unidad
+                    </button>
+                    <button class="btn btn-sm btn-primary flex-grow-1"
+                            t-on-click="() => this.openVehicleForm(selectedVehicle.id)">
+                        <i class="fa fa-external-link me-1"/> Ver registro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Floating Collapsible Fleet Drawer -->
+            <div t-attf-class="o_bus_fleet_drawer #{state.sidebarOpen ? 'is-open' : ''}">
+                <div class="o_bus_drawer_header">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 fw-bold">Flota Activa</h6>
+                        <span class="badge text-bg-secondary" t-esc="filteredVehicles.length + ' de ' + state.vehicles.length"/>
+                    </div>
+                    <div class="o_bus_search_input_wrap">
+                        <i class="fa fa-search o_bus_search_icon"/>
+                        <input type="text" class="o_bus_search_input"
+                               placeholder="Buscar unidad, placa o chofer..."
+                               t-model="state.searchQuery"/>
+                        <button t-if="state.searchQuery" class="o_bus_search_clear"
+                                t-on-click="() => this.state.searchQuery = ''">
+                            <i class="fa fa-times-circle"/>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="o_bus_drawer_list">
+                    <div t-if="!filteredVehicles.length" class="p-4 text-center text-muted">
+                        <i class="fa fa-bus fa-2x mb-2 text-black-50"/>
+                        <div>No se encontraron unidades para este filtro.</div>
+                    </div>
                     <div t-foreach="filteredVehicles" t-as="v" t-key="v.id"
-                         class="o_bus_item px-3 py-2 border-bottom"
-                         t-att-class="{'o_bus_item_selected': v.id === state.selectedId}"
+                         t-attf-class="o_bus_unit_row #{v.id === state.selectedId ? 'is-selected' : ''}"
                          t-on-click="() => this.selectVehicle(v)">
-                        <div class="d-flex justify-content-between">
-                            <strong><span t-esc="v.connected ? '🟢' : '🔴'"/> <t t-esc="v.name"/></strong>
-                            <span t-attf-class="badge text-bg-{{ v.status === 'moving' ? 'success' : 'warning' }}"
-                                  t-esc="movementLabel(v.status)"/>
-                        </div>
-                        <div class="small text-muted">
-                            <span t-if="v.route_name" t-esc="v.route_name"/>
-                            <span t-if="v.stop"> · @ <t t-esc="v.stop"/></span>
-                        </div>
-                        <div class="small text-muted"><t t-esc="v.speed"/> km/h</div>
-                        <div t-if="v.alerts.length" class="mt-1">
-                            <span t-foreach="v.alerts" t-as="kind" t-key="kind"
-                                  class="badge text-bg-danger me-1" t-esc="state.alertLabels[kind]"/>
+                        <div class="o_bus_unit_indicator" t-attf-style="background-color: #{v.color || '#8B1D24'};"/>
+                        <div class="o_bus_unit_content">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="o_bus_unit_name"><t t-esc="v.name"/></span>
+                                <span t-attf-class="o_bus_speed_tag #{v.speed > 0 ? 'is-moving' : ''}">
+                                    <t t-esc="v.speed"/> km/h
+                                </span>
+                            </div>
+                            <div class="o_bus_unit_meta">
+                                <span t-if="v.plate" class="text-uppercase fw-semibold" t-esc="v.plate"/>
+                                <span t-if="v.driver" t-esc="' · ' + v.driver"/>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="o_bus_unit_stop text-truncate" t-esc="v.stop or (v.route_name or 'En servicio')"/>
+                                <span t-attf-class="o_bus_status_badge #{v.connected ? (v.status === 'moving' ? 'moving' : 'stopped') : 'offline'}">
+                                    <t t-esc="movementLabel(v.status)"/>
+                                </span>
+                            </div>
+                            <div t-if="v.alerts.length" class="mt-1">
+                                <span t-foreach="v.alerts" t-as="kind" t-key="kind"
+                                      class="badge text-bg-danger me-1">
+                                    <t t-esc="state.alertLabels[kind] or kind"/>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="o_bus_map flex-grow-1" t-ref="map"/>
         </div>
     </t>
 </templates>
