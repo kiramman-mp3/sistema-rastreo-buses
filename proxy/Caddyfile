@@ -5,16 +5,21 @@
 (security_headers) {
 	encode zstd gzip
 	header {
-		Strict-Transport-Security "max-age=31536000"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 		X-Content-Type-Options nosniff
-		Referrer-Policy strict-origin-when-cross-origin
 		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "geolocation=(self), camera=(), microphone=()"
 		-Server
 	}
 }
 
 {$DOMAIN} {
 	import security_headers
+
+	# Cache headers for static assets to reduce load on Odoo workers
+	@static path /bus_tracking/static/* /web/assets/* /web/static/*
+	header @static Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
 
 	# Positions reach Odoo over the internal Docker network, and the database
 	# manager must never be public: neither is served through the proxy.
