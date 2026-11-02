@@ -82,6 +82,7 @@ class ResUsers(models.Model):
             else:
                 user.write({'groups_id': [(3, driver_group.id)]})
 
+    @api.depends('driver_badge_qr')
     def _compute_driver_badge_active(self):
         now = fields.Datetime.now()
         active_tokens = self.env['bus.driver.token'].sudo().search([
