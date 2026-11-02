@@ -71,3 +71,15 @@ class TestDriverStaff(TransactionCase):
     def test_a_plain_user_cannot_sign_a_tablet_out(self):
         with self.assertRaises(AccessError):
             self.shift.with_user(self.viewer).action_revoke_tablet()
+
+    def test_an_unattended_sos_stays_in_the_queue_however_old(self):
+        sos = self.env['bus.incident'].create({
+            'shift_id': self.shift.id, 'vehicle_id': self.bus.id, 'kind': 'sos'})
+        self.env.cr.execute(
+            "UPDATE bus_incident SET create_date = now() at time zone 'utc' - interval '30 hours' WHERE id IN %s",
+            [(sos.id, self.incident.id)])
+        self.env.invalidate_all()
+        queue = self.env['bus.incident']._open_for_map()
+        self.assertIn(sos, queue)
+        self.assertNotIn(self.incident, queue)
+

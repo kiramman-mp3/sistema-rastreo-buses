@@ -21,7 +21,7 @@
 
     var map = L.map(el, { zoomControl: false, scrollWheelZoom: false }).setView(center, 13);
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb", {
+    L.tileLayer(el.dataset.tiles || "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb", {
         maxZoom: 19,
         subdomains: "abcd",
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" rel="noopener">CARTO</a>',
@@ -130,6 +130,9 @@
                 return;
             }
             known.marker.options.title = label;
+            // options.title is only read when the marker is created: the element keeps the old one.
+            var element = known.marker.getElement();
+            if (element) { element.setAttribute("title", label); }
             if (known.status !== bus.status) {
                 known.marker.setIcon(busIcon(bus));
                 known.status = bus.status;

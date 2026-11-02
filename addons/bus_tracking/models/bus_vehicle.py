@@ -56,6 +56,8 @@ class BusVehicle(models.Model):
 
     _sql_constraints = [
         ('traccar_device_uniq', 'unique(traccar_device_id)', "Traccar device is already linked to another bus."),
+        # Passengers tell buses apart by name: two with the same one would merge on the public map.
+        ('name_uniq', 'unique(name)', "Another bus already has this name."),
     ]
 
     @api.model
