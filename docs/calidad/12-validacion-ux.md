@@ -8,7 +8,7 @@ Fecha: 2026-11-02. Entorno: Docker local (Odoo 16 en el puerto 8070, base `buses
 
 | Verificación | Herramienta | Resultado |
 |---|---|---|
-| Pruebas del módulo Odoo | `odoo --test-enable --test-tags /bus_tracking` en base limpia | Ver §4 (corrida final) |
+| Pruebas del módulo Odoo | `odoo --test-enable --test-tags /bus_tracking` en base limpia | 213 de 213 (§4) |
 | Pruebas de la app de tableta | Jest | 56 de 56 |
 | Tipos y linter de la tableta | `tsc --noEmit`, `expo lint --no-cache` | Sin errores |
 | Contraste de los tokens | `python qa/contraste.py` | 20 de 20 pares cumplen; texto de cuerpo ≥ 7:1 en portal y tableta |
@@ -47,7 +47,7 @@ La primera corrida dio además 2 fallos (un título de 3 líneas en móvil y una
 
 ## 4. Corrida final de pruebas
 
-Se completa en la entrada de `docs/BITACORA.md` del 2026-11-02 con los números de la última corrida sobre `develop`.
+Base limpia, `--test-tags /bus_tracking`, código final de las fases 26 a 31: **213 pruebas, 0 fallos, 0 errores**. Antes del trabajo, `develop` tenía 4 fallos y 2 errores.
 
 ## 5. Protocolo de pruebas con personas
 

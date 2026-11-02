@@ -3,6 +3,8 @@
 Continúa la numeración de `docs/PLAN.md` y `docs/PLAN-APP-CHOFER.md` (fases 26 a 31).
 Fecha del análisis: 2026-11-01. Base revisada: `develop` en `9118fc7`.
 
+**Estado (2026-11-02):** fases 26 a 30 hechas e integradas en `develop`; fase 31 con la medición automática hecha y las pruebas con personas pendientes (`docs/calidad/12-validacion-ux.md`). Desvíos respecto del plan: la tableta no recibió `react-native-svg` (los íconos se dibujan con vistas), el portal no usa Lighthouse sino axe y el inspector de diseño, y la hoja de incidentes no tiene dictado por voz.
+
 ## 1. Resumen
 
 El sistema funciona, pero la interfaz actual, sobre todo desde las fases 23 a 25, **dice cosas que no son ciertas** y **se ve como una plantilla**. Esas dos cosas explican la sensación de que "no tiene alma":
