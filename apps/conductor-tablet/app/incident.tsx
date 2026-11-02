@@ -1,255 +1,201 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import type { IncidentKind } from '../src/api/types';
-import { readLastSent } from '../src/gps/store';
-import { t } from '../src/i18n';
+import { readLastSample, readLastSent } from '../src/gps/store';
+import { t, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Button } from '../src/ui/Button';
-import { colors, hit, type } from '../src/ui/theme';
+import { Action, HIT, Txt } from '../src/ui/cabin';
+import { fonts, sizes } from '../src/ui/theme';
+import { useTheme } from '../src/ui/ThemeProvider';
 
-const KINDS: { key: IncidentKind; icon: string }[] = [
-  { key: 'breakdown', icon: '🛠️' },
-  { key: 'traffic', icon: '🚦' },
-  { key: 'accident', icon: '💥' },
-  { key: 'other', icon: '📝' },
+const KINDS: { key: IncidentKind; label: Message }[] = [
+  { key: 'traffic', label: 'kind_traffic' },
+  { key: 'breakdown', label: 'kind_breakdown' },
+  { key: 'accident', label: 'kind_accident' },
+  { key: 'other', label: 'kind_other' },
 ];
-
-function kindLabel(kind: IncidentKind) {
-  if (kind === 'breakdown') return t('kind_breakdown');
-  if (kind === 'traffic') return t('kind_traffic');
-  if (kind === 'accident') return t('kind_accident');
-  return t('kind_other');
-}
 
 export default function IncidentScreen() {
   useLang();
+  const { palette } = useTheme();
   const session = useSession();
-  const [kind, setKind] = useState<IncidentKind>('breakdown');
+  const [kind, setKind] = useState<IncidentKind | null>(null);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [result, setResult] = useState<'sent' | 'queued' | 'error' | null>(null);
 
   async function submit() {
+    if (!kind) return;
     setBusy(true);
-    setMessage('');
-    const last = await readLastSent();
+    setResult(null);
+    const where = (await readLastSample()) ?? (await readLastSent());
     try {
-      const result = await session.reportIncident({
+      const outcome = await session.reportIncident({
         kind,
-        note: note.slice(0, 300),
-        lat: last?.lat ?? null,
-        lon: last?.lon ?? null,
+        note: note.trim().slice(0, 300),
+        lat: where?.lat ?? null,
+        lon: where?.lon ?? null,
       });
-      setIsSuccess(true);
-      setMessage(t(result === 'queued' ? 'queued' : 'sent'));
+      setResult(outcome);
       setNote('');
     } catch {
-      setIsSuccess(false);
-      setMessage(t('network'));
+      setResult('error');
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.page}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('incident')}</Text>
-          <Text style={styles.subtitle}>Notifica a la central de monitoreo de la UTA sobre cualquier novedad en la vía.</Text>
-        </View>
+    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+      <View style={styles.head}>
+        <Txt bold size="title">
+          {t('actionProblem')}
+        </Txt>
+        <Action label={t('backToShift')} onPress={() => router.back()} kind="quiet" />
+      </View>
 
-        <Text style={styles.sectionLabel}>{t('field_kind')}</Text>
-        <View style={styles.grid}>
+      <View style={styles.body}>
+        <View style={styles.kinds} accessibilityRole="radiogroup" accessibilityLabel={t('incidentWhat')}>
+          <Txt size="small" dim>
+            {t('incidentWhat')}
+          </Txt>
           {KINDS.map((item) => {
-            const isSelected = kind === item.key;
+            const on = kind === item.key;
             return (
               <Pressable
                 key={item.key}
-                onPress={() => setKind(item.key)}
-                style={[styles.chip, isSelected && styles.chipSelected]}
+                onPress={() => {
+                  setKind(item.key);
+                  setResult(null);
+                }}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: on }}
+                style={[
+                  styles.kind,
+                  { backgroundColor: on ? palette.ink : palette.panel },
+                ]}
               >
-                <Text style={styles.chipIcon}>{item.icon}</Text>
-                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                  {kindLabel(item.key)}
-                </Text>
+                <View style={[styles.radio, { borderColor: on ? palette.signal : palette.ink2 }]}>
+                  {on ? <View style={[styles.radioDot, { backgroundColor: palette.signal }]} /> : null}
+                </View>
+                <Txt bold size="data" color={on ? palette.ground : palette.ink}>
+                  {t(item.label)}
+                </Txt>
               </Pressable>
             );
           })}
         </View>
 
-        <View style={styles.textLabelRow}>
-          <Text style={styles.sectionLabel}>{t('field_description')}</Text>
-          <Text style={styles.charCounter}>{note.length} / 300</Text>
-        </View>
-        <TextInput
-          value={note}
-          onChangeText={setNote}
-          placeholder="Escribe detalles del suceso (opcional)..."
-          placeholderTextColor={colors.muted}
-          maxLength={300}
-          multiline
-          style={styles.input}
-        />
-
-        {message ? (
-          <View style={[styles.messageBox, isSuccess ? styles.messageSuccess : styles.messageError]}>
-            <Text style={[styles.messageText, isSuccess ? styles.messageTextSuccess : styles.messageTextError]}>
-              {message}
-            </Text>
-          </View>
-        ) : null}
-
-        <View style={styles.actions}>
-          <Button
-            label={busy ? t('loading') : t('submit')}
-            onPress={submit}
-            disabled={busy}
-            style={styles.submitBtn}
+        <View style={styles.side}>
+          <Txt size="small" dim>
+            {t('incidentNote')}
+          </Txt>
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder={t('incidentNoteHint')}
+            placeholderTextColor={palette.ink2}
+            maxLength={300}
+            multiline
+            style={[
+              styles.input,
+              { backgroundColor: palette.field, color: palette.ink, borderColor: palette.ink2 },
+            ]}
           />
-          <Button
-            label={t('backToShift')}
-            variant="secondary"
-            onPress={() => router.back()}
+          <Txt size="small" dim>
+            {note.length} / 300
+          </Txt>
+
+          {result ? (
+            <View
+              style={[styles.result, { borderColor: result === 'error' ? palette.danger : palette.ok }]}
+              accessibilityLiveRegion="polite"
+            >
+              <Txt bold size="body" color={result === 'error' ? palette.danger : palette.ok}>
+                {result === 'sent' ? t('sent') : result === 'queued' ? t('queued') : t('network')}
+              </Txt>
+            </View>
+          ) : null}
+
+          <Action
+            label={busy ? t('loading') : t('incidentSend')}
+            onPress={submit}
+            kind="accent"
+            disabled={busy || !kind}
+            style={styles.send}
           />
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   page: {
-    flexGrow: 1,
-    backgroundColor: colors.paper,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    width: '100%',
-    maxWidth: 620,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: colors.line,
-    gap: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  header: {
-    gap: 4,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: type.title,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: colors.muted,
-  },
-  sectionLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.ink,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  textLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-  },
-  charCounter: {
-    fontSize: 12,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  chip: {
     flex: 1,
-    minWidth: 120,
-    minHeight: hit,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.line,
+    padding: 24,
+    gap: 20,
+  },
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  body: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 24,
+  },
+  kinds: {
+    flex: 1,
+    gap: 12,
+  },
+  kind: {
+    minHeight: HIT + 8,
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+  },
+  radio: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 8,
-    backgroundColor: '#FAFAFA',
   },
-  chipSelected: {
-    borderColor: colors.route,
-    backgroundColor: colors.routeLight,
+  radioDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
   },
-  chipIcon: {
-    fontSize: 18,
-  },
-  chipText: {
-    fontSize: type.body - 2,
-    color: colors.ink,
-    fontWeight: '600',
-  },
-  chipTextSelected: {
-    color: colors.route,
-    fontWeight: '800',
+  side: {
+    flex: 1,
+    gap: 10,
   },
   input: {
-    minHeight: 110,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 10,
-    padding: 14,
-    fontSize: type.body - 1,
-    backgroundColor: '#F8FAFC',
-    color: colors.ink,
+    minHeight: 160,
+    borderWidth: 2,
+    borderRadius: 8,
+    padding: 16,
+    fontSize: sizes.body,
+    fontFamily: fonts.text,
     textAlignVertical: 'top',
   },
-  messageBox: {
-    padding: 12,
+  result: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 2,
+    borderLeftWidth: 8,
   },
-  messageSuccess: {
-    backgroundColor: colors.routeLight,
-    borderColor: colors.route,
-  },
-  messageError: {
-    backgroundColor: colors.busLight,
-    borderColor: colors.bus,
-  },
-  messageText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  messageTextSuccess: {
-    color: colors.route,
-  },
-  messageTextError: {
-    color: colors.bus,
-  },
-  actions: {
-    gap: 10,
-    marginTop: 8,
-  },
-  submitBtn: {
-    minHeight: hit,
+  send: {
+    marginTop: 'auto',
   },
 });

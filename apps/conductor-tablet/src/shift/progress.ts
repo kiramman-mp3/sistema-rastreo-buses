@@ -25,3 +25,11 @@ export function clock(iso: string | null): string {
   const match = iso.match(/T(\d{2}:\d{2})/);
   return match ? match[1] : iso;
 }
+
+/** Four stops fit at a readable size: the next one and the three after it (or the last ones). */
+export function stopWindow(stops: StopView[], before = 0, after = 3): StopView[] {
+  const next = stops.findIndex((s) => s.status === 'next');
+  if (next < 0) return stops.slice(-(before + after + 1));
+  const from = Math.max(0, next - before);
+  return stops.slice(from, from + before + after + 1);
+}

@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { parseDriverBadge } from '../src/config/odooUrl';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Button } from '../src/ui/Button';
-import { colors, type } from '../src/ui/theme';
+import { Action, Txt } from '../src/ui/cabin';
+import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function ScanScreen() {
   useLang();
   const session = useSession();
+  const { palette } = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +27,7 @@ export default function ScanScreen() {
     if (badge) {
       try {
         await session.loginWithBadge(badge.token, badge.odooUrl);
-        router.replace(session.snapshot.shift ? '/shift' : '/select');
+        router.replace('/');
         return;
       } catch {
         setError(t('badgeError'));
@@ -46,10 +47,10 @@ export default function ScanScreen() {
 
   if (!permission?.granted) {
     return (
-      <View style={styles.page}>
-        <Text style={styles.body}>{t('cameraNeed')}</Text>
-        <Button label={t('scanQr')} onPress={() => requestPermission()} />
-        <Button label={t('cancel')} onPress={() => router.back()} />
+      <View style={[styles.page, { backgroundColor: palette.ground }]}>
+        <Txt size="body">{t('cameraNeed')}</Txt>
+        <Action label={t('scanQr')} onPress={() => requestPermission()} kind="accent" />
+        <Action label={t('cancel')} onPress={() => router.back()} kind="quiet" />
       </View>
     );
   }
@@ -61,20 +62,26 @@ export default function ScanScreen() {
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
         onBarcodeScanned={busy ? undefined : onScan}
       />
-      {busy ? <Text style={styles.info}>{t('badgeLoggingIn')}</Text> : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {busy ? (
+        <Txt bold size="body" color="#FFFFFF" style={styles.info}>
+          {t('badgeLoggingIn')}
+        </Txt>
+      ) : null}
+      {error ? (
+        <Txt bold size="body" color="#FFFFFF" style={styles.info}>
+          {error}
+        </Txt>
+      ) : null}
       <View style={styles.bar}>
-        <Button label={t('cancel')} onPress={() => router.back()} />
+        <Action label={t('cancel')} onPress={() => router.back()} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: colors.paper, padding: 32, justifyContent: 'center', gap: 16 },
+  page: { flex: 1, padding: 32, justifyContent: 'center', gap: 16 },
   camera: { flex: 1, backgroundColor: '#000' },
-  body: { fontSize: type.body, color: colors.ink },
-  error: { color: '#fff', fontSize: type.body, textAlign: 'center', marginTop: 24 },
-  info: { color: '#fff', fontSize: type.body + 2, textAlign: 'center', marginTop: 24, fontWeight: '600' },
+  info: { textAlign: 'center', marginTop: 24, backgroundColor: 'rgba(0,0,0,0.6)', padding: 12 },
   bar: { position: 'absolute', bottom: 24, left: 24, right: 24 },
 });
