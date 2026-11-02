@@ -1,16 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
-import type { StopView } from '../shift/progress';
+import { stopWindow, type StopView } from '../shift/progress';
 import { Txt } from './cabin';
 import { useTheme } from './ThemeProvider';
-
-/** The stops around the next one, laid flat: passed stops filled, the next one in signal yellow. */
-export function stopWindow(stops: StopView[], before = 1, after = 4): StopView[] {
-  const next = stops.findIndex((s) => s.status === 'next');
-  if (next < 0) return stops.slice(-(before + after + 1));
-  const from = Math.max(0, next - before);
-  return stops.slice(from, from + before + after + 1);
-}
 
 export function StopStrip({ stops, color }: { stops: StopView[]; color: string }) {
   const { palette } = useTheme();
@@ -78,6 +70,6 @@ const styles = StyleSheet.create({
   },
   name: {
     textAlign: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
 });
