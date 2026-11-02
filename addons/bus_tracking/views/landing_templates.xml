@@ -217,6 +217,14 @@
                         </div>
                         <p id="escribir-nota" class="nota" t-esc="s['write_note']"/>
                     </form>
+                    <div class="despues">
+                        <h3 t-esc="s['next_title']"/>
+                        <ol class="linea">
+                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_1']"/></span></li>
+                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_2']"/></span></li>
+                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_3']"/></span></li>
+                        </ol>
+                    </div>
                 </section>
             </main>
 
