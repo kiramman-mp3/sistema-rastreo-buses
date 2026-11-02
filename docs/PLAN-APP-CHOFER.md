@@ -25,6 +25,7 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 | 20 | App: GPS en segundo plano y cola sin red | `feature/driver-app-gps` | 17, 19 | Integrada en develop |
 | 21 | App: paradas, avance, alertas, incidentes, idiomas | `feature/driver-app-route` | 17, 19 | Integrada en develop |
 | 22 | Prueba real, QA, distribución y documentación | `feature/driver-app-release` | 18, 20, 21 | Docs y QA en develop; falta jornada real |
+| 25 | App: ergonomía de cabina (modo oscuro profundo, headway semafórico, parada 34px y SOS anti-vibración) | `feature/driver-tablet-shift` | 21 | Integrada en develop |
 
 Las fases 19 a 21 pueden avanzar en paralelo con la 18 una vez que la 17 fije el contrato de la API.
 
@@ -127,6 +128,28 @@ Criterio de aceptación: `classifyStops`, cola de incidentes e i18n es/en/qu cub
 - Configuración de la tableta: pantalla siempre encendida, sin ahorro de batería para la app, cargador en el bus, modo de aplicación fija si el modelo lo permite.
 
 Criterio de aceptación (código): guía del chofer, sección de producción, README/PLAN, perfil EAS `production`, casos F13–F14 y E23–E25 en `qa/qa_suite.py`. Criterio de campo **abierto**: jornada completa con chofer real y APK firmado en tableta con GPS.
+
+## Fase 25. App: ergonomía de cabina, cadencia headway y SOS anti-vibración
+
+Hecho en la rama `feature/driver-tablet-shift` y merge `--no-ff` a `develop`.
+
+- **Ergonomía visual y táctil para montaje en tablero (a 100 cm de los ojos):**
+  - Paleta ultra oscura antirreflejos (`#0B0F17`, superficie `#151D2A`) para evitar encandilamiento en la noche y reflejos de luz solar.
+  - Tamaño de toque mínimo de 72px (`cockpitHit = 72`) para interacción segura ante vibración y baches del camino.
+- **Header de telemetría:**
+  - Identificador gigante de unidad y línea, reloj digital monoespaciado en tiempo real, indicador de estado GPS y diálogo modal seguro para finalizar turno.
+- **Barra de cadencia / Headway (`HeadwayBar.tsx`):**
+  - Semáforo periférico respecto al bus delantero con feedback físico de resorte (`react-native-reanimated`):
+    - 🟢 **A TIEMPO:** Intervalo óptimo de frecuencia.
+    - 🟡 **ADELANTADO:** Alerta de reducción de velocidad.
+    - 🔴 **RETRASADO:** Alerta de aceleración.
+- **Próximas paradas (`StopAlertCard.tsx`):**
+  - Parada inmediata en tipografía de 34px, distancia estimada en vivo por Haversine (`useCockpitTelemetry.ts`), botón de confirmación táctil de 72px con feedback háptico (`expo-haptics`) y riel de anticipación para las siguientes 2 paradas.
+- **Acciones rápidas de emergencia (`IncidentActions.tsx`):**
+  - Reporte de congestión/tráfico con 1 solo toque despachado a la cola offline de Odoo (`session.reportIncident`).
+  - Alerta SOS con pulsación obligatoria sostenida de 1.5s (`holdProgress` continuo) para evitar activaciones accidentales por vibración del bus.
+- **Pruebas y verificación:**
+  - 10 suites Jest (44 tests) PASS, `tsc --noEmit` PASS (0 errores TypeScript).
 
 ## Riesgos
 
