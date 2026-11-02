@@ -1,12 +1,15 @@
 import base64
 import logging
+import math
 import secrets
 from datetime import timedelta
 from urllib.parse import urlencode
 
+from psycopg2 import IntegrityError
+
 from odoo import _, api, fields, models
-import math
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import mute_logger
 
 from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
 
@@ -128,16 +131,22 @@ class BusVehicle(models.Model):
             altitude = float(alt_raw) if alt_raw is not None else 0.0
         except (ValueError, TypeError):
             altitude = 0.0
-        record = self.env['bus.position'].create({
-            'vehicle_id': self.id,
-            'fix_time': fix_time,
-            'latitude': lat,
-            'longitude': lon,
-            'speed': speed,
-            'course': course,
-            'altitude': altitude,
-            'address': pos.get('address'),
-        })
+        try:
+            # The webhook and the cron can bring the same fix at once: the unique constraint
+            # decides, and the loser just skips it instead of failing the whole request.
+            with self.env.cr.savepoint(), mute_logger('odoo.sql_db'):
+                record = self.env['bus.position'].create({
+                    'vehicle_id': self.id,
+                    'fix_time': fix_time,
+                    'latitude': lat,
+                    'longitude': lon,
+                    'speed': speed,
+                    'course': course,
+                    'altitude': altitude,
+                    'address': pos.get('address'),
+                })
+        except IntegrityError:
+            return False
         if not self.last_fix_time or fix_time >= self.last_fix_time:
             self.write({
                 'last_latitude': lat,
