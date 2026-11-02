@@ -158,5 +158,28 @@ class TestPassengerPortal(HttpCase):
             self.assertRegex(html, r'landing\.css\?v=\d+', url)
         self.assertRegex(self.url_open('/rutas/L1').text, r'portal_map\.js\?v=\d+')
 
+    def test_no_invented_numbers_when_no_bus_reports(self):
+        html = self.url_open('/rutas').text
+        self.assertIn('Ahora no hay buses con señal', html)
+        for invented in ('8 buses', 'Frecuencia', 'min</span>', 'Accesible'):
+            self.assertNotIn(invented, html)
+
+    def test_route_page_promises_no_arrival_times(self):
+        html = self.url_open('/rutas/L1').text
+        self.assertNotIn('Llega en', html)
+        self.assertNotIn('probabil', html)
+
+    def test_routes_can_be_searched_by_stop_without_accents(self):
+        self.env['bus.route.stop'].create({'route_id': self.route.id, 'name': 'Píllaro centro',
+                                           'latitude': -1.17, 'longitude': -78.54})
+        found = self.url_open('/rutas?q=pillaro').text
+        self.assertIn('Linea Centro', found)
+        self.assertNotIn('Linea Centro', self.url_open('/rutas?q=quito').text)
+
+    def test_contact_is_only_shown_when_configured(self):
+        self.assertNotIn('tel:', self.url_open('/').text)
+        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.contact_phone', '+593 3 299 9999')
+        self.assertIn('tel:+59332999999', self.url_open('/').text)
+
     def test_landing_sends_passengers_to_the_routes(self):
         self.assertIn('href="/rutas"', self.url_open('/').text)
