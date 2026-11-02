@@ -64,6 +64,15 @@ export const secureStore: TokenStore = {
   clear: () => safeSecureClear(KEY),
 };
 
+const PENDING_END_KEY = 'bus.shift.pending_end';
+
+/** A shift the driver ended without signal, still to be closed on the server. */
+export const pendingEndStore: TokenStore = {
+  get: () => AsyncStorage.getItem(PENDING_END_KEY).catch(() => null),
+  set: (value) => AsyncStorage.setItem(PENDING_END_KEY, value).catch(() => undefined),
+  clear: () => AsyncStorage.removeItem(PENDING_END_KEY).catch(() => undefined),
+};
+
 export const odooUrlStore: TokenStore = {
   get: () => AsyncStorage.getItem(URL_KEY).catch(() => null),
   set: (url) => AsyncStorage.setItem(URL_KEY, url).catch(() => undefined),

@@ -10,7 +10,7 @@ import { alertLabel, t, tf, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
-import { classifyStops } from '../src/shift/progress';
+import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, SosButton, Txt } from '../src/ui/cabin';
 import { StopStrip } from '../src/ui/StopStrip';
@@ -44,15 +44,15 @@ export default function ShiftScreen() {
   const route = routes.find((item) => item.id === shift?.route_id);
   const gps = useGpsHealth();
   const [stale, setStale] = useState(false);
-  const [sosLocal, setSosLocal] = useState<'sending' | 'queued' | 'sent' | null>(null);
+  const [sosLocal, setSosLocal] = useState<SosLocal>(null);
 
   // A small state machine kept across renders; it only reads the last GPS sample.
   const [lock] = useState(() => createMotionLock());
   const locked = useMemo(() => lock(gps.speedKmh, gps.sampleAt, gps.readAt), [lock, gps.speedKmh, gps.sampleAt, gps.readAt]);
 
   const stops = useMemo(
-    () => classifyStops(shiftState?.stops ?? [], shiftState?.next_stop_id ?? null),
-    [shiftState?.stops, shiftState?.next_stop_id],
+    () => classifyStops(shiftState?.stops ?? [], shiftState?.next_stop_id ?? null, shiftState?.direction),
+    [shiftState?.stops, shiftState?.next_stop_id, shiftState?.direction],
   );
   const nextIndex = stops.findIndex((s) => s.status === 'next');
   const nextStop = nextIndex >= 0 ? stops[nextIndex] : null;
@@ -70,14 +70,15 @@ export default function ShiftScreen() {
   const alert = (shiftState?.alerts ?? []).find((a) => a.state === 'open') ?? null;
 
   const serverSos = shiftState?.sos ?? null;
+  const phase = sosPhase(serverSos, sosLocal);
   let sosStatus: string | null = null;
-  if (serverSos?.seen_at) {
-    sosStatus = tf('sosSeen', { by: serverSos.seen_by ?? '', time: localTime(serverSos.seen_at) });
-  } else if (sosLocal === 'sending') {
+  if (phase === 'seen') {
+    sosStatus = tf('sosSeen', { by: serverSos?.seen_by ?? '', time: localTime(serverSos?.seen_at) });
+  } else if (phase === 'sending') {
     sosStatus = t('sosSending');
-  } else if (sosLocal === 'queued') {
+  } else if (phase === 'queued') {
     sosStatus = t('sosQueued');
-  } else if (serverSos || sosLocal === 'sent') {
+  } else if (phase === 'sent') {
     sosStatus = t('sosSent');
   }
 
@@ -93,6 +94,7 @@ export default function ShiftScreen() {
           if (live) setStale(false);
         } catch (error) {
           if (error instanceof ApiError && error.code === 'no_shift') {
+            // The session already stopped the GPS.
             router.replace('/select');
             return;
           }
@@ -123,21 +125,27 @@ export default function ShiftScreen() {
         onPress: () => {
           session
             .endShift()
-            .then(() => router.replace('/select'))
-            .catch(() => Alert.alert(t('network')));
+            .then((result) => {
+              if (result === 'queued') Alert.alert(t('endQueued'));
+              router.replace('/select');
+            })
+            .catch(() => Alert.alert(t('serverError')));
         },
       },
     ]);
   }
 
   async function fireSos() {
-    setSosLocal('sending');
+    const at = new Date().toISOString();
+    setSosLocal({ status: 'sending', at });
     try {
-      const result = await session.reportIncident({ kind: 'sos', note: '', lat: gps.lat, lon: gps.lon });
-      setSosLocal(result === 'queued' ? 'queued' : 'sent');
+      const result = await session.reportIncident({ kind: 'sos', note: '', lat: gps.lat, lon: gps.lon, reported_at: at });
+      setSosLocal({ status: result === 'queued' ? 'queued' : 'sent', at });
       session.pullState().catch(() => undefined);
     } catch {
-      setSosLocal('queued');
+      // The server refused it (for example the shift was closed): say so, never "saved".
+      setSosLocal(null);
+      Alert.alert(t('serverError'));
     }
   }
 
