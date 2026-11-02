@@ -52,7 +52,7 @@ class RateLimiter:
         self.limit, self.window = limit, window
         self._hits = defaultdict(deque)
         self._lock = threading.Lock()
-        self._swept = time.monotonic()
+        self._swept = None
 
     def _sweep(self, now):
         """Forget keys that have been quiet for a whole window, so many different addresses
@@ -67,7 +67,9 @@ class RateLimiter:
     def allow(self, key, now=None):
         now = time.monotonic() if now is None else now
         with self._lock:
-            if now - self._swept > self.window:
+            if self._swept is None:
+                self._swept = now
+            elif now - self._swept > self.window:
                 self._sweep(now)
             hits = self._hits[key]
             while hits and now - hits[0] > self.window:
