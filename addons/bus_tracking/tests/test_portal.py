@@ -61,7 +61,11 @@ class TestPassengerPortal(HttpCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', html)
 
     def test_a_bad_color_cannot_inject_css(self):
-        self.route.color = 'red; background:url(//evil)'
+        # The model refuses it now; data saved before that check still reaches the page safely.
+        self.env.flush_all()
+        self.env.cr.execute("UPDATE bus_route SET color = %s WHERE id = %s",
+                            ['red; background:url(//evil)', self.route.id])
+        self.route.invalidate_recordset(['color'])
         html = self.url_open('/rutas').text
         self.assertIn('#1e5560', html)
         self.assertNotIn('evil', html)
