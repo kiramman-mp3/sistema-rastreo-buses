@@ -212,16 +212,18 @@ def f8(ctx):
 
 
 @case('F9', 'Funcional', 'El feed público expone solo nombre, posición, rumbo y estado',
-      'GET /rutas/QA1/buses.json', 'Claves exactas {name, lat, lon, course, status}; sin placa ni velocidad')
+      'GET /rutas/QA1/buses.json',
+      'Claves exactas {name, lat, lon, course, status, at, after, dir}; sin placa ni velocidad')
 def f9(ctx):
     r = req('GET', BASE + '/rutas/QA1/buses.json')
     check(r.status_code == 200, 'HTTP %s' % r.status_code)
     data = r.json()
     check(data['buses'], 'ningún bus visible')
     keys = {frozenset(bus) for bus in data['buses']}
-    check(keys == {frozenset({'name', 'lat', 'lon', 'course', 'status'})}, 'claves: %r' % keys)
+    # at/after: tramo de la línea; dir: sentido del viaje (índices, sin ids ni horas).
+    check(keys == {frozenset({'name', 'lat', 'lon', 'course', 'status', 'at', 'after', 'dir'})}, 'claves: %r' % keys)
     check('QAPLATE' not in r.text, 'la placa aparece en el feed')
-    return dict(obtenido='%d buses; 5 claves; sin placa' % len(data['buses']), mensaje='JSON')
+    return dict(obtenido='%d buses; 8 claves; sin placa' % len(data['buses']), mensaje='JSON')
 
 
 @case('F10', 'Funcional', 'Guardar una queja válida y entregar un folio', 'Formulario con descripción de 60 caracteres y correo',
@@ -442,12 +444,13 @@ def e15(ctx):
     time.sleep(3.2)
     before = complaint_count(ctx)
     r = complaint(session, csrf, token, 'QA-E15 descripción suficientemente larga', website='http://spam')
-    check(r.status_code == 303 and complaint_count(ctx) == before, 'HTTP %s' % r.status_code)
-    return dict(obtenido='HTTP 303; nada guardado', mensaje='Redirección a gracias sin folio')
+    check(r.status_code == 400 and complaint_count(ctx) == before, 'HTTP %s' % r.status_code)
+    check('Enviar otra vez' in r.text or 'Send again' in r.text, 'sin el aviso de reenviar')
+    return dict(obtenido='HTTP 400; nada guardado', mensaje='Revisa tu reporte y pulsa Enviar otra vez')
 
 
-@case('E16', 'Error', 'Descartar un envío demasiado rápido (menos de 3 s)', 'POST inmediato tras cargar el formulario',
-      'Parece éxito (303) pero 0 quejas nuevas')
+@case('E16', 'Error', 'No guardar un envío demasiado rápido (menos de 3 s) y pedir reenviarlo',
+      'POST inmediato tras cargar el formulario', 'HTTP 400 con el aviso de enviar otra vez y 0 quejas nuevas')
 def e16(ctx):
     session = requests.Session()
     csrf, token = form(session)
@@ -502,21 +505,24 @@ def e20(ctx):
     return dict(obtenido='AccessError', mensaje=body['error']['data'].get('message', '')[:80])
 
 
-@case('E21', 'Error', 'Limitar el feed público a 60 peticiones por minuto y dirección',
-      'Más de 60 GET seguidos a /rutas/QA1/buses.json', 'Aparece HTTP 429 con Retry-After')
+@case('E21', 'Error', 'Limitar a 60 por minuto y dirección las consultas del feed que no salen de la caché',
+      '70 GET a una línea real y luego más de 60 a una línea inexistente',
+      'La línea real responde 200 siempre (caché); la inexistente llega a 429 con Retry-After')
 def e21(ctx):
     time.sleep(61)                                   # let the one-minute window forget earlier hits
+    cached = {req('GET', BASE + '/rutas/QA1/buses.json').status_code for _ in range(70)}
+    check(cached == {200}, 'línea real: %r' % cached)
     codes = []
     retry = None
     for _ in range(70):
-        r = req('GET', BASE + '/rutas/QA1/buses.json')
+        r = req('GET', BASE + '/rutas/QA-NOPE/buses.json')
         codes.append(r.status_code)
         if r.status_code == 429:
             retry = r.headers.get('Retry-After')
             break
-    check(429 in codes, 'nunca llegó el 429 en %d peticiones' % len(codes))
-    check(codes.count(200) == 60 and retry, '200 antes del 429: %d; Retry-After=%s' % (codes.count(200), retry))
-    return dict(obtenido='60 × HTTP 200 y luego 429 (Retry-After %s)' % retry, mensaje='')
+    check(429 in codes and retry, 'nunca llegó el 429 en %d peticiones' % len(codes))
+    return dict(obtenido='70 × 200 en caché; %d × 404 y luego 429 (Retry-After %s)' % (codes.count(404), retry),
+                mensaje='')
 
 
 @case('E22', 'Error', 'Limitar a 5 quejas por hora y dirección', 'Quejas válidas seguidas desde la misma dirección',
