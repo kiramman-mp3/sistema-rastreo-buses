@@ -1,7 +1,8 @@
 """Strings of the public passenger portal.
 
-Kept in plain dictionaries so a language is added by adding a key. Kichwa is
-deliberately absent until a native speaker has reviewed a translation.
+Kept in plain dictionaries so a language is added by adding a key. Kichwa (`qu`) is a
+draft: a few strings over the Spanish ones, marked as a draft in the language picker, until a
+native speaker reviews a full translation.
 """
 
 DEFAULT_LANG = 'es'
