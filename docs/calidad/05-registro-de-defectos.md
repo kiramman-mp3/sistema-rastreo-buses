@@ -35,7 +35,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-025 | 02-nov-2026 | Auditoría integral (TAB-02) | Sin red o con el turno ya cerrado, el chofer no podía terminar el turno | apps/conductor-tablet/src/state/session.ts | Cerrado |
 | DEF-026 | 02-nov-2026 | Auditoría integral (OPS-02) | El CI no corría la suite de Odoo ni el linter de la tableta | .github/workflows/ci.yml | Cerrado |
 
-Resumen: 26 registrados, 25 cerrados (96 %), 1 abiertos. Densidad: 12,4 defectos por KLOC (2,090 KLOC de Python sin pruebas).
+Resumen: 26 registrados, 25 cerrados (96 %), 1 abiertos. Densidad: 9,1 defectos por KLOC (2,871 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 

@@ -119,6 +119,6 @@ docker compose run --rm odoo odoo -d buses_test -i bus_tracking --test-enable --
 docker compose exec -T db dropdb -U odoo buses_test     # con dos bases, las páginas públicas fallan
 ```
 
-En Git Bash de Windows antepón `MSYS_NO_PATHCONV=1` al comando, o la ruta `/bus_tracking` se convierte en una ruta de Windows. Hoy son 248 pruebas de Odoo y 72 de la tableta (`cd apps/conductor-tablet && npm test`).
+En Git Bash de Windows antepón `MSYS_NO_PATHCONV=1` al comando, o la ruta `/bus_tracking` se convierte en una ruta de Windows. Hoy son 250 pruebas de Odoo y 72 de la tableta (`cd apps/conductor-tablet && npm test`).
 
 Otros chequeos: `flake8` (reglas en `.flake8`), `python -X utf8 qa/traducciones.py` (es.po completo y sin modelos borrados) y, en la tableta, `npm run lint` y `npm run typecheck`. El CI (`.github/workflows/ci.yml`) corre todo esto y la suite de Odoo contra Postgres.

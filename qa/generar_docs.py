@@ -49,9 +49,7 @@ def write(name, text):
 
 
 # ------------------------------------------------------------------ figures
-fallos = {'Coordenadas fuera de rango guardadas (DEF-008)': A['fallos_por_causa']['coordenadas fuera de rango guardadas'] + 1,
-          'Hora GPS inválida, HTTP 500 (DEF-010)': A['fallos_por_causa']['time_text'] + 1,
-          'Latitud no numérica, HTTP 500 (DEF-009)': A['fallos_por_causa']['lat_text'] + 1}
+fallos = dq.FALLOS_28OCT
 pareto_fallos = sorted(fallos.items(), key=lambda kv: -kv[1])
 graficos.pareto([(k.split(' (')[0].replace(', HTTP 500', '\n(HTTP 500)'), v) for k, v in pareto_fallos], 'pareto_fallos_evaluacion.png', 7.5)
 
@@ -154,12 +152,14 @@ n_aud, f_aud = A['total'], A['fallos']
 cerrados = sum(1 for d in dq.DEFECTOS if d[7] == 'Cerrado')
 datos = {d['consulta']: d['valor'] for d in M['datos']}
 invalid = [v for k, v in datos.items() if 'fuera de rango' in k][0]
-mini = lambda ok: 'Sí' if ok else '**No**'
+mini = lambda ok: 'Sí' if ok else '**No**'  # noqa: E731
+suite_5xx = sum(1 for c in S['casos'] if c.get('estado') == 'FAIL' and 'HTTP 5' in str(c.get('obtenido', '')))
+bad_5xx = A.get('estados_5xx_inesperados', A['estados_5xx']) + suite_5xx
 metas = [
     ['Pruebas de Odoo aprobadas', '100 %', pct(100.0 - 100.0 * f_unit / n_unit), mini(f_unit == 0)],
     ['Error en la suite en vivo', '< 10 %', pct(100.0 * f_suite / n_suite), mini(100.0 * f_suite / n_suite < 10)],
     ['Error en la auditoría', '< 10 %', pct(100.0 * f_aud / n_aud), mini(100.0 * f_aud / n_aud < 10)],
-    ['Respuestas HTTP 5xx ante cualquier entrada', '0', str(A['estados_5xx'] + 2), mini(False)],
+    ['Respuestas HTTP 5xx no esperadas ante cualquier entrada', '0', str(bad_5xx), mini(bad_5xx == 0)],
     ['Tiempo promedio de la auditoría', '< 0,5 s', n(A['tiempo']['mean']) + ' s', mini(A['tiempo']['mean'] < 0.5)],
     ['Latencia p95 con 20 hilos (P2, P7)', '< 2 s', '%s s / %s s' % (n(PERF.get('P2', {}).get('p95', 0)), n(PERF.get('P7', {}).get('p95', 0))), mini(bool(PERF.get('P2') and PERF.get('P7') and max(PERF['P2']['p95'], PERF['P7']['p95']) < 2))],
     ['Capacidad de ingesta (100 buses, un reporte cada 10 s)', '≥ 10 req/s', n(cap, 1) + ' req/s', mini(cap >= 10)],
@@ -187,7 +187,7 @@ Generado por `qa/generar_docs.py` con los datos de la ejecución del %(fecha)s. 
 
 %(metas)s
 
-Las metas que no se cumplen son las del defecto abierto en la validación de la posición (DEF-008 a DEF-010, ver `05-registro-de-defectos.md`) y la cobertura de tres rutas del panel (`/bus_tracking/track`, `/bus_tracking/stop/load` y `/bus_tracking/stop/save`) que no tienen prueba de petición.
+%(lectura_metas)s
 
 ## 2. Resultados por conjunto
 
@@ -218,7 +218,9 @@ Cobertura total: **%(cov)s** (%(stm)d sentencias, %(miss)d sin cubrir, %(br)d ra
 ## 7. Evidencias de esta tabla
 
 `docs/calidad/evidencias/`: `suite.json` y `suite.log`, `auditoria.json` y `auditoria.log`, `metricas.json`, `odoo_test.log`, `coverage.json` y `cobertura.txt`.
-''' % dict(fecha='28-oct-2026', metas=md_table(['Meta', 'Umbral', 'Resultado', 'Cumple'], metas),
+''' % dict(fecha=dq.FECHA_EVIDENCIAS, metas=md_table(['Meta', 'Umbral', 'Resultado', 'Cumple'], metas),
+           lectura_metas=('No se cumplen: ' + '; '.join(m[0] for m in metas if m[3] != 'Sí') + '.'
+                          if any(m[3] != 'Sí' for m in metas) else 'Se cumplen todas las metas.'),
            conjuntos=md_table(['Conjunto', 'Pruebas', 'Errores', '% error'], [
                ['Pruebas de Odoo', str(n_unit), str(f_unit), pct(100.0 * f_unit / n_unit)], ['Suite en vivo', str(n_suite), str(f_suite), pct(100.0 * f_suite / n_suite)],
                ['Auditoría aleatoria', miles(n_aud), str(f_aud), pct(100.0 * f_aud / n_aud)],
