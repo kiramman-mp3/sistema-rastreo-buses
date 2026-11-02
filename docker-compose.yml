@@ -48,13 +48,6 @@ services:
       - traccar-data:/opt/traccar/data
       - traccar-logs:/opt/traccar/logs
 
-  # Development mailbox: catches every email Odoo sends. Web UI on http://localhost:8025
-  mailpit:
-    image: axllent/mailpit:latest
-    restart: unless-stopped
-    ports:
-      - "${MAILPIT_PORT:-8025}:8025"
-
 volumes:
   db-data:
   odoo-data:
