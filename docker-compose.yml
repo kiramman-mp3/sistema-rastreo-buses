@@ -28,7 +28,8 @@ services:
       - ./config/odoo.conf:/etc/odoo/odoo.conf
 
   traccar:
-    image: traccar/traccar:latest
+    # Pinned: the forwarding settings changed between versions (see README). Verified with 6.16.0.
+    image: traccar/traccar:6.16.0
     restart: unless-stopped
     depends_on:
       - odoo
