@@ -6,7 +6,7 @@ import { ApiError, NetworkError } from '../src/api/client';
 import { GpsPermissionError } from '../src/gps/types';
 import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
-import { useSession } from '../src/state/SessionContext';
+import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, HIT, Txt } from '../src/ui/cabin';
 import { useTheme } from '../src/ui/ThemeProvider';
 
@@ -14,6 +14,7 @@ export default function Select() {
   useLang();
   const { palette } = useTheme();
   const session = useSession();
+  const actions = useSessionActions();
   const { vehicles, routes, driver } = session.snapshot;
 
   const [vehicleId, setVehicleId] = useState<number | null>(vehicles.find((bus) => bus.available)?.id ?? null);
@@ -23,19 +24,24 @@ export default function Select() {
   const [error, setError] = useState('');
   const offline = session.snapshot.offline;
 
+  // A driver who already has an open shift belongs on the shift screen.
+  useEffect(() => {
+    if (session.snapshot.shift) router.replace('/shift');
+  }, [session.snapshot.shift]);
+
   // Opened without signal: keep asking until the server answers, then go to the shift if there is one.
   useEffect(() => {
     if (!offline) return undefined;
     const id = setInterval(() => {
-      session
+      actions
         .refreshMe()
         .then(() => {
-          if (session.snapshot.shift) router.replace('/shift');
+          if (actions.snapshot.shift) router.replace('/shift');
         })
         .catch(() => undefined);
     }, 10_000);
     return () => clearInterval(id);
-  }, [offline, session]);
+  }, [offline, actions]);
 
   async function start() {
     if (!vehicleId || !routeId) return;
