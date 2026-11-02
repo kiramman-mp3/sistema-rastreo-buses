@@ -29,10 +29,22 @@ class BusPosition(models.Model):
                 raise ValidationError(_("Latitude must be between -90 and 90, and longitude between -180 and 180."))
 
     @api.model
-    def _cron_cleanup(self):
+    def _cron_cleanup(self, batch_size=5000):
         icp = self.env['ir.config_parameter'].sudo()
         days = int(icp.get_param('bus_tracking.retention_days') or 0)
         if days <= 0:
             return
         limit = fields.Datetime.now() - timedelta(days=days)
-        self.search([('fix_time', '<', limit)]).unlink()
+        # Delete in small batches to avoid lock contention, statement timeout, and memory exhaustion
+        while True:
+            self.env.cr.execute("""
+                DELETE FROM bus_position
+                WHERE id IN (
+                    SELECT id FROM bus_position
+                    WHERE fix_time < %s
+                    LIMIT %s
+                )
+            """, (limit, batch_size))
+            if self.env.cr.rowcount < batch_size:
+                break
+        self.env['bus.position'].invalidate_model()
