@@ -992,3 +992,28 @@ Auditoría del back, el front y la app de tableta: 63 hallazgos (5 críticos, 18
 - La suite en vivo, la auditoría aleatoria y las métricas (`qa/ejecutar_todo.sh`) siguen con los datos del 28-oct.
 - Turno real de dos vueltas en una tableta, con corte de red, SOS sin señal y cierre desde la oficina.
 - Los menús del panel siguen escritos en español en el código.
+
+### Corrida completa de QA (misma fecha)
+
+La primera corrida de `qa/ejecutar_todo.sh` la cortó Claude Code por falta de memoria del equipo. Se repitió por pasos (`odoo`, `suite`, `auditoria`, `metricas`), con Mailpit fuera y el Odoo de desarrollo detenido.
+
+| Prueba | Resultado |
+|---|---|
+| Odoo con cobertura (base desechable) | 250 pruebas, 0 fallos; cobertura 92,8 % |
+| Suite en vivo | 47 de 47 (antes: 44; las tres fallas eran cambios intencionales del plan) |
+| Auditoría aleatoria | 1.000 de 1.000; 0 respuestas 5xx inesperadas (los 503 de `/health` sin buses recientes son esperados) |
+| `X-Forwarded-For` falso | 10 respuestas 429 de 70: no burla el límite |
+| Cuadro de mando | 12 de 12 metas (el 28-oct: 8 de 12) |
+| Contraste / accesibilidad (axe, 7 páginas × 2 tamaños) | 20 de 20 / 0 problemas |
+| Capturas del portal y del panel | Cargan; el SOS de hace 13 h sigue en la cola de Atención |
+
+Problemas encontrados:
+
+- Un ajuste anterior de la suite en vivo cayó en E15 (trampa) en vez de E16 (envío rápido): ambos tenían el mismo texto.
+- La prueba de `X-Forwarded-For` y E21 usaban la línea real, que ahora sale de la caché y no cuenta en el límite: pasaron a una línea inexistente.
+- `qa/generar_docs.py` tenía cifras fijas del 28-oct (los 5xx se sumaban a mano y esa meta salía siempre "No"): ahora sale de los datos y la serie del 28-oct queda como dato histórico.
+- Faltaban pruebas de petición para `/bus_tracking/incident/ack`, `/stop/load` y `/stop/save` (cobertura de rutas 86,4 %): se agregaron. Dos llamadas que terminaban en error JSON (sin sesión y parada imposible) hacían fallar al azar otras pruebas HTTP con "Session expired" en el arnés de Odoo (1 error por corrida); se quitaron, porque esos casos ya los cubren otras pruebas. Sin ellas: 3 de 3 corridas limpias. La suite original también falló así 1 de 7 veces: es una intermitencia del arnés que conviene vigilar en el CI.
+- La base de desarrollo estaba en 16.0.1.2.0; se actualizó a 16.0.1.3.0 con Odoo detenido.
+
+Sin hacer: el informe PDF (`Informe_calidad_rastreo_buses.pdf`) sigue siendo el de la evaluación del 28-oct (texto redactado a mano y `reportlab` no instalado), las capturas de la tableta y la prueba en una tableta real.
+

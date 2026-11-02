@@ -5,6 +5,17 @@ so the tables and the figures always agree.
 """
 
 # Categories of the problems found while building (used by the Pareto and the Ishikawa diagram).
+# Date of the run whose evidence is in docs/calidad/evidencias (qa/ejecutar_todo.sh).
+FECHA_EVIDENCIAS = '2-nov-2026'
+
+# Failures of the quality evaluation of 2026-10-28, by cause (auditoria.json of that run, plus the
+# suite case of each). They were fixed afterwards; kept here so the first Pareto keeps its data.
+FALLOS_28OCT = {
+    'Coordenadas fuera de rango guardadas (DEF-008)': 33,
+    'Hora GPS inválida, HTTP 500 (DEF-010)': 15,
+    'Latitud no numérica, HTTP 500 (DEF-009)': 12,
+}
+
 CATEGORIAS = {
     'P': 'Pruebas y su entorno',
     'H': 'Herramientas de shell y edición',
