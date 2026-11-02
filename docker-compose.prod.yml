@@ -34,6 +34,7 @@ services:
         ODOO_IMAGE: ${ODOO_IMAGE:-odoo:16.0}
     image: rastreo-odoo:16.0
     restart: unless-stopped
+    command: ["odoo", "-d", "${ODOO_DB:-postgres}"]
     environment:
       HOST: ${DB_HOST:-db}
       PORT: ${DB_PORT:-5432}
