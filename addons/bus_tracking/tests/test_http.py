@@ -165,3 +165,32 @@ class TestHttp(HttpCase):
     def test_webhook_still_accepts_the_secret_in_the_url_for_now(self):
         self.assertEqual(self.post().status_code, 200)
         self.assertEqual(self.positions(), 1)
+
+    def rpc(self, path, **params):
+        return self.url_open(path, data=json.dumps({'jsonrpc': '2.0', 'method': 'call', 'params': params}),
+                             headers={'Content-Type': 'application/json'}).json()
+
+    def test_the_stop_picker_loads_and_saves_through_http(self):
+        route = self.env['bus.route'].create({
+            'name': 'R', 'code': 'R1', 'stop_ids': [(0, 0, {'name': 'A', 'latitude': -1.24, 'longitude': -78.62})]})
+        self.authenticate('admin', 'admin')
+        data = self.rpc('/bus_tracking/stop/load', route_id=route.id)['result']
+        self.assertEqual([s['name'] for s in data['stops']], ['A'])
+        self.assertTrue(data['tile_url'].startswith('https://'))
+        saved = self.rpc('/bus_tracking/stop/save', route_id=route.id, stop_id=False, name='B',
+                         latitude=-1.25, longitude=-78.63, radius=40)['result']
+        self.assertEqual(self.env['bus.route.stop'].browse(saved['id']).name, 'B')
+
+    def test_an_incident_is_marked_as_seen_through_http(self):
+        route = self.env['bus.route'].create({'name': 'R', 'code': 'R1'})
+        driver = self.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'Chofer HTTP', 'login': 'chofer_http', 'password': 'x' * 12,
+            'groups_id': [(6, 0, [self.env.ref('base.group_portal').id,
+                                  self.env.ref('bus_tracking.group_bus_driver').id])]})
+        shift = self.env['bus.shift'].create({'user_id': driver.id, 'vehicle_id': self.bus.id, 'route_id': route.id})
+        incident = self.env['bus.incident'].create({'shift_id': shift.id, 'vehicle_id': self.bus.id, 'kind': 'sos'})
+        self.authenticate('admin', 'admin')
+        self.assertEqual(self.rpc('/bus_tracking/incident/ack', incident_id=incident.id)['result']['ok'], True)
+        self.assertTrue(incident.acknowledged_at)
+        self.assertEqual(self.rpc('/bus_tracking/incident/ack', incident_id=999999)['result'], {'ok': False})
+
