@@ -1,51 +1,103 @@
-/* Shared brand tokens and fonts: landing, login, portal and backend. */
+/* Buses UTA design tokens, shared by the public portal, the login page and the Odoo backend.
+   Contrast of every text pair is measured by qa/contraste.py and documented in docs/DISENO.md. */
+
+@font-face {
+    font-family: "Bricolage Grotesque";
+    src: url("/bus_tracking/static/fonts/bricolage-grotesque-var.woff2") format("woff2");
+    font-weight: 200 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/bus_tracking/static/fonts/atkinson-400.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/bus_tracking/static/fonts/atkinson-700.woff2") format("woff2");
+    font-weight: 700;
+    font-display: swap;
+}
 
 :root {
-    /* Institutional UTA Palette */
-    --bus-uta-primary: #8B1D24;
-    --bus-uta-dark: #5E1217;
-    --bus-uta-light: #FDF2F2;
-    --bus-uta-gold: #D97706;
+    /* Ground, ink and the one accent */
+    --papel: #F1F3F2;          /* ground: cool green-grey, never cream */
+    --papel-2: #E3E8E6;        /* one tone step for panels and fragments */
+    --blanco: #FFFFFF;         /* the brightest surface: fields only */
+    --tinta: #172025;          /* text, 14.8:1 on papel */
+    --tinta-2: #3E4C51;        /* secondary text, 8.0:1 on papel */
+    --granate: #7A1A22;        /* the action and the default route colour */
+    --granate-osc: #5C1219;
+    --senal: #FFC62B;          /* "now / live / your stop": the yellow of a bus stop sign */
 
-    /* Base neutrals */
-    --bus-paper: #F8FAFC;
-    --bus-surface: #FFFFFF;
-    --bus-ink: #0F172A;
-    --bus-slate-800: #1E293B;
-    --bus-muted: #64748B;
-    --bus-line: #E2E8F0;
-    --bus-line-dark: #CBD5E1;
+    /* States: always with a word or a shape, never colour alone */
+    --ok: #1D6B44;
+    --alerta: #7A5000;
+    --peligro: #A1221B;
 
-    /* Functional transit semantics */
-    --bus-ruta: #8B1D24;
-    --bus-rojo: #DC2626;
-    --bus-ok: #0D684D;
-    --bus-ok-light: #ECFDF5;
-    --bus-warn: #D97706;
-    --bus-warn-light: #FFFBEB;
-    --bus-senal: #D97706;
-    --bus-lluvia: #F1F5F9;
+    /* Type */
+    --display: "Bricolage Grotesque", "Atkinson Hyperlegible", system-ui, sans-serif;
+    --texto: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --t-1: 0.875rem;                          /* 14px: small print, credits */
+    --t-2: 1.0625rem;                         /* 17px: body */
+    --t-3: clamp(1.25rem, 1rem + 1vw, 1.5rem);   /* 20-24px: section headings, values */
+    --t-4: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem); /* 28-44px: page title */
+    --t-5: clamp(2.5rem, 1.4rem + 5vw, 5.5rem);   /* 40-88px: the one very large thing */
 
-    /* Extended transit design tokens */
-    --transit-on-time: #059669;
-    --transit-delayed: #D97706;
-    --transit-critical: #DC2626;
-    --transit-offline: #64748B;
+    /* Space and shape: one radius, one pair of margins */
+    --margen: clamp(1.25rem, 4vw, 3rem);
+    --ancho: 72rem;
+    --radio: 6px;
+    --toque: 48px;             /* minimum touch target on the portal */
 
-    /* Glassmorphism & Elevation */
-    --bus-glass-bg: rgba(255, 255, 255, 0.90);
-    --bus-glass-border: rgba(226, 232, 240, 0.85);
-    --bus-glass-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    /* Motion */
+    --facil: cubic-bezier(0.22, 1, 0.36, 1);   /* ease-out for things that arrive */
+    --rapido: 160ms;
+    --medio: 240ms;
 
-    /* Typography */
-    --bus-font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --bus-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Aliases kept for the backend stylesheets until they move to the names above. */
+    --bus-uta-primary: var(--granate);
+    --bus-uta-dark: var(--granate-osc);
+    --bus-uta-light: #F6EDEE;
+    --bus-uta-gold: var(--senal);
+    --bus-paper: var(--papel);
+    --bus-surface: var(--blanco);
+    --bus-ink: var(--tinta);
+    --bus-slate-800: var(--tinta);
+    --bus-muted: var(--tinta-2);
+    --bus-line: var(--papel-2);
+    --bus-line-dark: #C9D1CE;
+    --bus-ruta: var(--granate);
+    --bus-rojo: var(--peligro);
+    --bus-ok: var(--ok);
+    --bus-ok-light: #E3F1E9;
+    --bus-warn: var(--alerta);
+    --bus-warn-light: #FBF1DA;
+    --bus-senal: var(--senal);
+    --bus-lluvia: var(--papel-2);
+    --transit-on-time: var(--ok);
+    --transit-delayed: var(--alerta);
+    --transit-critical: var(--peligro);
+    --transit-offline: var(--tinta-2);
+    --bus-font-display: var(--display);
+    --bus-font-body: var(--texto);
+    --bus-radius-sm: var(--radio);
+    --bus-radius: var(--radio);
+    --bus-radius-lg: var(--radio);
+    --bus-shadow-sm: none;
+    --bus-shadow: none;
+    --bus-shadow-lg: 0 8px 24px rgba(23, 32, 37, 0.18);   /* only for things that float */
+    --bus-glass-bg: var(--blanco);
+    --bus-glass-border: var(--papel-2);
+    --bus-glass-shadow: var(--bus-shadow-lg);
+}
 
-    /* Shadows & Radii */
-    --bus-radius-sm: 8px;
-    --bus-radius: 12px;
-    --bus-radius-lg: 18px;
-    --bus-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
-    --bus-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
-    --bus-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --rapido: 0ms;
+        --medio: 0ms;
+    }
 }
