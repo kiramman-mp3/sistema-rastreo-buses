@@ -80,6 +80,8 @@ const es = {
   cabinAfter: 'Después',
   cabinStopsLeft: 'Quedan {n} paradas',
   cabinLastStop: 'Última parada',
+  moreNotice_one: '1 aviso más',
+  moreNotice_other: '{n} avisos más',
   gpsSending: 'GPS enviando',
   gpsSaving: 'Sin red: {n} puntos guardados',
   gpsWaiting: 'Esperando señal del GPS',
@@ -201,6 +203,8 @@ const en: typeof es = {
   cabinAfter: 'Then',
   cabinStopsLeft: '{n} stops left',
   cabinLastStop: 'Last stop',
+  moreNotice_one: '1 more notice',
+  moreNotice_other: '{n} more notices',
   gpsSending: 'GPS sending',
   gpsSaving: 'No network: {n} points saved',
   gpsWaiting: 'Waiting for the GPS',
@@ -282,6 +286,21 @@ export function t(key: Message): string {
 /** A message with values: tf('cabinStopsLeft', { n: 3 }). */
 export function tf(key: Message, values: Record<string, string | number>): string {
   return t(key).replace(/\{(\w+)\}/g, (all, name: string) => (name in values ? String(values[name]) : all));
+}
+
+/** The keys that come in a singular and a plural form: `moreNotice_one` and `moreNotice_other`. */
+export type PluralKey = Message extends infer K ? (K extends `${infer Base}_one` ? Base : never) : never;
+
+/**
+ * A message that depends on a count, with {n} filled in: tp('moreNotice', 1) is "1 aviso más".
+ * Kichwa has no plural marking in the draft, so it follows the Spanish rule.
+ */
+export function tp(key: PluralKey, n: number, values: Record<string, string | number> = {}): string {
+  let one = n === 1;
+  if (typeof Intl !== 'undefined' && typeof Intl.PluralRules === 'function') {
+    one = new Intl.PluralRules(lang === 'en' ? 'en' : 'es').select(n) === 'one';
+  }
+  return tf(`${key}_${one ? 'one' : 'other'}` as Message, { ...values, n });
 }
 
 function capitalize(text: string): string {

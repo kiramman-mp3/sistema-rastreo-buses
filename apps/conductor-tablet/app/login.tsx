@@ -10,6 +10,7 @@ import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
+import { Notice } from '../src/ui/Notice';
 import { fonts } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
@@ -126,11 +127,7 @@ export default function Login() {
           </View>
         ) : null}
         {error ? (
-          <View style={[styles.error, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
-            <Txt bold size="body" color={palette.danger}>
-              {error}
-            </Txt>
-          </View>
+          <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
         ) : null}
         <Action
           label={busy ? t('loading') : t('login')}
@@ -198,12 +195,5 @@ const styles = StyleSheet.create({
   },
   server: {
     gap: 6,
-  },
-  error: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderLeftWidth: 8,
   },
 });

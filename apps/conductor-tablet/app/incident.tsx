@@ -9,6 +9,7 @@ import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
+import { Notice } from '../src/ui/Notice';
 import { fonts } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
@@ -120,14 +121,14 @@ export default function IncidentScreen() {
           </Txt>
 
           {result ? (
-            <View
-              style={[styles.result, { borderColor: result === 'error' ? palette.danger : palette.ok }]}
-              accessibilityLiveRegion="polite"
-            >
-              <Txt bold size="body" color={result === 'error' ? palette.danger : palette.ok}>
-                {result === 'sent' ? t('sent') : result === 'queued' ? t('queued') : t('network')}
-              </Txt>
-            </View>
+            <Notice
+              item={{
+                key: 'result',
+                tone: result === 'error' ? 'danger' : result === 'queued' ? 'warn' : 'ok',
+                title: result === 'sent' ? t('sent') : result === 'queued' ? t('queued') : t('network'),
+                live: 'polite',
+              }}
+            />
           ) : null}
 
           <Action
@@ -196,13 +197,6 @@ const styles = StyleSheet.create({
     padding: 16,
     fontFamily: fonts.text,
     textAlignVertical: 'top',
-  },
-  result: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderLeftWidth: 8,
   },
   send: {
     marginTop: 'auto',

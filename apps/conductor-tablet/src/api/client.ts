@@ -118,8 +118,9 @@ export function createClient(options: ClientOptions) {
     endShift() {
       return post<{ ok: boolean }>('/bus_tracking/driver/shift/end');
     },
-    state() {
-      return post<StateResponse>('/bus_tracking/driver/state');
+    /** `lang` is the language of the app: the server writes the alert details in it, not in the language of the Odoo user. */
+    state(lang?: string) {
+      return post<StateResponse>('/bus_tracking/driver/state', lang ? { lang } : {});
     },
     routeMap() {
       return post<RouteMap>('/bus_tracking/driver/route');
