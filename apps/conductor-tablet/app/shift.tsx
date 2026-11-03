@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     minWidth: 52,
-    height: 44,
+    minHeight: 44,
     paddingHorizontal: space[3],
     ...shape.control,
     alignItems: 'center',
