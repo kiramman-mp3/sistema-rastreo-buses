@@ -15,6 +15,7 @@ import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
 import { hapticCommit } from '../src/ui/haptics';
+import { readableOn } from '../src/ui/contrast';
 import { useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
@@ -250,7 +251,7 @@ export default function ShiftScreen() {
       <View style={[styles.header, { backgroundColor: palette.panel }]}>
         <View style={[styles.identity, tallHeader && styles.identityTall]}>
           <View style={[styles.chip, { backgroundColor: color }]}>
-            <Txt bold size="body" color="#FFFFFF">
+            <Txt bold size="body" color={readableOn(color)}>
               {route?.code ?? ''}
             </Txt>
           </View>
