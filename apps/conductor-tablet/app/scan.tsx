@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
+import { space } from '../src/ui/theme';
 
 /** A QR can point the tablet at another server: the driver's password and the GPS would go there. */
 function confirmServer(url: string): Promise<boolean> {
@@ -120,7 +121,7 @@ export default function ScanScreen() {
 const styles = StyleSheet.create({
   page: { justifyContent: 'center' },
   camera: { flex: 1, backgroundColor: '#000' },
-  info: { textAlign: 'center', marginTop: 24, backgroundColor: 'rgba(0,0,0,0.6)', padding: 12 },
+  info: { textAlign: 'center', marginTop: space[6], backgroundColor: 'rgba(0,0,0,0.6)', padding: space[3] },
   bar: { position: 'absolute' },
   fullBar: { alignSelf: 'stretch' },
 });
