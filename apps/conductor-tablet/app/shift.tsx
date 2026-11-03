@@ -225,7 +225,7 @@ export default function ShiftScreen() {
 
       {showStrip ? (
         <View style={styles.strip}>
-          <StopStrip stops={stops} color={color} />
+          <StopStrip stops={stops} color={color} ahead={layout.largeText ? 1 : 3} />
         </View>
       ) : null}
     </>
