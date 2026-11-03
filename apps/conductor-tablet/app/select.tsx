@@ -9,6 +9,7 @@ import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
+import { Notice } from '../src/ui/Notice';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Select() {
@@ -175,11 +176,7 @@ export default function Select() {
       </View>
 
       {error ? (
-        <View style={[styles.note, styles.error, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
-          <Txt bold size="body" color={palette.danger}>
-            {error}
-          </Txt>
-        </View>
+        <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
       ) : null}
 
       <Action
@@ -207,10 +204,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
-  },
-  error: {
-    borderWidth: 2,
-    borderLeftWidth: 8,
   },
   columns: {
     flex: 1,

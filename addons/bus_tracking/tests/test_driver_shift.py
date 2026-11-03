@@ -5,6 +5,7 @@ from odoo import fields
 from odoo.tests import HttpCase, TransactionCase, tagged
 
 from ..controllers.driver_api import login_limiter
+from ..models.utils import pick_odoo_lang
 from .test_driver_auth import make_driver
 
 LOGIN = '/bus_tracking/driver/login'
@@ -41,6 +42,28 @@ class TestShiftCron(TransactionCase):
             'user_id': self.driver.id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
         self.env['bus.shift']._cron_close_stale()
         self.assertEqual(shift.state, 'active')
+
+
+@tagged('post_install', '-at_install')
+class TestOdooLanguagePick(TransactionCase):
+    """The app language (es, en, qu) is mapped to an Odoo language that is installed."""
+
+    def test_the_best_installed_spanish_wins(self):
+        self.assertEqual(pick_odoo_lang('es', ['en_US', 'es_ES', 'es_EC']), 'es_EC')
+        self.assertEqual(pick_odoo_lang('es', ['en_US', 'es_ES']), 'es_ES')
+
+    def test_any_other_spanish_is_better_than_none(self):
+        self.assertEqual(pick_odoo_lang('es', ['en_US', 'es_AR', 'es_MX']), 'es_AR')
+
+    def test_english_and_the_kichwa_draft(self):
+        self.assertEqual(pick_odoo_lang('en', ['es_EC', 'en_US']), 'en_US')
+        self.assertEqual(pick_odoo_lang('qu', ['en_US', 'es_EC']), 'es_EC')
+
+    def test_nothing_installed_or_nonsense_falls_back(self):
+        self.assertEqual(pick_odoo_lang('es', ['en_US'], fallback='en_US'), 'en_US')
+        self.assertIsNone(pick_odoo_lang('es', []))
+        for junk in (None, 'zz', 42, ['es'], {'es': 1}, ''):
+            self.assertEqual(pick_odoo_lang(junk, ['es_EC'], fallback='x'), 'x')
 
 
 @tagged('post_install', '-at_install')
@@ -193,6 +216,14 @@ class TestDriverShiftApi(HttpCase):
         self.assertIsNone(by_id[self.stops['Campus'].id]['arrived_at'])
         self.assertEqual(data['current_stop_id'], terminal.id)
         self.assertEqual(data['next_stop_id'], self.stops['Campus'].id)
+
+    def test_state_accepts_the_app_language_and_ignores_nonsense(self):
+        token = self.token()
+        self.start(token)
+        for body in ({'lang': 'es'}, {'lang': 'en'}, {'lang': 'qu'}, {'lang': 'zz'}, {'lang': ['es']}, {}):
+            resp = self.post(STATE, body, token=token)
+            self.assertEqual(resp.status_code, 200, body)
+            self.assertIn('alerts', resp.json())
 
     def test_route_returns_stops_and_the_line_between_them(self):
         token = self.token()
