@@ -162,7 +162,11 @@ def main():
                 adb('shell', 'am', 'force-stop', 'host.exp.exponent')
                 time.sleep(2)
                 adb('shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', f"'{url}'")
-                walk(folder, f'{size}-font{font}')
+                try:
+                    walk(folder, f'{size}-font{font}')
+                except RuntimeError:
+                    shot(folder, f'FAILED-{size}-font{font}')  # what was on screen when a wait ran out
+                    raise
     finally:
         adb('shell', 'wm', 'size', 'reset')
         adb('shell', 'wm', 'density', 'reset')
