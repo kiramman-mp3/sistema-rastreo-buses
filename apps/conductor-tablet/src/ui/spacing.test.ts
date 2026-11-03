@@ -1,5 +1,8 @@
-import { readdirSync, readFileSync } from 'fs';
-import { join } from 'path';
+// The app ships no Node typings; this test only needs to read files, so it declares what it uses.
+declare const require: (name: string) => any;
+declare const __dirname: string;
+const { readdirSync, readFileSync } = require('fs');
+const { join } = require('path');
 
 /**
  * Spacing lives on a 4 px grid (2 and 1 for hairlines). A padding, margin or gap written as a bare number
@@ -11,8 +14,8 @@ const SPACING = /\b(padding[A-Za-z]*|margin[A-Za-z]*|gap|rowGap|columnGap)\s*:\s
 
 function sources(folder: string): string[] {
   return readdirSync(join(ROOT, folder))
-    .filter((name) => name.endsWith('.tsx'))
-    .map((name) => join(folder, name));
+    .filter((name: string) => name.endsWith('.tsx'))
+    .map((name: string) => join(folder, name));
 }
 
 describe('spacing grid', () => {

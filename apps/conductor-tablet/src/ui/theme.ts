@@ -79,7 +79,7 @@ export const sizesPhone: typeof sizes = {
 export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32 } as const;
 
 /** Lines around controls and marks. */
-export const border = { thin: 2, mark: 3 } as const;
+export const border = { thin: 2, mark: 3, round: 999 } as const;
 
 /** One corner for every control. `continuous` is the smooth corner of iOS and changes nothing on Android. */
 export const shape = { control: { borderRadius: 8, borderCurve: 'continuous' } } as const;

@@ -26,7 +26,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { hapticCommit } from './haptics';
 import { createHold, type Hold } from './hold';
 import { useLayout } from './layout';
-import { sizes, fonts } from './theme';
+import { border, fonts, shape, sizes, space } from './theme';
 import { useTheme } from './ThemeProvider';
 
 /** Tablet control height; phones use `useLayout().hit`. */
@@ -178,8 +178,8 @@ export function GpsBadge({ health, label }: { health: GpsHealth; label: string }
       <View
         style={[
           styles.badgeMark,
-          health === 'sending' && { backgroundColor: color, borderRadius: 9 },
-          health === 'waiting' && { borderWidth: 3, borderColor: color, borderRadius: 9 },
+          health === 'sending' && { backgroundColor: color, borderRadius: border.round },
+          health === 'waiting' && { borderWidth: border.mark, borderColor: color, borderRadius: border.round },
           health === 'saving' && { backgroundColor: color, borderRadius: 2 },
           health === 'off' && { backgroundColor: color, borderRadius: 2, transform: [{ rotate: '45deg' }] },
         ]}
@@ -309,16 +309,16 @@ const styles = StyleSheet.create({
   },
   action: {
     minHeight: HIT,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 2,
+    paddingHorizontal: space[5],
+    paddingVertical: space[3],
+    ...shape.control,
+    borderWidth: border.thin,
     justifyContent: 'center',
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: space[2],
   },
   badgeMark: {
     width: 18,
