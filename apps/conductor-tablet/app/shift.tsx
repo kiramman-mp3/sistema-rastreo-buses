@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, AppState, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Animated, AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
@@ -21,6 +21,7 @@ import { useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { useStopCue } from '../src/ui/useStopCue';
 import { border, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
@@ -69,6 +70,7 @@ export default function ShiftScreen() {
   const nextStop = nextIndex >= 0 ? stops[nextIndex] : null;
   const afterStop = nextIndex >= 0 ? stops[nextIndex + 1] ?? null : null;
   const left = nextIndex >= 0 ? stops.length - nextIndex : 0;
+  const stopCue = useStopCue(nextStop?.id ?? null);
 
   const busFix = useMemo(
     () => (gps.lat !== null && gps.lon !== null ? { lat: gps.lat, lon: gps.lon } : null),
@@ -207,9 +209,11 @@ export default function ShiftScreen() {
       <Txt size="small" dim>
         {t('cabinNext')}
       </Txt>
-      <Txt bold size="stop" lines={2} fit>
-        {nextStop ? nextStop.name : t('noNextStop')}
-      </Txt>
+      <Animated.View style={stopCue}>
+        <Txt bold size="stop" lines={2} fit>
+          {nextStop ? nextStop.name : t('noNextStop')}
+        </Txt>
+      </Animated.View>
       {nextStop ? (
         <Txt size="body" dim>
           {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
