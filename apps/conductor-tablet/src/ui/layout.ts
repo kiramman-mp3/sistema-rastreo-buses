@@ -20,6 +20,8 @@ export type Layout = {
   wide: boolean;
   /** Very little vertical room (a phone on its side): drop what is not essential. */
   short: boolean;
+  /** The system font size is 130 % or more: fixed-height layouts no longer fit and the page scrolls instead. */
+  largeText: boolean;
   /** Text sizes for this screen class. */
   sizes: typeof sizes;
   /** Minimum height of every control. */
@@ -30,7 +32,10 @@ export type Layout = {
   gap: number;
 };
 
-export function layoutFor(width: number, height: number): Layout {
+/** From this system font scale the cabin screens stop trying to fit everything in one view. */
+export const LARGE_TEXT_SCALE = 1.3;
+
+export function layoutFor(width: number, height: number, fontScale = 1): Layout {
   const phone = Math.min(width, height) < PHONE_MAX_SHORT_SIDE;
   const landscape = width > height;
   const short = height < SHORT_HEIGHT;
@@ -41,6 +46,7 @@ export function layoutFor(width: number, height: number): Layout {
     phone,
     wide: width >= TWO_PANE_MIN_WIDTH,
     short,
+    largeText: fontScale >= LARGE_TEXT_SCALE,
     sizes: phone ? sizesPhone : sizes,
     // 72 dp is for gloved hands on a tablet; 56 dp is still far over Android's 48 dp minimum.
     hit: phone ? 56 : 72,
@@ -50,6 +56,6 @@ export function layoutFor(width: number, height: number): Layout {
 }
 
 export function useLayout(): Layout {
-  const { width, height } = useWindowDimensions();
-  return useMemo(() => layoutFor(width, height), [width, height]);
+  const { width, height, fontScale } = useWindowDimensions();
+  return useMemo(() => layoutFor(width, height, fontScale), [width, height, fontScale]);
 }
