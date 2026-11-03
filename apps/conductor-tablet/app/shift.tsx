@@ -6,7 +6,8 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { ApiError, NetworkError } from '../src/api/client';
 import { calculateDistanceMeters, useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
 import { useGpsHealth } from '../src/gps/useGpsHealth';
-import { alertLabel, t, tf, type Message } from '../src/i18n';
+import { alertLabel, t, tf, tp, type Message } from '../src/i18n';
+import { formatDistance } from '../src/i18n/format';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
@@ -24,10 +25,14 @@ import { border, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
   sending: 'gpsSending',
-  saving: 'gpsSaving',
   waiting: 'gpsWaiting',
   off: 'gpsOff',
 };
+
+/** What the GPS badge says; with points waiting to be sent it counts them in the right plural. */
+function gpsLabel(health: string, queued: number): string {
+  return health === 'saving' ? tp('gpsSaving', queued) : tf(GPS_LABEL[health], { n: queued });
+}
 
 function localTime(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -36,8 +41,7 @@ function localTime(iso: string | null | undefined): string {
 }
 
 function distance(meters: number | null): string | null {
-  if (meters === null) return null;
-  return meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
+  return meters === null ? null : formatDistance(meters);
 }
 
 export default function ShiftScreen() {
@@ -273,7 +277,7 @@ export default function ShiftScreen() {
             accessibilityHint={t('gpsOpen')}
             style={styles.gpsTap}
           >
-            <GpsBadge health={health} label={tf(GPS_LABEL[health], { n: gps.queued })} />
+            <GpsBadge health={health} label={gpsLabel(health, gps.queued)} />
           </Press>
           <Txt bold size="data">
             {currentTime}
