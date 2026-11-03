@@ -26,7 +26,7 @@ STRINGS = {
         'updated': 'Actualizado hace {s} s',
         'update_error': 'No pudimos actualizar. Reintentando…',
         'report': 'Reportar un problema',
-        'staff_login': 'Ingresar',
+        'staff_login': 'Iniciar sesión',
         'footer': 'La posición de los buses se actualiza cada pocos segundos.',
         'map_label': 'Mapa con los buses de la ruta',
         'report_title': 'Reportar un problema',
