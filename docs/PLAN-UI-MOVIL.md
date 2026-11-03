@@ -61,7 +61,7 @@ Las seis fases están hechas en `feature/responsive-layout`, a la espera de fusi
 | 36 | Hecha, más trabajo del previsto | La matriz de fuente 1,3 y 2,0 en el emulador destapó cinco defectos reales que el plan no tenía (ver abajo) |
 | 37 | Hecha | D4: el gesto de atrás predictivo sigue apagado. D5: el movimiento de la parada se construyó |
 
-Defectos que solo apareció al probar con letra grande en Android, todos corregidos:
+Defectos que solo aparecieron al probar con letra grande en Android, todos corregidos:
 
 1. El turno se desbordaba: a 1,3× desaparecía la próxima parada y a 2,0× el SOS y Terminar turno eran inalcanzables. Ahora la página hace scroll entera.
 2. Android informa 130 % como `1.2999999`: la comparación fallaba. Ahora hay tolerancia.
