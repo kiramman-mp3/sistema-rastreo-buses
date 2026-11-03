@@ -73,8 +73,33 @@ def wait_for(*needles, seconds=20, clickable=False):
     raise RuntimeError('did not appear: ' + ' / '.join(needles))
 
 
+def screen_size():
+    text = adb('shell', 'wm', 'size')
+    found = re.findall(r'(\d+)x(\d+)', text)
+    width, height = found[-1]  # the override, when there is one, is listed last
+    return int(width), int(height)
+
+
+def scroll(direction):
+    """Drag the page: 'down' moves toward the end of the content, like a finger swiping up."""
+    width, height = screen_size()
+    top, bottom = int(height * 0.25), int(height * 0.75)
+    start, end = (bottom, top) if direction == 'down' else (top, bottom)
+    adb('shell', 'input', 'swipe', str(width // 2), str(start), str(width // 2), str(end), '350')
+    time.sleep(0.8)
+
+
 def tap(*needles, seconds=20):
-    node = wait_for(*needles, seconds=seconds, clickable=True)
+    """Tap the element; a page that scrolls (large text) is scrolled until the element shows up."""
+    node = None
+    for attempt in range(6):
+        try:
+            node = wait_for(*needles, seconds=4 if attempt < 5 else seconds, clickable=True)
+            break
+        except RuntimeError:
+            if attempt == 5:
+                raise
+            scroll('down')
     x, y = center(node)
     adb('shell', 'input', 'tap', str(x), str(y))
 
@@ -113,6 +138,8 @@ def walk(folder, prefix):
             time.sleep(1.5)
         wait_for('Próxima parada', seconds=10)
         shot(folder, f'{prefix}-shift')
+        scroll('down')  # when the page scrolls (large text) this shows the buttons; otherwise nothing moves
+        shot(folder, f'{prefix}-shift-bottom')
         tap('Avisar un problema', 'Avisar')
         wait_for('Volver al turno', seconds=15)
         shot(folder, f'{prefix}-incident')
