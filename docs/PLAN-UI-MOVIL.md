@@ -21,19 +21,21 @@ Lo que **no** se toca porque ya cumple: pila nativa con `fade` de 160 ms, escala
 
 El detalle de la alerta ("Up to 9545927 m away from its route…") **no** está sin traducir. `driver_api.py` ya lo calcula con `with_context(lang=user.lang)` y existe `i18n/es.po`. Salió en inglés porque el usuario de Odoo `johan` tiene el idioma en inglés, mientras la app estaba en español. El defecto real es que **el idioma del texto lo decide el usuario de Odoo y no el de la app**. Se corrige en la fase 33.
 
-## Decisiones pendientes
+## Decisiones
 
-| # | Decisión | Opciones | Recomendada |
+Resueltas el 2-nov-2026 con quien dirige el proyecto, salvo D1 y D4, que siguen la recomendación.
+
+| # | Decisión | Opciones | Elegida |
 |---|---|---|---|
-| D1 | Dónde probar el turno | Producción (ensucia datos, genera alertas reales) · Odoo local sembrado con `scripts/dev_seed.py` | **Odoo local.** La app acepta `http://` en redes locales (`isLocalHost`) |
-| D2 | Idioma del detalle de alertas | `lang` opcional en `/driver/state` · fijar el idioma de Odoo al crear el chofer · las dos | **Las dos**, para que la app mande y haya un valor por defecto sensato |
+| D1 | Dónde probar el turno | Producción (ensucia datos, genera alertas reales) · Odoo local sembrado con `scripts/dev_seed.py` | **Odoo local** (recomendada). La app acepta `http://` en redes locales (`isLocalHost`) |
+| D2 | Idioma del detalle de alertas | `lang` opcional en `/driver/state` · fijar el idioma de Odoo al crear el chofer · las dos | **Las dos**: la app manda `lang` y los choferes nuevos nacen con Odoo en español |
 | D3 | Borde izquierdo de 8 px en avisos | A: conservarlo y documentarlo como excepción · B: marca de forma a la izquierda (como el punto de `GpsBadge`) con borde de 2 px | **B**: mantiene "palabra más forma" y sale de lo que las skills desaconsejan |
-| D4 | `predictiveBackGestureEnabled: false` | Dejarlo · activarlo | **Dejarlo** hasta probar en un Android 14+ real; en turno abierto un gesto de atrás accidental es un riesgo. Documentar el motivo |
+| D4 | `predictiveBackGestureEnabled: false` | Dejarlo · activarlo | **Dejarlo** (recomendada) hasta probar en un Android 14+ real; en turno abierto un gesto de atrás accidental es un riesgo. Documentar el motivo |
 | D5 | "Deslizamiento corto" al cambiar de parada (prometido en `DISENO.md`, no construido) | Construirlo (200 ms, solo opacidad y 8 px) · quitar la promesa del documento | **Construirlo pequeño**; sin movimiento si hay "reducir animaciones" |
 
 ## Mapa de fases
 
-Antes de la 32 hay que fusionar `feature/responsive-layout` a `develop`. Cada fase sale de `develop` en su propia rama, con commits pequeños en Conventional Commits y sin coautoría de IA.
+**Rama de trabajo:** se decidió no fusionar todavía `feature/responsive-layout`. Cada fase sale de esa rama (no de `develop`), en su propia rama hija, y se fusiona de vuelta con `--no-ff`. Al terminar la fase 37 se fusiona todo a `develop`. Commits pequeños en Conventional Commits y sin coautoría de IA.
 
 | Fase | Contenido | Rama | Depende de | Hallazgos | Tamaño |
 |---|---|---|---|---|---|
