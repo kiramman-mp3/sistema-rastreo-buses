@@ -1037,12 +1037,13 @@ Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-la
 
 | Prueba | Resultado |
 |---|---|
-| Tableta: Jest | 22 suites, 127 pruebas PASS |
+| Tableta: Jest | 22 suites, 128 pruebas PASS |
 | Tableta: `tsc --noEmit` y `expo lint` | Sin errores ni avisos |
 | `python qa/contraste.py` | PASS, incluidos los chips de línea |
 | Flake8 del módulo y de `qa` (entorno virtual temporal) | 0 avisos |
 | Matriz web (4 tamaños, día y noche, 5 escenarios) | Sin desbordes horizontales ni errores de página |
 | Emulador Android (LDPlayer, Android 9) | Recorrido completo con fuente 1,0, 1,3 y 2,0 en teléfono y tableta |
+| Emulador, pasada final sobre el código definitivo | Cuatro tamaños con fuente 1,0 y teléfono vertical con 1,3, sin fallos; una primera pasada encontró que con dos avisos fijos desaparecía la próxima parada en un teléfono vertical bajo, y se corrigió (un solo aviso fijo con poca altura, el resto contado) |
 | SOS en el emulador | Mantener 1,1 s llena el botón y no dispara; al soltar se vacía |
 
 ### Problemas encontrados
