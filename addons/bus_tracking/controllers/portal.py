@@ -9,7 +9,8 @@ from datetime import timedelta
 from odoo import fields, http
 from odoo.http import Response, request
 
-from ..models.utils import brand_name, fold, map_center, public_contact, tile_url
+from ..models.privacy_text import privacy_sections
+from ..models.utils import brand_name, fold, int_param, map_center, public_contact, safe_http_url, tile_url
 from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
@@ -119,6 +120,10 @@ def portal_context(**values):
                   line_i18n=js_strings(STRINGS[lang]),
                   brand=brand_name(request.env(su=True)),
                   contact=public_contact(request.env(su=True)),
+                  # The university's own policy when one is set in Settings, otherwise the page of this site.
+                  privacy_link=safe_http_url(
+                      request.env(su=True)['ir.config_parameter'].get_param('bus_tracking.privacy_url'))
+                  or '/privacidad',
                   languages={c: s['lang_name'] for c, s in STRINGS.items()})
     return values
 
@@ -200,6 +205,18 @@ class BusPortal(http.Controller):
     def _fresh_buses(route):
         limit = fields.Datetime.now() - SHOW_BUSES_FOR
         return route.vehicle_ids.filtered(lambda b: b.last_fix_time and b.last_fix_time >= limit)
+
+    # ------------------------------------------------------------------
+    @http.route(['/privacidad', '/transporte/privacidad'], type='http', auth='public', methods=['GET'])
+    def privacy(self, **kwargs):
+        """What data the system handles, for what, for how long: with the periods set in Settings."""
+        env = request.env(su=True)
+        values = portal_context()
+        values['sections'] = privacy_sections(
+            values['lang'], values['brand'], values['contact'],
+            position_days=int_param(env, 'bus_tracking.retention_days', 0),
+            complaint_days=int_param(env, 'bus_tracking.complaint_retention_days', 90))
+        return render_portal('bus_tracking.privacy_page', values)
 
     # ------------------------------------------------------------------
     @http.route(['/rutas', '/transporte/rutas'], type='http', auth='public', methods=['GET'])
