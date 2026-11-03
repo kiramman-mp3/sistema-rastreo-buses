@@ -12,6 +12,7 @@ import type {
   Vehicle,
 } from '../api/types';
 import type { GpsController, GpsStore } from '../gps/types';
+import { getLang } from '../i18n';
 import { flushIncidents, IncidentQueue } from '../incidents/queue';
 
 export type SessionSnapshot = {
@@ -236,7 +237,7 @@ export class Session {
   async pullState(): Promise<StateResponse> {
     let state: StateResponse;
     try {
-      state = await this.client.state();
+      state = await this.client.state(getLang());
     } catch (error) {
       // The office or the stale-shift cron closed it, or the tablet was signed out:
       // the tablet must stop sending positions right away.
