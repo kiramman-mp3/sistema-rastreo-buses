@@ -95,8 +95,8 @@ export default function Select() {
     ]);
   }
 
-  return (
-    <Screen scroll={layout.largeText}>
+  const content = (
+    <>
       <View style={[styles.head, layout.largeText && styles.headStack]}>
         <View style={styles.headText}>
           <Txt size="body" dim>
@@ -210,14 +210,33 @@ export default function Select() {
       {error ? (
         <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
       ) : null}
+    </>
+  );
+  // The main action stays at the bottom in either case; with a large font only the content above it scrolls.
+  const startButton = (
+    <Action
+      label={busy ? t('loading') : t('startShift')}
+      sub={selectedBus && routeId ? `${selectedBus.name} · ${routes.find((r) => r.id === routeId)?.code ?? ''}` : undefined}
+      onPress={start}
+      kind="accent"
+      disabled={busy || !vehicleId || !routeId}
+    />
+  );
 
-      <Action
-        label={busy ? t('loading') : t('startShift')}
-        sub={selectedBus && routeId ? `${selectedBus.name} · ${routes.find((r) => r.id === routeId)?.code ?? ''}` : undefined}
-        onPress={start}
-        kind="accent"
-        disabled={busy || !vehicleId || !routeId}
-      />
+  return (
+    <Screen>
+      {layout.largeText ? (
+        <ScrollView
+          style={styles.flowScroll}
+          contentContainerStyle={{ gap: layout.gap }}
+          showsVerticalScrollIndicator={false}
+        >
+          {content}
+        </ScrollView>
+      ) : (
+        content
+      )}
+      {startButton}
     </Screen>
   );
 }
@@ -228,6 +247,11 @@ const styles = StyleSheet.create({
   },
   // With a large system font the title and its button no longer fit side by side: the button goes below.
   // Large system font: the page scrolls as a whole, so nothing here may claim the leftover height.
+  flowScroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
   unfilled: {
     flexGrow: 0,
     flexShrink: 0,
