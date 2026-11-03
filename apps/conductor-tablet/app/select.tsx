@@ -114,6 +114,9 @@ export default function Select() {
             {t('chooseBus')}
           </Txt>
           <ScrollView contentContainerStyle={styles.list}>
+            {vehicles.length === 0 ? (
+              <Notice item={{ key: 'no-buses', tone: 'warn', title: t('noBuses'), live: 'polite' }} />
+            ) : null}
             {vehicles.map((bus) => {
               const on = vehicleId === bus.id;
               return (
@@ -152,6 +155,9 @@ export default function Select() {
             {t('chooseRoute')}
           </Txt>
           <ScrollView contentContainerStyle={styles.list}>
+            {routes.length === 0 ? (
+              <Notice item={{ key: 'no-routes', tone: 'warn', title: t('noRoutes'), live: 'polite' }} />
+            ) : null}
             {routes.map((route) => {
               const on = routeId === route.id;
               return (
@@ -176,6 +182,10 @@ export default function Select() {
           </ScrollView>
         </View>
       </View>
+
+      {vehicles.length > 0 && !vehicles.some(usable) && !offline ? (
+        <Notice item={{ key: 'all-taken', tone: 'warn', title: t('allBusesTaken'), live: 'polite' }} />
+      ) : null}
 
       {error ? (
         <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
