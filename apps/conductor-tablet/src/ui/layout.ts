@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 
-import { sizes, sizesPhone } from './theme';
+import { sizes, sizesPhone, space } from './theme';
 
 /** Android's own "sw600dp" rule: a shortest side under 600 dp is a phone, anything else a tablet. */
 export const PHONE_MAX_SHORT_SIDE = 600;
@@ -44,8 +44,8 @@ export function layoutFor(width: number, height: number): Layout {
     sizes: phone ? sizesPhone : sizes,
     // 72 dp is for gloved hands on a tablet; 56 dp is still far over Android's 48 dp minimum.
     hit: phone ? 56 : 72,
-    gutter: phone ? (short ? 12 : 16) : 24,
-    gap: phone ? (short ? 8 : 12) : 16,
+    gutter: phone ? (short ? space[3] : space[4]) : space[6],
+    gap: phone ? (short ? space[2] : space[3]) : space[4],
   };
 }
 
