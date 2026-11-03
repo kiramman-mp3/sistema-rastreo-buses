@@ -1,27 +1,39 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, AppState, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Animated, AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { ApiError, NetworkError } from '../src/api/client';
 import { calculateDistanceMeters, useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
 import { useGpsHealth } from '../src/gps/useGpsHealth';
-import { alertLabel, t, tf, type Message } from '../src/i18n';
+import { alertLabel, t, tf, tp, type Message } from '../src/i18n';
+import { formatDistance } from '../src/i18n/format';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
+import { buildNotices } from '../src/shift/notices';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, GpsBadge, SosButton, Txt } from '../src/ui/cabin';
+import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { hapticCommit } from '../src/ui/haptics';
+import { readableOn } from '../src/ui/contrast';
+import { noticeCapacity, useLayout } from '../src/ui/layout';
+import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { useStopCue } from '../src/ui/useStopCue';
+import { border, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
   sending: 'gpsSending',
-  saving: 'gpsSaving',
   waiting: 'gpsWaiting',
   off: 'gpsOff',
 };
+
+/** What the GPS badge says; with points waiting to be sent it counts them in the right plural. */
+function gpsLabel(health: string, queued: number): string {
+  return health === 'saving' ? tp('gpsSaving', queued) : tf(GPS_LABEL[health], { n: queued });
+}
 
 function localTime(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -30,13 +42,13 @@ function localTime(iso: string | null | undefined): string {
 }
 
 function distance(meters: number | null): string | null {
-  if (meters === null) return null;
-  return meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
+  return meters === null ? null : formatDistance(meters);
 }
 
 export default function ShiftScreen() {
   useLang();
   const { palette, choice, setChoice } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const actions = useSessionActions();
   const { shift, vehicles, routes, shiftState, routeMap } = session.snapshot;
@@ -58,6 +70,7 @@ export default function ShiftScreen() {
   const nextStop = nextIndex >= 0 ? stops[nextIndex] : null;
   const afterStop = nextIndex >= 0 ? stops[nextIndex + 1] ?? null : null;
   const left = nextIndex >= 0 ? stops.length - nextIndex : 0;
+  const stopCue = useStopCue(nextStop?.id ?? null);
 
   const busFix = useMemo(
     () => (gps.lat !== null && gps.lon !== null ? { lat: gps.lat, lon: gps.lon } : null),
@@ -66,8 +79,6 @@ export default function ShiftScreen() {
   const { currentTime } = useCockpitTelemetry(busFix, null);
   const nextCoords = routeMap?.stops.find((s) => s.id === nextStop?.id);
   const meters = busFix && nextCoords ? calculateDistanceMeters(busFix.lat, busFix.lon, nextCoords.lat, nextCoords.lon) : null;
-
-  const alert = (shiftState?.alerts ?? []).find((a) => a.state === 'open') ?? null;
 
   const serverSos = shiftState?.sos ?? null;
   const phase = sosPhase(serverSos, sosLocal);
@@ -81,6 +92,13 @@ export default function ShiftScreen() {
   } else if (phase === 'sent') {
     sosStatus = t('sosSent');
   }
+
+  const notices = buildNotices({
+    sos: sosStatus ? { text: sosStatus, seen: Boolean(serverSos?.seen_at) } : null,
+    alerts: (shiftState?.alerts ?? [])
+      .filter((a) => a.state === 'open')
+      .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -123,6 +141,7 @@ export default function ShiftScreen() {
         text: t('endShift'),
         style: 'destructive',
         onPress: () => {
+          hapticCommit();
           session
             .endShift()
             .then((result) => {
@@ -152,18 +171,110 @@ export default function ShiftScreen() {
   const color = route?.color || palette.line;
   const health = stale && gps.health === 'sending' ? 'saving' : gps.health;
 
+  // Landscape puts the next stop beside the map; portrait stacks them (the map takes what is left).
+  // With the system font at 130 % or more nothing fits one view: the whole page scrolls (header, notices,
+  // next stop, a map of fixed height, then the buttons), stacked in either orientation.
+  const pageScroll = layout.largeText;
+  const side = layout.landscape && !pageScroll;
+  // A phone in portrait has no width for three buttons in a row: SOS on top, the other two below.
+  const stackedActions = layout.phone && !layout.landscape;
+  // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
+  const showStrip = !layout.short || pageScroll;
+  // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
+  // has room for one, and a shorter detail; the rest is counted.
+  const noticeBlock = <NoticeList items={notices} max={noticeCapacity(layout)} detailLines={layout.short && !pageScroll ? 1 : 2} />;
+
+  const problem = (
+    <Action
+      label={t('actionProblem')}
+      sub={stackedActions ? undefined : t('actionProblemSub')}
+      onPress={() => router.push('/incident')}
+      disabled={locked}
+      style={stackedActions ? undefined : styles.actionWide}
+    />
+  );
+  const sos = <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />;
+  const end = (
+    <Action
+      label={t('endShift')}
+      onPress={confirmEnd}
+      kind="quiet"
+      disabled={locked}
+      style={stackedActions ? undefined : styles.actionNarrow}
+    />
+  );
+
+  const nextContent = (
+    <>
+      <Txt size="small" dim>
+        {t('cabinNext')}
+      </Txt>
+      <Animated.View style={stopCue}>
+        <Txt bold size="stop" lines={2} fit>
+          {nextStop ? nextStop.name : t('noNextStop')}
+        </Txt>
+      </Animated.View>
+      {nextStop ? (
+        <Txt size="body" dim>
+          {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
+            .filter(Boolean)
+            .join(' · ')}
+        </Txt>
+      ) : null}
+      {afterStop && !(layout.phone && showStrip) ? (
+        <Txt size="body">
+          {t('cabinAfter')}: {afterStop.name}
+        </Txt>
+      ) : null}
+
+      {showStrip ? (
+        <View style={styles.strip}>
+          <StopStrip stops={stops} color={color} ahead={layout.largeText ? 1 : 3} />
+        </View>
+      ) : null}
+    </>
+  );
+  const nextBlock = pageScroll ? (
+    <View style={styles.leftContent}>{nextContent}</View>
+  ) : (
+    <ScrollView
+      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
+      contentContainerStyle={styles.leftContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {nextContent}
+    </ScrollView>
+  );
+
+  const modeButton = (
+    <Press
+      onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
+      onLongPress={() => setChoice('auto')}
+      accessibilityRole="button"
+      accessibilityLabel={palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+      style={[styles.mode, { borderColor: palette.ink2 }]}
+    >
+      <Txt bold size="small">
+        {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+      </Txt>
+      {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
+    </Press>
+  );
+  // On a phone in portrait the header has two rows: bus and day/night on top, GPS and time below.
+  const tallHeader = layout.phone && !layout.landscape;
+
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
+    <Screen scroll={pageScroll}>
       {/* Header: bus and line, real GPS state, time, day or night */}
       <View style={[styles.header, { backgroundColor: palette.panel }]}>
-        <View style={styles.identity}>
+        <View style={[styles.identity, tallHeader && styles.identityTall]}>
           <View style={[styles.chip, { backgroundColor: color }]}>
-            <Txt bold size="body" color="#FFFFFF">
+            <Txt bold size="body" color={readableOn(color)}>
               {route?.code ?? ''}
             </Txt>
           </View>
           <View style={styles.identityText}>
-            <Txt bold size="body">
+            <Txt bold size="body" lines={1}>
               {bus?.name ?? ''}
             </Txt>
             <Txt size="small" dim lines={1}>
@@ -171,83 +282,47 @@ export default function ShiftScreen() {
             </Txt>
           </View>
         </View>
-        <View style={styles.headerRight}>
-          <Pressable
+        {tallHeader ? modeButton : null}
+        <View style={[styles.headerRight, tallHeader && styles.headerRightFull, { columnGap: layout.phone ? 12 : 24 }]}>
+          <Press
             onPress={() => router.push('/gps')}
             disabled={locked}
             accessibilityRole="button"
             accessibilityHint={t('gpsOpen')}
             style={styles.gpsTap}
           >
-            <GpsBadge health={health} label={tf(GPS_LABEL[health], { n: gps.queued })} />
-          </Pressable>
+            <GpsBadge health={health} label={gpsLabel(health, gps.queued)} />
+          </Press>
           <Txt bold size="data">
             {currentTime}
           </Txt>
-          <Pressable
-            onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
-            onLongPress={() => setChoice('auto')}
-            accessibilityRole="button"
-            accessibilityLabel={palette.mode === 'day' ? t('modeNight') : t('modeDay')}
-            style={[styles.mode, { borderColor: palette.ink2 }]}
-          >
-            <Txt bold size="small">
-              {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
-            </Txt>
-            {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
-          </Pressable>
+          {tallHeader ? null : modeButton}
         </View>
       </View>
 
-      <View style={styles.body}>
-        {/* Left: where the bus goes next */}
-        <View style={styles.left}>
-          <Txt size="small" dim>
-            {t('cabinNext')}
-          </Txt>
-          <Txt bold size="stop" lines={2} fit>
-            {nextStop ? nextStop.name : t('noNextStop')}
-          </Txt>
-          {nextStop ? (
-            <Txt size="body" dim>
-              {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
-                .filter(Boolean)
-                .join(' · ')}
-            </Txt>
-          ) : null}
-          {afterStop ? (
-            <Txt size="body">
-              {t('cabinAfter')}: {afterStop.name}
-            </Txt>
-          ) : null}
+      {side ? null : noticeBlock}
 
-          <View style={styles.strip}>
-            <StopStrip stops={stops} color={color} />
+      <View
+        style={[pageScroll ? null : styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}
+      >
+        {/* Where the bus goes next. Beside the map the notices are pinned above it; the rest scrolls. */}
+        {side ? (
+          <View style={styles.left}>
+            {noticeBlock}
+            {nextBlock}
           </View>
+        ) : (
+          nextBlock
+        )}
 
-          {alert ? (
-            <View style={[styles.notice, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
-              <Txt bold size="body" color={palette.danger}>
-                {alertLabel(alert.kind)}
-              </Txt>
-              {alert.detail ? <Txt size="small">{alert.detail}</Txt> : null}
-            </View>
-          ) : null}
-
-          {sosStatus ? (
-            <View
-              style={[styles.notice, { borderColor: serverSos?.seen_at ? palette.ok : palette.danger }]}
-              accessibilityLiveRegion="assertive"
-            >
-              <Txt bold size="body" color={serverSos?.seen_at ? palette.ok : palette.danger}>
-                {sosStatus}
-              </Txt>
-            </View>
-          ) : null}
-        </View>
-
-        {/* Right: the map */}
-        <View style={[styles.map, { backgroundColor: palette.panel }]}>
+        {/* The map */}
+        <View
+          style={[
+            styles.map,
+            pageScroll ? styles.mapFixed : side ? styles.mapSide : styles.mapStack,
+            { backgroundColor: palette.panel },
+          ]}
+        >
           <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
         </View>
       </View>
@@ -260,56 +335,69 @@ export default function ShiftScreen() {
           </Txt>
         </View>
       ) : null}
-      <View style={styles.actions}>
-        <Action
-          label={t('actionProblem')}
-          sub={t('actionProblemSub')}
-          onPress={() => router.push('/incident')}
-          disabled={locked}
-          style={styles.actionWide}
-        />
-        <View style={styles.actionWide}>
-          <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />
+      {stackedActions ? (
+        <View style={[styles.actionsStack, { gap: layout.gap }]}>
+          {sos}
+          <View style={[styles.actionsPair, { gap: layout.gap }]}>
+            <View style={styles.pairItem}>{problem}</View>
+            <View style={styles.pairItem}>{end}</View>
+          </View>
         </View>
-        <Action label={t('endShift')} onPress={confirmEnd} kind="quiet" disabled={locked} style={styles.actionNarrow} />
-      </View>
-    </View>
+      ) : (
+        <View style={[styles.actions, { gap: layout.gap }]}>
+          {problem}
+          <View style={styles.actionWide}>{sos}</View>
+          {end}
+        </View>
+      )}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    gap: 16,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    columnGap: space[4],
+    rowGap: space[2],
+    ...shape.control,
   },
   identity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: space[3],
+    flexGrow: 1,
     flexShrink: 1,
+    flexBasis: 220,
+  },
+  identityTall: {
+    flexBasis: 140,
   },
   identityText: {
     flexShrink: 1,
   },
   chip: {
-    minWidth: 56,
-    height: 44,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    minWidth: 52,
+    minHeight: 44,
+    paddingHorizontal: space[3],
+    ...shape.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerRight: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 24,
+    justifyContent: 'space-between',
+    flexShrink: 1,
+    rowGap: space[1],
+  },
+  headerRightFull: {
+    flexBasis: '100%',
   },
   gpsTap: {
     minHeight: 48,
@@ -317,59 +405,84 @@ const styles = StyleSheet.create({
   },
   mode: {
     minHeight: 48,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 2,
+    paddingHorizontal: space[4],
+    ...shape.control,
+    borderWidth: border.thin,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space[2],
   },
   modeDot: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: border.round,
   },
   body: {
     flex: 1,
+    minHeight: 0,
+  },
+  bodySide: {
     flexDirection: 'row',
-    gap: 20,
-    paddingHorizontal: 24,
-    paddingTop: 20,
+  },
+  bodyStack: {
+    flexDirection: 'column',
   },
   left: {
-    flex: 4,
-    gap: 8,
+    flexGrow: 4,
+    flexShrink: 1,
+    flexBasis: 0,
+    gap: space[2],
+  },
+  leftScroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  top: {
+    // Content height, but it gives way (and scrolls) before the map is squeezed out.
+    flexGrow: 0,
+    flexShrink: 1,
+    flexBasis: 'auto',
+  },
+  leftContent: {
+    gap: space[2],
   },
   strip: {
-    marginTop: 18,
-    marginBottom: 6,
-  },
-  notice: {
-    marginTop: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderLeftWidth: 8,
-    borderWidth: 2,
-    gap: 4,
+    marginTop: space[3],
+    marginBottom: space[2],
   },
   map: {
-    flex: 6,
-    borderRadius: 8,
+    ...shape.control,
     overflow: 'hidden',
   },
+  mapSide: {
+    flex: 6,
+  },
+  mapFixed: {
+    height: 260,
+  },
+  mapStack: {
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 0,
+    minHeight: 96,
+  },
   lockNote: {
-    marginHorizontal: 24,
-    marginTop: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
   },
   actions: {
     flexDirection: 'row',
-    gap: 16,
-    padding: 24,
-    paddingTop: 16,
+  },
+  actionsStack: {
+    flexDirection: 'column',
+  },
+  actionsPair: {
+    flexDirection: 'row',
+  },
+  pairItem: {
+    flex: 1,
   },
   actionWide: {
     flex: 3,

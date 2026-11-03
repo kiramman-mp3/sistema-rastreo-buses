@@ -80,8 +80,14 @@ const es = {
   cabinAfter: 'Después',
   cabinStopsLeft: 'Quedan {n} paradas',
   cabinLastStop: 'Última parada',
+  moreNotice_one: '1 aviso más',
+  moreNotice_other: '{n} avisos más',
   gpsSending: 'GPS enviando',
-  gpsSaving: 'Sin red: {n} puntos guardados',
+  gpsSaving_one: 'Sin red: 1 punto guardado',
+  gpsSaving_other: 'Sin red: {n} puntos guardados',
+  noBuses: 'No hay buses para elegir. Avisa a la central.',
+  noRoutes: 'No hay líneas para elegir. Avisa a la central.',
+  allBusesTaken: 'Todos los buses están en uso ahora.',
   gpsWaiting: 'Esperando señal del GPS',
   gpsOff: 'GPS sin permiso',
   lockedMoving: 'En marcha. Detén el bus para usar la pantalla.',
@@ -102,6 +108,8 @@ const es = {
   incidentSend: 'Enviar aviso',
   loginTitle: 'Ingreso del chofer',
   loginHelp: 'Escanea tu credencial o escribe tu usuario y tu clave.',
+  trackingNoticeLogin: 'La posición del bus se envía a la oficina solo mientras tu turno está abierto.',
+  trackingNoticeStart: 'Al iniciar el turno, la oficina ve la posición del bus hasta que lo termines.',
   serverHint: 'Servidor (solo soporte técnico)',
   selectTitle: 'Elige tu bus y tu línea',
   selectHello: 'Hola, {name}',
@@ -117,6 +125,7 @@ const es = {
   busNoGps: 'Sin GPS',
   serverChange: 'Este código cambia el servidor a {url}. ¿Continuar?',
   serverHttps: 'El servidor debe empezar con https://',
+  gpsLastAppError: 'Última falla de la app',
   gpsLastError: 'Último error',
   gpsServiceTitle: 'Buses UTA: GPS activo',
   gpsServiceBody: 'Enviando la posición del bus',
@@ -201,8 +210,14 @@ const en: typeof es = {
   cabinAfter: 'Then',
   cabinStopsLeft: '{n} stops left',
   cabinLastStop: 'Last stop',
+  moreNotice_one: '1 more notice',
+  moreNotice_other: '{n} more notices',
   gpsSending: 'GPS sending',
-  gpsSaving: 'No network: {n} points saved',
+  gpsSaving_one: 'No network: 1 point saved',
+  gpsSaving_other: 'No network: {n} points saved',
+  noBuses: 'No buses to choose from. Tell the dispatcher.',
+  noRoutes: 'No lines to choose from. Tell the dispatcher.',
+  allBusesTaken: 'Every bus is in use right now.',
   gpsWaiting: 'Waiting for the GPS',
   gpsOff: 'GPS not allowed',
   lockedMoving: 'Moving. Stop the bus to use the screen.',
@@ -223,6 +238,8 @@ const en: typeof es = {
   incidentSend: 'Send',
   loginTitle: 'Driver sign-in',
   loginHelp: 'Scan your badge or type your user and password.',
+  trackingNoticeLogin: 'The bus position is sent to the office only while your shift is open.',
+  trackingNoticeStart: 'When you start the shift, the office sees the bus position until you end it.',
   serverHint: 'Server (technical support only)',
   selectTitle: 'Pick your bus and your line',
   selectHello: 'Hello, {name}',
@@ -238,6 +255,7 @@ const en: typeof es = {
   busNoGps: 'No GPS',
   serverChange: 'This code changes the server to {url}. Continue?',
   serverHttps: 'The server must start with https://',
+  gpsLastAppError: 'Last app failure',
   gpsLastError: 'Last error',
   gpsServiceTitle: 'Buses UTA: GPS on',
   gpsServiceBody: 'Sending the bus position',
@@ -282,6 +300,21 @@ export function t(key: Message): string {
 /** A message with values: tf('cabinStopsLeft', { n: 3 }). */
 export function tf(key: Message, values: Record<string, string | number>): string {
   return t(key).replace(/\{(\w+)\}/g, (all, name: string) => (name in values ? String(values[name]) : all));
+}
+
+/** The keys that come in a singular and a plural form: `moreNotice_one` and `moreNotice_other`. */
+export type PluralKey = Message extends infer K ? (K extends `${infer Base}_one` ? Base : never) : never;
+
+/**
+ * A message that depends on a count, with {n} filled in: tp('moreNotice', 1) is "1 aviso más".
+ * Kichwa has no plural marking in the draft, so it follows the Spanish rule.
+ */
+export function tp(key: PluralKey, n: number, values: Record<string, string | number> = {}): string {
+  let one = n === 1;
+  if (typeof Intl !== 'undefined' && typeof Intl.PluralRules === 'function') {
+    one = new Intl.PluralRules(lang === 'en' ? 'en' : 'es').select(n) === 'one';
+  }
+  return tf(`${key}_${one ? 'one' : 'other'}` as Message, { ...values, n });
 }
 
 function capitalize(text: string): string {

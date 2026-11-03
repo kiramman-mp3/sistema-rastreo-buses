@@ -1,9 +1,10 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { LANGS, messages } from '../i18n';
 import { persistLang, useLang } from '../i18n/LangProvider';
-import { Txt } from './cabin';
+import { Press, Txt } from './cabin';
 import { useTheme } from './ThemeProvider';
+import { border, shape, space } from './theme';
 
 export function LangSwitch() {
   const lang = useLang();
@@ -13,7 +14,7 @@ export function LangSwitch() {
       {LANGS.map((code) => {
         const on = lang === code;
         return (
-          <Pressable
+          <Press
             key={code}
             onPress={() => persistLang(code)}
             accessibilityRole="radio"
@@ -23,7 +24,7 @@ export function LangSwitch() {
             <Txt bold={on} size="small">
               {messages[code].lang_name}
             </Txt>
-          </Pressable>
+          </Press>
         );
       })}
     </View>
@@ -31,12 +32,12 @@ export function LangSwitch() {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   chip: {
     minHeight: 48,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    borderWidth: 2,
+    paddingHorizontal: space[4],
+    ...shape.control,
+    borderWidth: border.thin,
     justifyContent: 'center',
   },
 });
