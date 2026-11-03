@@ -1,19 +1,54 @@
-import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Fragment, useCallback, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../src/api/client';
+import type { Route, Vehicle } from '../src/api/types';
 import { GpsPermissionError } from '../src/gps/types';
 import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, Press, Screen, Txt } from '../src/ui/cabin';
-import { readableOn } from '../src/ui/contrast';
+import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
+import { BusOption, RouteOption } from '../src/ui/OptionRows';
 import { useTheme } from '../src/ui/ThemeProvider';
 import { shape, space } from '../src/ui/theme';
+
+type OptionListProps<T> = {
+  items: T[];
+  flow: boolean;
+  extraData: unknown;
+  empty: ReactNode;
+  renderRow: (item: T) => ReactElement;
+};
+
+/**
+ * A virtualised list: only the rows on screen are mounted. With a large system font the whole page scrolls
+ * instead, so the rows are drawn in a plain view (the page's scroll view owns the gesture).
+ */
+function OptionList<T extends { id: number }>({ items, flow, extraData, empty, renderRow }: OptionListProps<T>) {
+  if (flow) {
+    return (
+      <View style={styles.list}>
+        {empty}
+        {items.map((item) => (
+          <Fragment key={item.id}>{renderRow(item)}</Fragment>
+        ))}
+      </View>
+    );
+  }
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => String(item.id)}
+      renderItem={({ item }) => renderRow(item)}
+      extraData={extraData}
+      ListHeaderComponent={<>{empty}</>}
+      contentContainerStyle={styles.list}
+    />
+  );
+}
 
 export default function Select() {
   useLang();
@@ -36,13 +71,12 @@ export default function Select() {
   const [error, setError] = useState('');
   const offline = session.snapshot.offline;
 
-  // With a large system font the page scrolls as a whole; otherwise each list scrolls on its own.
-  const renderList = (children: ReactNode) =>
-    layout.largeText ? (
-      <View style={styles.list}>{children}</View>
-    ) : (
-      <ScrollView contentContainerStyle={styles.list}>{children}</ScrollView>
-    );
+  // Stable, so the memoised rows only redraw when their own mark changes.
+  const pickBus = useCallback((bus: Vehicle) => {
+    setVehicleId(bus.id);
+    if (bus.route_id) setRouteId(bus.route_id);
+  }, []);
+  const pickRoute = useCallback((route: Route) => setRouteId(route.id), []);
 
   // A driver who already has an open shift belongs on the shift screen.
   useEffect(() => {
@@ -129,77 +163,38 @@ export default function Select() {
           <Txt size="small" dim>
             {t('chooseBus')}
           </Txt>
-          {renderList(
-            <>
-            {vehicles.length === 0 ? (
-              <Notice item={{ key: 'no-buses', tone: 'warn', title: t('noBuses'), live: 'polite' }} />
-            ) : null}
-            {vehicles.map((bus) => {
-              const on = vehicleId === bus.id;
-              return (
-                <Press
-                  key={bus.id}
-                  disabled={!usable(bus)}
-                  onPress={() => {
-                    setVehicleId(bus.id);
-                    if (bus.route_id) setRouteId(bus.route_id);
-                  }}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on, disabled: !usable(bus) }}
-                  style={[
-                    styles.option,
-                    { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel, opacity: usable(bus) ? 1 : 0.45 },
-                  ]}
-                >
-                  <Txt bold size="data" color={on ? palette.ground : palette.ink}>
-                    {bus.name}
-                  </Txt>
-                  <Txt size="small" color={on ? palette.ground : palette.ink2}>
-                    {!bus.available
-                      ? `${bus.plate} · ${t('busTaken')}`
-                      : bus.has_gps === false
-                        ? `${bus.plate} · ${t('busNoGps')}`
-                        : bus.plate}
-                  </Txt>
-                </Press>
-              );
-            })}
-            </>,
-          )}
+          <OptionList
+            items={vehicles}
+            flow={layout.largeText}
+            extraData={vehicleId}
+            empty={
+              vehicles.length === 0 ? (
+                <Notice item={{ key: 'no-buses', tone: 'warn', title: t('noBuses'), live: 'polite' }} />
+              ) : null
+            }
+            renderRow={(bus) => (
+              <BusOption bus={bus} selected={vehicleId === bus.id} usable={usable(bus)} hit={layout.hit} onPick={pickBus} />
+            )}
+          />
         </View>
 
         <View style={[styles.column, layout.largeText && styles.unfilled]}>
           <Txt size="small" dim>
             {t('chooseRoute')}
           </Txt>
-          {renderList(
-            <>
-            {routes.length === 0 ? (
-              <Notice item={{ key: 'no-routes', tone: 'warn', title: t('noRoutes'), live: 'polite' }} />
-            ) : null}
-            {routes.map((route) => {
-              const on = routeId === route.id;
-              return (
-                <Press
-                  key={route.id}
-                  onPress={() => setRouteId(route.id)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on }}
-                  style={[styles.option, styles.routeOption, { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel }]}
-                >
-                  <View style={[styles.chip, { backgroundColor: route.color || palette.accent }]}>
-                    <Txt bold size="body" color={readableOn(route.color || palette.accent)}>
-                      {route.code}
-                    </Txt>
-                  </View>
-                  <Txt bold size="body" color={on ? palette.ground : palette.ink} lines={2} style={styles.routeName}>
-                    {route.name}
-                  </Txt>
-                </Press>
-              );
-            })}
-            </>,
-          )}
+          <OptionList
+            items={routes}
+            flow={layout.largeText}
+            extraData={routeId}
+            empty={
+              routes.length === 0 ? (
+                <Notice item={{ key: 'no-routes', tone: 'warn', title: t('noRoutes'), live: 'polite' }} />
+              ) : null
+            }
+            renderRow={(route) => (
+              <RouteOption route={route} selected={routeId === route.id} hit={layout.hit} onPick={pickRoute} />
+            )}
+          />
         </View>
       </View>
 
@@ -286,27 +281,5 @@ const styles = StyleSheet.create({
   list: {
     gap: space[2],
     paddingBottom: space[2],
-  },
-  option: {
-    ...shape.control,
-    paddingHorizontal: space[5],
-    paddingVertical: space[3],
-    justifyContent: 'center',
-  },
-  routeOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[4],
-  },
-  chip: {
-    minWidth: 56,
-    minHeight: 44,
-    paddingHorizontal: space[3],
-    ...shape.control,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  routeName: {
-    flex: 1,
   },
 });
