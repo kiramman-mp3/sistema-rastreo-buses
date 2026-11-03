@@ -52,28 +52,29 @@ def center(node):
     return (left + right) // 2, (top + bottom) // 2
 
 
-def find(*needles):
+def find(*needles, clickable=False):
+    """The first element whose text or description holds a needle (only clickable ones to tap)."""
     for node in ui_nodes():
+        if clickable and node.get('clickable') != 'true':
+            continue
         label = (node.get('text') or '') + '|' + (node.get('content-desc') or '')
         if any(n.lower() in label.lower() for n in needles):
             return node
     return None
 
 
-def wait_for(*needles, seconds=20):
+def wait_for(*needles, seconds=20, clickable=False):
     end = time.time() + seconds
     while time.time() < end:
-        node = find(*needles)
+        node = find(*needles, clickable=clickable)
         if node is not None:
             return node
         time.sleep(1)
-    return None
+    raise RuntimeError('did not appear: ' + ' / '.join(needles))
 
 
 def tap(*needles, seconds=20):
-    node = wait_for(*needles, seconds=seconds)
-    if node is None:
-        raise RuntimeError('not on screen: ' + ' / '.join(needles))
+    node = wait_for(*needles, seconds=seconds, clickable=True)
     x, y = center(node)
     adb('shell', 'input', 'tap', str(x), str(y))
 
@@ -93,8 +94,7 @@ def shot(folder, name):
 
 def walk(folder, prefix):
     """One pass through the app. Starts on the login screen, ends signed out."""
-    if wait_for('Ingresar manualmente', 'Usuario', seconds=40) is None:
-        raise RuntimeError('the login screen did not appear (is Expo running and the app open?)')
+    wait_for('Ingresar manualmente', seconds=60)  # is Expo running and the app open?
     shot(folder, f'{prefix}-login')
     type_into('Usuario', 'chofer')
     type_into('Contraseña', 'clave')
@@ -102,13 +102,16 @@ def walk(folder, prefix):
     tap('Entrar')
     wait_for('Iniciar turno', 'Elige tu bus', 'Elige el bus', seconds=30)
     shot(folder, f'{prefix}-select')
-    if find('Iniciar turno') is not None:
+    if find('Iniciar turno', clickable=True) is not None:
         tap('Iniciar turno')
-        permission = wait_for('Permitir', 'Allow', 'Mientras la app', 'While using', 'Próxima parada', seconds=25)
-        if permission is not None and 'rxima' not in (permission.get('text') or ''):
-            x, y = center(permission)
-            adb('shell', 'input', 'tap', str(x), str(y))
-        wait_for('Próxima parada', 'Terminar turno', seconds=30)
+        end = time.time() + 45
+        while time.time() < end and find('Próxima parada') is None:
+            button = find('Permitir', 'Allow', 'Mientras la app', 'While using', clickable=True)
+            if button is not None:  # the location permission dialog, once or twice
+                x, y = center(button)
+                adb('shell', 'input', 'tap', str(x), str(y))
+            time.sleep(1.5)
+        wait_for('Próxima parada', seconds=10)
         shot(folder, f'{prefix}-shift')
         tap('Avisar un problema', 'Avisar')
         wait_for('Volver al turno', seconds=15)

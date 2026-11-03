@@ -54,14 +54,15 @@ Las fases 33 y 34 pueden ir en paralelo (tocan archivos distintos salvo `cabin.t
 
 Objetivo: poder ver el turno, las alertas y los casos extremos sin tocar datos reales. Lo hecho hasta ahora creó un turno y una alerta "Fuera de ruta" en producción.
 
-1. Levantar Odoo local con datos de `scripts/dev_seed.py` (`chofer1` con turno abierto, `chofer2` sin turno). Añadir una variante `--peor-caso` con nombres largos de ruta y de bus, una sola parada, cero buses libres, y alertas `off_route` y SOS abiertos (técnica de break-ui: datos reales y límites del esquema, nada aleatorio).
-2. Apuntar el emulador a `http://<IP de la PC>:8070`. Si Android bloquea el tráfico sin cifrar en Expo Go, anotar el ajuste en la guía; en builds de producción sigue siendo solo https.
-3. Crear `qa/capturas_movil.py` a partir de `qa/capturas_tablet.py`: matriz de **4 tamaños** (390×844, 844×390, 800×1280, 1280×800) × **pantallas** (login, selección, turno, incidente, GPS) × **día y noche** × **datos normales y peor caso**, guardando en `docs/calidad/evidencias/movil/`.
-4. Crear `qa/capturas_android.sh` para el emulador: `wm size/density` para los cuatro tamaños, `font_scale` 1,0 / 1,3 / 2,0, `adb exec-out screencap`, y un `trap` que **siempre** restaura tamaño, densidad y escala. Documentar el interruptor de LDPlayer ("Abrir conexión remota") y que Expo Go se abre con `--go`.
-5. Documentar las trampas conocidas: Metro no recarga en la ruta con "ó" (reiniciar el servidor en cada prueba), un `cd` fallido corta las cadenas con `&&`, y Expo Go muestra "runtime not ready" al reabrir (forzar el cierre).
-6. **Capturas base** de todo antes de tocar nada, para comparar antes y después.
+**Cambio respecto al plan original:** no se levantó Odoo con Docker (el daemon no corría y la imagen, la base y la siembra pesan mucho). Se escribió un **servidor simulado de la API del chofer**, que además permite el peor caso de forma determinista. Odoo sigue siendo la referencia: los tests de Python del backend se ejecutan en el CI.
 
-Terminado cuando: un solo comando genera la matriz completa y otro la del emulador, y la base queda commiteada.
+1. `qa/mock_driver_api.py`: API del chofer con escenarios `normal`, `worst` (nombres largos, 9 buses, 12 paradas largas, alerta de ruta y SOS ya visto, ruta amarilla y ruta blanca), `onestop`, `empty` y `busy`, conmutables en caliente (`POST /__scenario`). Acepta cualquier login. El detalle de la alerta sigue el `lang` que mande la app.
+2. `qa/capturas_movil.py`: matriz web de 4 tamaños (390×844, 844×390, 800×1280, 1280×800) × pantallas × día y noche × escenarios, con comprobación de desborde horizontal y errores de página. Genera 88 capturas.
+3. `qa/capturas_android.py`: recorre el flujo real en el emulador (login, selección, turno, incidente, GPS, terminar, salir) por tamaño y escala de fuente, nunca pulsa SOS y **siempre restaura** tamaño, densidad y escala. Borra los datos de Expo Go al empezar para que no quede guardada la dirección de producción.
+4. Trampas documentadas en los propios scripts: Metro no recarga en la ruta con "ó" (reiniciar el servidor en cada corrida), LDPlayer necesita "Abrir conexión remota", y Expo Go se abre con `--go`.
+5. Las capturas base se guardan **fuera del repo** (≈90 PNG); solo se versionará evidencia final seleccionada en `docs/calidad/evidencias/movil/`.
+
+Resultado de la base: 88 capturas web sin desbordes ni errores. En el peor caso la alerta de ruta y el SOS **no se ven** en horizontal ni en Android (quedan bajo el pliegue), y el chip de una ruta amarilla lleva texto blanco casi ilegible.
 
 ## Fase 33: avisos siempre visibles e idioma de las alertas
 
