@@ -136,6 +136,11 @@ body.o_bus_site {
     flex: none;
 }
 
+.marca-bus {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 .cabecera nav {
     display: flex;
     align-items: center;
@@ -158,6 +163,12 @@ body.o_bus_site {
     text-decoration-color: var(--senal);
     text-decoration-thickness: 4px;
     text-underline-offset: 0.35em;
+}
+
+.cabecera-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }
 
 .idiomas {
@@ -190,6 +201,39 @@ body.o_bus_site {
     font-weight: 700;
 }
 
+.boton-acceso {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 40px;
+    padding: 0 0.95rem;
+    border: 1.5px solid var(--granate);
+    border-radius: var(--radio);
+    background: var(--granate);
+    color: var(--blanco) !important;
+    font-family: var(--display);
+    font-size: var(--t-1);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--rapido) var(--facil), border-color var(--rapido) var(--facil), transform var(--rapido) var(--facil);
+}
+
+.boton-acceso:hover {
+    background: var(--granate-osc);
+    border-color: var(--granate-osc);
+}
+
+.boton-acceso:active {
+    transform: scale(0.97);
+}
+
+.boton-acceso svg {
+    flex: none;
+}
+
 @media (max-width: 640px) {
     .cabecera .marco {
         gap: 0.25rem 1rem;
@@ -209,8 +253,19 @@ body.o_bus_site {
         margin-left: 0;
     }
 
-    .idiomas {
+    .cabecera-acciones {
         margin-left: auto;
+    }
+}
+
+@media (max-width: 440px) {
+    .boton-acceso span {
+        display: none;
+    }
+
+    .boton-acceso {
+        padding: 0 0.65rem;
+        min-width: 40px;
     }
 }
 
