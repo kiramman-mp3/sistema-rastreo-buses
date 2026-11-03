@@ -90,16 +90,19 @@ def scroll(direction):
 
 
 def tap(*needles, seconds=20):
-    """Tap the element; a page that scrolls (large text) is scrolled until the element shows up."""
+    """Tap the element; a page that scrolls (large text) is scrolled down, then back up, until it shows up."""
     node = None
-    for attempt in range(6):
+    moves = ['down'] * 3 + ['up'] * 6
+    for move in [None] + moves:
+        if move:
+            scroll(move)
         try:
-            node = wait_for(*needles, seconds=4 if attempt < 5 else seconds, clickable=True)
+            node = wait_for(*needles, seconds=4, clickable=True)
             break
         except RuntimeError:
-            if attempt == 5:
-                raise
-            scroll('down')
+            continue
+    if node is None:
+        node = wait_for(*needles, seconds=seconds, clickable=True)  # raises with the names that were missing
     x, y = center(node)
     adb('shell', 'input', 'tap', str(x), str(y))
 
