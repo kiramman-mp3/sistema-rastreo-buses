@@ -89,18 +89,20 @@ def scroll(direction):
     time.sleep(0.8)
 
 
-def tap(*needles, seconds=20):
-    """Tap the element; a page that scrolls (large text) is scrolled down, then back up, until it shows up."""
-    node = None
-    moves = ['down'] * 3 + ['up'] * 6
-    for move in [None] + moves:
+def locate(*needles, seconds=4):
+    """The clickable element, or None. A page that scrolls (large text) is scrolled down, then back up."""
+    for move in [None] + ['down'] * 3 + ['up'] * 6:
         if move:
             scroll(move)
         try:
-            node = wait_for(*needles, seconds=4, clickable=True)
-            break
+            return wait_for(*needles, seconds=seconds, clickable=True)
         except RuntimeError:
             continue
+    return None
+
+
+def tap(*needles, seconds=20):
+    node = locate(*needles)
     if node is None:
         node = wait_for(*needles, seconds=seconds, clickable=True)  # raises with the names that were missing
     x, y = center(node)
@@ -130,7 +132,7 @@ def walk(folder, prefix):
     tap('Entrar')
     wait_for('Iniciar turno', 'Elige tu bus', 'Elige el bus', seconds=30)
     shot(folder, f'{prefix}-select')
-    if find('Iniciar turno', clickable=True) is not None:
+    if locate('Iniciar turno', seconds=3) is not None:
         tap('Iniciar turno')
         end = time.time() + 45
         while time.time() < end and find('Próxima parada') is None:
