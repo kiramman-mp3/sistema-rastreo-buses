@@ -70,4 +70,13 @@ describe('driver API client', () => {
       expect((error as ApiError).code).toBe('no_gps');
     }
   });
+
+  test('asks for the state in the language of the app', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(json(200, { stops: [], alerts: [] }));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: store(), fetch: fetchMock });
+    await client.state('es');
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ lang: 'es' });
+    await client.state();
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({});
+  });
 });
