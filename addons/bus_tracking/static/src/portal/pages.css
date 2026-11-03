@@ -692,6 +692,35 @@ a.fragmento-nombre:hover {
     white-space: nowrap;
 }
 
+/* ======================================================== Privacy */
+
+.pagina-privacidad {
+    max-width: calc(46rem + 2 * var(--margen));
+}
+
+.pagina-privacidad .encabezado-pagina h1 {
+    font-size: var(--t-4);
+}
+
+.bloque-privacidad {
+    margin-top: 2rem;
+}
+
+.bloque-privacidad h2 {
+    font-size: var(--t-3);
+    margin: 0 0 0.5rem;
+}
+
+.bloque-privacidad p,
+.bloque-privacidad li {
+    max-width: 68ch;
+    line-height: 1.55;
+}
+
+.bloque-privacidad ul {
+    padding-left: 1.25rem;
+}
+
 /* ======================================================== Write to transport */
 
 .pagina-escribir {
