@@ -65,6 +65,21 @@ class TestOdooLanguagePick(TransactionCase):
         for junk in (None, 'zz', 42, ['es'], {'es': 1}, ''):
             self.assertEqual(pick_odoo_lang(junk, ['es_EC'], fallback='x'), 'x')
 
+    def new_driver(self, login, **vals):
+        return self.env['res.users'].with_context(no_reset_password=True).create(dict({
+            'name': 'Chofer Nuevo', 'login': login, 'password': 'clave-segura-1', 'is_bus_driver': True}, **vals))
+
+    def test_a_new_driver_reads_spanish_when_it_is_installed(self):
+        self.env['res.lang']._activate_lang('es_EC')
+        self.assertEqual(self.new_driver('chofer-es').lang, 'es_EC')
+
+    def test_a_language_chosen_for_the_driver_is_kept(self):
+        self.env['res.lang']._activate_lang('es_EC')
+        self.assertEqual(self.new_driver('chofer-en', lang='en_US').lang, 'en_US')
+
+    def test_without_spanish_installed_the_driver_gets_the_default(self):
+        self.assertEqual(self.new_driver('chofer-def').lang, self.env.user.lang or 'en_US')
+
 
 @tagged('post_install', '-at_install')
 class TestTripProgress(TransactionCase):
@@ -224,6 +239,26 @@ class TestDriverShiftApi(HttpCase):
             resp = self.post(STATE, body, token=token)
             self.assertEqual(resp.status_code, 200, body)
             self.assertIn('alerts', resp.json())
+
+    def test_alert_details_follow_the_language_of_the_app(self):
+        """The Odoo user of the driver reads English; the app asks for Spanish, English or the Kichwa draft."""
+        self.env['res.lang']._activate_lang('es_EC')
+        token = self.token()
+        self.start(token)
+        self.env['bus.alert'].create({
+            'vehicle_id': self.bus.id, 'kind': 'off_route', 'start_time': fields.Datetime.now(),
+            'distance_m': 400.0, 'threshold': 150.0})
+        english = 'Up to 400 m away from its route (limit 150 m)'
+        spanish = 'Hasta 400 m fuera de su ruta (límite 150 m)'
+
+        def detail(body):
+            return self.post(STATE, body, token=token).json()['alerts'][0]['detail']
+
+        self.assertEqual(detail({'lang': 'es'}), spanish)
+        self.assertEqual(detail({'lang': 'qu'}), spanish)   # the Kichwa draft reads Spanish
+        self.assertEqual(detail({'lang': 'en'}), english)
+        self.assertEqual(detail({}), english)               # no language sent: the one of the Odoo user
+        self.assertEqual(detail({'lang': 'zz'}), english)   # not an app language: ignored
 
     def test_route_returns_stops_and_the_line_between_them(self):
         token = self.token()
