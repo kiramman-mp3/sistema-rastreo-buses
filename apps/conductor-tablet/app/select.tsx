@@ -231,6 +231,9 @@ export default function Select() {
       ) : (
         content
       )}
+      <Txt size="small" dim>
+        {t('trackingNoticeStart')}
+      </Txt>
       {startButton}
     </Screen>
   );
