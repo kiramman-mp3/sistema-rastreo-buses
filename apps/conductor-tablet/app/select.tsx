@@ -120,7 +120,7 @@ export default function Select() {
       <View
         style={[
           styles.columns,
-          !layout.wide && styles.columnsStack,
+          (!layout.wide || layout.largeText) && styles.columnsStack,
           layout.largeText && styles.unfilled,
           { gap: layout.gap },
         ]}
