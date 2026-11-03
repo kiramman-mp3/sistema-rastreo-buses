@@ -10,13 +10,16 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
-from ..models.utils import parse_traccar_dt, tile_url
+from ..models.utils import parse_traccar_dt, pick_odoo_lang, tile_url
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
 
 LOGIN_LIMIT = 10          # attempts per IP and per login, per minute and worker process
 login_limiter = RateLimiter(LOGIN_LIMIT, 60.0)
+CLIENT_ERROR_LIMIT = 20   # reports per driver and minute and worker process: a crash loop must not flood the log
+error_limiter = RateLimiter(CLIENT_ERROR_LIMIT, 60.0)
+MESSAGE_MAX, STACK_MAX, SHORT_MAX = 500, 3000, 60
 INCIDENT_KIND = {key for key, _label in INCIDENT_KINDS}
 
 
@@ -220,6 +223,9 @@ class BusDriverApi(http.Controller):
         ])
         sos = request.env['bus.incident'].sudo().search(
             [('shift_id', '=', shift.id), ('kind', '=', 'sos')], order='create_date desc', limit=1)
+        # The alert details read in the language of the app, not in the one of the Odoo user.
+        installed = request.env['res.lang'].sudo().search([('active', '=', True)]).mapped('code')
+        lang = pick_odoo_lang((read_body() or {}).get('lang'), installed, fallback=user.lang)
         return json_response({
             'shift': self._shift_payload(shift),
             # The last SOS of this shift and whether someone in the office saw it.
@@ -243,7 +249,7 @@ class BusDriverApi(http.Controller):
                 'id': alert.id,
                 'kind': alert.kind,
                 'state': alert.state,
-                'detail': alert.with_context(lang=user.lang).detail or '',
+                'detail': alert.with_context(lang=lang).detail or '',
                 'start': utc_z(alert.start_time),
             } for alert in alerts],
         })
@@ -273,6 +279,41 @@ class BusDriverApi(http.Controller):
             'lines': route._map_lines(),
             'tile_url': tile_url(request.env),
         })
+
+    @http.route('/bus_tracking/driver/client_error', type='http', auth='public', methods=['POST'], csrf=False)
+    def client_error(self, **kwargs):
+        """A crash or failure inside the tablet app, for the operators: it goes to the Odoo log.
+
+        It does not need an open shift (an app that crashes at login must be able to say so) and it never
+        stores anything: the log line is what support reads (`grep "Tablet error"`).
+        """
+        user, err = self._auth()
+        if err:
+            return err
+        if not error_limiter.allow(user.id):
+            return json_response({'error': 'too_many_requests'}, 429)
+        body = read_body()
+        if body is None:
+            return json_response({'error': 'bad_request'}, 400)
+        message, stack = body.get('message'), body.get('stack') or ''
+        app, screen = body.get('app') or '', body.get('screen') or ''
+        if not isinstance(message, str) or not message.strip() or len(message) > MESSAGE_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+        if not isinstance(stack, str) or len(stack) > STACK_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+        if not isinstance(app, str) or len(app) > SHORT_MAX or not isinstance(screen, str) or len(screen) > SHORT_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+
+        def one_line(text):
+            # Text from a phone cannot start a fake log line.
+            return ' '.join(text.split())
+
+        shift = self._active_shift(user)
+        _logger.warning(
+            'Tablet error: driver=%s bus=%s app=%s screen=%s message=%s stack=%s',
+            user.login, shift.vehicle_id.name if shift else '-', one_line(app) or '-', one_line(screen) or '-',
+            one_line(message), one_line(stack) or '-')
+        return json_response({'ok': True})
 
     @http.route('/bus_tracking/driver/incident', type='http', auth='public', methods=['POST'], csrf=False)
     def incident(self, **kwargs):

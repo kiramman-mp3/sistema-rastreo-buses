@@ -4,7 +4,7 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 
 ## Qué necesitas
 
-- Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app.
+- Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app: la pantalla se adapta al celular y funciona de pie o acostado.
 - Datos móviles o Wi-Fi del bus.
 - Tu **Credencial QR de Chofer** asignada por el administrador en Odoo (menú *Choferes*), o tu usuario y contraseña de chofer. Esa cuenta sólo sirve en la tableta: no abre el panel de Odoo. No es el identificador de Traccar: ese dato no se escribe a mano.
 - La app instalada como APK (no hace falta Play Store). Expo Go no sirve: el GPS de fondo necesita el APK de desarrollo o de producción.
@@ -28,7 +28,8 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 7. **SOS**: mantén presionado un segundo y medio (así un bache no lo dispara). Sin red dice "SOS guardado"; en cuanto llega a la oficina cambia a "SOS enviado. Esperando a la central." y, cuando alguien lo ve, muestra quién y a qué hora. Un SOS sin atender no desaparece del mapa de la oficina.
 8. El botón **Día / Noche** cambia los colores (el modo día se lee mejor al sol). Si lo dejas presionado, vuelve al cambio automático por la hora.
 9. Al terminar, pulsa **Terminar turno** y confirma. Ahí se corta el GPS, **aunque no haya señal**: la app avisa a la oficina apenas vuelva la red (y si nunca vuelve, Odoo cierra el turno solo a las 14 horas). Antes de apagarse, el GPS intenta enviar los puntos guardados. **Cerrar sesión** también detiene el GPS en esa tableta.
-10. Si abres la app sin señal, tu sesión sigue abierta y el GPS sigue guardando; la app vuelve a intentar sola.
+10. Si usas letra grande en Android, la pantalla del turno se desplaza hacia abajo: los avisos importantes siempre están arriba y los botones **Avisar un problema**, **SOS** y **Terminar turno** quedan al final. La pantalla se puede girar: vale de pie o acostada, en celular o tableta.
+11. Si abres la app sin señal, tu sesión sigue abierta y el GPS sigue guardando; la app vuelve a intentar sola.
 
 Si cierras la app sin terminar el turno, el servicio en primer plano sigue enviando posición hasta que termines el turno. Si la oficina cierra tu turno o revoca la tableta, la app apaga el GPS en cuanto se entera (en unos segundos con señal) y vuelve a *Elegir bus*; Odoo, además, descarta cualquier posición de un bus sin turno abierto.
 

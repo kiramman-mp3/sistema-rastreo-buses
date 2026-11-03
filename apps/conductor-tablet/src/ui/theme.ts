@@ -66,6 +66,24 @@ export const sizes = {
   stop: 60,
 };
 
+/** Phones are held closer than a dashboard tablet: smaller steps, but still large and never under 16. */
+export const sizesPhone: typeof sizes = {
+  small: 16,
+  body: 18,
+  data: 24,
+  title: 30,
+  stop: 40,
+};
+
+/** Spacing on a 4 px grid, so nothing is placed by eye: space[2] is 8, space[4] is 16. */
+export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 12: 48 } as const;
+
+/** Lines around controls and marks. */
+export const border = { thin: 2, mark: 3, round: 999 } as const;
+
+/** One corner for every control. `continuous` is the smooth corner of iOS and changes nothing on Android. */
+export const shape = { control: { borderRadius: 8, borderCurve: 'continuous' } } as const;
+
 export const fonts = {
   text: 'Atkinson-Regular',
   bold: 'Atkinson-Bold',

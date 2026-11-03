@@ -1,0 +1,17 @@
+title = "rastreo-buses secret scan"
+
+[extend]
+useDefault = true
+
+# The CARTO key travels in the address of every map tile: any browser or tablet that shows the map has to
+# send it, so it can never be secret (docs/OPERACION.md, "Secretos"). Only the lines that hold that address
+# are allowed, not whole files. Limit: a real secret written on the same line as that address would not be
+# reported either, so keep the tile address on a line of its own.
+[allowlist]
+description = "Public CARTO tile key inside the tile address"
+regexTarget = "line"
+regexes = [
+  '''basemaps\.cartocdn\.com/rastertiles/voyager/[^'" ]*\?key=''',
+  # models/utils.py continues the address on the next line (it must fit 120 columns): only that exact shape.
+  '''^\s*'\?key=[A-Za-z0-9_.~-]+'\)\s*$''',
+]

@@ -1,6 +1,6 @@
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/PLAN-UI-MOVIL.md`). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -34,8 +34,16 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-024 | 02-nov-2026 | Auditoría integral (TAB-01) | Cuando la oficina cerraba el turno, la tableta seguía enviando el GPS | apps/conductor-tablet/app/shift.tsx, src/state/session.ts | Cerrado |
 | DEF-025 | 02-nov-2026 | Auditoría integral (TAB-02) | Sin red o con el turno ya cerrado, el chofer no podía terminar el turno | apps/conductor-tablet/src/state/session.ts | Cerrado |
 | DEF-026 | 02-nov-2026 | Auditoría integral (OPS-02) | El CI no corría la suite de Odoo ni el linter de la tableta | .github/workflows/ci.yml | Cerrado |
+| DEF-027 | 02-nov-2026 | Auditoría de diseño móvil (P1) | El SOS y las alertas abiertas quedaban fuera de la vista en horizontal y en Android | apps/conductor-tablet/app/shift.tsx | Cerrado |
+| DEF-028 | 02-nov-2026 | Auditoría de diseño móvil (P2) | El detalle de las alertas salía en el idioma del usuario de Odoo y no en el de la app | controllers/driver_api.py, models/res_users.py | Cerrado |
+| DEF-029 | 02-nov-2026 | Auditoría de diseño móvil (P2) | Ninguna acción que confirma algo daba respuesta háptica, aunque DISENO.md la prometía | apps/conductor-tablet/src/ui/cabin.tsx, app/shift.tsx, app/incident.tsx | Cerrado |
+| DEF-030 | 02-nov-2026 | Auditoría de diseño móvil (P2) | El relleno del SOS animaba en el hilo de JS y volvía de golpe al soltar | apps/conductor-tablet/src/ui/cabin.tsx | Cerrado |
+| DEF-031 | 02-nov-2026 | Auditoría de diseño móvil (P2) | El código de la línea llevaba texto blanco fijo sobre el color que elige la oficina (ilegible en amarillo o blanco) | apps/conductor-tablet/app/shift.tsx, app/select.tsx | Cerrado |
+| DEF-032 | 02-nov-2026 | Auditoría de diseño móvil (P2) | Había valores de espaciado fuera de la cuadrícula de 4 px y sin tokens | apps/conductor-tablet/app/*.tsx, src/ui/*.tsx | Cerrado |
+| DEF-033 | 02-nov-2026 | Auditoría de diseño móvil (P2) | Con la fuente del sistema al 130 % o más el turno se desbordaba y el SOS y Terminar turno quedaban inalcanzables | apps/conductor-tablet/app/shift.tsx, select.tsx, incident.tsx, gps.tsx | Cerrado |
+| DEF-034 | 02-nov-2026 | Auditoría de diseño móvil (P2) | La selección de bus y línea quedaba en blanco sin buses, sin líneas o con todos los buses en uso | apps/conductor-tablet/app/select.tsx | Cerrado |
 
-Resumen: 26 registrados, 25 cerrados (96 %), 1 abiertos. Densidad: 9,1 defectos por KLOC (2,871 KLOC de Python sin pruebas).
+Resumen: 34 registrados, 33 cerrados (97 %), 1 abiertos. Densidad: 11,8 defectos por KLOC (2,871 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -194,6 +202,54 @@ Resumen: 26 registrados, 25 cerrados (96 %), 1 abiertos. Densidad: 9,1 defectos 
 - **Causa raíz:** Se configuró sólo una revisión de sintaxis; los conteos de pruebas de la documentación no se verificaban.
 - **Categoría:** Configuración
 - **Prueba que lo protege:** Job odoo-tests y lint de la tableta en el CI
+
+### DEF-027: El SOS y las alertas abiertas quedaban fuera de la vista en horizontal y en Android
+
+- **Causa raíz:** Los avisos vivían dentro del bloque que hace scroll y se medían solo con datos de ejemplo cortos.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** notices.test.ts y capturas del escenario de peor caso (qa/capturas_movil.py)
+
+### DEF-028: El detalle de las alertas salía en el idioma del usuario de Odoo y no en el de la app
+
+- **Causa raíz:** La API traducía con el idioma del usuario y la app no enviaba el suyo.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** TestOdooLanguagePick y test_state_accepts_the_app_language_and_ignores_nonsense
+
+### DEF-029: Ninguna acción que confirma algo daba respuesta háptica, aunque DISENO.md la prometía
+
+- **Causa raíz:** La promesa del documento no tenía una tarea ni una prueba que la cubriera.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** haptics.test.ts (la sensación se juzga en un dispositivo real)
+
+### DEF-030: El relleno del SOS animaba en el hilo de JS y volvía de golpe al soltar
+
+- **Causa raíz:** Se animó el ancho con el driver de JS, sin una lógica de mantener probada aparte.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** hold.test.ts y prueba en el emulador (mantener 1,1 s no dispara)
+
+### DEF-031: El código de la línea llevaba texto blanco fijo sobre el color que elige la oficina (ilegible en amarillo o blanco)
+
+- **Causa raíz:** Se dio por hecho que el color de la línea sería siempre oscuro.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** contrast.test.ts y qa/contraste.py (chips de línea)
+
+### DEF-032: Había valores de espaciado fuera de la cuadrícula de 4 px y sin tokens
+
+- **Causa raíz:** Cada pantalla escribía sus números a ojo y nada lo comprobaba.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** spacing.test.ts
+
+### DEF-033: Con la fuente del sistema al 130 % o más el turno se desbordaba y el SOS y Terminar turno quedaban inalcanzables
+
+- **Causa raíz:** Las pantallas se diseñaron para encajar en una vista y solo se probaron con el tamaño de letra por defecto.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** layout.test.ts y qa/capturas_android.py con font_scale 1,3 y 2,0
+
+### DEF-034: La selección de bus y línea quedaba en blanco sin buses, sin líneas o con todos los buses en uso
+
+- **Causa raíz:** No se pensó el estado vacío ni el caso de flota ocupada.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** Capturas de los escenarios empty y busy de qa/capturas_movil.py
 
 ## 3. Qué falta para cerrar los abiertos
 

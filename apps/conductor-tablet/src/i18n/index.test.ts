@@ -1,4 +1,4 @@
-import { alertLabel, getLang, LANGS, messages, setLang, t } from './index';
+import { alertLabel, getLang, LANGS, messages, setLang, t, tp } from './index';
 
 describe('driver i18n', () => {
   afterEach(() => setLang('es'));
@@ -31,5 +31,26 @@ describe('driver i18n', () => {
     setLang('en');
     expect(alertLabel('speeding')).toBe('Speeding');
     expect(getLang()).toBe('en');
+  });
+
+  test('plurals pick the singular for exactly one and the plural otherwise', () => {
+    setLang('es');
+    expect(tp('moreNotice', 1)).toBe('1 aviso más');
+    expect(tp('moreNotice', 0)).toBe('0 avisos más');
+    expect(tp('moreNotice', 3)).toBe('3 avisos más');
+    setLang('en');
+    expect(tp('moreNotice', 1)).toBe('1 more notice');
+    expect(tp('moreNotice', 2)).toBe('2 more notices');
+    setLang('qu');
+    expect(tp('moreNotice', 2)).toBe('2 avisos más');
+  });
+
+  test('every singular form has its plural form in every language', () => {
+    const singular = Object.keys(messages.es).filter((key) => key.endsWith('_one'));
+    for (const code of LANGS) {
+      for (const key of singular) {
+        expect(Object.keys(messages[code])).toContain(key.replace(/_one$/, '_other'));
+      }
+    }
   });
 });

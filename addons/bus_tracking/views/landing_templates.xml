@@ -56,6 +56,7 @@
                     <nav t-att-aria-label="s['footer_what']">
                         <a href="/rutas" t-esc="s['nav_lines']"/>
                         <a href="/quejas" t-esc="s['nav_write']"/>
+                        <a t-att-href="privacy_link or '/privacidad'" t-esc="s['privacy_more']"/>
                         <a t-if="contact and contact['phone']" t-attf-href="tel:#{contact['phone_href']}" t-esc="contact['phone']"/>
                         <a t-if="contact and contact['email']" t-attf-href="mailto:#{contact['email']}" t-esc="contact['email']"/>
                         <a href="/web/login" t-esc="s['staff']"/>

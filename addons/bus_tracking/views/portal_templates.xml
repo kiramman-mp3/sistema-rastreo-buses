@@ -213,6 +213,32 @@
         </t>
     </template>
 
+    <!-- Privacy (/privacidad): the text comes from models/privacy_text.py, with the retention periods of Settings. -->
+    <template id="privacy_page" name="Passenger portal: privacy">
+        <t t-call="web.layout">
+            <t t-set="title"><t t-esc="s['privacy_more']"/> · <t t-esc="brand"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
+            <t t-call="bus_tracking.portal_header"/>
+
+            <main id="contenido" class="marco pagina-privacidad">
+                <div class="encabezado-pagina">
+                    <h1 t-esc="s['privacy_more']"/>
+                </div>
+                <section t-foreach="sections" t-as="section" class="bloque-privacidad">
+                    <h2 t-esc="section['title']"/>
+                    <p t-foreach="section['paragraphs']" t-as="text" t-esc="text"/>
+                    <ul t-if="section['bullets']">
+                        <li t-foreach="section['bullets']" t-as="item" t-esc="item"/>
+                    </ul>
+                </section>
+            </main>
+
+            <t t-call="bus_tracking.portal_footer"/>
+        </t>
+    </template>
+
     <!-- Received (/quejas/gracias): the reference number is the one thing to keep. -->
     <template id="complaint_thanks" name="Passenger portal: complaint received">
         <t t-call="web.layout">
