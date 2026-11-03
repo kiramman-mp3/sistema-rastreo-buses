@@ -69,6 +69,32 @@ def public_contact(env):
     }
 
 
+# The driver app speaks Spanish, English and a Kichwa draft; Odoo names its languages differently
+# (es_EC, en_US...). Kichwa has no Odoo translation, so it reads in Spanish.
+APP_LANGUAGES = {
+    'es': ('es_EC', 'es_419', 'es_ES'),
+    'qu': ('es_EC', 'es_419', 'es_ES'),
+    'en': ('en_US', 'en_GB'),
+}
+
+
+def pick_odoo_lang(requested, installed, fallback=None):
+    """The installed Odoo language that matches the language the app asked for, else `fallback`.
+
+    `requested` comes from the request body: anything that is not one of the app languages is ignored.
+    """
+    if not isinstance(requested, str) or requested not in APP_LANGUAGES:
+        return fallback
+    for code in APP_LANGUAGES[requested]:
+        if code in installed:
+            return code
+    base = 'en' if requested == 'en' else 'es'
+    for code in sorted(installed):
+        if code.split('_')[0] == base:
+            return code
+    return fallback
+
+
 def fold(text):
     """Lowercase without accents, so "Pillaro" finds "Píllaro"."""
     text = unicodedata.normalize('NFKD', text or '')

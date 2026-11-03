@@ -5,6 +5,8 @@ from urllib.parse import urlencode
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
+from .utils import pick_odoo_lang
+
 _logger = logging.getLogger(__name__)
 
 
@@ -41,10 +43,15 @@ class ResUsers(models.Model):
         # groups along, so they are replaced, not added to.
         driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
+        # A new driver reads Spanish unless someone chose another language.
+        installed = self.env['res.lang'].sudo().search([('active', '=', True)]).mapped('code')
+        spanish = pick_odoo_lang('es', installed)
         for vals in vals_list:
             if driver_group and portal_group and vals.get(
                     'is_bus_driver', self.env.context.get('default_is_bus_driver')):
                 vals['groups_id'] = [(6, 0, [portal_group.id, driver_group.id])]
+                if spanish and not vals.get('lang'):
+                    vals['lang'] = spanish
             if vals.get('driver_password'):
                 vals['password'] = vals.pop('driver_password')
         return super(ResUsers, self.with_context(no_reset_password=True)).create(vals_list)

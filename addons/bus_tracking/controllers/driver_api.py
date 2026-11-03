@@ -10,7 +10,7 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
-from ..models.utils import parse_traccar_dt, tile_url
+from ..models.utils import parse_traccar_dt, pick_odoo_lang, tile_url
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
@@ -220,6 +220,9 @@ class BusDriverApi(http.Controller):
         ])
         sos = request.env['bus.incident'].sudo().search(
             [('shift_id', '=', shift.id), ('kind', '=', 'sos')], order='create_date desc', limit=1)
+        # The alert details read in the language of the app, not in the one of the Odoo user.
+        installed = request.env['res.lang'].sudo().search([('active', '=', True)]).mapped('code')
+        lang = pick_odoo_lang((read_body() or {}).get('lang'), installed, fallback=user.lang)
         return json_response({
             'shift': self._shift_payload(shift),
             # The last SOS of this shift and whether someone in the office saw it.
@@ -243,7 +246,7 @@ class BusDriverApi(http.Controller):
                 'id': alert.id,
                 'kind': alert.kind,
                 'state': alert.state,
-                'detail': alert.with_context(lang=user.lang).detail or '',
+                'detail': alert.with_context(lang=lang).detail or '',
                 'start': utc_z(alert.start_time),
             } for alert in alerts],
         })
