@@ -11,7 +11,7 @@ import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
 import { Notice } from '../src/ui/Notice';
-import { fonts } from '../src/ui/theme';
+import { border, fonts, shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Login() {
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   intro: {
     flex: 1,
-    gap: 14,
+    gap: space[3],
   },
   introStack: {
     flexGrow: 0,
@@ -163,16 +163,16 @@ const styles = StyleSheet.create({
   brand: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    marginBottom: 24,
+    gap: space[3],
+    marginBottom: space[6],
     alignSelf: 'flex-start',
   },
   langs: {
-    marginTop: 20,
+    marginTop: space[5],
   },
   card: {
-    borderRadius: 8,
-    gap: 14,
+    ...shape.control,
+    gap: space[3],
   },
   cardSide: {
     flex: 1,
@@ -185,15 +185,15 @@ const styles = StyleSheet.create({
   },
   or: {
     textAlign: 'center',
-    marginVertical: 4,
+    marginVertical: space[1],
   },
   input: {
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingHorizontal: 18,
+    borderWidth: border.thin,
+    ...shape.control,
+    paddingHorizontal: space[4],
     fontFamily: fonts.text,
   },
   server: {
-    gap: 6,
+    gap: space[2],
   },
 });
