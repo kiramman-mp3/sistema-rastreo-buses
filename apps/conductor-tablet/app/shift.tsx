@@ -170,14 +170,17 @@ export default function ShiftScreen() {
   const health = stale && gps.health === 'sending' ? 'saving' : gps.health;
 
   // Landscape puts the next stop beside the map; portrait stacks them (the map takes what is left).
-  const side = layout.landscape;
+  // With the system font at 130 % or more nothing fits one view: the whole page scrolls (header, notices,
+  // next stop, a map of fixed height, then the buttons), stacked in either orientation.
+  const pageScroll = layout.largeText;
+  const side = layout.landscape && !pageScroll;
   // A phone in portrait has no width for three buttons in a row: SOS on top, the other two below.
   const stackedActions = layout.phone && !layout.landscape;
   // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
-  const showStrip = !layout.short;
+  const showStrip = !layout.short || pageScroll;
   // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
   // has room for one, and a shorter detail; the rest is counted.
-  const noticeBlock = <NoticeList items={notices} max={layout.short ? 1 : 2} detailLines={layout.short ? 1 : 2} />;
+  const noticeBlock = <NoticeList items={notices} max={layout.short && !pageScroll ? 1 : 2} detailLines={layout.short && !pageScroll ? 1 : 2} />;
 
   const problem = (
     <Action
@@ -199,12 +202,8 @@ export default function ShiftScreen() {
     />
   );
 
-  const nextBlock = (
-    <ScrollView
-      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
-      contentContainerStyle={styles.leftContent}
-      showsVerticalScrollIndicator={false}
-    >
+  const nextContent = (
+    <>
       <Txt size="small" dim>
         {t('cabinNext')}
       </Txt>
@@ -229,6 +228,17 @@ export default function ShiftScreen() {
           <StopStrip stops={stops} color={color} />
         </View>
       ) : null}
+    </>
+  );
+  const nextBlock = pageScroll ? (
+    <View style={styles.leftContent}>{nextContent}</View>
+  ) : (
+    <ScrollView
+      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
+      contentContainerStyle={styles.leftContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {nextContent}
     </ScrollView>
   );
 
@@ -250,7 +260,7 @@ export default function ShiftScreen() {
   const tallHeader = layout.phone && !layout.landscape;
 
   return (
-    <Screen>
+    <Screen scroll={pageScroll}>
       {/* Header: bus and line, real GPS state, time, day or night */}
       <View style={[styles.header, { backgroundColor: palette.panel }]}>
         <View style={[styles.identity, tallHeader && styles.identityTall]}>
@@ -288,7 +298,9 @@ export default function ShiftScreen() {
 
       {side ? null : noticeBlock}
 
-      <View style={[styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}>
+      <View
+        style={[pageScroll ? null : styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}
+      >
         {/* Where the bus goes next. Beside the map the notices are pinned above it; the rest scrolls. */}
         {side ? (
           <View style={styles.left}>
@@ -300,7 +312,13 @@ export default function ShiftScreen() {
         )}
 
         {/* The map */}
-        <View style={[styles.map, side ? styles.mapSide : styles.mapStack, { backgroundColor: palette.panel }]}>
+        <View
+          style={[
+            styles.map,
+            pageScroll ? styles.mapFixed : side ? styles.mapSide : styles.mapStack,
+            { backgroundColor: palette.panel },
+          ]}
+        >
           <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
         </View>
       </View>
@@ -435,6 +453,9 @@ const styles = StyleSheet.create({
   },
   mapSide: {
     flex: 6,
+  },
+  mapFixed: {
+    height: 260,
   },
   mapStack: {
     flexGrow: 1,
