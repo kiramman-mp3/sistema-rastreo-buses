@@ -54,6 +54,27 @@ def ratio(a, b):
     return (la + 0.05) / (lb + 0.05)
 
 
+# The route chip of the tablet is painted with a colour the office picks in Odoo, so its text is not a
+# fixed token: the app chooses white or the dark ink (apps/conductor-tablet/src/ui/contrast.ts). Whatever
+# the colour, the better of the two must reach 4:1 (a mid grey is the worst case, about 4.06:1); the
+# listed colours are the ones the seed and the production lines use, which must reach 4.5:1.
+ROUTE_CHIPS = ['#7A1A22', '#1E5560', '#9A4A12', '#3D4F8A', '#3388FF', '#FFC62B', '#FFFFFF']
+
+
+def route_chip_failures():
+    failures = []
+    for value in range(0, 256, 5):
+        grey = '#%02x%02x%02x' % (value, value, value)
+        best = max(ratio(TOKENS['blanco'], grey), ratio(TOKENS['tinta'], grey))
+        if best < 4.0:
+            failures.append((grey, best, 4.0))
+    for color in ROUTE_CHIPS:
+        best = max(ratio(TOKENS['blanco'], color), ratio(TOKENS['tinta'], color))
+        if best < 4.5:
+            failures.append((color, best, 4.5))
+    return failures
+
+
 def main():
     failed = 0
     for fg, bg, target, use in PAIRS:
@@ -61,6 +82,12 @@ def main():
         ok = r >= target
         failed += not ok
         print('%-6s %5.2f:1 (min %.1f)  %-14s on %-12s %s' % ('OK' if ok else 'FALLA', r, target, fg, bg, use))
+    chips = route_chip_failures()
+    for color, best, target in chips:
+        print('FALLA %5.2f:1 (min %.1f)  route chip %s: neither white nor the ink reads on it' % (best, target, color))
+    failed += len(chips)
+    if not chips:
+        print('OK     route chips: white or ink reaches 4.5:1 on every line colour and 4:1 on any grey')
     return 1 if failed else 0
 
 

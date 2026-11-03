@@ -11,9 +11,9 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "eas:android:dev": "eas-cli build --profile development --platform android",
-    "eas:android": "eas-cli build --profile production --platform android",
-    "eas:ios:altstore": "eas build --profile ios-altstore --platform ios",
+    "eas:android:dev": "npx eas-cli build --profile development --platform android",
+    "eas:android": "npx eas-cli build --profile production --platform android",
+    "eas:ios:altstore": "npx eas-cli build --profile ios-altstore --platform ios",
     "eas-build-pre-install": "npm config set legacy-peer-deps true"
   },
   "jest": {
@@ -26,20 +26,21 @@
     "@expo/metro-runtime": "~58.0.16",
     "@react-native-async-storage/async-storage": "2.2.0",
     "babel-preset-expo": "~58.0.0",
-    "expo": "~58.0.21",
+    "expo": "~58.0.22",
     "expo-battery": "~58.0.3",
     "expo-camera": "~58.0.14",
     "expo-constants": "~58.0.14",
-    "expo-dev-client": "~58.0.17",
+    "expo-dev-client": "~58.0.18",
     "expo-font": "~58.0.11",
+    "expo-haptics": "~58.0.7",
     "expo-intent-launcher": "~58.0.3",
     "expo-keep-awake": "~58.0.3",
     "expo-linking": "~58.0.15",
     "expo-location": "~58.0.20",
-    "expo-router": "~58.0.28",
+    "expo-router": "~58.0.29",
     "expo-secure-store": "~58.0.2",
     "expo-status-bar": "~58.0.4",
-    "expo-task-manager": "~58.0.12",
+    "expo-task-manager": "~58.0.13",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-native": "0.88.1",
@@ -50,17 +51,24 @@
   },
   "devDependencies": {
     "@react-native/jest-preset": "^0.88.1",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
-    "eas-cli": "^27.2.0",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.0",
-    "jest": "^29.7.0",
+    "jest": "~30.5.2",
     "jest-expo": "~58.0.0",
     "typescript": "~6.0.3"
   },
   "overrides": {
     "react": "19.3.1",
     "react-dom": "19.3.1"
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "react",
+        "react-dom"
+      ]
+    }
   }
 }

@@ -61,12 +61,14 @@ class TestHttp(HttpCase):
         bus.write({'last_fix_time': fields.Datetime.now()})
         resp = self.url_open('/bus_tracking/health')
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json(), {'status': 'ok'})
+        self.assertEqual(resp.json()['status'], 'ok')
 
     def test_health_goes_stale_and_can_be_disabled(self):
         self.bus.write({'last_fix_time': fields.Datetime.now() - timedelta(minutes=11)})
         self.assertEqual(self.url_open('/bus_tracking/health').status_code, 503)
-        self.assertEqual(self.url_open('/bus_tracking/health').json(), {'status': 'stale'})
+        stale = self.url_open('/bus_tracking/health').json()
+        self.assertEqual(stale['status'], 'stale')
+        self.assertRegex(stale['version'], r'^16\.0\.\d+\.\d+\.\d+$')  # which release is running
         self.env['ir.config_parameter'].set_param('bus_tracking.stale_minutes', '30')
         self.assertEqual(self.url_open('/bus_tracking/health').status_code, 200)
         self.env['ir.config_parameter'].set_param('bus_tracking.stale_minutes', '0')

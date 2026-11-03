@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import type { IncidentKind } from '../src/api/types';
 import { readLastSample, readLastSent } from '../src/gps/store';
 import { t, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, HIT, Txt } from '../src/ui/cabin';
-import { fonts, sizes } from '../src/ui/theme';
+import { Action, Field, Press, Screen, Txt } from '../src/ui/cabin';
+import { hapticDone, hapticFail } from '../src/ui/haptics';
+import { useLayout } from '../src/ui/layout';
+import { Notice } from '../src/ui/Notice';
+import { border, shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 const KINDS: { key: IncidentKind; label: Message }[] = [
@@ -21,6 +24,7 @@ const KINDS: { key: IncidentKind; label: Message }[] = [
 export default function IncidentScreen() {
   useLang();
   const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const [kind, setKind] = useState<IncidentKind | null>(null);
   const [note, setNote] = useState('');
@@ -41,31 +45,35 @@ export default function IncidentScreen() {
       });
       setResult(outcome);
       setNote('');
+      hapticDone();
     } catch {
       setResult('error');
+      hapticFail();
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
-      <View style={styles.head}>
-        <Txt bold size="title">
-          {t('actionProblem')}
-        </Txt>
+    <Screen scroll>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
+        <View style={styles.headText}>
+          <Txt bold size="title">
+            {t('actionProblem')}
+          </Txt>
+        </View>
         <Action label={t('backToShift')} onPress={() => router.back()} kind="quiet" />
       </View>
 
-      <View style={styles.body}>
-        <View style={styles.kinds} accessibilityRole="radiogroup" accessibilityLabel={t('incidentWhat')}>
+      <View style={[styles.body, !layout.wide && styles.bodyStack, { gap: layout.gap + 8 }]}>
+        <View style={[styles.kinds, { gap: layout.gap }]} accessibilityRole="radiogroup" accessibilityLabel={t('incidentWhat')}>
           <Txt size="small" dim>
             {t('incidentWhat')}
           </Txt>
           {KINDS.map((item) => {
             const on = kind === item.key;
             return (
-              <Pressable
+              <Press
                 key={item.key}
                 onPress={() => {
                   setKind(item.key);
@@ -75,7 +83,7 @@ export default function IncidentScreen() {
                 accessibilityState={{ checked: on }}
                 style={[
                   styles.kind,
-                  { backgroundColor: on ? palette.ink : palette.panel },
+                  { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel },
                 ]}
               >
                 <View style={[styles.radio, { borderColor: on ? palette.signal : palette.ink2 }]}>
@@ -84,7 +92,7 @@ export default function IncidentScreen() {
                 <Txt bold size="data" color={on ? palette.ground : palette.ink}>
                   {t(item.label)}
                 </Txt>
-              </Pressable>
+              </Press>
             );
           })}
         </View>
@@ -93,31 +101,27 @@ export default function IncidentScreen() {
           <Txt size="small" dim>
             {t('incidentNote')}
           </Txt>
-          <TextInput
+          <Field
             value={note}
             onChangeText={setNote}
             placeholder={t('incidentNoteHint')}
-            placeholderTextColor={palette.ink2}
             maxLength={300}
             multiline
-            style={[
-              styles.input,
-              { backgroundColor: palette.field, color: palette.ink, borderColor: palette.ink2 },
-            ]}
+            style={[styles.input, { minHeight: layout.short ? 96 : 160 }]}
           />
           <Txt size="small" dim>
             {note.length} / 300
           </Txt>
 
           {result ? (
-            <View
-              style={[styles.result, { borderColor: result === 'error' ? palette.danger : palette.ok }]}
-              accessibilityLiveRegion="polite"
-            >
-              <Txt bold size="body" color={result === 'error' ? palette.danger : palette.ok}>
-                {result === 'sent' ? t('sent') : result === 'queued' ? t('queued') : t('network')}
-              </Txt>
-            </View>
+            <Notice
+              item={{
+                key: 'result',
+                tone: result === 'error' ? 'danger' : result === 'queued' ? 'warn' : 'ok',
+                title: result === 'sent' ? t('sent') : result === 'queued' ? t('queued') : t('network'),
+                live: 'polite',
+              }}
+            />
           ) : null}
 
           <Action
@@ -125,75 +129,69 @@ export default function IncidentScreen() {
             onPress={submit}
             kind="accent"
             disabled={busy || !kind}
-            style={styles.send}
+            style={layout.wide ? styles.send : undefined}
           />
         </View>
       </View>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    padding: 24,
-    gap: 20,
+  headText: {
+    flexShrink: 1,
+  },
+  // With a large system font the title and its button no longer fit side by side: the button goes below.
+  headStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   head: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: space[4],
   },
   body: {
     flex: 1,
     flexDirection: 'row',
-    gap: 24,
+  },
+  bodyStack: {
+    flexDirection: 'column',
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
   },
   kinds: {
     flex: 1,
-    gap: 12,
   },
   kind: {
-    minHeight: HIT + 8,
-    borderRadius: 8,
-    paddingHorizontal: 20,
+    ...shape.control,
+    paddingHorizontal: space[5],
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
+    gap: space[4],
   },
   radio: {
     width: 30,
     height: 30,
-    borderRadius: 15,
-    borderWidth: 3,
+    borderRadius: border.round,
+    borderWidth: border.mark,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioDot: {
     width: 14,
     height: 14,
-    borderRadius: 7,
+    borderRadius: border.round,
   },
   side: {
     flex: 1,
-    gap: 10,
+    gap: space[2],
   },
   input: {
-    minHeight: 160,
-    borderWidth: 2,
-    borderRadius: 8,
-    padding: 16,
-    fontSize: sizes.body,
-    fontFamily: fonts.text,
+    paddingVertical: space[4],
     textAlignVertical: 'top',
-  },
-  result: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderLeftWidth: 8,
   },
   send: {
     marginTop: 'auto',

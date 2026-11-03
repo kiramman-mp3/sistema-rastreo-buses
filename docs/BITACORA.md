@@ -1017,3 +1017,84 @@ Problemas encontrados:
 
 Sin hacer: el informe PDF (`Informe_calidad_rastreo_buses.pdf`) sigue siendo el de la evaluación del 28-oct (texto redactado a mano y `reportlab` no instalado), las capturas de la tableta y la prueba en una tableta real.
 
+
+## 2026-11-02: app móvil adaptable y su auditoría de diseño (fases 32 a 37)
+
+### Qué se hizo
+
+Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-layout`; cada fase salió de ella en su propia rama y volvió con `--no-ff`.
+
+1. **Adaptabilidad.** La app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto menor a 600 dp es teléfono) y decide tamaños de letra, alto de controles y si los paneles van lado a lado o apilados. `Screen` cuida muescas, barras del sistema y teclado.
+2. **Fase 32, entorno de pruebas** (`chore/qa-movil`): `qa/mock_driver_api.py` (la API del chofer con escenarios normal, peor caso, una parada, vacío y bus ocupado), `qa/capturas_movil.py` (88 capturas web: 4 tamaños, día y noche) y `qa/capturas_android.py` (recorrido real en el emulador por tamaño y escala de fuente; restaura el emulador siempre).
+3. **Fase 33, avisos** (`fix/avisos-fijos`): `Notice` (palabra y forma, sin franja gruesa), prioridad pura de avisos, avisos fijos fuera del scroll, y la app manda su idioma a `/driver/state` (`pick_odoo_lang`; los choferes nuevos nacen en español).
+4. **Fase 34, respuesta táctil** (`feature/feedback-cabina`): `expo-haptics` en SOS, terminar turno y aviso de problema; SOS con relleno nativo, liberación de 200 ms y lógica de mantener probada aparte; respuesta inmediata al pulsar filas y chips.
+5. **Fase 35, tokens** (`refactor/tokens-diseno`): `space`, `border` y `shape` en `theme.ts`, guarda `spacing.test.ts` y color del texto del chip de la línea por contraste (`readableOn`, también en `qa/contraste.py`).
+6. **Fase 36, accesibilidad y contenido** (`feature/accesibilidad-contenido`): tope de escala de letra por tamaño, `Field`, estados vacíos, plurales (`tp`), distancias con el formato del idioma y, con letra al 130 % o más, páginas que hacen scroll con los botones principales a mano.
+7. **Fase 37, pulido** (`chore/pulido-plataforma`): listas de bus y línea con `FlatList` y filas memoizadas, movimiento de 200 ms al cambiar de parada, y el motivo por el que el gesto de atrás predictivo sigue apagado.
+8. Registro de defectos DEF-027 a DEF-034 en `qa/datos_calidad.py` y `docs/calidad/`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Tableta: Jest | 22 suites, 128 pruebas PASS |
+| Tableta: `tsc --noEmit` y `expo lint` | Sin errores ni avisos |
+| `python qa/contraste.py` | PASS, incluidos los chips de línea |
+| Flake8 del módulo y de `qa` (entorno virtual temporal) | 0 avisos |
+| Suite de Odoo con el comando del CI (`docker run`, base nueva) | 259 pruebas, 0 fallos, 0 errores |
+| Matriz web (4 tamaños, día y noche, 5 escenarios) | Sin desbordes horizontales ni errores de página |
+| Emulador Android (LDPlayer, Android 9) | Recorrido completo con fuente 1,0, 1,3 y 2,0 en teléfono y tableta |
+| Emulador, pasada final sobre el código definitivo | Cuatro tamaños con fuente 1,0 y teléfono vertical con 1,3, sin fallos; una primera pasada encontró que con dos avisos fijos desaparecía la próxima parada en un teléfono vertical bajo, y se corrigió (un solo aviso fijo con poca altura, el resto contado) |
+| SOS en el emulador | Mantener 1,1 s llena el botón y no dispara; al soltar se vacía |
+
+### Problemas encontrados
+
+- Con la fuente del sistema al 130 % o más el turno se desbordaba: a 1,3× desaparecía la próxima parada y a 2,0× el SOS y Terminar turno quedaban fuera de pantalla. La selección y los encabezados se desarmaban letra por letra. Se corrigió con páginas que hacen scroll, botón principal fijo y encabezados apilados (DEF-033).
+- Android informa un 130 % como `1.2999999`; la comparación `>= 1.3` no lo detectaba. Se añadió tolerancia y una prueba.
+- En el navegador, `flex: n` sobre un `ScrollView` queda anulado por su `flexGrow` base, y `flex: 0` colapsa un bloque; se usan propiedades explícitas.
+- Metro no recarga los cambios en esta ruta (tiene una "ó"): hay que reiniciar el servidor en cada prueba.
+- Se probó una vez contra producción con un usuario de chofer: se inició un turno del Bus 1 y se generó una alerta "Fuera de ruta" por la posición falsa del emulador. El turno se terminó y se cerró la sesión; **la alerta y el turno quedan en el historial** y conviene cerrarlos en Odoo. Desde entonces todo va contra el servidor simulado.
+
+### Pendiente o sin confirmar
+
+- Con Docker ya levantado se corrió la suite de Odoo: **259 pruebas, 0 fallos, 0 errores** con el comando exacto del CI. Incluye las de la fase 33: elegir el idioma de Odoo, el detalle de la alerta en español, inglés y kichwa con el usuario del chofer en inglés, y el idioma por defecto de un chofer nuevo.
+- `TestHttp` falla de forma intermitente cuando se corre con `docker compose run` (también sobre `develop`, 2 de 4 corridas: `Session expired` tras `authenticate('admin')`); con el comando del CI pasó 5 de 5. Parece un efecto del `odoo.conf` del compose (`proxy_mode`) o del volumen de datos compartido con el Odoo de desarrollo; no se investigó la causa.
+- La vibración, la fluidez del SOS bajo carga, el gesto de atrás y TalkBack solo se juzgan en un celular real; LDPlayer es Android 9 y no sirve para eso.
+- `expo-haptics` es un módulo nativo: las tabletas ya instaladas necesitan un build de EAS nuevo para vibrar.
+- El teclado en pantalla no apareció en LDPlayer, así que no se verificó cómo reacciona el formulario de ingreso.
+- La rama `feature/responsive-layout` no se ha fusionado a `develop`.
+
+## 2026-11-03: endurecimiento previo a la preview (dependencias, observabilidad, privacidad y operación)
+
+Parte del análisis de preparación para producción. Ramas de trabajo hijas de `feature/responsive-layout`, fusionadas con `--no-ff`.
+
+### Qué se hizo
+
+1. **Dependencias** (`chore/dependencias`): `npm audit fix` quitó las 2 vulnerabilidades altas (`@expo/cli`, `zod`); parches de Expo SDK 58 (`expo`, `expo-dev-client`, `expo-router`, `expo-task-manager`); Jest 29 a 30.5; `eas-cli` sale de las dependencias del proyecto y los scripts usan `npx eas-cli`; el `react` fijado a propósito para EAS se declara en `expo.install.exclude`. `expo-doctor`: 20 de 20. Quedan 11 avisos moderados de la cadena de herramientas de Expo (`glob`, `minimatch`, `@expo/*`), cuyo "arreglo" sería bajar Expo a la 51: no se aplicó.
+2. **Observabilidad** (`feature/observabilidad`): `/bus_tracking/health` informa la versión instalada del módulo; `POST /bus_tracking/driver/client_error` (con sesión de chofer, límite de 20 por minuto, entradas acotadas y saneadas) deja las fallas de la app en el registro de Odoo como `Tablet error`. La app registra los errores no atrapados con su pantalla, los guarda en una cola persistente (10, sin repetidos seguidos) y los envía al volver la señal; *Estado del GPS* muestra la última falla de los últimos 7 días.
+3. **Privacidad** (`feature/privacidad`): página pública `/privacidad` (es y en; el kichwa lee español) armada con los plazos reales de *Ajustes*, enlazada desde el pie y el formulario de quejas (o la política oficial si se configura); la app avisa al chofer al ingresar y antes de iniciar turno de que la oficina ve la posición; `docs/PRIVACIDAD.md` con el inventario y cómo atender un pedido de derechos.
+4. **Operación** (`chore/operaciones`): la cookie de sesión de Odoo sale con `Secure; SameSite=Lax` desde el proxy (probado con un Caddy real); `gitleaks` en el CI (`.gitleaks.toml`, solo permite la URL pública de teselas); `docs/OPERACION.md` (quién vigila el SOS, monitor, errores de tabletas, respaldos y ensayo de restauración, etiquetas y reversión, mantenimiento mensual).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo con el comando del CI (base nueva) | 276 pruebas, 0 fallos, 0 errores |
+| Tableta: Jest, `tsc`, `expo lint`, `expo-doctor` | 25 suites, 149 pruebas; sin errores; 20 de 20 |
+| Flake8 del módulo y de `qa`, `qa/traducciones.py` | 0 avisos, 0 sin traducir |
+| `caddy validate` del `Caddyfile` y prueba de la cookie | Configuración válida; `session_id` recibe `Secure; SameSite=Lax` y otras cookies no cambian |
+| `gitleaks` sobre el árbol | 0 hallazgos; detecta una clave falsa plantada (y no detecta una escrita en la misma línea que la URL permitida: límite documentado) |
+| Web de la app (login, selección, turno, GPS) | Sin errores de página ni desbordes |
+
+### Problemas encontrados
+
+- `gitleaks` sobre todas las ramas mostró que la contraseña de producción **sigue en `origin/main`** (commit `7d08bf3`): DEF-013 sigue abierto hasta el `git push --force-with-lease` de `main` y la rotación. Mi revisión anterior no la detectó (la clave lleva un carácter que mi patrón excluía), la de `gitleaks` sí.
+- La intermitencia de `TestHttp` con `docker compose run` no es por `proxy_mode` ni por el volumen compartido (6 de 6 corridas pasan en cada prueba); la causa sigue sin conocerse.
+- Un escape de barra invertida llegó colapsado al shell y rompió un literal de prueba; se arregló y no afecta al producto.
+
+### Pendiente o sin confirmar
+
+- La rotación de la contraseña del admin de producción y el `push --force` de `main` (los hace el equipo).
+- El panel de Traccar sigue público (`traccar.20.119.213.192.nip.io`) y la documentación aún dice que no se expone; el respaldo fuera del servidor, la jornada de campo con tableta física y el plan para Odoo 16 no se tocaron.
+- La política de privacidad es el texto del sistema: la universidad debe revisarla con quien lleve la protección de datos antes de adoptarla como oficial.
+- `expo-haptics` y los cambios de la app necesitan un build de EAS nuevo para llegar a las tabletas.

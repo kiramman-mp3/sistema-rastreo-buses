@@ -40,7 +40,7 @@ export function RouteMapView({ route, bus, nextStopId }: Props) {
 const styles = StyleSheet.create({
   box: {
     flex: 1,
-    minHeight: 280,
+    minHeight: 120,
     overflow: 'hidden',
     borderRadius: 8,
   },

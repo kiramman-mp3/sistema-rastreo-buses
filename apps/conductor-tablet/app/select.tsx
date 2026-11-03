@@ -1,18 +1,59 @@
-import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Fragment, useCallback, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../src/api/client';
+import type { Route, Vehicle } from '../src/api/types';
 import { GpsPermissionError } from '../src/gps/types';
 import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, HIT, Txt } from '../src/ui/cabin';
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
+import { Notice } from '../src/ui/Notice';
+import { BusOption, RouteOption } from '../src/ui/OptionRows';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { shape, space } from '../src/ui/theme';
+
+type OptionListProps<T> = {
+  items: T[];
+  flow: boolean;
+  extraData: unknown;
+  empty: ReactNode;
+  renderRow: (item: T) => ReactElement;
+};
+
+/**
+ * A virtualised list: only the rows on screen are mounted. With a large system font the whole page scrolls
+ * instead, so the rows are drawn in a plain view (the page's scroll view owns the gesture).
+ */
+function OptionList<T extends { id: number }>({ items, flow, extraData, empty, renderRow }: OptionListProps<T>) {
+  if (flow) {
+    return (
+      <View style={styles.list}>
+        {empty}
+        {items.map((item) => (
+          <Fragment key={item.id}>{renderRow(item)}</Fragment>
+        ))}
+      </View>
+    );
+  }
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => String(item.id)}
+      renderItem={({ item }) => renderRow(item)}
+      extraData={extraData}
+      ListHeaderComponent={<>{empty}</>}
+      contentContainerStyle={styles.list}
+    />
+  );
+}
 
 export default function Select() {
   useLang();
   const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const actions = useSessionActions();
   const { vehicles, routes, driver } = session.snapshot;
@@ -29,6 +70,13 @@ export default function Select() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const offline = session.snapshot.offline;
+
+  // Stable, so the memoised rows only redraw when their own mark changes.
+  const pickBus = useCallback((bus: Vehicle) => {
+    setVehicleId(bus.id);
+    if (bus.route_id) setRouteId(bus.route_id);
+  }, []);
+  const pickRoute = useCallback((route: Route) => setRouteId(route.id), []);
 
   // A driver who already has an open shift belongs on the shift screen.
   useEffect(() => {
@@ -81,10 +129,10 @@ export default function Select() {
     ]);
   }
 
-  return (
-    <View style={[styles.page, { backgroundColor: palette.ground }]}>
-      <View style={styles.head}>
-        <View>
+  const content = (
+    <>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
+        <View style={styles.headText}>
           <Txt size="body" dim>
             {tf('selectHello', { name: driver?.name ?? '' })}
           </Txt>
@@ -103,149 +151,138 @@ export default function Select() {
         </View>
       ) : null}
 
-      <View style={styles.columns}>
-        <View style={styles.column}>
+      <View
+        style={[
+          styles.columns,
+          (!layout.wide || layout.largeText) && styles.columnsStack,
+          layout.largeText && styles.unfilled,
+          { gap: layout.gap },
+        ]}
+      >
+        <View style={[styles.column, layout.largeText && styles.unfilled]}>
           <Txt size="small" dim>
             {t('chooseBus')}
           </Txt>
-          <ScrollView contentContainerStyle={styles.list}>
-            {vehicles.map((bus) => {
-              const on = vehicleId === bus.id;
-              return (
-                <Pressable
-                  key={bus.id}
-                  disabled={!usable(bus)}
-                  onPress={() => {
-                    setVehicleId(bus.id);
-                    if (bus.route_id) setRouteId(bus.route_id);
-                  }}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on, disabled: !usable(bus) }}
-                  style={[
-                    styles.option,
-                    { backgroundColor: on ? palette.ink : palette.panel, opacity: usable(bus) ? 1 : 0.45 },
-                  ]}
-                >
-                  <Txt bold size="data" color={on ? palette.ground : palette.ink}>
-                    {bus.name}
-                  </Txt>
-                  <Txt size="small" color={on ? palette.ground : palette.ink2}>
-                    {!bus.available
-                      ? `${bus.plate} · ${t('busTaken')}`
-                      : bus.has_gps === false
-                        ? `${bus.plate} · ${t('busNoGps')}`
-                        : bus.plate}
-                  </Txt>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <OptionList
+            items={vehicles}
+            flow={layout.largeText}
+            extraData={vehicleId}
+            empty={
+              vehicles.length === 0 ? (
+                <Notice item={{ key: 'no-buses', tone: 'warn', title: t('noBuses'), live: 'polite' }} />
+              ) : null
+            }
+            renderRow={(bus) => (
+              <BusOption bus={bus} selected={vehicleId === bus.id} usable={usable(bus)} hit={layout.hit} onPick={pickBus} />
+            )}
+          />
         </View>
 
-        <View style={styles.column}>
+        <View style={[styles.column, layout.largeText && styles.unfilled]}>
           <Txt size="small" dim>
             {t('chooseRoute')}
           </Txt>
-          <ScrollView contentContainerStyle={styles.list}>
-            {routes.map((route) => {
-              const on = routeId === route.id;
-              return (
-                <Pressable
-                  key={route.id}
-                  onPress={() => setRouteId(route.id)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on }}
-                  style={[styles.option, styles.routeOption, { backgroundColor: on ? palette.ink : palette.panel }]}
-                >
-                  <View style={[styles.chip, { backgroundColor: route.color || palette.accent }]}>
-                    <Txt bold size="body" color="#FFFFFF">
-                      {route.code}
-                    </Txt>
-                  </View>
-                  <Txt bold size="body" color={on ? palette.ground : palette.ink} lines={2} style={styles.routeName}>
-                    {route.name}
-                  </Txt>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <OptionList
+            items={routes}
+            flow={layout.largeText}
+            extraData={routeId}
+            empty={
+              routes.length === 0 ? (
+                <Notice item={{ key: 'no-routes', tone: 'warn', title: t('noRoutes'), live: 'polite' }} />
+              ) : null
+            }
+            renderRow={(route) => (
+              <RouteOption route={route} selected={routeId === route.id} hit={layout.hit} onPick={pickRoute} />
+            )}
+          />
         </View>
       </View>
 
-      {error ? (
-        <View style={[styles.note, styles.error, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
-          <Txt bold size="body" color={palette.danger}>
-            {error}
-          </Txt>
-        </View>
+      {vehicles.length > 0 && !vehicles.some(usable) && !offline ? (
+        <Notice item={{ key: 'all-taken', tone: 'warn', title: t('allBusesTaken'), live: 'polite' }} />
       ) : null}
 
-      <Action
-        label={busy ? t('loading') : t('startShift')}
-        sub={selectedBus && routeId ? `${selectedBus.name} · ${routes.find((r) => r.id === routeId)?.code ?? ''}` : undefined}
-        onPress={start}
-        kind="accent"
-        disabled={busy || !vehicleId || !routeId}
-      />
-    </View>
+      {error ? (
+        <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
+      ) : null}
+    </>
+  );
+  // The main action stays at the bottom in either case; with a large font only the content above it scrolls.
+  const startButton = (
+    <Action
+      label={busy ? t('loading') : t('startShift')}
+      sub={selectedBus && routeId ? `${selectedBus.name} · ${routes.find((r) => r.id === routeId)?.code ?? ''}` : undefined}
+      onPress={start}
+      kind="accent"
+      disabled={busy || !vehicleId || !routeId}
+    />
+  );
+
+  return (
+    <Screen>
+      {layout.largeText ? (
+        <ScrollView
+          style={styles.flowScroll}
+          contentContainerStyle={{ gap: layout.gap }}
+          showsVerticalScrollIndicator={false}
+        >
+          {content}
+        </ScrollView>
+      ) : (
+        content
+      )}
+      <Txt size="small" dim>
+        {t('trackingNoticeStart')}
+      </Txt>
+      {startButton}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    padding: 24,
-    gap: 16,
+  headText: {
+    flexShrink: 1,
+  },
+  // With a large system font the title and its button no longer fit side by side: the button goes below.
+  // Large system font: the page scrolls as a whole, so nothing here may claim the leftover height.
+  flowScroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  unfilled: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+  },
+  headStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   head: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 16,
+    gap: space[4],
   },
   note: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  error: {
-    borderWidth: 2,
-    borderLeftWidth: 8,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
   },
   columns: {
     flex: 1,
     flexDirection: 'row',
-    gap: 24,
+  },
+  columnsStack: {
+    flexDirection: 'column',
   },
   column: {
     flex: 1,
-    gap: 8,
+    gap: space[2],
   },
   list: {
-    gap: 10,
-    paddingBottom: 8,
-  },
-  option: {
-    minHeight: HIT + 8,
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    justifyContent: 'center',
-  },
-  routeOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  chip: {
-    minWidth: 56,
-    height: 44,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  routeName: {
-    flex: 1,
+    gap: space[2],
+    paddingBottom: space[2],
   },
 });

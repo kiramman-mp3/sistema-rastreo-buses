@@ -7,8 +7,11 @@ import { normalizeOdooUrl, parseDriverBadge } from '../src/config/odooUrl';
 import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Txt } from '../src/ui/cabin';
-import { useTheme } from '../src/ui/ThemeProvider';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
+import { space } from '../src/ui/theme';
 
 /** A QR can point the tablet at another server: the driver's password and the GPS would go there. */
 function confirmServer(url: string): Promise<boolean> {
@@ -23,7 +26,8 @@ function confirmServer(url: string): Promise<boolean> {
 export default function ScanScreen() {
   useLang();
   const session = useSession();
-  const { palette } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { gutter, phone } = useLayout();
   const [permission, requestPermission] = useCameraPermissions();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -71,11 +75,11 @@ export default function ScanScreen() {
 
   if (!permission?.granted) {
     return (
-      <View style={[styles.page, { backgroundColor: palette.ground }]}>
+      <Screen scroll style={styles.page}>
         <Txt size="body">{t('cameraNeed')}</Txt>
         <Action label={t('scanQr')} onPress={() => requestPermission()} kind="accent" />
         <Action label={t('cancel')} onPress={() => router.back()} kind="quiet" />
-      </View>
+      </Screen>
     );
   }
 
@@ -96,16 +100,28 @@ export default function ScanScreen() {
           {error}
         </Txt>
       ) : null}
-      <View style={styles.bar}>
-        <Action label={t('cancel')} onPress={() => router.back()} />
+      <View
+        style={[
+          styles.bar,
+          {
+            bottom: insets.bottom + gutter,
+            left: insets.left + gutter,
+            right: insets.right + gutter,
+            // On a phone on its side the bar would cover the camera: keep it small and to one side.
+            ...(phone ? { alignItems: 'flex-start' as const } : null),
+          },
+        ]}
+      >
+        <Action label={t('cancel')} onPress={() => router.back()} style={phone ? undefined : styles.fullBar} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, padding: 32, justifyContent: 'center', gap: 16 },
+  page: { justifyContent: 'center' },
   camera: { flex: 1, backgroundColor: '#000' },
-  info: { textAlign: 'center', marginTop: 24, backgroundColor: 'rgba(0,0,0,0.6)', padding: 12 },
-  bar: { position: 'absolute', bottom: 24, left: 24, right: 24 },
+  info: { textAlign: 'center', marginTop: space[6], backgroundColor: 'rgba(0,0,0,0.6)', padding: space[3] },
+  bar: { position: 'absolute' },
+  fullBar: { alignSelf: 'stretch' },
 });
