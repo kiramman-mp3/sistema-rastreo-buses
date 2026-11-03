@@ -14,6 +14,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type PressableProps,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -105,6 +106,22 @@ export function Txt({ children, size = 'body', bold, dim, color, style, lines, f
     >
       {children}
     </Text>
+  );
+}
+
+type PressProps = Omit<PressableProps, 'style'> & { style?: StyleProp<ViewStyle> };
+
+/**
+ * A pressable row, chip or button that answers at once when the finger goes down: a small shrink, not
+ * an animation (these are touched tens of times a day). `Action` does the same at 0.97 for big buttons.
+ */
+export function Press({ style, disabled, ...rest }: PressProps) {
+  return (
+    <Pressable
+      {...rest}
+      disabled={disabled}
+      style={({ pressed }) => [style, pressed && !disabled && styles.pressedRow]}
+    />
   );
 }
 
@@ -285,6 +302,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  pressedRow: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
   },
   action: {
     minHeight: HIT,
