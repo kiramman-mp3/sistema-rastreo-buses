@@ -147,12 +147,12 @@ def walk(folder, prefix):
         wait_for('Volver al turno', seconds=15)
         shot(folder, f'{prefix}-incident')
         tap('Volver al turno')
-        wait_for('Terminar turno', seconds=15)
+        wait_for('Próxima parada', 'Terminar turno', seconds=15)  # back on the shift screen
         tap('GPS enviando', 'Esperando señal', 'Sin red', 'GPS apagado', 'GPS')
         wait_for('Estado del GPS', seconds=15)
         shot(folder, f'{prefix}-gps')
         tap('Volver al turno')
-        wait_for('Terminar turno', seconds=15)
+        wait_for('Próxima parada', 'Terminar turno', seconds=15)  # back on the shift screen
         tap('Terminar turno')
         time.sleep(1.5)
         tap('TERMINAR TURNO', 'Terminar turno')  # the confirmation dialog repeats the label
