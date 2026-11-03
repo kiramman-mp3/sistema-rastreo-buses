@@ -12,6 +12,7 @@ import type {
   Vehicle,
 } from '../api/types';
 import type { GpsController, GpsStore } from '../gps/types';
+import { flushErrors, type ErrorQueue } from '../diagnostics/queue';
 import { getLang } from '../i18n';
 import { flushIncidents, IncidentQueue } from '../incidents/queue';
 
@@ -63,6 +64,8 @@ export class Session {
     private urlStore?: TokenStore,
     /** Remembers a shift the driver ended without signal, to close it on the server later. */
     private endStore?: TokenStore,
+    /** Failures of the app itself, waiting to be told to the office. */
+    private errors?: ErrorQueue,
   ) {}
 
   subscribe(listener: () => void) {
@@ -119,6 +122,7 @@ export class Session {
         // The driver already ended it: never bring its GPS back.
         if (pendingEnd) me.shift = null;
         this.applyMe(me, token);
+        this.sendErrors();
         if (me.shift) {
           try {
             await this.pullState();
@@ -178,6 +182,7 @@ export class Session {
     await this.store.set(token);
     const me = await this.client.me();
     this.applyMe({ ...me, driver }, token);
+    this.sendErrors();
     await this.restoreGps(me.shift);
   }
 
@@ -191,6 +196,7 @@ export class Session {
     await this.store.set(token);
     const me = await this.client.me();
     this.applyMe({ ...me, driver }, token);
+    this.sendErrors();
     await this.restoreGps(me.shift);
   }
 
@@ -246,6 +252,7 @@ export class Session {
     }
     this.set({ shiftState: state, shift: state.shift });
     await this.flushIncidents();
+    this.sendErrors();
     return state;
   }
 
@@ -267,6 +274,26 @@ export class Session {
       throw error;
     }
     return 'sent' as const;
+  }
+
+  /** Tell the office about the app failures that are waiting. Fire and forget: it must never get in the way. */
+  private sendErrors() {
+    this.flushErrors().catch(() => undefined);
+  }
+
+  async flushErrors() {
+    if (!this.errors) return;
+    await flushErrors(this.errors, async (report) => {
+      try {
+        await this.client.clientError(report);
+        return true;
+      } catch (error) {
+        // Kept for later without signal, without a session or when the server is busy or failing; a report the
+        // server refuses for good (bad data) is dropped.
+        if (error instanceof NetworkError || error instanceof AuthError || isServerError(error)) return false;
+        return !(error instanceof ApiError && error.status === 429);
+      }
+    });
   }
 
   async flushIncidents() {

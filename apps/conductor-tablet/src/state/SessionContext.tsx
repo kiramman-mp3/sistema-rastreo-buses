@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { createClient, defaultBaseUrl } from '../api/client';
+import { errorQueue } from '../diagnostics';
 import { gpsKv, gpsStore } from '../gps/store';
 import { liveGps } from '../gps/tracker';
 import { IncidentQueue } from '../incidents/queue';
@@ -21,6 +22,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         new IncidentQueue(gpsKv),
         odooUrlStore,
         pendingEndStore,
+        errorQueue,
       ),
     [],
   );

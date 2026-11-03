@@ -79,4 +79,13 @@ describe('driver API client', () => {
     await client.state();
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({});
   });
+
+  test('sends an app failure to the client_error endpoint', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(json(200, { ok: true }));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: store(), fetch: fetchMock });
+    const report = { message: 'Error: boom', app: '1.0.0', at: '2026-11-02T20:00:00.000Z' };
+    await client.clientError(report);
+    expect(fetchMock.mock.calls[0][0]).toBe('http://odoo:8069/bus_tracking/driver/client_error');
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual(report);
+  });
 });
