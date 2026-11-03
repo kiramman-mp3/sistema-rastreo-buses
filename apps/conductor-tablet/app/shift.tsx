@@ -17,7 +17,7 @@ import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
 import { hapticCommit } from '../src/ui/haptics';
 import { readableOn } from '../src/ui/contrast';
-import { useLayout } from '../src/ui/layout';
+import { noticeCapacity, useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
@@ -182,7 +182,7 @@ export default function ShiftScreen() {
   const showStrip = !layout.short || pageScroll;
   // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
   // has room for one, and a shorter detail; the rest is counted.
-  const noticeBlock = <NoticeList items={notices} max={layout.short && !pageScroll ? 1 : 2} detailLines={layout.short && !pageScroll ? 1 : 2} />;
+  const noticeBlock = <NoticeList items={notices} max={noticeCapacity(layout)} detailLines={layout.short && !pageScroll ? 1 : 2} />;
 
   const problem = (
     <Action
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexShrink: 0,
     flexBasis: 0,
-    minHeight: 150,
+    minHeight: 120,
   },
   lockNote: {
     paddingHorizontal: space[4],

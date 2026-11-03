@@ -9,6 +9,8 @@ export const PHONE_MAX_SHORT_SIDE = 600;
 export const TWO_PANE_MIN_WIDTH = 640;
 /** Below this height the screen has no room for decoration (phones on their side). */
 export const SHORT_HEIGHT = 480;
+/** A portrait screen at least this tall (dp) can pin two notices and still show the next stop and the map. */
+export const TALL_PORTRAIT_HEIGHT = 800;
 
 export type Layout = {
   width: number;
@@ -57,6 +59,18 @@ export function layoutFor(width: number, height: number, fontScale = 1): Layout 
     gutter: phone ? (short ? space[3] : space[4]) : space[6],
     gap: phone ? (short ? space[2] : space[3]) : space[4],
   };
+}
+
+/**
+ * How many notices (SOS answer, alerts) the shift screen pins above the next stop. The next stop must always
+ * stay visible: a phone in portrait that is not tall has room for one, the rest is counted ("1 aviso más").
+ * With large text the page scrolls and there is room for two.
+ */
+export function noticeCapacity(layout: Layout): number {
+  if (layout.largeText) return 2;
+  if (layout.short) return 1;
+  if (!layout.landscape && layout.height < TALL_PORTRAIT_HEIGHT) return 1;
+  return 2;
 }
 
 export function useLayout(): Layout {
