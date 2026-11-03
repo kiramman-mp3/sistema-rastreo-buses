@@ -10,10 +10,12 @@ import { alertLabel, t, tf, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
+import { buildNotices } from '../src/shift/notices';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, Screen, SosButton, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
+import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
 
@@ -69,8 +71,6 @@ export default function ShiftScreen() {
   const nextCoords = routeMap?.stops.find((s) => s.id === nextStop?.id);
   const meters = busFix && nextCoords ? calculateDistanceMeters(busFix.lat, busFix.lon, nextCoords.lat, nextCoords.lon) : null;
 
-  const alert = (shiftState?.alerts ?? []).find((a) => a.state === 'open') ?? null;
-
   const serverSos = shiftState?.sos ?? null;
   const phase = sosPhase(serverSos, sosLocal);
   let sosStatus: string | null = null;
@@ -83,6 +83,13 @@ export default function ShiftScreen() {
   } else if (phase === 'sent') {
     sosStatus = t('sosSent');
   }
+
+  const notices = buildNotices({
+    sos: sosStatus ? { text: sosStatus, seen: Boolean(serverSos?.seen_at) } : null,
+    alerts: (shiftState?.alerts ?? [])
+      .filter((a) => a.state === 'open')
+      .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -160,6 +167,9 @@ export default function ShiftScreen() {
   const stackedActions = layout.phone && !layout.landscape;
   // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
   const showStrip = !layout.short;
+  // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
+  // has room for one, and a shorter detail; the rest is counted.
+  const noticeBlock = <NoticeList items={notices} max={layout.short ? 1 : 2} detailLines={layout.short ? 1 : 2} />;
 
   const problem = (
     <Action
@@ -179,6 +189,39 @@ export default function ShiftScreen() {
       disabled={locked}
       style={stackedActions ? undefined : styles.actionNarrow}
     />
+  );
+
+  const nextBlock = (
+    <ScrollView
+      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
+      contentContainerStyle={styles.leftContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <Txt size="small" dim>
+        {t('cabinNext')}
+      </Txt>
+      <Txt bold size="stop" lines={2} fit>
+        {nextStop ? nextStop.name : t('noNextStop')}
+      </Txt>
+      {nextStop ? (
+        <Txt size="body" dim>
+          {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
+            .filter(Boolean)
+            .join(' · ')}
+        </Txt>
+      ) : null}
+      {afterStop && !(layout.phone && showStrip) ? (
+        <Txt size="body">
+          {t('cabinAfter')}: {afterStop.name}
+        </Txt>
+      ) : null}
+
+      {showStrip ? (
+        <View style={styles.strip}>
+          <StopStrip stops={stops} color={color} />
+        </View>
+      ) : null}
+    </ScrollView>
   );
 
   const modeButton = (
@@ -235,58 +278,18 @@ export default function ShiftScreen() {
         </View>
       </View>
 
+      {side ? null : noticeBlock}
+
       <View style={[styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}>
-        {/* Where the bus goes next; it scrolls if a notice makes it taller than its room */}
-        <ScrollView
-          style={side ? styles.left : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
-          contentContainerStyle={styles.leftContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <Txt size="small" dim>
-            {t('cabinNext')}
-          </Txt>
-          <Txt bold size="stop" lines={2} fit>
-            {nextStop ? nextStop.name : t('noNextStop')}
-          </Txt>
-          {nextStop ? (
-            <Txt size="body" dim>
-              {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
-                .filter(Boolean)
-                .join(' · ')}
-            </Txt>
-          ) : null}
-          {afterStop && !(layout.phone && showStrip) ? (
-            <Txt size="body">
-              {t('cabinAfter')}: {afterStop.name}
-            </Txt>
-          ) : null}
-
-          {showStrip ? (
-            <View style={styles.strip}>
-              <StopStrip stops={stops} color={color} />
-            </View>
-          ) : null}
-
-          {alert ? (
-            <View style={[styles.notice, { borderColor: palette.danger }]} accessibilityLiveRegion="polite">
-              <Txt bold size="body" color={palette.danger}>
-                {alertLabel(alert.kind)}
-              </Txt>
-              {alert.detail ? <Txt size="small">{alert.detail}</Txt> : null}
-            </View>
-          ) : null}
-
-          {sosStatus ? (
-            <View
-              style={[styles.notice, { borderColor: serverSos?.seen_at ? palette.ok : palette.danger }]}
-              accessibilityLiveRegion="assertive"
-            >
-              <Txt bold size="body" color={serverSos?.seen_at ? palette.ok : palette.danger}>
-                {sosStatus}
-              </Txt>
-            </View>
-          ) : null}
-        </ScrollView>
+        {/* Where the bus goes next. Beside the map the notices are pinned above it; the rest scrolls. */}
+        {side ? (
+          <View style={styles.left}>
+            {noticeBlock}
+            {nextBlock}
+          </View>
+        ) : (
+          nextBlock
+        )}
 
         {/* The map */}
         <View style={[styles.map, side ? styles.mapSide : styles.mapStack, { backgroundColor: palette.panel }]}>
@@ -398,6 +401,12 @@ const styles = StyleSheet.create({
     flexGrow: 4,
     flexShrink: 1,
     flexBasis: 0,
+    gap: 8,
+  },
+  leftScroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
   },
   top: {
     // Content height, but it gives way (and scrolls) before the map is squeezed out.
@@ -411,15 +420,6 @@ const styles = StyleSheet.create({
   strip: {
     marginTop: 12,
     marginBottom: 6,
-  },
-  notice: {
-    marginTop: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderLeftWidth: 8,
-    borderWidth: 2,
-    gap: 4,
   },
   map: {
     borderRadius: 8,
