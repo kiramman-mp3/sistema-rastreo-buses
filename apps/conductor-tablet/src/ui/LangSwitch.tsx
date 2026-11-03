@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { LANGS, messages } from '../i18n';
 import { persistLang, useLang } from '../i18n/LangProvider';
-import { Txt } from './cabin';
+import { Press, Txt } from './cabin';
 import { useTheme } from './ThemeProvider';
 
 export function LangSwitch() {
@@ -13,7 +13,7 @@ export function LangSwitch() {
       {LANGS.map((code) => {
         const on = lang === code;
         return (
-          <Pressable
+          <Press
             key={code}
             onPress={() => persistLang(code)}
             accessibilityRole="radio"
@@ -23,7 +23,7 @@ export function LangSwitch() {
             <Txt bold={on} size="small">
               {messages[code].lang_name}
             </Txt>
-          </Pressable>
+          </Press>
         );
       })}
     </View>
