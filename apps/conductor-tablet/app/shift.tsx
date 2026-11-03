@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexShrink: 0,
     flexBasis: 0,
-    minHeight: 120,
+    minHeight: 96,
   },
   lockNote: {
     paddingHorizontal: space[4],
