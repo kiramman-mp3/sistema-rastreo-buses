@@ -8,9 +8,11 @@ import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, Press, Screen, Txt } from '../src/ui/cabin';
+import { readableOn } from '../src/ui/contrast';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { shape, space } from '../src/ui/theme';
 
 export default function Select() {
   useLang();
@@ -161,7 +163,7 @@ export default function Select() {
                   style={[styles.option, styles.routeOption, { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel }]}
                 >
                   <View style={[styles.chip, { backgroundColor: route.color || palette.accent }]}>
-                    <Txt bold size="body" color="#FFFFFF">
+                    <Txt bold size="body" color={readableOn(route.color || palette.accent)}>
                       {route.code}
                     </Txt>
                   </View>
@@ -198,12 +200,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 16,
+    gap: space[4],
   },
   note: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
   },
   columns: {
     flex: 1,
@@ -214,28 +216,28 @@ const styles = StyleSheet.create({
   },
   column: {
     flex: 1,
-    gap: 8,
+    gap: space[2],
   },
   list: {
-    gap: 10,
-    paddingBottom: 8,
+    gap: space[2],
+    paddingBottom: space[2],
   },
   option: {
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    ...shape.control,
+    paddingHorizontal: space[5],
+    paddingVertical: space[3],
     justifyContent: 'center',
   },
   routeOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: space[4],
   },
   chip: {
     minWidth: 56,
     height: 44,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingHorizontal: space[3],
+    ...shape.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
