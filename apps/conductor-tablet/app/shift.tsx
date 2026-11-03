@@ -19,6 +19,7 @@ import { useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { border, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
   sending: 'gpsSending',
@@ -332,16 +333,16 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    columnGap: 16,
-    rowGap: 8,
-    borderRadius: 8,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    columnGap: space[4],
+    rowGap: space[2],
+    ...shape.control,
   },
   identity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: space[3],
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: 220,
@@ -355,8 +356,8 @@ const styles = StyleSheet.create({
   chip: {
     minWidth: 52,
     height: 44,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingHorizontal: space[3],
+    ...shape.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -366,7 +367,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     flexShrink: 1,
-    rowGap: 4,
+    rowGap: space[1],
   },
   headerRightFull: {
     flexBasis: '100%',
@@ -377,17 +378,17 @@ const styles = StyleSheet.create({
   },
   mode: {
     minHeight: 48,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    borderWidth: 2,
+    paddingHorizontal: space[4],
+    ...shape.control,
+    borderWidth: border.thin,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: space[2],
   },
   modeDot: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: border.round,
   },
   body: {
     flex: 1,
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
     flexGrow: 4,
     flexShrink: 1,
     flexBasis: 0,
-    gap: 8,
+    gap: space[2],
   },
   leftScroll: {
     flexGrow: 1,
@@ -417,14 +418,14 @@ const styles = StyleSheet.create({
     flexBasis: 'auto',
   },
   leftContent: {
-    gap: 8,
+    gap: space[2],
   },
   strip: {
-    marginTop: 12,
-    marginBottom: 6,
+    marginTop: space[3],
+    marginBottom: space[2],
   },
   map: {
-    borderRadius: 8,
+    ...shape.control,
     overflow: 'hidden',
   },
   mapSide: {
@@ -437,9 +438,9 @@ const styles = StyleSheet.create({
     minHeight: 150,
   },
   lockNote: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
   },
   actions: {
     flexDirection: 'row',
