@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
@@ -34,6 +35,14 @@ export default function Select() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const offline = session.snapshot.offline;
+
+  // With a large system font the page scrolls as a whole; otherwise each list scrolls on its own.
+  const renderList = (children: ReactNode) =>
+    layout.largeText ? (
+      <View style={styles.list}>{children}</View>
+    ) : (
+      <ScrollView contentContainerStyle={styles.list}>{children}</ScrollView>
+    );
 
   // A driver who already has an open shift belongs on the shift screen.
   useEffect(() => {
@@ -87,7 +96,7 @@ export default function Select() {
   }
 
   return (
-    <Screen>
+    <Screen scroll={layout.largeText}>
       <View style={[styles.head, layout.largeText && styles.headStack]}>
         <View style={styles.headText}>
           <Txt size="body" dim>
@@ -108,12 +117,20 @@ export default function Select() {
         </View>
       ) : null}
 
-      <View style={[styles.columns, !layout.wide && styles.columnsStack, { gap: layout.gap }]}>
-        <View style={styles.column}>
+      <View
+        style={[
+          styles.columns,
+          !layout.wide && styles.columnsStack,
+          layout.largeText && styles.unfilled,
+          { gap: layout.gap },
+        ]}
+      >
+        <View style={[styles.column, layout.largeText && styles.unfilled]}>
           <Txt size="small" dim>
             {t('chooseBus')}
           </Txt>
-          <ScrollView contentContainerStyle={styles.list}>
+          {renderList(
+            <>
             {vehicles.length === 0 ? (
               <Notice item={{ key: 'no-buses', tone: 'warn', title: t('noBuses'), live: 'polite' }} />
             ) : null}
@@ -147,14 +164,16 @@ export default function Select() {
                 </Press>
               );
             })}
-          </ScrollView>
+            </>,
+          )}
         </View>
 
-        <View style={styles.column}>
+        <View style={[styles.column, layout.largeText && styles.unfilled]}>
           <Txt size="small" dim>
             {t('chooseRoute')}
           </Txt>
-          <ScrollView contentContainerStyle={styles.list}>
+          {renderList(
+            <>
             {routes.length === 0 ? (
               <Notice item={{ key: 'no-routes', tone: 'warn', title: t('noRoutes'), live: 'polite' }} />
             ) : null}
@@ -179,7 +198,8 @@ export default function Select() {
                 </Press>
               );
             })}
-          </ScrollView>
+            </>,
+          )}
         </View>
       </View>
 
@@ -207,6 +227,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   // With a large system font the title and its button no longer fit side by side: the button goes below.
+  // Large system font: the page scrolls as a whole, so nothing here may claim the leftover height.
+  unfilled: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+  },
   headStack: {
     flexDirection: 'column',
     alignItems: 'flex-start',
