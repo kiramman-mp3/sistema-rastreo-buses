@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, AppState, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
@@ -13,7 +13,8 @@ import { createMotionLock } from '../src/shift/motion';
 import { buildNotices } from '../src/shift/notices';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, GpsBadge, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { hapticCommit } from '../src/ui/haptics';
 import { useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
@@ -132,6 +133,7 @@ export default function ShiftScreen() {
         text: t('endShift'),
         style: 'destructive',
         onPress: () => {
+          hapticCommit();
           session
             .endShift()
             .then((result) => {
@@ -225,7 +227,7 @@ export default function ShiftScreen() {
   );
 
   const modeButton = (
-    <Pressable
+    <Press
       onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
       onLongPress={() => setChoice('auto')}
       accessibilityRole="button"
@@ -236,7 +238,7 @@ export default function ShiftScreen() {
         {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
       </Txt>
       {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
-    </Pressable>
+    </Press>
   );
   // On a phone in portrait the header has two rows: bus and day/night on top, GPS and time below.
   const tallHeader = layout.phone && !layout.landscape;
@@ -262,7 +264,7 @@ export default function ShiftScreen() {
         </View>
         {tallHeader ? modeButton : null}
         <View style={[styles.headerRight, tallHeader && styles.headerRightFull, { columnGap: layout.phone ? 12 : 24 }]}>
-          <Pressable
+          <Press
             onPress={() => router.push('/gps')}
             disabled={locked}
             accessibilityRole="button"
@@ -270,7 +272,7 @@ export default function ShiftScreen() {
             style={styles.gpsTap}
           >
             <GpsBadge health={health} label={tf(GPS_LABEL[health], { n: gps.queued })} />
-          </Pressable>
+          </Press>
           <Txt bold size="data">
             {currentTime}
           </Txt>
