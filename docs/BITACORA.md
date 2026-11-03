@@ -1079,7 +1079,7 @@ Parte del análisis de preparación para producción. Ramas de trabajo hijas de 
 
 | Prueba | Resultado |
 |---|---|
-| Suite de Odoo con el comando del CI (base nueva) | Ver el resultado de la corrida final en el mensaje de la fusión |
+| Suite de Odoo con el comando del CI (base nueva) | 276 pruebas, 0 fallos, 0 errores |
 | Tableta: Jest, `tsc`, `expo lint`, `expo-doctor` | 25 suites, 149 pruebas; sin errores; 20 de 20 |
 | Flake8 del módulo y de `qa`, `qa/traducciones.py` | 0 avisos, 0 sin traducir |
 | `caddy validate` del `Caddyfile` y prueba de la cookie | Configuración válida; `session_id` recibe `Secure; SameSite=Lax` y otras cookies no cambian |
