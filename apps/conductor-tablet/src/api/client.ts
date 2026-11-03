@@ -1,3 +1,4 @@
+import type { ErrorReport } from '../diagnostics/report';
 import type { IncidentDraft, MeResponse, RouteMap, StartResponse, StateResponse } from './types';
 
 export class AuthError extends Error {
@@ -124,6 +125,10 @@ export function createClient(options: ClientOptions) {
     },
     routeMap() {
       return post<RouteMap>('/bus_tracking/driver/route');
+    },
+    /** A failure of the app itself, for the operators of the system (it goes to the Odoo log). */
+    clientError(report: ErrorReport) {
+      return post<{ ok: boolean }>('/bus_tracking/driver/client_error', report);
     },
     incident(draft: IncidentDraft) {
       const body: Record<string, unknown> = { kind: draft.kind, note: draft.note };

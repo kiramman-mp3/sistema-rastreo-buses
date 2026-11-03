@@ -192,6 +192,9 @@ class Handler(BaseHTTPRequestHandler):
                               200 if STATE['open_shift'] else 409)
         if path.endswith('/driver/route'):
             return self._send(route_map())
+        if path.endswith('/driver/client_error'):  # what the Odoo log would get: print it for the developer
+            print('Tablet error:', body.get('app'), body.get('screen'), body.get('message'), flush=True)
+            return self._send({'ok': True})
         if path.endswith('/driver/incident'):
             if body.get('kind') == 'sos':
                 STATE['sos'] = STATE['sos'] or 'sent'
