@@ -153,4 +153,7 @@ class BusTrackingController(http.Controller):
             last = env['bus.vehicle'].search([('last_fix_time', '!=', False)], order='last_fix_time desc', limit=1)
             if not last or fields.Datetime.now() - last.last_fix_time > timedelta(minutes=stale_minutes):
                 status, code = 'stale', 503
-        return Response(json.dumps({'status': status}), status=code, content_type='application/json')
+        # The installed version tells which release is running (rollbacks, support, "is the fix deployed?").
+        module = env['ir.module.module'].search([('name', '=', 'bus_tracking')], limit=1)
+        body = {'status': status, 'version': module.installed_version or module.latest_version or ''}
+        return Response(json.dumps(body), status=code, content_type='application/json')

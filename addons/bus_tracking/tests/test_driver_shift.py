@@ -4,7 +4,7 @@ from datetime import timedelta
 from odoo import fields
 from odoo.tests import HttpCase, TransactionCase, tagged
 
-from ..controllers.driver_api import login_limiter
+from ..controllers.driver_api import error_limiter, login_limiter
 from ..models.utils import pick_odoo_lang
 from .test_driver_auth import make_driver
 
@@ -15,6 +15,7 @@ END = '/bus_tracking/driver/shift/end'
 STATE = '/bus_tracking/driver/state'
 ROUTE = '/bus_tracking/driver/route'
 INCIDENT = '/bus_tracking/driver/incident'
+CLIENT_ERROR = '/bus_tracking/driver/client_error'
 
 
 @tagged('post_install', '-at_install')
@@ -135,6 +136,7 @@ class TestDriverShiftApi(HttpCase):
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        error_limiter.reset()
         self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
         self.env['ir.config_parameter'].sudo().set_param('bus_tracking.gps_url', 'https://gps.example.com/')
         self.driver = make_driver(self.env)
@@ -259,6 +261,48 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual(detail({'lang': 'en'}), english)
         self.assertEqual(detail({}), english)               # no language sent: the one of the Odoo user
         self.assertEqual(detail({'lang': 'zz'}), english)   # not an app language: ignored
+
+    def test_client_error_needs_a_driver_session(self):
+        self.assertEqual(self.post(CLIENT_ERROR, {'message': 'boom'}).status_code, 401)
+
+    def test_client_error_goes_to_the_log_with_who_and_where(self):
+        token = self.token()
+        self.start(token)
+        with self.assertLogs('odoo.addons.bus_tracking.controllers.driver_api', level='WARNING') as logs:
+            resp = self.post(CLIENT_ERROR, {
+                'message': 'TypeError: x is undefined', 'stack': 'at a (b.js:1)', 'app': '1.0.0', 'screen': 'shift'},
+                token=token)
+        self.assertEqual(resp.json(), {'ok': True})
+        line = logs.output[0]
+        self.assertIn('Tablet error', line)
+        self.assertIn('driver=chofer1', line)
+        self.assertIn('bus=Bus 1', line)
+        self.assertIn('app=1.0.0', line)
+        self.assertIn('message=TypeError: x is undefined', line)
+
+    def test_client_error_works_without_a_shift_and_cannot_forge_log_lines(self):
+        token = self.token()
+        with self.assertLogs('odoo.addons.bus_tracking.controllers.driver_api', level='WARNING') as logs:
+            resp = self.post(CLIENT_ERROR, {'message': 'one\n2026-11-02 ERROR fake line\r\nthree'}, token=token)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(len(logs.output), 1)
+        self.assertNotIn('\n', logs.output[0])
+        self.assertIn('bus=-', logs.output[0])
+
+    def test_client_error_rejects_bad_input(self):
+        token = self.token()
+        bad = (
+            {}, {'message': ''}, {'message': '   '}, {'message': 123}, {'message': 'x' * 501},
+            {'message': 'x', 'stack': 'y' * 3001}, {'message': 'x', 'stack': ['a']},
+            {'message': 'x', 'app': 'a' * 61}, {'message': 'x', 'screen': 5})
+        for body in bad:
+            self.assertEqual(self.post(CLIENT_ERROR, body, token=token).status_code, 400, body)
+
+    def test_client_error_is_rate_limited_per_driver(self):
+        token = self.token()
+        codes = [self.post(CLIENT_ERROR, {'message': 'loop'}, token=token).status_code for _ in range(22)]
+        self.assertEqual(codes[:20], [200] * 20)
+        self.assertEqual(codes[20:], [429, 429])
 
     def test_route_returns_stops_and_the_line_between_them(self):
         token = self.token()
