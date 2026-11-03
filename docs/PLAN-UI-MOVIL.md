@@ -55,7 +55,7 @@ Las seis fases están hechas en `feature/responsive-layout`, a la espera de fusi
 | Fase | Estado | Diferencias con lo planeado |
 |---|---|---|
 | 32 | Hecha | Servidor simulado en vez de Odoo con Docker; capturas base fuera del repo (ver más abajo) |
-| 33 | Hecha | Las alertas abiertas van antes que la buena noticia de un SOS ya visto (en una pantalla con un solo aviso mostraba el SOS y ocultaba la alerta); tests de Python escritos pero sin correr aquí |
+| 33 | Hecha | Las alertas abiertas van antes que la buena noticia de un SOS ya visto (en una pantalla con un solo aviso mostraba el SOS y ocultaba la alerta); tests de Python corridos en Odoo con Docker (259 pruebas de la suite, 0 fallos) |
 | 34 | Hecha | Sin Reanimated: el SOS usa `Animated` con `scaleX` y driver nativo. La vibración queda por sentir en un dispositivo real |
 | 35 | Hecha | `space` es numérico (`space[4]` es 16); se añadieron `space[12]` (48) y `border.round`. El guarda corre en Jest, sin dependencias nuevas |
 | 36 | Hecha, más trabajo del previsto | La matriz de fuente 1,3 y 2,0 en el emulador destapó cinco defectos reales que el plan no tenía (ver abajo) |
