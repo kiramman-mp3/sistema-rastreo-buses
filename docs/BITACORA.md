@@ -1041,6 +1041,7 @@ Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-la
 | Tableta: `tsc --noEmit` y `expo lint` | Sin errores ni avisos |
 | `python qa/contraste.py` | PASS, incluidos los chips de línea |
 | Flake8 del módulo y de `qa` (entorno virtual temporal) | 0 avisos |
+| Suite de Odoo con el comando del CI (`docker run`, base nueva) | 259 pruebas, 0 fallos, 0 errores |
 | Matriz web (4 tamaños, día y noche, 5 escenarios) | Sin desbordes horizontales ni errores de página |
 | Emulador Android (LDPlayer, Android 9) | Recorrido completo con fuente 1,0, 1,3 y 2,0 en teléfono y tableta |
 | Emulador, pasada final sobre el código definitivo | Cuatro tamaños con fuente 1,0 y teléfono vertical con 1,3, sin fallos; una primera pasada encontró que con dos avisos fijos desaparecía la próxima parada en un teléfono vertical bajo, y se corrigió (un solo aviso fijo con poca altura, el resto contado) |
@@ -1056,7 +1057,8 @@ Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-la
 
 ### Pendiente o sin confirmar
 
-- Los tests de Python de la fase 33 (`TestOdooLanguagePick`, `test_state_accepts_the_app_language_and_ignores_nonsense`) no se pudieron ejecutar aquí (sin Docker ni Odoo local): la función pura se comprobó fuera de Odoo y `flake8` pasa, pero la suite de Odoo la corre el CI.
+- Con Docker ya levantado se corrió la suite de Odoo: **259 pruebas, 0 fallos, 0 errores** con el comando exacto del CI. Incluye las de la fase 33: elegir el idioma de Odoo, el detalle de la alerta en español, inglés y kichwa con el usuario del chofer en inglés, y el idioma por defecto de un chofer nuevo.
+- `TestHttp` falla de forma intermitente cuando se corre con `docker compose run` (también sobre `develop`, 2 de 4 corridas: `Session expired` tras `authenticate('admin')`); con el comando del CI pasó 5 de 5. Parece un efecto del `odoo.conf` del compose (`proxy_mode`) o del volumen de datos compartido con el Odoo de desarrollo; no se investigó la causa.
 - La vibración, la fluidez del SOS bajo carga, el gesto de atrás y TalkBack solo se juzgan en un celular real; LDPlayer es Android 9 y no sirve para eso.
 - `expo-haptics` es un módulo nativo: las tabletas ya instaladas necesitan un build de EAS nuevo para vibrar.
 - El teclado en pantalla no apareció en LDPlayer, así que no se verificó cómo reacciona el formulario de ingreso.
