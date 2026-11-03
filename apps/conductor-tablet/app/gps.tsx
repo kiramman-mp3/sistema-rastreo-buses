@@ -9,6 +9,7 @@ import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Action, Screen, Txt } from '../src/ui/cabin';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { shape, space } from '../src/ui/theme';
 
 type Facts = { foreground: boolean; background: boolean; queue: number; last: string; error: string | null };
 
@@ -96,20 +97,20 @@ export default function GpsScreen() {
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  head: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: space[3] },
   headText: { flexShrink: 1 },
-  headActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  headActions: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
   label: { flexShrink: 0 },
   value: { flexShrink: 1, textAlign: 'right' },
-  rows: { gap: 10 },
+  rows: { gap: space[2] },
   row: {
     minHeight: 64,
-    paddingVertical: 8,
-    borderRadius: 8,
-    paddingHorizontal: 20,
+    paddingVertical: space[2],
+    ...shape.control,
+    paddingHorizontal: space[5],
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: space[4],
   },
 });
