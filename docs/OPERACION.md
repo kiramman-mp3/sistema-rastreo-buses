@@ -28,7 +28,7 @@ Un SOS solo sirve si alguien lo ve. El sistema lo deja en la cola **Atención** 
 **Disponibilidad.** Apunta un monitor externo (el que prefieras) a `https://<DOMAIN>/bus_tracking/health`:
 
 - Cada 5 minutos, y que avise tras **2 fallos seguidos** (un 503 aislado puede ser un bus en un túnel).
-- **Pausa el monitor fuera del horario de servicio.** Sin buses reportando, `health` responde 503 de noche y el monitor avisaría todas las noches. Alternativa: sube *Reportar caído tras (minutos)* en Ajustes, o ponlo en 0 para desactivar el control.
+- **Pausa el monitor fuera del horario de servicio.** Sin buses reportando, `health` responde 503 de noche y el monitor avisaría todas las noches. Alternativa: sube *Informar caída tras (minutos)* en Ajustes, o ponlo en 0 para desactivar el control.
 - Avisa por correo o mensaje a más de una persona.
 
 **Errores de las tabletas.** Una falla de la propia app llega al registro de Odoo (si hay señal) como una línea `Tablet error`, con chofer, bus, versión de la app, pantalla y mensaje:
