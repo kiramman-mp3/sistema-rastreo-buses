@@ -2,7 +2,7 @@
  * Building blocks of the cabin screens. Rules: nothing the driver reads is smaller than 20 px on a tablet (16 px on a phone), every
  * control is at least 72 px tall (56 px on a phone), states carry a word and a shape, never colour alone, no emoji.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   AccessibilityInfo,
   Animated,
@@ -14,6 +14,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type PressableProps,
   type StyleProp,
   type TextStyle,
   type ViewStyle,
@@ -22,6 +23,8 @@ import {
 import type { GpsHealth } from '../gps/health';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { hapticCommit } from './haptics';
+import { createHold, type Hold } from './hold';
 import { useLayout } from './layout';
 import { sizes, fonts } from './theme';
 import { useTheme } from './ThemeProvider';
@@ -106,6 +109,22 @@ export function Txt({ children, size = 'body', bold, dim, color, style, lines, f
   );
 }
 
+type PressProps = Omit<PressableProps, 'style'> & { style?: StyleProp<ViewStyle> };
+
+/**
+ * A pressable row, chip or button that answers at once when the finger goes down: a small shrink, not
+ * an animation (these are touched tens of times a day). `Action` does the same at 0.97 for big buttons.
+ */
+export function Press({ style, disabled, ...rest }: PressProps) {
+  return (
+    <Pressable
+      {...rest}
+      disabled={disabled}
+      style={({ pressed }) => [style, pressed && !disabled && styles.pressedRow]}
+    />
+  );
+}
+
 type ActionProps = {
   label: string;
   sub?: string;
@@ -180,39 +199,72 @@ type SosProps = {
   status?: string | null;
 };
 
-/** Press and hold 1.5 s: a bump of the road cannot send an SOS by accident. */
+const SOS_HOLD_MS = 1500;
+/** The fill empties fast when the finger lifts: slow where the driver decides, quick where the system answers. */
+const SOS_RELEASE_MS = 200;
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+
+/**
+ * Press and hold 1.5 s: a bump of the road cannot send an SOS by accident. The fill is a transform
+ * (scaleX) run natively, so a busy JS thread (map, GPS) cannot make it stutter. With "reduce motion"
+ * the fill appears at once as a state instead of travelling; the 1.5 s is still required.
+ */
 export function SosButton({ onFire, title, hint, holding, status }: SosProps) {
   const { palette } = useTheme();
+  const { hit } = useLayout();
   const [progress] = useState(() => new Animated.Value(0));
-  const fill = useMemo(() => progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }), [progress]);
   const [pressing, setPressing] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [reduce, setReduce] = useState(false);
+  const native = Platform.OS !== 'web';
+
+  const fire = useRef(onFire);
+  const hold = useRef<Hold | null>(null);
+  useEffect(() => {
+    fire.current = onFire;
+  }, [onFire]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduce).catch(() => undefined);
   }, []);
 
-  function start() {
-    setPressing(true);
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: reduce ? 0 : 1500,
-      easing: Easing.linear,
-      useNativeDriver: false,
-    }).start();
-    timer.current = setTimeout(() => {
+  useEffect(() => {
+    const current = createHold(SOS_HOLD_MS, () => {
       setPressing(false);
       progress.setValue(0);
-      onFire();
-    }, 1500);
+      hapticCommit();
+      fire.current();
+    });
+    hold.current = current;
+    return () => current.cancel();
+  }, [progress]);
+
+  function start() {
+    setPressing(true);
+    hold.current?.start();
+    if (reduce) {
+      progress.setValue(1);
+      return;
+    }
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: SOS_HOLD_MS,
+      easing: Easing.linear,
+      useNativeDriver: native,
+    }).start();
   }
 
   function cancel() {
+    const wasHolding = hold.current?.active ?? false;
+    hold.current?.cancel();
     setPressing(false);
-    if (timer.current) clearTimeout(timer.current);
     progress.stopAnimation();
-    progress.setValue(0);
+    if (!wasHolding) return; // it already fired: the fire reset the fill
+    Animated.timing(progress, {
+      toValue: 0,
+      duration: reduce ? 0 : SOS_RELEASE_MS,
+      easing: EASE_OUT,
+      useNativeDriver: native,
+    }).start();
   }
 
   return (
@@ -222,13 +274,16 @@ export function SosButton({ onFire, title, hint, holding, status }: SosProps) {
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${hint}`}
       accessibilityActions={[{ name: 'activate', label: title }]}
-      onAccessibilityAction={() => onFire()}
-      style={[styles.action, styles.sos, { backgroundColor: palette.danger, borderColor: palette.danger }]}
+      onAccessibilityAction={() => {
+        hapticCommit();
+        onFire();
+      }}
+      style={[styles.action, styles.sos, { minHeight: hit, backgroundColor: palette.danger, borderColor: palette.danger }]}
     >
       <Animated.View
         style={[
           styles.sosFill,
-          { backgroundColor: palette.onDanger, width: fill },
+          { backgroundColor: palette.onDanger, opacity: reduce ? 0.18 : 0.25, transform: [{ scaleX: progress }] },
         ]}
       />
       <Txt bold size="data" color={palette.onDanger}>
@@ -247,6 +302,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  pressedRow: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
   },
   action: {
     minHeight: HIT,
@@ -273,6 +332,8 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    opacity: 0.25,
+    right: 0,
+    // grows from the left edge: scaleX alone would grow from the middle
+    transformOrigin: 'left',
   },
 });

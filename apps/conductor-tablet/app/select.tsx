@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../src/api/client';
@@ -7,7 +7,7 @@ import { GpsPermissionError } from '../src/gps/types';
 import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
-import { Action, Screen, Txt } from '../src/ui/cabin';
+import { Action, Press, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
 import { useTheme } from '../src/ui/ThemeProvider';
@@ -115,7 +115,7 @@ export default function Select() {
             {vehicles.map((bus) => {
               const on = vehicleId === bus.id;
               return (
-                <Pressable
+                <Press
                   key={bus.id}
                   disabled={!usable(bus)}
                   onPress={() => {
@@ -139,7 +139,7 @@ export default function Select() {
                         ? `${bus.plate} · ${t('busNoGps')}`
                         : bus.plate}
                   </Txt>
-                </Pressable>
+                </Press>
               );
             })}
           </ScrollView>
@@ -153,7 +153,7 @@ export default function Select() {
             {routes.map((route) => {
               const on = routeId === route.id;
               return (
-                <Pressable
+                <Press
                   key={route.id}
                   onPress={() => setRouteId(route.id)}
                   accessibilityRole="radio"
@@ -168,7 +168,7 @@ export default function Select() {
                   <Txt bold size="body" color={on ? palette.ground : palette.ink} lines={2} style={styles.routeName}>
                     {route.name}
                   </Txt>
-                </Pressable>
+                </Press>
               );
             })}
           </ScrollView>
