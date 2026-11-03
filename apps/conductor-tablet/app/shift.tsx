@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, AppState, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Animated, AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
@@ -17,10 +17,11 @@ import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
 import { hapticCommit } from '../src/ui/haptics';
 import { readableOn } from '../src/ui/contrast';
-import { useLayout } from '../src/ui/layout';
+import { noticeCapacity, useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
+import { useStopCue } from '../src/ui/useStopCue';
 import { border, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
@@ -69,6 +70,7 @@ export default function ShiftScreen() {
   const nextStop = nextIndex >= 0 ? stops[nextIndex] : null;
   const afterStop = nextIndex >= 0 ? stops[nextIndex + 1] ?? null : null;
   const left = nextIndex >= 0 ? stops.length - nextIndex : 0;
+  const stopCue = useStopCue(nextStop?.id ?? null);
 
   const busFix = useMemo(
     () => (gps.lat !== null && gps.lon !== null ? { lat: gps.lat, lon: gps.lon } : null),
@@ -180,7 +182,7 @@ export default function ShiftScreen() {
   const showStrip = !layout.short || pageScroll;
   // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
   // has room for one, and a shorter detail; the rest is counted.
-  const noticeBlock = <NoticeList items={notices} max={layout.short && !pageScroll ? 1 : 2} detailLines={layout.short && !pageScroll ? 1 : 2} />;
+  const noticeBlock = <NoticeList items={notices} max={noticeCapacity(layout)} detailLines={layout.short && !pageScroll ? 1 : 2} />;
 
   const problem = (
     <Action
@@ -207,9 +209,11 @@ export default function ShiftScreen() {
       <Txt size="small" dim>
         {t('cabinNext')}
       </Txt>
-      <Txt bold size="stop" lines={2} fit>
-        {nextStop ? nextStop.name : t('noNextStop')}
-      </Txt>
+      <Animated.View style={stopCue}>
+        <Txt bold size="stop" lines={2} fit>
+          {nextStop ? nextStop.name : t('noNextStop')}
+        </Txt>
+      </Animated.View>
       {nextStop ? (
         <Txt size="body" dim>
           {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
@@ -461,7 +465,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexShrink: 0,
     flexBasis: 0,
-    minHeight: 150,
+    minHeight: 96,
   },
   lockNote: {
     paddingHorizontal: space[4],

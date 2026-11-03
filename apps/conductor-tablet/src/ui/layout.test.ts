@@ -1,4 +1,4 @@
-import { layoutFor } from './layout';
+import { layoutFor, noticeCapacity } from './layout';
 import { sizes, sizesPhone } from './theme';
 
 describe('layoutFor', () => {
@@ -47,6 +47,15 @@ describe('layoutFor', () => {
     expect(layoutFor(390, 844, 1.3).largeText).toBe(true);
     expect(layoutFor(390, 844, 1.2999999523162842).largeText).toBe(true); // what Android reports for 130 %
     expect(layoutFor(1280, 800, 2).largeText).toBe(true);
+  });
+
+  test('pinned notices: one where the next stop would be pushed out, two where there is room', () => {
+    expect(noticeCapacity(layoutFor(411, 731))).toBe(1); // a phone in portrait that is not tall
+    expect(noticeCapacity(layoutFor(390, 844))).toBe(2);
+    expect(noticeCapacity(layoutFor(844, 390))).toBe(1); // a phone on its side
+    expect(noticeCapacity(layoutFor(1067, 600))).toBe(2); // a tablet on its side: the column scrolls
+    expect(noticeCapacity(layoutFor(800, 1280))).toBe(2);
+    expect(noticeCapacity(layoutFor(411, 731, 2))).toBe(2); // large text: the page scrolls
   });
 
   test('nothing the driver reads is smaller than 16 px', () => {
