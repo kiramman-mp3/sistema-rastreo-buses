@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { stopWindow, type StopView } from '../shift/progress';
 import { Txt } from './cabin';
 import { useTheme } from './ThemeProvider';
+import { border, space } from './theme';
 
 export function StopStrip({ stops, color }: { stops: StopView[]; color: string }) {
   const { palette } = useTheme();
@@ -21,7 +22,7 @@ export function StopStrip({ stops, color }: { stops: StopView[]; color: string }
                 style={[
                   styles.dot,
                   { borderColor: line, backgroundColor: passed ? line : palette.ground },
-                  next && { width: 34, height: 34, borderRadius: 17, borderColor: palette.ink, backgroundColor: palette.signal },
+                  next && { width: 34, height: 34, borderRadius: border.round, borderColor: palette.ink, backgroundColor: palette.signal },
                 ]}
               />
             </View>
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
   cell: {
     flex: 1,
     alignItems: 'center',
-    gap: 8,
+    gap: space[2],
   },
   track: {
     height: 34,
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: border.round,
     borderWidth: 6,
   },
   name: {

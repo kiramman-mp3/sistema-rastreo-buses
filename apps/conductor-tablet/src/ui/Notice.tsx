@@ -10,6 +10,7 @@ import { pickNotices, type NoticeItem, type NoticeTone } from '../shift/notices'
 import { Txt } from './cabin';
 import { useLayout } from './layout';
 import { useTheme } from './ThemeProvider';
+import { border, shape, space } from './theme';
 
 const MARK = 16;
 
@@ -73,11 +74,10 @@ type NoticeListProps = {
 
 /** The notices that fit, then a line saying how many more there are. */
 export function NoticeList({ items, max, detailLines, style }: NoticeListProps) {
-  const { gap } = useLayout();
   if (items.length === 0) return null;
   const { shown, hidden } = pickNotices(items, max);
   return (
-    <View style={[{ gap: gap / 2 }, style]}>
+    <View style={[{ gap: space[2] }, style]}>
       {shown.map((item) => (
         <Notice key={item.key} item={item} detailLines={detailLines} />
       ))}
@@ -94,11 +94,11 @@ const styles = StyleSheet.create({
   box: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
+    gap: space[3],
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
+    borderWidth: border.thin,
   },
   markSlot: {
     justifyContent: 'center',
@@ -121,6 +121,6 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
-    gap: 4,
+    gap: space[1],
   },
 });
