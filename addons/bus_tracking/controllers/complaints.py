@@ -7,7 +7,6 @@ from odoo.http import request
 from odoo.tools import misc
 
 from ..models.bus_complaint import KINDS, MAX_DESCRIPTION
-from ..models.utils import safe_http_url
 from .portal import RateLimiter, portal_context, public_routes, render_portal
 
 MIN_DESCRIPTION = 10
@@ -83,8 +82,7 @@ class BusComplaints(http.Controller):
         )
         values['privacy_text'] = values['s']['privacy'].format(days=self._retention_days())
         values['max_description'] = MAX_DESCRIPTION
-        values['privacy_url'] = safe_http_url(
-            request.env(su=True)['ir.config_parameter'].get_param('bus_tracking.privacy_url'))
+        values['privacy_url'] = values['privacy_link']
         return values
 
     def _thanks(self, folio=None, has_contact=True):
