@@ -1,7 +1,7 @@
 /**
- * What the cabin says about the SOS and the open alerts, in the order a driver needs it: the answer
- * to the SOS first, then the alerts. The screen has room for few, so the rest is counted, not hidden
- * without a word.
+ * What the cabin says about the SOS and the open alerts, in the order a driver needs it: what still
+ * needs attention first (an SOS nobody has seen, then the open alerts) and good news last (the office
+ * saw the SOS). The screen has room for few, so the rest is counted, not hidden without a word.
  */
 export type NoticeTone = 'danger' | 'ok' | 'warn';
 
@@ -21,6 +21,8 @@ type NoticeInput = {
   alerts: { id: number; title: string; detail: string }[];
 };
 
+const RANK: Record<NoticeTone, number> = { danger: 0, warn: 1, ok: 2 };
+
 export function buildNotices({ sos, alerts }: NoticeInput): NoticeItem[] {
   const items: NoticeItem[] = [];
   if (sos) {
@@ -35,7 +37,8 @@ export function buildNotices({ sos, alerts }: NoticeInput): NoticeItem[] {
       live: 'polite',
     });
   }
-  return items;
+  // Array.sort is stable: inside a tone the order above (the SOS before the alerts) holds.
+  return items.sort((a, b) => RANK[a.tone] - RANK[b.tone]);
 }
 
 /** The first `max` notices (at least one when there is any) and how many were left out. */

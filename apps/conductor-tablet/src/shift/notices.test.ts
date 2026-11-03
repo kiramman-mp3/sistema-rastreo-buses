@@ -6,15 +6,17 @@ const alerts = [
 ];
 
 describe('cabin notices', () => {
-  test('the answer to the SOS comes before any alert', () => {
+  test('an SOS nobody has seen comes before any alert', () => {
     const items = buildNotices({ sos: { text: 'SOS enviado', seen: false }, alerts });
     expect(items.map((i) => i.key)).toEqual(['sos', 'alert-1', 'alert-2']);
     expect(items[0]).toMatchObject({ tone: 'danger', live: 'assertive' });
   });
 
-  test('an SOS the office has seen is good news, not danger', () => {
-    const [sos] = buildNotices({ sos: { text: 'Visto por Central', seen: true }, alerts: [] });
-    expect(sos.tone).toBe('ok');
+  test('an SOS the office has seen is good news, not danger, and waits behind the open alerts', () => {
+    const [only] = buildNotices({ sos: { text: 'Visto por Central', seen: true }, alerts: [] });
+    expect(only.tone).toBe('ok');
+    const items = buildNotices({ sos: { text: 'Visto por Central', seen: true }, alerts });
+    expect(items.map((i) => i.key)).toEqual(['alert-1', 'alert-2', 'sos']);
   });
 
   test('an alert without detail has no detail line', () => {
