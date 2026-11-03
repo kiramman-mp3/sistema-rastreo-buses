@@ -98,6 +98,6 @@ Una vez al mes (30 minutos):
 
 ## 8. Pruebas en el equipo de desarrollo
 
-La suite de Odoo se corre como el CI: con `docker run` y una base nueva, no con `docker compose run`. Con `compose run`, `TestHttp` falló de forma intermitente (`Session expired` tras `authenticate('admin')`, o el inicio sin redirección): 3 de 6 corridas, y también sobre `develop` sin ningún cambio nuestro (2 de 4). Con el comando del CI pasó 5 de 5.
+La suite de Odoo se corre como el CI: con `docker run` y una base nueva, no con `docker compose run`. Con `compose run`, `TestHttp` falló de forma intermitente (`Session expired` tras `authenticate('admin')`, o el inicio sin redirección): 2 de 4 corridas sobre nuestra rama y 2 de 4 sobre `develop` sin ningún cambio nuestro. Con el comando del CI pasó 5 de 5.
 
 Se probó qué diferencia lo causa, con el comando del CI y una sola variable cada vez: `--proxy-mode` (6 de 6 pasan) y montar el volumen de datos compartido con el Odoo de desarrollo (6 de 6 pasan). **Ninguna de las dos es la causa.** Quedan sin probar el resto del `odoo.conf` del compose y el montaje de `addons` con escritura. Mientras no se sepa, el veredicto de las pruebas es el del CI, y una falla aislada de `TestHttp` en `compose run` se repite con el comando del CI antes de darla por real. Comando exacto en `.github/workflows/ci.yml`, trabajo `odoo-tests`.
