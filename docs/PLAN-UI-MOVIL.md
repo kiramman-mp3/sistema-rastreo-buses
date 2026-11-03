@@ -48,6 +48,27 @@ Resueltas el 2-nov-2026 con quien dirige el proyecto, salvo D1 y D4, que siguen 
 
 Las fases 33 y 34 pueden ir en paralelo (tocan archivos distintos salvo `cabin.tsx`; si chocan, 34 espera a 33).
 
+## Estado de la ejecución (2-nov-2026)
+
+Las seis fases están hechas en `feature/responsive-layout`, a la espera de fusionarla a `develop`. Lo que cambió respecto al plan:
+
+| Fase | Estado | Diferencias con lo planeado |
+|---|---|---|
+| 32 | Hecha | Servidor simulado en vez de Odoo con Docker; capturas base fuera del repo (ver más abajo) |
+| 33 | Hecha | Las alertas abiertas van antes que la buena noticia de un SOS ya visto (en una pantalla con un solo aviso mostraba el SOS y ocultaba la alerta); tests de Python escritos pero sin correr aquí |
+| 34 | Hecha | Sin Reanimated: el SOS usa `Animated` con `scaleX` y driver nativo. La vibración queda por sentir en un dispositivo real |
+| 35 | Hecha | `space` es numérico (`space[4]` es 16); se añadieron `space[12]` (48) y `border.round`. El guarda corre en Jest, sin dependencias nuevas |
+| 36 | Hecha, más trabajo del previsto | La matriz de fuente 1,3 y 2,0 en el emulador destapó cinco defectos reales que el plan no tenía (ver abajo) |
+| 37 | Hecha | D4: el gesto de atrás predictivo sigue apagado. D5: el movimiento de la parada se construyó |
+
+Defectos que solo apareció al probar con letra grande en Android, todos corregidos:
+
+1. El turno se desbordaba: a 1,3× desaparecía la próxima parada y a 2,0× el SOS y Terminar turno eran inalcanzables. Ahora la página hace scroll entera.
+2. Android informa 130 % como `1.2999999`: la comparación fallaba. Ahora hay tolerancia.
+3. En selección, incidente y GPS el botón del encabezado dejaba al título casi sin ancho. Ahora se apilan.
+4. El chip de la línea tenía alto fijo y recortaba el código. Ahora crece con el texto.
+5. La selección quedaba sin listas visibles. Ahora el botón de inicio queda fijo abajo y el contenido hace scroll.
+
 ---
 
 ## Fase 32: entorno de pruebas sin producción
