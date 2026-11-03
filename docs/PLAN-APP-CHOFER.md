@@ -84,6 +84,7 @@ Carpeta `apps/conductor-tablet/`. Expo SDK vigente, TypeScript, `expo-router`.
 - Pantallas: Login, Selección de bus y ruta (buses con `available: false` aparecen deshabilitados), y recuperación del turno activo al abrir la app.
 - Tableta: textos y botones grandes, `expo-keep-awake`.
 - Pantallas adaptables: la app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto < 600 dp es teléfono) y decide: tamaños de texto (tableta 20-60 px, teléfono 16-40 px), alto mínimo de los controles (72 / 56 px), paneles lado a lado o apilados, y qué se oculta cuando falta altura. `Screen` (`src/ui/cabin.tsx`) cuida muescas, barras del sistema y teclado.
+- Gesto de atrás: `predictiveBackGestureEnabled` se mantiene en `false`. La tecla y el gesto de atrás funcionan igual; solo se evita la animación predictiva. Con un turno abierto, un gesto de atrás accidental sobre la pantalla del turno es un riesgo, y el emulador de pruebas (LDPlayer, Android 9) no puede validarlo. Reabrir cuando haya un Android 14 o superior real para probar login, selección, turno, incidente y GPS.
 - Herramientas: `tsc --noEmit`, `expo lint`, `jest-expo`.
 - `eas.json` con perfil `development` (APK).
 
