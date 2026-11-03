@@ -29,7 +29,11 @@
 	@realtime path /longpolling/* /websocket
 	reverse_proxy @realtime odoo:8072
 
-	reverse_proxy odoo:8069
+	reverse_proxy odoo:8069 {
+		# Odoo 16 sends its session cookie without Secure or SameSite: add them here, since this site is
+		# only served over HTTPS (HSTS). Cookies other than the session one are left as they come.
+		header_down Set-Cookie "^(session_id=[^;]*;.*)$" "$1; Secure; SameSite=Lax"
+	}
 }
 
 # Drivers' phones (Traccar Client, OsmAnd protocol) send their position here over HTTPS.
