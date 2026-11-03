@@ -138,11 +138,15 @@ export default function IncidentScreen() {
 }
 
 const styles = StyleSheet.create({
+  // The title keeps room to be read: when a big font leaves less than this, the button drops to the next line.
   headText: {
+    flexGrow: 1,
     flexShrink: 1,
+    flexBasis: 200,
   },
   head: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: space[4],
