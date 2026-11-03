@@ -14,8 +14,10 @@ import {
   StyleSheet,
   Text,
   View,
+  TextInput,
   type PressableProps,
   type StyleProp,
+  type TextInputProps,
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
@@ -84,6 +86,12 @@ type TxtProps = {
   fit?: boolean;
 };
 
+/**
+ * How far the system font size may grow the text. Small and body text follows the setting up to 200 %
+ * (people with low vision depend on it); the big numbers are already large and would break the layout.
+ */
+export const MAX_FONT_SCALE: Record<keyof typeof sizes, number> = { small: 2, body: 2, data: 1.6, title: 1.3, stop: 1.3 };
+
 export function Txt({ children, size = 'body', bold, dim, color, style, lines, fit }: TxtProps) {
   const { palette } = useTheme();
   const px = useLayout().sizes[size];
@@ -92,7 +100,7 @@ export function Txt({ children, size = 'body', bold, dim, color, style, lines, f
       numberOfLines={lines}
       adjustsFontSizeToFit={fit}
       minimumFontScale={0.7}
-      maxFontSizeMultiplier={1.3}
+      maxFontSizeMultiplier={MAX_FONT_SCALE[size]}
       style={[
         {
           color: color ?? (dim ? palette.ink2 : palette.ink),
@@ -106,6 +114,33 @@ export function Txt({ children, size = 'body', bold, dim, color, style, lines, f
     >
       {children}
     </Text>
+  );
+}
+
+/** A text field: same corners, border and size as the rest, and the same cap on the system font size. */
+export function Field({ style, ...rest }: TextInputProps) {
+  const { palette } = useTheme();
+  const { sizes: text, phone } = useLayout();
+  return (
+    <TextInput
+      placeholderTextColor={palette.ink2}
+      maxFontSizeMultiplier={MAX_FONT_SCALE.body}
+      {...rest}
+      style={[
+        {
+          minHeight: phone ? 52 : 64,
+          paddingHorizontal: space[4],
+          borderWidth: border.thin,
+          ...shape.control,
+          fontFamily: fonts.text,
+          fontSize: text.body,
+          color: palette.ink,
+          backgroundColor: palette.field,
+          borderColor: palette.ink2,
+        },
+        style,
+      ]}
+    />
   );
 }
 

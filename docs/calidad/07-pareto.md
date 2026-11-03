@@ -22,10 +22,11 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 9 | 34,6 % | 34,6 % |
-| Configuración | 7 | 26,9 % | 61,5 % |
-| Seguridad | 7 | 26,9 % | 88,5 % |
-| Validación de entrada | 3 | 11,5 % | 100,0 % |
+| Lógica | 11 | 32,4 % | 32,4 % |
+| Configuración | 7 | 20,6 % | 52,9 % |
+| Seguridad | 7 | 20,6 % | 73,5 % |
+| Accesibilidad y diseño | 6 | 17,6 % | 91,2 % |
+| Validación de entrada | 3 | 8,8 % | 100,0 % |
 
 **Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Queda abierto uno de seguridad (DEF-013).
 
