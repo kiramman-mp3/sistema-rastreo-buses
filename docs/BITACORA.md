@@ -1063,3 +1063,38 @@ Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-la
 - `expo-haptics` es un módulo nativo: las tabletas ya instaladas necesitan un build de EAS nuevo para vibrar.
 - El teclado en pantalla no apareció en LDPlayer, así que no se verificó cómo reacciona el formulario de ingreso.
 - La rama `feature/responsive-layout` no se ha fusionado a `develop`.
+
+## 2026-11-03: endurecimiento previo a la preview (dependencias, observabilidad, privacidad y operación)
+
+Parte del análisis de preparación para producción. Ramas de trabajo hijas de `feature/responsive-layout`, fusionadas con `--no-ff`.
+
+### Qué se hizo
+
+1. **Dependencias** (`chore/dependencias`): `npm audit fix` quitó las 2 vulnerabilidades altas (`@expo/cli`, `zod`); parches de Expo SDK 58 (`expo`, `expo-dev-client`, `expo-router`, `expo-task-manager`); Jest 29 a 30.5; `eas-cli` sale de las dependencias del proyecto y los scripts usan `npx eas-cli`; el `react` fijado a propósito para EAS se declara en `expo.install.exclude`. `expo-doctor`: 20 de 20. Quedan 11 avisos moderados de la cadena de herramientas de Expo (`glob`, `minimatch`, `@expo/*`), cuyo "arreglo" sería bajar Expo a la 51: no se aplicó.
+2. **Observabilidad** (`feature/observabilidad`): `/bus_tracking/health` informa la versión instalada del módulo; `POST /bus_tracking/driver/client_error` (con sesión de chofer, límite de 20 por minuto, entradas acotadas y saneadas) deja las fallas de la app en el registro de Odoo como `Tablet error`. La app registra los errores no atrapados con su pantalla, los guarda en una cola persistente (10, sin repetidos seguidos) y los envía al volver la señal; *Estado del GPS* muestra la última falla de los últimos 7 días.
+3. **Privacidad** (`feature/privacidad`): página pública `/privacidad` (es y en; el kichwa lee español) armada con los plazos reales de *Ajustes*, enlazada desde el pie y el formulario de quejas (o la política oficial si se configura); la app avisa al chofer al ingresar y antes de iniciar turno de que la oficina ve la posición; `docs/PRIVACIDAD.md` con el inventario y cómo atender un pedido de derechos.
+4. **Operación** (`chore/operaciones`): la cookie de sesión de Odoo sale con `Secure; SameSite=Lax` desde el proxy (probado con un Caddy real); `gitleaks` en el CI (`.gitleaks.toml`, solo permite la URL pública de teselas); `docs/OPERACION.md` (quién vigila el SOS, monitor, errores de tabletas, respaldos y ensayo de restauración, etiquetas y reversión, mantenimiento mensual).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo con el comando del CI (base nueva) | 276 pruebas, 0 fallos, 0 errores |
+| Tableta: Jest, `tsc`, `expo lint`, `expo-doctor` | 25 suites, 149 pruebas; sin errores; 20 de 20 |
+| Flake8 del módulo y de `qa`, `qa/traducciones.py` | 0 avisos, 0 sin traducir |
+| `caddy validate` del `Caddyfile` y prueba de la cookie | Configuración válida; `session_id` recibe `Secure; SameSite=Lax` y otras cookies no cambian |
+| `gitleaks` sobre el árbol | 0 hallazgos; detecta una clave falsa plantada (y no detecta una escrita en la misma línea que la URL permitida: límite documentado) |
+| Web de la app (login, selección, turno, GPS) | Sin errores de página ni desbordes |
+
+### Problemas encontrados
+
+- `gitleaks` sobre todas las ramas mostró que la contraseña de producción **sigue en `origin/main`** (commit `7d08bf3`): DEF-013 sigue abierto hasta el `git push --force-with-lease` de `main` y la rotación. Mi revisión anterior no la detectó (la clave lleva un carácter que mi patrón excluía), la de `gitleaks` sí.
+- La intermitencia de `TestHttp` con `docker compose run` no es por `proxy_mode` ni por el volumen compartido (6 de 6 corridas pasan en cada prueba); la causa sigue sin conocerse.
+- Un escape de barra invertida llegó colapsado al shell y rompió un literal de prueba; se arregló y no afecta al producto.
+
+### Pendiente o sin confirmar
+
+- La rotación de la contraseña del admin de producción y el `push --force` de `main` (los hace el equipo).
+- El panel de Traccar sigue público (`traccar.20.119.213.192.nip.io`) y la documentación aún dice que no se expone; el respaldo fuera del servidor, la jornada de campo con tableta física y el plan para Odoo 16 no se tocaron.
+- La política de privacidad es el texto del sistema: la universidad debe revisarla con quien lleve la protección de datos antes de adoptarla como oficial.
+- `expo-haptics` y los cambios de la app necesitan un build de EAS nuevo para llegar a las tabletas.
