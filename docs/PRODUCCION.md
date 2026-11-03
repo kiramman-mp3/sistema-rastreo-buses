@@ -92,9 +92,9 @@ Las alertas llegan por push (notificaciones web), que funcionan solo sobre HTTPS
 
 ## Monitoreo
 
-`GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok"}` con código 200, o `{"status": "stale"}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
+`GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok", "version": "<versión del módulo>"}` con código 200, o `{"status": "stale", "version": "..."}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
 
-Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y que avise por correo o mensaje cuando falle. Ojo: si tus buses no circulan de noche, el endpoint devolverá 503 en ese horario; sube el plazo o pausa el monitor.
+Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y que avise por correo o mensaje cuando falle. La operación diaria (quién vigila el SOS, el monitor, los errores de las tabletas, el ensayo de restauración, las etiquetas de versión y la reversión) está en `docs/OPERACION.md`; los datos personales y sus plazos, en `docs/PRIVACIDAD.md`. Ojo: si tus buses no circulan de noche, el endpoint devolverá 503 en ese horario; sube el plazo o pausa el monitor.
 
 ## Actualizar
 
