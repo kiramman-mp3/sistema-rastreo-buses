@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 
 import type { IncidentKind } from '../src/api/types';
 import { readLastSample, readLastSent } from '../src/gps/store';
 import { t, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Screen, Txt } from '../src/ui/cabin';
+import { Action, Press, Screen, Txt } from '../src/ui/cabin';
+import { hapticDone, hapticFail } from '../src/ui/haptics';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
 import { fonts } from '../src/ui/theme';
@@ -44,8 +45,10 @@ export default function IncidentScreen() {
       });
       setResult(outcome);
       setNote('');
+      hapticDone();
     } catch {
       setResult('error');
+      hapticFail();
     } finally {
       setBusy(false);
     }
@@ -70,7 +73,7 @@ export default function IncidentScreen() {
           {KINDS.map((item) => {
             const on = kind === item.key;
             return (
-              <Pressable
+              <Press
                 key={item.key}
                 onPress={() => {
                   setKind(item.key);
@@ -89,7 +92,7 @@ export default function IncidentScreen() {
                 <Txt bold size="data" color={on ? palette.ground : palette.ink}>
                   {t(item.label)}
                 </Txt>
-              </Pressable>
+              </Press>
             );
           })}
         </View>
