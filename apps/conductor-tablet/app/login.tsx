@@ -1,17 +1,17 @@
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Screen, Txt } from '../src/ui/cabin';
+import { Action, Field, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
 import { Notice } from '../src/ui/Notice';
-import { border, fonts, shape, space } from '../src/ui/theme';
+import { shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Login() {
@@ -52,21 +52,11 @@ export default function Login() {
     }
   }
 
-  const field = [
-    styles.input,
-    {
-      backgroundColor: palette.field,
-      color: palette.ink,
-      borderColor: palette.ink2,
-      minHeight: layout.phone ? 52 : 64,
-      fontSize: layout.sizes.body,
-    },
-  ];
   // Side by side when there is width; stacked (and centred) on a phone in portrait.
   const side = layout.wide;
 
   return (
-    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? 48 : layout.gap * 2 }]}>
+    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[12] : layout.gap * 2 }]}>
       <View style={[styles.intro, !side && styles.introStack]}>
         <Pressable onLongPress={() => setShowServer((v) => !v)} accessibilityLabel="Buses UTA" style={styles.brand}>
           <LineMark />
@@ -85,45 +75,39 @@ export default function Login() {
         </View>
       </View>
 
-      <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? 18 : 28 }]}>
+      <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? space[4] : space[6] }]}>
         <Action label={t('scanDriverBadge')} onPress={() => router.push('/scan')} kind="accent" />
         <Txt size="small" dim style={styles.or}>
           {t('orManualLogin')}
         </Txt>
-        <TextInput
+        <Field
           value={login}
           onChangeText={setLogin}
           autoCapitalize="none"
           autoCorrect={false}
           placeholder={t('user')}
-          placeholderTextColor={palette.ink2}
           accessibilityLabel={t('user')}
-          style={field}
         />
-        <TextInput
+        <Field
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           placeholder={t('password')}
-          placeholderTextColor={palette.ink2}
           accessibilityLabel={t('password')}
-          style={field}
         />
         {showServer ? (
           <View style={styles.server}>
             <Txt size="small" dim>
               {t('serverHint')}
             </Txt>
-            <TextInput
+            <Field
               value={odooUrl}
               onChangeText={setOdooUrl}
               autoCapitalize="none"
               autoCorrect={false}
               placeholder={t('odooUrl')}
-              placeholderTextColor={palette.ink2}
-              accessibilityLabel={t('odooUrl')}
-              style={field}
-            />
+                  accessibilityLabel={t('odooUrl')}
+                />
           </View>
         ) : null}
         {error ? (
@@ -186,12 +170,6 @@ const styles = StyleSheet.create({
   or: {
     textAlign: 'center',
     marginVertical: space[1],
-  },
-  input: {
-    borderWidth: border.thin,
-    ...shape.control,
-    paddingHorizontal: space[4],
-    fontFamily: fonts.text,
   },
   server: {
     gap: space[2],

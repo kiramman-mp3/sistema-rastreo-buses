@@ -76,7 +76,7 @@ export const sizesPhone: typeof sizes = {
 };
 
 /** Spacing on a 4 px grid, so nothing is placed by eye: space[2] is 8, space[4] is 16. */
-export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32 } as const;
+export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 12: 48 } as const;
 
 /** Lines around controls and marks. */
 export const border = { thin: 2, mark: 3, round: 999 } as const;
