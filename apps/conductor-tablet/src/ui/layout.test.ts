@@ -45,6 +45,7 @@ describe('layoutFor', () => {
     expect(layoutFor(390, 844).largeText).toBe(false);
     expect(layoutFor(390, 844, 1.15).largeText).toBe(false);
     expect(layoutFor(390, 844, 1.3).largeText).toBe(true);
+    expect(layoutFor(390, 844, 1.2999999523162842).largeText).toBe(true); // what Android reports for 130 %
     expect(layoutFor(1280, 800, 2).largeText).toBe(true);
   });
 

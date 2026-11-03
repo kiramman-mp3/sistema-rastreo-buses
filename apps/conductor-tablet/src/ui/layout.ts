@@ -32,8 +32,12 @@ export type Layout = {
   gap: number;
 };
 
-/** From this system font scale the cabin screens stop trying to fit everything in one view. */
+/**
+ * From this system font scale the cabin screens stop trying to fit everything in one view. Android reports
+ * a setting of 130 % as 1.2999999, so the comparison has a little room.
+ */
 export const LARGE_TEXT_SCALE = 1.3;
+const SCALE_TOLERANCE = 0.01;
 
 export function layoutFor(width: number, height: number, fontScale = 1): Layout {
   const phone = Math.min(width, height) < PHONE_MAX_SHORT_SIDE;
@@ -46,7 +50,7 @@ export function layoutFor(width: number, height: number, fontScale = 1): Layout 
     phone,
     wide: width >= TWO_PANE_MIN_WIDTH,
     short,
-    largeText: fontScale >= LARGE_TEXT_SCALE,
+    largeText: fontScale >= LARGE_TEXT_SCALE - SCALE_TOLERANCE,
     sizes: phone ? sizesPhone : sizes,
     // 72 dp is for gloved hands on a tablet; 56 dp is still far over Android's 48 dp minimum.
     hit: phone ? 56 : 72,
