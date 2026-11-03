@@ -14,6 +14,7 @@ import { buildNotices } from '../src/shift/notices';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { hapticCommit } from '../src/ui/haptics';
 import { useLayout } from '../src/ui/layout';
 import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
@@ -132,6 +133,7 @@ export default function ShiftScreen() {
         text: t('endShift'),
         style: 'destructive',
         onPress: () => {
+          hapticCommit();
           session
             .endShift()
             .then((result) => {
