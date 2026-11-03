@@ -1017,3 +1017,46 @@ Problemas encontrados:
 
 Sin hacer: el informe PDF (`Informe_calidad_rastreo_buses.pdf`) sigue siendo el de la evaluación del 28-oct (texto redactado a mano y `reportlab` no instalado), las capturas de la tableta y la prueba en una tableta real.
 
+
+## 2026-11-02: app móvil adaptable y su auditoría de diseño (fases 32 a 37)
+
+### Qué se hizo
+
+Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-layout`; cada fase salió de ella en su propia rama y volvió con `--no-ff`.
+
+1. **Adaptabilidad.** La app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto menor a 600 dp es teléfono) y decide tamaños de letra, alto de controles y si los paneles van lado a lado o apilados. `Screen` cuida muescas, barras del sistema y teclado.
+2. **Fase 32, entorno de pruebas** (`chore/qa-movil`): `qa/mock_driver_api.py` (la API del chofer con escenarios normal, peor caso, una parada, vacío y bus ocupado), `qa/capturas_movil.py` (88 capturas web: 4 tamaños, día y noche) y `qa/capturas_android.py` (recorrido real en el emulador por tamaño y escala de fuente; restaura el emulador siempre).
+3. **Fase 33, avisos** (`fix/avisos-fijos`): `Notice` (palabra y forma, sin franja gruesa), prioridad pura de avisos, avisos fijos fuera del scroll, y la app manda su idioma a `/driver/state` (`pick_odoo_lang`; los choferes nuevos nacen en español).
+4. **Fase 34, respuesta táctil** (`feature/feedback-cabina`): `expo-haptics` en SOS, terminar turno y aviso de problema; SOS con relleno nativo, liberación de 200 ms y lógica de mantener probada aparte; respuesta inmediata al pulsar filas y chips.
+5. **Fase 35, tokens** (`refactor/tokens-diseno`): `space`, `border` y `shape` en `theme.ts`, guarda `spacing.test.ts` y color del texto del chip de la línea por contraste (`readableOn`, también en `qa/contraste.py`).
+6. **Fase 36, accesibilidad y contenido** (`feature/accesibilidad-contenido`): tope de escala de letra por tamaño, `Field`, estados vacíos, plurales (`tp`), distancias con el formato del idioma y, con letra al 130 % o más, páginas que hacen scroll con los botones principales a mano.
+7. **Fase 37, pulido** (`chore/pulido-plataforma`): listas de bus y línea con `FlatList` y filas memoizadas, movimiento de 200 ms al cambiar de parada, y el motivo por el que el gesto de atrás predictivo sigue apagado.
+8. Registro de defectos DEF-027 a DEF-034 en `qa/datos_calidad.py` y `docs/calidad/`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Tableta: Jest | 22 suites, 127 pruebas PASS |
+| Tableta: `tsc --noEmit` y `expo lint` | Sin errores ni avisos |
+| `python qa/contraste.py` | PASS, incluidos los chips de línea |
+| Flake8 del módulo y de `qa` (entorno virtual temporal) | 0 avisos |
+| Matriz web (4 tamaños, día y noche, 5 escenarios) | Sin desbordes horizontales ni errores de página |
+| Emulador Android (LDPlayer, Android 9) | Recorrido completo con fuente 1,0, 1,3 y 2,0 en teléfono y tableta |
+| SOS en el emulador | Mantener 1,1 s llena el botón y no dispara; al soltar se vacía |
+
+### Problemas encontrados
+
+- Con la fuente del sistema al 130 % o más el turno se desbordaba: a 1,3× desaparecía la próxima parada y a 2,0× el SOS y Terminar turno quedaban fuera de pantalla. La selección y los encabezados se desarmaban letra por letra. Se corrigió con páginas que hacen scroll, botón principal fijo y encabezados apilados (DEF-033).
+- Android informa un 130 % como `1.2999999`; la comparación `>= 1.3` no lo detectaba. Se añadió tolerancia y una prueba.
+- En el navegador, `flex: n` sobre un `ScrollView` queda anulado por su `flexGrow` base, y `flex: 0` colapsa un bloque; se usan propiedades explícitas.
+- Metro no recarga los cambios en esta ruta (tiene una "ó"): hay que reiniciar el servidor en cada prueba.
+- Se probó una vez contra producción con un usuario de chofer: se inició un turno del Bus 1 y se generó una alerta "Fuera de ruta" por la posición falsa del emulador. El turno se terminó y se cerró la sesión; **la alerta y el turno quedan en el historial** y conviene cerrarlos en Odoo. Desde entonces todo va contra el servidor simulado.
+
+### Pendiente o sin confirmar
+
+- Los tests de Python de la fase 33 (`TestOdooLanguagePick`, `test_state_accepts_the_app_language_and_ignores_nonsense`) no se pudieron ejecutar aquí (sin Docker ni Odoo local): la función pura se comprobó fuera de Odoo y `flake8` pasa, pero la suite de Odoo la corre el CI.
+- La vibración, la fluidez del SOS bajo carga, el gesto de atrás y TalkBack solo se juzgan en un celular real; LDPlayer es Android 9 y no sirve para eso.
+- `expo-haptics` es un módulo nativo: las tabletas ya instaladas necesitan un build de EAS nuevo para vibrar.
+- El teclado en pantalla no apareció en LDPlayer, así que no se verificó cómo reacciona el formulario de ingreso.
+- La rama `feature/responsive-layout` no se ha fusionado a `develop`.
