@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
+import { errorQueue } from '../src/diagnostics';
 import { gpsPermissionSnapshot } from '../src/gps/permissions';
 import { locationQueue, readLastError, readLastSent } from '../src/gps/store';
 import { t } from '../src/i18n';
@@ -12,19 +13,32 @@ import { useLayout } from '../src/ui/layout';
 import { useTheme } from '../src/ui/ThemeProvider';
 import { shape, space } from '../src/ui/theme';
 
-type Facts = { foreground: boolean; background: boolean; queue: number; last: string; error: string | null };
+type Facts = {
+  foreground: boolean;
+  background: boolean;
+  queue: number;
+  last: string;
+  error: string | null;
+  appError: string | null;
+};
+
+/** An app failure older than this is history, not something to worry the driver with. */
+const APP_ERROR_RECENT_MS = 7 * 24 * 3600 * 1000;
 
 function stamp(at: number, lat: number, lon: number) {
   return `${new Date(at).toLocaleTimeString()} · ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
 }
 
 async function loadFacts(): Promise<Facts> {
-  const [permissions, queue, sent, failed] = await Promise.all([
+  const [permissions, queue, sent, failed, appFailure] = await Promise.all([
     gpsPermissionSnapshot(),
     locationQueue.size(),
     readLastSent(),
     readLastError(),
+    errorQueue.last(),
   ]);
+  const at = appFailure ? Date.parse(appFailure.at) : NaN;
+  const recent = appFailure !== null && Number.isFinite(at) && Date.now() - at < APP_ERROR_RECENT_MS;
   // Only a failure newer than the last good send still explains anything.
   const error =
     failed && (!sent || failed.at > sent.at) ? `${new Date(failed.at).toLocaleTimeString()} · ${failed.error}` : null;
@@ -34,6 +48,7 @@ async function loadFacts(): Promise<Facts> {
     queue,
     last: sent ? stamp(sent.at, sent.lat, sent.lon) : t('gpsNone'),
     error,
+    appError: recent && appFailure ? `${new Date(at).toLocaleString()} · ${appFailure.message}` : null,
   };
 }
 
@@ -66,6 +81,7 @@ export default function GpsScreen() {
         [t('gpsLast'), facts.last, null],
         [t('gpsDevice'), session.snapshot.gps?.uniqueId ?? '-', null],
         ...(facts.error ? [[t('gpsLastError'), facts.error, false] as [string, string, boolean]] : []),
+        ...(facts.appError ? [[t('gpsLastAppError'), facts.appError, false] as [string, string, boolean]] : []),
       ]
     : [];
 
