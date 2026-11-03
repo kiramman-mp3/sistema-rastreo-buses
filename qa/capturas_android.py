@@ -73,8 +73,38 @@ def wait_for(*needles, seconds=20, clickable=False):
     raise RuntimeError('did not appear: ' + ' / '.join(needles))
 
 
+def screen_size():
+    text = adb('shell', 'wm', 'size')
+    found = re.findall(r'(\d+)x(\d+)', text)
+    width, height = found[-1]  # the override, when there is one, is listed last
+    return int(width), int(height)
+
+
+def scroll(direction):
+    """Drag the page: 'down' moves toward the end of the content, like a finger swiping up."""
+    width, height = screen_size()
+    top, bottom = int(height * 0.25), int(height * 0.75)
+    start, end = (bottom, top) if direction == 'down' else (top, bottom)
+    adb('shell', 'input', 'swipe', str(width // 2), str(start), str(width // 2), str(end), '350')
+    time.sleep(0.8)
+
+
+def locate(*needles, seconds=4):
+    """The clickable element, or None. A page that scrolls (large text) is scrolled down, then back up."""
+    for move in [None] + ['down'] * 3 + ['up'] * 6:
+        if move:
+            scroll(move)
+        try:
+            return wait_for(*needles, seconds=seconds, clickable=True)
+        except RuntimeError:
+            continue
+    return None
+
+
 def tap(*needles, seconds=20):
-    node = wait_for(*needles, seconds=seconds, clickable=True)
+    node = locate(*needles)
+    if node is None:
+        node = wait_for(*needles, seconds=seconds, clickable=True)  # raises with the names that were missing
     x, y = center(node)
     adb('shell', 'input', 'tap', str(x), str(y))
 
@@ -102,7 +132,7 @@ def walk(folder, prefix):
     tap('Entrar')
     wait_for('Iniciar turno', 'Elige tu bus', 'Elige el bus', seconds=30)
     shot(folder, f'{prefix}-select')
-    if find('Iniciar turno', clickable=True) is not None:
+    if locate('Iniciar turno', seconds=3) is not None:
         tap('Iniciar turno')
         end = time.time() + 45
         while time.time() < end and find('Próxima parada') is None:
@@ -113,16 +143,18 @@ def walk(folder, prefix):
             time.sleep(1.5)
         wait_for('Próxima parada', seconds=10)
         shot(folder, f'{prefix}-shift')
+        scroll('down')  # when the page scrolls (large text) this shows the buttons; otherwise nothing moves
+        shot(folder, f'{prefix}-shift-bottom')
         tap('Avisar un problema', 'Avisar')
         wait_for('Volver al turno', seconds=15)
         shot(folder, f'{prefix}-incident')
         tap('Volver al turno')
-        wait_for('Terminar turno', seconds=15)
+        wait_for('Próxima parada', 'Terminar turno', seconds=15)  # back on the shift screen
         tap('GPS enviando', 'Esperando señal', 'Sin red', 'GPS apagado', 'GPS')
         wait_for('Estado del GPS', seconds=15)
         shot(folder, f'{prefix}-gps')
         tap('Volver al turno')
-        wait_for('Terminar turno', seconds=15)
+        wait_for('Próxima parada', 'Terminar turno', seconds=15)  # back on the shift screen
         tap('Terminar turno')
         time.sleep(1.5)
         tap('TERMINAR TURNO', 'Terminar turno')  # the confirmation dialog repeats the label
@@ -162,7 +194,11 @@ def main():
                 adb('shell', 'am', 'force-stop', 'host.exp.exponent')
                 time.sleep(2)
                 adb('shell', 'am', 'start', '-a', 'android.intent.action.VIEW', '-d', f"'{url}'")
-                walk(folder, f'{size}-font{font}')
+                try:
+                    walk(folder, f'{size}-font{font}')
+                except RuntimeError:
+                    shot(folder, f'FAILED-{size}-font{font}')  # what was on screen when a wait ran out
+                    raise
     finally:
         adb('shell', 'wm', 'size', 'reset')
         adb('shell', 'wm', 'density', 'reset')

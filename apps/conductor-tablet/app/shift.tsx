@@ -6,7 +6,8 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { ApiError, NetworkError } from '../src/api/client';
 import { calculateDistanceMeters, useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
 import { useGpsHealth } from '../src/gps/useGpsHealth';
-import { alertLabel, t, tf, type Message } from '../src/i18n';
+import { alertLabel, t, tf, tp, type Message } from '../src/i18n';
+import { formatDistance } from '../src/i18n/format';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
 import { createMotionLock } from '../src/shift/motion';
@@ -24,10 +25,14 @@ import { border, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
   sending: 'gpsSending',
-  saving: 'gpsSaving',
   waiting: 'gpsWaiting',
   off: 'gpsOff',
 };
+
+/** What the GPS badge says; with points waiting to be sent it counts them in the right plural. */
+function gpsLabel(health: string, queued: number): string {
+  return health === 'saving' ? tp('gpsSaving', queued) : tf(GPS_LABEL[health], { n: queued });
+}
 
 function localTime(iso: string | null | undefined): string {
   if (!iso) return '';
@@ -36,8 +41,7 @@ function localTime(iso: string | null | undefined): string {
 }
 
 function distance(meters: number | null): string | null {
-  if (meters === null) return null;
-  return meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
+  return meters === null ? null : formatDistance(meters);
 }
 
 export default function ShiftScreen() {
@@ -166,14 +170,17 @@ export default function ShiftScreen() {
   const health = stale && gps.health === 'sending' ? 'saving' : gps.health;
 
   // Landscape puts the next stop beside the map; portrait stacks them (the map takes what is left).
-  const side = layout.landscape;
+  // With the system font at 130 % or more nothing fits one view: the whole page scrolls (header, notices,
+  // next stop, a map of fixed height, then the buttons), stacked in either orientation.
+  const pageScroll = layout.largeText;
+  const side = layout.landscape && !pageScroll;
   // A phone in portrait has no width for three buttons in a row: SOS on top, the other two below.
   const stackedActions = layout.phone && !layout.landscape;
   // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
-  const showStrip = !layout.short;
+  const showStrip = !layout.short || pageScroll;
   // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
   // has room for one, and a shorter detail; the rest is counted.
-  const noticeBlock = <NoticeList items={notices} max={layout.short ? 1 : 2} detailLines={layout.short ? 1 : 2} />;
+  const noticeBlock = <NoticeList items={notices} max={layout.short && !pageScroll ? 1 : 2} detailLines={layout.short && !pageScroll ? 1 : 2} />;
 
   const problem = (
     <Action
@@ -195,12 +202,8 @@ export default function ShiftScreen() {
     />
   );
 
-  const nextBlock = (
-    <ScrollView
-      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
-      contentContainerStyle={styles.leftContent}
-      showsVerticalScrollIndicator={false}
-    >
+  const nextContent = (
+    <>
       <Txt size="small" dim>
         {t('cabinNext')}
       </Txt>
@@ -222,9 +225,20 @@ export default function ShiftScreen() {
 
       {showStrip ? (
         <View style={styles.strip}>
-          <StopStrip stops={stops} color={color} />
+          <StopStrip stops={stops} color={color} ahead={layout.largeText ? 1 : 3} />
         </View>
       ) : null}
+    </>
+  );
+  const nextBlock = pageScroll ? (
+    <View style={styles.leftContent}>{nextContent}</View>
+  ) : (
+    <ScrollView
+      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
+      contentContainerStyle={styles.leftContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {nextContent}
     </ScrollView>
   );
 
@@ -246,7 +260,7 @@ export default function ShiftScreen() {
   const tallHeader = layout.phone && !layout.landscape;
 
   return (
-    <Screen>
+    <Screen scroll={pageScroll}>
       {/* Header: bus and line, real GPS state, time, day or night */}
       <View style={[styles.header, { backgroundColor: palette.panel }]}>
         <View style={[styles.identity, tallHeader && styles.identityTall]}>
@@ -273,7 +287,7 @@ export default function ShiftScreen() {
             accessibilityHint={t('gpsOpen')}
             style={styles.gpsTap}
           >
-            <GpsBadge health={health} label={tf(GPS_LABEL[health], { n: gps.queued })} />
+            <GpsBadge health={health} label={gpsLabel(health, gps.queued)} />
           </Press>
           <Txt bold size="data">
             {currentTime}
@@ -284,7 +298,9 @@ export default function ShiftScreen() {
 
       {side ? null : noticeBlock}
 
-      <View style={[styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}>
+      <View
+        style={[pageScroll ? null : styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}
+      >
         {/* Where the bus goes next. Beside the map the notices are pinned above it; the rest scrolls. */}
         {side ? (
           <View style={styles.left}>
@@ -296,7 +312,13 @@ export default function ShiftScreen() {
         )}
 
         {/* The map */}
-        <View style={[styles.map, side ? styles.mapSide : styles.mapStack, { backgroundColor: palette.panel }]}>
+        <View
+          style={[
+            styles.map,
+            pageScroll ? styles.mapFixed : side ? styles.mapSide : styles.mapStack,
+            { backgroundColor: palette.panel },
+          ]}
+        >
           <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
         </View>
       </View>
@@ -356,7 +378,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     minWidth: 52,
-    height: 44,
+    minHeight: 44,
     paddingHorizontal: space[3],
     ...shape.control,
     alignItems: 'center',
@@ -431,6 +453,9 @@ const styles = StyleSheet.create({
   },
   mapSide: {
     flex: 6,
+  },
+  mapFixed: {
+    height: 260,
   },
   mapStack: {
     flexGrow: 1,

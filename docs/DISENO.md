@@ -56,6 +56,7 @@ Tableta: modo día sobre blanco (tinta 16,5:1) para sol directo y modo noche sob
 - **Atkinson Hyperlegible** (400 y 700) para el texto: pensada para baja visión, se lee bien en movimiento y al sol.
 - Cinco tamaños en el portal (`--t-1` a `--t-5`: 14, 17, 20–24, 28–44 y 40–88 px). Campos con 16 px o más para que el teléfono no haga zoom.
 - Tableta: nada visible por debajo de 20 px; datos a 32 px; la próxima parada a 56–64 px.
+- Teléfono (lado corto menor a 600 dp): nada por debajo de 16 px; datos a 24 px; la próxima parada a 40 px; controles de 56 px (72 px en tableta). El tamaño de letra del sistema se respeta: textos pequeños y de cuerpo hasta el 200 %, los números grandes hasta el 130 % (`MAX_FONT_SCALE`).
 
 ## Fotos
 
@@ -69,8 +70,19 @@ Una sola cosa con significado por superficie; lo demás es inmediato.
 
 - Portal: los buses avanzan **linealmente** entre posiciones (sin el frenazo de *ease-out*); el punto de "en vivo" respira cada 2 s solo mientras los datos son recientes; las secciones entran una vez, 18 px, escalonadas 70 ms.
 - Panel: igual para los buses; el bucle de animación se detiene si nada se mueve o la pestaña está oculta.
-- Tableta: cambio de parada con un deslizamiento corto; háptica solo al confirmar acciones.
+- Tableta: cambio de parada con un deslizamiento corto (200 ms, solo opacidad y 8 px, sin movimiento si el sistema pide reducir animaciones).
+- Háptica: una sola vibración por acción que confirma algo, en el mismo instante que el efecto visual y nunca como única señal: el SOS al cumplirse el segundo y medio, terminar turno al confirmar, y el aviso de problema al quedar enviado (éxito) o al fallar (error).
+- SOS: el relleno crece con una transformación nativa (1,5 s lineal) y se vacía en 200 ms al soltar; con "reducir animaciones" aparece de una vez, pero se sigue exigiendo el segundo y medio.
 - `prefers-reduced-motion` desactiva todo desplazamiento y deja el contenido.
+
+## Espaciado, esquinas y bordes
+
+- **Cuadrícula de 4 px.** Todo `padding`, `margin` y `gap` sale de `space[n]` en `theme.ts` (`space[2]` es 8, `space[4]` es 16). `src/ui/spacing.test.ts` falla si un número suelto cae fuera de la cuadrícula.
+- **Una esquina para todos los controles:** radio de 8 px con `borderCurve: 'continuous'` (`shape.control`). Los círculos usan `border.round`.
+- **Bordes finos y parejos:** 2 px (`border.thin`). No hay franjas gruesas de color en un solo lado.
+- **Avisos.** Un solo componente (`Notice`): el estado se dice con una palabra y una forma (rombo para peligro, cuadrado para aviso, punto para buena noticia, las mismas formas que el estado del GPS), nunca solo con color. Primero lo que sigue pendiente (un SOS que nadie vio, luego las alertas abiertas) y al final la buena noticia; lo que no cabe se cuenta ("2 avisos más"). Los avisos nunca se van con el scroll.
+- **Color de la línea.** El texto del código sobre el chip de la línea es blanco o la tinta, según cuál contraste más con el color que puso la oficina (`readableOn`).
+- **Texto grande.** Con la fuente del sistema al 130 % o más no hay forma de que todo quepa en una vista: el turno y la selección pasan a hacer scroll, con los botones principales abajo, y las listas y la franja de paradas se acortan para que ningún nombre se parta.
 
 ## No hacer
 

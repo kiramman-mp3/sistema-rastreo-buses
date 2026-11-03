@@ -5,9 +5,10 @@ import { Txt } from './cabin';
 import { useTheme } from './ThemeProvider';
 import { border, space } from './theme';
 
-export function StopStrip({ stops, color }: { stops: StopView[]; color: string }) {
+/** `ahead` is how many stops after the next one are drawn; with large text two cells are all that fit a name. */
+export function StopStrip({ stops, color, ahead = 3 }: { stops: StopView[]; color: string; ahead?: number }) {
   const { palette } = useTheme();
-  const shown = stopWindow(stops);
+  const shown = stopWindow(stops, 0, ahead);
   const line = palette.mode === 'night' ? palette.line : color;
   return (
     <View style={styles.strip} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">

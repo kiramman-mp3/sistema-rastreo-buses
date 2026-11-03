@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import type { IncidentKind } from '../src/api/types';
 import { readLastSample, readLastSent } from '../src/gps/store';
 import { t, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Press, Screen, Txt } from '../src/ui/cabin';
+import { Action, Field, Press, Screen, Txt } from '../src/ui/cabin';
 import { hapticDone, hapticFail } from '../src/ui/haptics';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
-import { border, fonts, shape, space } from '../src/ui/theme';
+import { border, shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 const KINDS: { key: IncidentKind; label: Message }[] = [
@@ -56,7 +56,7 @@ export default function IncidentScreen() {
 
   return (
     <Screen scroll>
-      <View style={styles.head}>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
         <View style={styles.headText}>
           <Txt bold size="title">
             {t('actionProblem')}
@@ -101,23 +101,13 @@ export default function IncidentScreen() {
           <Txt size="small" dim>
             {t('incidentNote')}
           </Txt>
-          <TextInput
+          <Field
             value={note}
             onChangeText={setNote}
             placeholder={t('incidentNoteHint')}
-            placeholderTextColor={palette.ink2}
             maxLength={300}
             multiline
-            style={[
-              styles.input,
-              {
-                backgroundColor: palette.field,
-                color: palette.ink,
-                borderColor: palette.ink2,
-                fontSize: layout.sizes.body,
-                minHeight: layout.short ? 96 : 160,
-              },
-            ]}
+            style={[styles.input, { minHeight: layout.short ? 96 : 160 }]}
           />
           <Txt size="small" dim>
             {note.length} / 300
@@ -150,6 +140,11 @@ export default function IncidentScreen() {
 const styles = StyleSheet.create({
   headText: {
     flexShrink: 1,
+  },
+  // With a large system font the title and its button no longer fit side by side: the button goes below.
+  headStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   head: {
     flexDirection: 'row',
@@ -195,10 +190,7 @@ const styles = StyleSheet.create({
     gap: space[2],
   },
   input: {
-    borderWidth: border.thin,
-    ...shape.control,
-    padding: space[4],
-    fontFamily: fonts.text,
+    paddingVertical: space[4],
     textAlignVertical: 'top',
   },
   send: {
