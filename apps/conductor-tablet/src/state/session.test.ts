@@ -1,4 +1,6 @@
 import { ApiError, AuthError, createClient, type TokenStore } from '../api/client';
+import { ErrorQueue, memoryKv } from '../diagnostics/queue';
+import type { ErrorReport } from '../diagnostics/report';
 import { GpsPermissionError, type GpsController, type GpsStore } from '../gps/types';
 import { IncidentQueue } from '../incidents/queue';
 import { Session } from './session';
@@ -370,5 +372,66 @@ describe('session', () => {
     await expect(session.reportIncident({ kind: 'traffic', note: '', lat: null, lon: null })).rejects.toBeInstanceOf(ApiError);
     expect(await queue.size()).toBe(0);
   });
-});
 
+  describe('app failures waiting for the office', () => {
+    const waiting: ErrorReport = { message: 'Error: boom', app: '1.0.0', at: '2026-11-02T20:00:00.000Z' };
+
+    async function arrange(answer: (url: string) => Promise<Response>) {
+      const tokens = memoryStore('saved');
+      const calls: string[] = [];
+      const client = createClient({
+        baseUrl: 'http://odoo:8069',
+        store: tokens,
+        fetch: (url) => {
+          calls.push(String(url));
+          return answer(String(url));
+        },
+      });
+      const errors = new ErrorQueue(memoryKv());
+      await errors.push(waiting);
+      const session = new Session(tokens, client, undefined, undefined, undefined, undefined, undefined, errors);
+      return { session, errors, calls };
+    }
+
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+    const answers = (clientError: () => Promise<Response>) => (url: string) =>
+      url.endsWith('/driver/client_error') ? clientError() : json(200, me);
+
+    test('are sent once the driver is signed in and then forgotten', async () => {
+      const { session, errors, calls } = await arrange(answers(() => json(200, { ok: true })));
+      await session.boot();
+      await settle();
+      expect(calls.filter((u) => u.endsWith('/client_error'))).toHaveLength(1);
+      expect(await errors.size()).toBe(0);
+      expect((await errors.last())?.message).toBe('Error: boom');
+    });
+
+    test('stay for later without signal or with a failing server', async () => {
+      for (const reply of [() => Promise.reject(new Error('offline')), () => json(500, { error: 'x' })]) {
+        const { session, errors } = await arrange(answers(reply));
+        await session.boot();
+        await settle();
+        expect(await errors.size()).toBe(1);
+      }
+    });
+
+    test('stay when the server is busy (429) and go when it refuses them for good (400)', async () => {
+      const busy = await arrange(answers(() => json(429, { error: 'too_many_requests' })));
+      await busy.session.boot();
+      await settle();
+      expect(await busy.errors.size()).toBe(1);
+      const refused = await arrange(answers(() => json(400, { error: 'bad_request' })));
+      await refused.session.boot();
+      await settle();
+      expect(await refused.errors.size()).toBe(0);
+    });
+
+    test('a session without an error queue works as before', async () => {
+      const tokens = memoryStore('saved');
+      const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: () => json(200, me) });
+      const session = new Session(tokens, client);
+      await session.boot();
+      await expect(session.flushErrors()).resolves.toBeUndefined();
+    });
+  });
+});
