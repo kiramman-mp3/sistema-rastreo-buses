@@ -11,7 +11,7 @@ import { Action, Press, Screen, Txt } from '../src/ui/cabin';
 import { hapticDone, hapticFail } from '../src/ui/haptics';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
-import { fonts } from '../src/ui/theme';
+import { border, fonts, shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 const KINDS: { key: IncidentKind; label: Message }[] = [
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: space[4],
   },
   body: {
     flex: 1,
@@ -171,33 +171,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   kind: {
-    borderRadius: 8,
-    paddingHorizontal: 20,
+    ...shape.control,
+    paddingHorizontal: space[5],
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
+    gap: space[4],
   },
   radio: {
     width: 30,
     height: 30,
-    borderRadius: 15,
-    borderWidth: 3,
+    borderRadius: border.round,
+    borderWidth: border.mark,
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioDot: {
     width: 14,
     height: 14,
-    borderRadius: 7,
+    borderRadius: border.round,
   },
   side: {
     flex: 1,
-    gap: 10,
+    gap: space[2],
   },
   input: {
-    borderWidth: 2,
-    borderRadius: 8,
-    padding: 16,
+    borderWidth: border.thin,
+    ...shape.control,
+    padding: space[4],
     fontFamily: fonts.text,
     textAlignVertical: 'top',
   },
