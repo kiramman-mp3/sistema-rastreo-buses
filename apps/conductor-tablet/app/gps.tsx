@@ -8,6 +8,7 @@ import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
 import { useTheme } from '../src/ui/ThemeProvider';
 import { shape, space } from '../src/ui/theme';
 
@@ -39,6 +40,7 @@ async function loadFacts(): Promise<Facts> {
 export default function GpsScreen() {
   useLang();
   const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const [facts, setFacts] = useState<Facts | null>(null);
 
@@ -69,7 +71,7 @@ export default function GpsScreen() {
 
   return (
     <Screen scroll>
-      <View style={styles.head}>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
         <View style={styles.headText}>
           <Txt bold size="title">
             {t('gpsStatus')}
@@ -98,7 +100,8 @@ export default function GpsScreen() {
 
 const styles = StyleSheet.create({
   head: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: space[3] },
-  headText: { flexGrow: 1, flexShrink: 1, flexBasis: 200 },
+  headText: { flexShrink: 1 },
+  headStack: { flexDirection: 'column', alignItems: 'flex-start' },
   headActions: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
   label: { flexShrink: 0 },
   value: { flexShrink: 1, textAlign: 'right' },

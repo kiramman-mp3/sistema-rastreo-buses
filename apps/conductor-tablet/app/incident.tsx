@@ -56,7 +56,7 @@ export default function IncidentScreen() {
 
   return (
     <Screen scroll>
-      <View style={styles.head}>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
         <View style={styles.headText}>
           <Txt bold size="title">
             {t('actionProblem')}
@@ -138,15 +138,16 @@ export default function IncidentScreen() {
 }
 
 const styles = StyleSheet.create({
-  // The title keeps room to be read: when a big font leaves less than this, the button drops to the next line.
   headText: {
-    flexGrow: 1,
     flexShrink: 1,
-    flexBasis: 200,
+  },
+  // With a large system font the title and its button no longer fit side by side: the button goes below.
+  headStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   head: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: space[4],

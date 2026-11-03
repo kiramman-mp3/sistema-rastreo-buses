@@ -88,7 +88,7 @@ export default function Select() {
 
   return (
     <Screen>
-      <View style={styles.head}>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
         <View style={styles.headText}>
           <Txt size="body" dim>
             {tf('selectHello', { name: driver?.name ?? '' })}
@@ -203,15 +203,16 @@ export default function Select() {
 }
 
 const styles = StyleSheet.create({
-  // The title keeps room to be read: when a big font leaves less than this, the button drops to the next line.
   headText: {
-    flexGrow: 1,
     flexShrink: 1,
-    flexBasis: 200,
+  },
+  // With a large system font the title and its button no longer fit side by side: the button goes below.
+  headStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   head: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: space[4],
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     minWidth: 56,
-    height: 44,
+    minHeight: 44,
     paddingHorizontal: space[3],
     ...shape.control,
     alignItems: 'center',
