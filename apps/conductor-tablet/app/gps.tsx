@@ -98,7 +98,7 @@ export default function GpsScreen() {
 
 const styles = StyleSheet.create({
   head: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: space[3] },
-  headText: { flexShrink: 1 },
+  headText: { flexGrow: 1, flexShrink: 1, flexBasis: 200 },
   headActions: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
   label: { flexShrink: 0 },
   value: { flexShrink: 1, textAlign: 'right' },
