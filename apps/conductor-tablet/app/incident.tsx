@@ -8,6 +8,7 @@ import { t, type Message } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
 import { Action, Screen, Txt } from '../src/ui/cabin';
+import { hapticDone, hapticFail } from '../src/ui/haptics';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
 import { fonts } from '../src/ui/theme';
@@ -44,8 +45,10 @@ export default function IncidentScreen() {
       });
       setResult(outcome);
       setNote('');
+      hapticDone();
     } catch {
       setResult('error');
+      hapticFail();
     } finally {
       setBusy(false);
     }
