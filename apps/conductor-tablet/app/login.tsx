@@ -70,6 +70,9 @@ export default function Login() {
         <Txt size="body" dim>
           {t('loginHelp')}
         </Txt>
+        <Txt size="small" dim>
+          {t('trackingNoticeLogin')}
+        </Txt>
         <View style={styles.langs}>
           <LangSwitch />
         </View>
