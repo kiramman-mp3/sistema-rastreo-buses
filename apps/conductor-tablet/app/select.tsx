@@ -8,6 +8,7 @@ import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, Press, Screen, Txt } from '../src/ui/cabin';
+import { readableOn } from '../src/ui/contrast';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
 import { useTheme } from '../src/ui/ThemeProvider';
@@ -162,7 +163,7 @@ export default function Select() {
                   style={[styles.option, styles.routeOption, { minHeight: layout.hit + 8, backgroundColor: on ? palette.ink : palette.panel }]}
                 >
                   <View style={[styles.chip, { backgroundColor: route.color || palette.accent }]}>
-                    <Txt bold size="body" color="#FFFFFF">
+                    <Txt bold size="body" color={readableOn(route.color || palette.accent)}>
                       {route.code}
                     </Txt>
                   </View>
