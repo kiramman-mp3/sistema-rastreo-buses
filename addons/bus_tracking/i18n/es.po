@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0-20250909\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 17:44+0000\n"
-"PO-Revision-Date: 2026-11-02 17:44+0000\n"
+"POT-Creation-Date: 2026-11-04 19:16+0000\n"
+"PO-Revision-Date: 2026-11-04 19:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -21,6 +22,13 @@ msgstr ""
 #, python-format
 msgid "%(points)s points from %(positions)s positions."
 msgstr "%(points)s puntos de %(positions)s posiciones."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "%(points)s points from %(total)s."
+msgstr "%(points)s puntos de %(total)s."
 
 #. module: bus_tracking
 #. odoo-python
@@ -51,6 +59,13 @@ msgid "%s s ago"
 msgstr "hace %s s"
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "%s stops created."
+msgstr "%s paradas creadas."
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
 msgid "(CC BY 3.0),"
 msgstr "(CC BY 3.0),"
@@ -71,7 +86,8 @@ msgstr "(CC BY-SA 4.0),"
 #, python-format
 msgid ". Click on the map to place the stop; drag the marker to fine-tune it."
 msgstr ""
-". Haz clic en el mapa para poner la parada; arrastra el marcador para afinar."
+". Haz clic en el mapa para poner la parada; arrastra el marcador para "
+"afinar."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_off_route_minutes
@@ -80,14 +96,15 @@ msgstr "... durante al menos (minutos)"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
-msgid "<br/>Veamos cómo van los buses."
+msgid "<br/>Let us see how the buses are doing."
 msgstr "<br/>Veamos cómo van los buses."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_speed_limit
 msgid "A bus above this speed raises a speeding alert. 0 disables the alert."
 msgstr ""
-"Un bus que supere esta velocidad genera una alerta de exceso de velocidad. Con 0 se desactiva."
+"Un bus que supere esta velocidad genera una alerta de exceso de velocidad. "
+"Con 0 se desactiva."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_accept_without_shift
@@ -119,31 +136,31 @@ msgid "Address"
 msgstr "Dirección"
 
 #. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_settings
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_settings
-msgid "Ajustes"
-msgstr "Ajustes"
-
-#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_long_stop_minutes
 msgid ""
-"Alert when a bus stays stopped this long away from any stop of its route. 0 disables the alert."
+"Alert when a bus stays stopped this long away from any stop of its route. 0 "
+"disables the alert."
 msgstr ""
-"Alerta cuando un bus permanece detenido este tiempo lejos de cualquier parada de su ruta. Con 0 se desactiva."
+"Alerta cuando un bus permanece detenido este tiempo lejos de cualquier "
+"parada de su ruta. Con 0 se desactiva."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_off_route_meters
 msgid ""
-"Alert when a bus stays this far from the road of its trip. 0 disables the alert."
+"Alert when a bus stays this far from the road of its trip. 0 disables the "
+"alert."
 msgstr ""
-"Alerta cuando un bus se queda así de lejos del camino de su recorrido. 0 desactiva la alerta."
+"Alerta cuando un bus se queda así de lejos del camino de su recorrido. 0 "
+"desactiva la alerta."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_offline_minutes
 msgid ""
-"Alert when a bus that was reporting goes silent for this long. 0 disables the alert."
+"Alert when a bus that was reporting goes silent for this long. 0 disables "
+"the alert."
 msgstr ""
-"Alerta cuando un bus que venía reportando queda en silencio este tiempo. Con 0 se desactiva."
+"Alerta cuando un bus que venía reportando queda en silencio este tiempo. Con"
+" 0 se desactiva."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -171,7 +188,7 @@ msgstr "Altitud"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
-msgid "Ambato desde lo alto. Foto: Martín Vasco, CC BY-SA 4.0"
+msgid "Ambato from above. Photo: Martín Vasco, CC BY-SA 4.0"
 msgstr "Ambato desde lo alto. Foto: Martín Vasco, CC BY-SA 4.0"
 
 #. module: bus_tracking
@@ -183,7 +200,8 @@ msgstr "Ya hay otro bus con ese nombre."
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_brand_name
 msgid "Appears on the public pages, the sign-in page and the page titles."
 msgstr ""
-"Aparece en las páginas públicas, en la pantalla de ingreso y en los títulos de las páginas."
+"Aparece en las páginas públicas, en la pantalla de ingreso y en los títulos "
+"de las páginas."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -255,21 +273,6 @@ msgstr "Avería"
 #: model:ir.model,name:bus_tracking.model_bus_push_subscription
 msgid "Browser Push Subscription"
 msgstr "Suscripción push del navegador"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
-msgid "Buenas noches."
-msgstr "Buenas noches."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
-msgid "Buenas tardes."
-msgstr "Buenas tardes."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
-msgid "Buenos días."
-msgstr "Buenos días."
 
 #. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_bus_vehicle
@@ -368,7 +371,8 @@ msgstr "Rastreo de buses: purgar posiciones antiguas"
 #: model:ir.actions.server,name:bus_tracking.cron_push_alerts_ir_actions_server
 #: model:ir.cron,cron_name:bus_tracking.cron_push_alerts
 msgid "Bus Tracking: push new alerts to the managers"
-msgstr "Bus Tracking: avisar por push las alertas nuevas a los administradores"
+msgstr ""
+"Bus Tracking: avisar por push las alertas nuevas a los administradores"
 
 #. module: bus_tracking
 #: model:ir.actions.server,name:bus_tracking.cron_push_incidents_ir_actions_server
@@ -396,6 +400,7 @@ msgstr "Buses"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/stop_picker.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_gpx_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_record_form
 #, python-format
 msgid "Cancel"
@@ -419,11 +424,6 @@ msgstr "Capacidad"
 #, python-format
 msgid "Checking this device…"
 msgstr "Revisando este dispositivo…"
-
-#. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_driver
-msgid "Choferes"
-msgstr "Choferes"
 
 #. module: bus_tracking
 #. odoo-python
@@ -484,7 +484,7 @@ msgstr "Ajustes de configuración"
 
 #. module: bus_tracking
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_config
-msgid "Configuración"
+msgid "Configuration"
 msgstr "Configuración"
 
 #. module: bus_tracking
@@ -554,8 +554,8 @@ msgstr "No se pudo marcar como visto. Inténtalo de nuevo."
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #, python-format
-msgid "Could not update. Retrying every 10 seconds."
-msgstr "No se pudo actualizar. Reintentamos cada 10 segundos."
+msgid "Could not update. Retrying in a few seconds."
+msgstr "No se pudo actualizar. Reintentando en unos segundos."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__course
@@ -568,6 +568,11 @@ msgid "Create a driver and generate their QR badge."
 msgstr "Crea un nuevo chofer y genera su credencial QR."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__create_stops
+msgid "Create the stops from the waypoints"
+msgstr "Crear las paradas a partir de los puntos de referencia"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__create_uid
@@ -575,6 +580,7 @@ msgstr "Crea un nuevo chofer y genera su credencial QR."
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__create_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__create_uid
@@ -592,6 +598,7 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__create_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__create_date
@@ -650,12 +657,6 @@ msgid "Description"
 msgstr "Descripción"
 
 #. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_off_route
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_off_route
-msgid "Desvíos de ruta"
-msgstr "Desvíos de ruta"
-
-#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__detail
 msgid "Detail"
 msgstr "Detalle"
@@ -680,6 +681,7 @@ msgstr "Dispositivos registrados a tu nombre:"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__display_name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__display_name
@@ -735,15 +737,26 @@ msgid "Driver or staff behavior"
 msgstr "Trato del conductor o del personal"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
+msgid "Driver tablet (Buses UTA app)"
+msgstr "Tableta del conductor (app Buses UTA)"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid "Driver's full name"
 msgstr "Nombre completo del conductor"
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_driver
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_driver
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_tree
 msgid "Drivers"
 msgstr "Choferes"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
+msgid "Drivers sign in from the bus tablet, not from here."
+msgstr "Los choferes ingresan desde la tableta del bus, no desde aquí."
 
 #. module: bus_tracking
 #: model:ir.model.constraint,message:bus_tracking.constraint_bus_position_vehicle_fix_uniq
@@ -768,16 +781,22 @@ msgid "Duration Minutes"
 msgstr "Minutos de duración"
 
 #. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
-msgid "Elegir en el mapa"
-msgstr "Elegir en el mapa"
+#: model:ir.model.fields,help:bus_tracking.field_bus_route_gpx__create_stops
+msgid ""
+"Each named point of the file becomes a stop, in the order of the file. Only "
+"offered while the route has no stops."
+msgstr ""
+"Cada punto con nombre del archivo se convierte en una parada, en el orden "
+"del archivo. Solo se ofrece mientras la ruta no tiene paradas."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_complaint_retention_days
 msgid ""
-"Email and phone left in a complaint are erased this many days after it is resolved. 0 keeps them."
+"Email and phone left in a complaint are erased this many days after it is "
+"resolved. 0 keeps them."
 msgstr ""
-"El correo y el teléfono dejados en una queja se borran estos días después de resolverla. Con 0 se conservan."
+"El correo y el teléfono dejados en una queja se borran estos días después de"
+" resolverla. Con 0 se conservan."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -789,20 +808,6 @@ msgstr ""
 #, python-format
 msgid "Emergency (SOS)"
 msgstr "Emergencia (SOS)"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
-msgid ""
-"En la app Buses UTA pulsa \"Escanear QR\". Este código contiene la dirección del servidor Odoo.\n"
-"                                Las credenciales de rastreo se asignan automáticamente cuando el chofer inicia su turno."
-msgstr ""
-"En la app Buses UTA pulsa \"Escanear QR\". Este código contiene la dirección del servidor Odoo.\n"
-"                                Las credenciales de rastreo se asignan automáticamente cuando el chofer inicia su turno."
-
-#. module: bus_tracking
-#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__status__moving
-msgid "En movimiento"
-msgstr "En movimiento"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -851,14 +856,15 @@ msgstr "Hora GPS"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet
 #, python-format
 msgid "Fleet"
 msgstr "Flota"
 
 #. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet
-msgid "Flota"
-msgstr "Flota"
+#: model_terms:ir.ui.view,arch_db:bus_tracking.login
+msgid "For those who coordinate the transport service."
+msgstr "Para quien coordina el servicio de transporte."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__date_from
@@ -877,16 +883,53 @@ msgid "GPS address for the phones"
 msgstr "Dirección GPS para los celulares"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__gpx_file
+msgid "GPX file"
+msgstr "Archivo GPX"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid "Generate QR badge"
 msgstr "Generar Credencial QR"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
+#, python-format
+msgid ""
+"Get a notice in this browser or phone when a bus alert opens\n"
+"                (speeding, no signal, long stop or route deviation)."
+msgstr ""
+"Recibe un aviso en este navegador o celular cuando se abra una alerta de un bus\n"
+"                (velocidad, sin señal, parada larga o desvío de ruta)."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
+msgid "Good afternoon."
+msgstr "Buenas tardes."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
+msgid "Good evening."
+msgstr "Buenas noches."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
+msgid "Good morning."
+msgstr "Buenos días."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__gpx_filename
+msgid "Gpx Filename"
+msgstr "Nombre del archivo GPX"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_vehicle__connection
 msgid ""
 "Green while the phone keeps sending its position, even if the bus is parked."
 msgstr ""
-"Verde mientras el teléfono sigue enviando su posición, aunque el bus esté estacionado."
+"Verde mientras el teléfono sigue enviando su posición, aunque el bus esté "
+"estacionado."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
@@ -909,7 +952,13 @@ msgstr "Agrupar por"
 msgid ""
 "HTTPS address of the map tiles, with {z}/{x}/{y}. Empty uses CARTO Voyager."
 msgstr ""
-"Dirección HTTPS de las teselas del mapa, con {z}/{x}/{y}. Vacío usa CARTO Voyager."
+"Dirección HTTPS de las teselas del mapa, con {z}/{x}/{y}. Vacío usa CARTO "
+"Voyager."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__has_stops
+msgid "Has Stops"
+msgstr "Tiene paradas"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_position__course
@@ -934,6 +983,7 @@ msgstr "Cuánto se alejó el bus del camino (metros)."
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__id
@@ -942,11 +992,6 @@ msgstr "Cuánto se alejó el bus del camino (metros)."
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__id
 msgid "ID"
 msgstr "ID"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
-msgid "Identificador Traccar"
-msgstr "Identificador Traccar"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__traccar_token
@@ -967,19 +1012,19 @@ msgid "In review"
 msgstr "En revisión"
 
 #. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_incident
-msgid "Incidentes"
-msgstr "Incidentes"
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
+msgid ""
+"In the Buses UTA app, tap \"Scan QR\". This code holds the address of the Odoo server.\n"
+"                                The tracking credentials are assigned automatically when the driver starts a shift."
+msgstr ""
+"En la app Buses UTA pulsa \"Escanear QR\". Este código contiene la dirección del servidor Odoo.\n"
+"                                Las credenciales de rastreo se asignan automáticamente cuando el chofer inicia su turno."
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_incident
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_incident
 msgid "Incidents"
 msgstr "Incidentes"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.login
-msgid "Ingreso del personal"
-msgstr "Ingreso del personal"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__internal_note
@@ -1058,6 +1103,7 @@ msgstr "Última longitud"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route____last_update
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run____last_update
@@ -1080,6 +1126,7 @@ msgstr "Última velocidad"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__write_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__write_uid
@@ -1097,6 +1144,7 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__write_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__write_date
@@ -1173,15 +1221,33 @@ msgstr "En vivo"
 #. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_vehicle.py:0
+#: model:ir.actions.client,name:bus_tracking.action_live_map
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_live_map
 #, python-format
 msgid "Live Map"
 msgstr "Mapa en vivo"
 
 #. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_stop_arrival
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_stop_arrival
-msgid "Llegada a paradas"
-msgstr "Llegada a paradas"
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_gpx_form
+msgid "Load"
+msgstr "Cargar"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid "Load a GPX file"
+msgstr "Cargar un archivo GPX"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route.py:0
+#, python-format
+msgid "Load the track from a GPX file"
+msgstr "Cargar el trazado desde un archivo GPX"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_route_gpx
+msgid "Load the track of a route from a GPX file"
+msgstr "Cargar el trazado de una ruta desde un archivo GPX"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1197,6 +1263,12 @@ msgid "Long stop"
 msgstr "Parada larga"
 
 #. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_long_stop
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_long_stop
+msgid "Long stops"
+msgstr "Paradas largas"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_long_stop_minutes
 msgid "Long-stop alert after (minutes)"
 msgstr "Alerta de parada larga tras (minutos)"
@@ -1208,11 +1280,6 @@ msgstr "Alerta de parada larga tras (minutos)"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__longitude
 msgid "Longitude"
 msgstr "Longitud"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
-msgid "Los choferes ingresan desde la tableta del bus, no desde aquí."
-msgstr "Los choferes ingresan desde la tableta del bus, no desde aquí."
 
 #. module: bus_tracking
 #: model:res.groups,name:bus_tracking.group_bus_manager
@@ -1235,13 +1302,8 @@ msgid ""
 "Map tiles for the panel, the passenger pages and the tablet.\n"
 "                                    Empty uses CARTO Voyager (OpenStreetMap data)."
 msgstr ""
-"Teselas del mapa para el panel, las páginas de pasajeros y la tableta. Vacío usa CARTO Voyager (datos de OpenStreetMap)."
-
-#. module: bus_tracking
-#: model:ir.actions.client,name:bus_tracking.action_live_map
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_live_map
-msgid "Mapa en vivo"
-msgstr "Mapa en vivo"
+"Teselas del mapa para el panel, las páginas de pasajeros y la tableta. Vacío"
+" usa CARTO Voyager (datos de OpenStreetMap)."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1264,10 +1326,9 @@ msgid "Max Speed"
 msgstr "Velocidad máxima"
 
 #. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_complaint
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_complaint
-msgid "Mensajes de pasajeros"
-msgstr "Mensajes de pasajeros"
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__status__moving
+msgid "Moving"
+msgstr "En movimiento"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__name
@@ -1319,7 +1380,9 @@ msgstr "Sin reportes hace %(minutes)d min"
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_offline
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__offline
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_offline
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
 #, python-format
 msgid "No signal"
@@ -1349,23 +1412,21 @@ msgid "Nothing needs attention right now."
 msgstr "Nada requiere atención ahora."
 
 #. module: bus_tracking
-#: model:ir.actions.client,name:bus_tracking.action_push_setup
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_push_setup
-msgid "Notificaciones en este dispositivo"
-msgstr "Notificaciones en este dispositivo"
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
 msgid ""
-"Notifications are blocked for this site. Allow them in the browser settings and reload this page."
+"Notifications are blocked for this site. Allow them in the browser settings "
+"and reload this page."
 msgstr ""
-"Las notificaciones están bloqueadas para este sitio. Permítelas en los ajustes del navegador y recarga esta página."
+"Las notificaciones están bloqueadas para este sitio. Permítelas en los "
+"ajustes del navegador y recarga esta página."
 
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
+#: model:ir.actions.client,name:bus_tracking.action_push_setup
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_push_setup
 #, python-format
 msgid "Notifications on this device"
 msgstr "Notificaciones en este dispositivo"
@@ -1394,16 +1455,20 @@ msgstr "Alerta de desvío a más de (metros)"
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_contact_email
 msgid ""
-"Official email of the transport service. Leave it empty to show no email on the public pages."
+"Official email of the transport service. Leave it empty to show no email on "
+"the public pages."
 msgstr ""
-"Correo oficial del servicio de transporte. Déjalo vacío para no mostrar correo en las páginas públicas."
+"Correo oficial del servicio de transporte. Déjalo vacío para no mostrar "
+"correo en las páginas públicas."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_contact_phone
 msgid ""
-"Official phone of the transport service. Leave it empty to show no phone on the public pages."
+"Official phone of the transport service. Leave it empty to show no phone on "
+"the public pages."
 msgstr ""
-"Teléfono oficial del servicio de transporte. Déjalo vacío para no mostrar teléfono en las páginas públicas."
+"Teléfono oficial del servicio de transporte. Déjalo vacío para no mostrar "
+"teléfono en las páginas públicas."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_position_retention_days
@@ -1432,16 +1497,20 @@ msgstr "Solo para buses que reportaron en las últimas 6 horas."
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_accept_without_shift
 msgid ""
-"Only for tests with curl or a GPS without the app. Normally a bus only reports while a driver has it on an open shift."
+"Only for tests with curl or a GPS without the app. Normally a bus only "
+"reports while a driver has it on an open shift."
 msgstr ""
-"Solo para pruebas con curl o un GPS sin la app. Normalmente un bus solo reporta mientras un chofer lo tiene en un turno abierto."
+"Solo para pruebas con curl o un GPS sin la app. Normalmente un bus solo "
+"reporta mientras un chofer lo tiene en un turno abierto."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid ""
-"Only for tests. Without it, positions from a bus with no open shift are dropped."
+"Only for tests. Without it, positions from a bus with no open shift are "
+"dropped."
 msgstr ""
-"Solo para pruebas. Sin esto, las posiciones de un bus sin turno abierto se descartan."
+"Solo para pruebas. Sin esto, las posiciones de un bus sin turno abierto se "
+"descartan."
 
 #. module: bus_tracking
 #. odoo-python
@@ -1457,6 +1526,13 @@ msgstr "Solo los administradores pueden editar paradas."
 #, python-format
 msgid "Only managers can issue or revoke QR badges."
 msgstr "Solo los administradores pueden emitir o revocar credenciales QR."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "Only managers can load a track."
+msgstr "Solo los gestores pueden cargar un trazado."
 
 #. module: bus_tracking
 #. odoo-python
@@ -1517,15 +1593,17 @@ msgstr "Abrir los mensajes"
 
 #. module: bus_tracking
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_operation
-msgid "Operación"
+msgid "Operations"
 msgstr "Operación"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_privacy_url
 msgid ""
-"Optional address of your institution's privacy policy, shown on the complaint form."
+"Optional address of your institution's privacy policy, shown on the "
+"complaint form."
 msgstr ""
-"Dirección opcional de la política de privacidad de tu institución, que se muestra en el formulario de quejas."
+"Dirección opcional de la política de privacidad de tu institución, que se "
+"muestra en el formulario de quejas."
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__kind__other
@@ -1540,22 +1618,6 @@ msgid "P256Dh"
 msgstr "Clave P256DH"
 
 #. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.login
-msgid "Para quien coordina el servicio de transporte."
-msgstr "Para quien coordina el servicio de transporte."
-
-#. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_long_stop
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_long_stop
-msgid "Paradas largas"
-msgstr "Paradas largas"
-
-#. module: bus_tracking
-#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__status__stopped
-msgid "Parado"
-msgstr "Parado"
-
-#. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_bus_complaint
 msgid "Passenger Complaint"
 msgstr "Queja de pasajero"
@@ -1564,6 +1626,12 @@ msgstr "Queja de pasajero"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__lang
 msgid "Passenger language"
 msgstr "Idioma del pasajero"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_complaint
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_complaint
+msgid "Passenger messages"
+msgstr "Mensajes de pasajeros"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -1575,6 +1643,11 @@ msgstr "Sitio de pasajeros"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid "Password"
 msgstr "Contraseña"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid "Pick on the map"
+msgstr "Elegir en el mapa"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__plate
@@ -1600,9 +1673,11 @@ msgstr "Enlace a la política de privacidad"
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_gps_url
 msgid ""
-"Public HTTPS address the drivers' phones send their position to, e.g. https://gps.example.com."
+"Public HTTPS address the drivers' phones send their position to, e.g. "
+"https://gps.example.com."
 msgstr ""
-"Dirección HTTPS pública a la que los celulares de los choferes envían su posición, por ejemplo https://gps.example.com."
+"Dirección HTTPS pública a la que los celulares de los choferes envían su "
+"posición, por ejemplo https://gps.example.com."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_tree
@@ -1643,17 +1718,6 @@ msgid "Received at"
 msgstr "Recibido a las"
 
 #. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
-#, python-format
-msgid ""
-"Recibe un aviso en este navegador o celular cuando se abra una alerta de un bus\n"
-"                (velocidad, sin señal, parada larga o desvío de ruta)."
-msgstr ""
-"Recibe un aviso en este navegador o celular cuando se abra una alerta de un bus\n"
-"                (velocidad, sin señal, parada larga o desvío de ruta)."
-
-#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_record_form
 msgid "Record"
 msgstr "Grabar"
@@ -1675,11 +1739,6 @@ msgstr "Grabar el trazado de una ruta desde un bus"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__track_json
 msgid "Recorded track"
 msgstr "Trazado grabado"
-
-#. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_run
-msgid "Recorridos"
-msgstr "Recorridos"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__name
@@ -1709,7 +1768,7 @@ msgstr "Reportado a las"
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_alert
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_reports
-msgid "Reportes"
+msgid "Reports"
 msgstr "Reportes"
 
 #. module: bus_tracking
@@ -1741,9 +1800,11 @@ msgstr "Revocar Credencial"
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid ""
-"Revoke this driver's QR badge? A new one must be generated before they can sign in by scanning again."
+"Revoke this driver's QR badge? A new one must be generated before they can "
+"sign in by scanning again."
 msgstr ""
-"¿Seguro que desea revocar la credencial QR de este chofer? Deberá generar una nueva para que vuelva a iniciar sesión escaneando."
+"¿Seguro que desea revocar la credencial QR de este chofer? Deberá generar "
+"una nueva para que vuelva a iniciar sesión escaneando."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1751,6 +1812,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__route_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__route_id
@@ -1778,13 +1840,15 @@ msgid "Route deviation"
 msgstr "Desvío de ruta"
 
 #. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_route
-msgid "Routes"
-msgstr "Rutas"
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_off_route
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_off_route
+msgid "Route deviations"
+msgstr "Desvíos de ruta"
 
 #. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_route
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_route
-msgid "Rutas"
+msgid "Routes"
 msgstr "Rutas"
 
 #. module: bus_tracking
@@ -1810,7 +1874,8 @@ msgid ""
 "Scan this QR in the Buses UTA tablet app to save the Odoo address\n"
 "                                    (from web.base.url). It does not include the GPS device identifier."
 msgstr ""
-"Escanea este QR en la app Buses UTA de la tableta para guardar la dirección de Odoo (de web.base.url). No incluye el identificador del GPS."
+"Escanea este QR en la app Buses UTA de la tableta para guardar la dirección "
+"de Odoo (de web.base.url). No incluye el identificador del GPS."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1859,12 +1924,19 @@ msgid "Set or change the password"
 msgstr "Asignar o cambiar contraseña"
 
 #. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_settings
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_settings
+msgid "Settings"
+msgstr "Ajustes"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__shift_id
 msgid "Shift"
 msgstr "Turno"
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_shift
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_shift
 msgid "Shifts"
 msgstr "Turnos"
 
@@ -1903,7 +1975,8 @@ msgstr "Mostrar u ocultar el panel"
 #: model:ir.model.fields,help:bus_tracking.field_bus_route__public
 msgid "Shown on the public page where passengers see the buses of a route."
 msgstr ""
-"Se muestra en la página pública donde los pasajeros ven los buses de una ruta."
+"Se muestra en la página pública donde los pasajeros ven los buses de una "
+"ruta."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_shift_form
@@ -1914,12 +1987,6 @@ msgstr "Cerrar sesión de la tableta"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid "Sign-in"
 msgstr "Datos de Acceso"
-
-#. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_offline
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_offline
-msgid "Sin señal"
-msgstr "Sin señal"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1942,10 +2009,17 @@ msgid "Speed limit (km/h)"
 msgstr "Límite de velocidad (km/h)"
 
 #. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_speeding
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__speeding
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_speeding
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
 msgid "Speeding"
 msgstr "Exceso de velocidad"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.login
+msgid "Staff sign-in"
+msgstr "Ingreso del personal"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__start
@@ -1987,9 +2061,22 @@ msgid "Stop"
 msgstr "Parada"
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "Stop %s"
+msgstr "Parada %s"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__stop_count
 msgid "Stop Count"
 msgstr "Cantidad de paradas"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_stop_arrival
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_stop_arrival
+msgid "Stop arrivals"
+msgstr "Llegada a paradas"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2009,6 +2096,7 @@ msgstr "Parada en el mapa"
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__status__stopped
 #, python-format
 msgid "Stopped"
 msgstr "Detenido"
@@ -2042,11 +2130,6 @@ msgstr "QR de la tableta"
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__tablet_setup_link
 msgid "Tablet setup link"
 msgstr "Enlace de configuración de la tableta"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
-msgid "Tableta del conductor (App Buses UTA)"
-msgstr "Tableta del conductor (App Buses UTA)"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -2118,7 +2201,9 @@ msgid ""
 "The bus GPS positions in this period are taken and the route is drawn along that trip.\n"
 "                    Choose a period in which the bus drove the whole route, from one end stop to the other."
 msgstr ""
-"Se toman las posiciones GPS del bus en este periodo y se dibuja la ruta siguiendo ese recorrido. Elige el periodo en que el bus hizo la ruta completa, de una parada extrema a la otra."
+"Se toman las posiciones GPS del bus en este periodo y se dibuja la ruta "
+"siguiendo ese recorrido. Elige el periodo en que el bus hizo la ruta "
+"completa, de una parada extrema a la otra."
 
 #. module: bus_tracking
 #. odoo-python
@@ -2137,9 +2222,11 @@ msgstr "La descripción no puede tener más de %s caracteres."
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid ""
-"The driver scans this QR code with the tablet camera to sign in without typing a user or password."
+"The driver scans this QR code with the tablet camera to sign in without "
+"typing a user or password."
 msgstr ""
-"El chofer escanea este código QR con la cámara de la tableta para entrar sin escribir usuario ni contraseña."
+"El chofer escanea este código QR con la cámara de la tableta para entrar sin"
+" escribir usuario ni contraseña."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_shift_form
@@ -2148,11 +2235,53 @@ msgstr ""
 "El chofer tendrá que volver a entrar. Si hay un turno activo, se cierra."
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "The file has no track or route with at least two points."
+msgstr "El archivo no tiene un trazado ni una ruta con al menos dos puntos."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "The file is not a GPX file."
+msgstr "El archivo no es un archivo GPX."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "The file is not a valid GPX file."
+msgstr "El archivo no es un GPX válido."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "The file is too big (5 MB at most)."
+msgstr "El archivo es demasiado grande (máximo 5 MB)."
+
+#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_stale_minutes
 msgid ""
-"The health check at /bus_tracking/health fails when no bus has reported for this long. 0 disables the check."
+"The health check at /bus_tracking/health fails when no bus has reported for "
+"this long. 0 disables the check."
 msgstr ""
-"La verificación de salud en /bus_tracking/health falla cuando ningún bus ha reportado en este tiempo. Con 0 se desactiva."
+"La verificación de salud en /bus_tracking/health falla cuando ningún bus ha "
+"reportado en este tiempo. Con 0 se desactiva."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_gpx_form
+msgid ""
+"The line of the route is drawn along the track of the file (the longest one, or the route\n"
+"                    if it has no track). The file is simplified to a few points; it can come from a phone app\n"
+"                    or a mapping site."
+msgstr ""
+"La línea de la ruta se dibuja siguiendo el trazado del archivo (el más "
+"largo, o la ruta si no tiene trazado). El archivo se simplifica a unos pocos"
+" puntos; puede venir de una app del celular o de un sitio de mapas."
 
 #. module: bus_tracking
 #. odoo-python
@@ -2171,9 +2300,11 @@ msgstr "La ruta volverá a dibujarse como línea recta entre sus paradas."
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
 msgid ""
-"The server cannot send push notifications yet. Ask the administrator to install the push component."
+"The server cannot send push notifications yet. Ask the administrator to "
+"install the push component."
 msgstr ""
-"El servidor aún no puede enviar notificaciones push. Pide al administrador que instale el componente de push."
+"El servidor aún no puede enviar notificaciones push. Pide al administrador "
+"que instale el componente de push."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2202,7 +2333,17 @@ msgstr "La prueba no pudo entregarse a ningún dispositivo."
 #, python-format
 msgid "The track has %s points after simplifying. Choose a shorter period."
 msgstr ""
-"El trazado tiene %s puntos después de simplificarlo. Elige un periodo más corto."
+"El trazado tiene %s puntos después de simplificarlo. Elige un periodo más "
+"corto."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "The track has %s points after simplifying. Use a shorter file."
+msgstr ""
+"El trazado tiene %s puntos después de simplificarlo. Usa un archivo más "
+"corto."
 
 #. module: bus_tracking
 #. odoo-python
@@ -2210,16 +2351,19 @@ msgstr ""
 #, python-format
 msgid "The user must be in the Driver group to have a QR badge."
 msgstr ""
-"El usuario debe pertenecer al grupo de Choferes para tener una credencial QR."
+"El usuario debe pertenecer al grupo de Choferes para tener una credencial "
+"QR."
 
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
 msgid ""
-"This browser cannot receive push notifications. On an iPhone, add this site to the Home Screen first."
+"This browser cannot receive push notifications. On an iPhone, add this site "
+"to the Home Screen first."
 msgstr ""
-"Este navegador no puede recibir notificaciones push. En un iPhone, primero agrega este sitio a la pantalla de inicio."
+"Este navegador no puede recibir notificaciones push. En un iPhone, primero "
+"agrega este sitio a la pantalla de inicio."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2305,6 +2449,7 @@ msgstr "La URL de Traccar no está configurada."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__traccar_unique_id
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
 msgid "Traccar Unique ID"
 msgstr "ID único en Traccar"
 
@@ -2362,6 +2507,13 @@ msgstr "Usuario de Traccar"
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_route_gpx.py:0
+#, python-format
+msgid "Track loaded"
+msgstr "Trazado cargado"
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/bus_route_record.py:0
 #, python-format
 msgid "Track recorded"
@@ -2375,6 +2527,7 @@ msgstr "Tráfico"
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_run
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_run
 msgid "Trips"
 msgstr "Recorridos"
 
@@ -2384,11 +2537,6 @@ msgstr "Recorridos"
 #, python-format
 msgid "Turn off"
 msgstr "Desactivar"
-
-#. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_shift
-msgid "Turnos"
-msgstr "Turnos"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_users__driver_password
@@ -2435,7 +2583,8 @@ msgstr "Actualizado %s"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid "Used by <code>/bus_tracking/health</code> for uptime monitors."
 msgstr ""
-"Lo usa <code>/bus_tracking/health</code> para los monitores de disponibilidad."
+"Lo usa <code>/bus_tracking/health</code> para los monitores de "
+"disponibilidad."
 
 #. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_res_users
@@ -2464,12 +2613,6 @@ msgstr "Bus"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__vehicle_count
 msgid "Vehicle Count"
 msgstr "Cantidad de buses"
-
-#. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_speeding
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_speeding
-msgid "Velocidad"
-msgstr "Velocidad"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
@@ -2507,7 +2650,8 @@ msgstr "Sitio web"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid "What the drivers' phones connect to. Must be HTTPS in production."
 msgstr ""
-"A lo que se conectan los celulares de los choferes. En producción debe ser HTTPS."
+"A lo que se conectan los celulares de los choferes. En producción debe ser "
+"HTTPS."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_form
@@ -2517,9 +2661,11 @@ msgstr "Lo que escribió el pasajero"
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_map_center
 msgid ""
-"Where the maps open when there is nothing else to show, e.g. -1.2417,-78.6167 for Ambato."
+"Where the maps open when there is nothing else to show, e.g. "
+"-1.2417,-78.6167 for Ambato."
 msgstr ""
-"Dónde se abren los mapas cuando no hay otra cosa que mostrar, por ejemplo -1.2417,-78.6167 para Ambato."
+"Dónde se abren los mapas cuando no hay otra cosa que mostrar, por ejemplo "
+"-1.2417,-78.6167 para Ambato."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_users__driver_badge_active
@@ -2579,10 +2725,10 @@ msgstr "km/h"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__connection__offline
-msgid "🔴 Sin conexión"
+msgid "🔴 Offline"
 msgstr "🔴 Sin conexión"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__connection__online
-msgid "🟢 Conectado"
+msgid "🟢 Connected"
 msgstr "🟢 Conectado"

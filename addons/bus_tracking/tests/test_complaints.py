@@ -216,7 +216,8 @@ class TestComplaintForm(HttpCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', resp.text)
 
     def test_messages_follow_the_language(self):
-        resp = self.submit(description='short', headers={'Accept-Language': 'en'}, allow_redirects=True)
+        self.opener.cookies.set('bus_lang', 'en')     # the visitor chose English once
+        resp = self.submit(description='short', allow_redirects=True)
         self.assertIn('Write between 10 and 2000 characters.', resp.text)
 
     # -- abuse protection ----------------------------------------------------------------------

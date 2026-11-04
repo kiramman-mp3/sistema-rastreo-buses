@@ -1,8 +1,7 @@
 """The privacy page of the public site, written from what the system really does and with the retention
 periods that are set in Settings (not invented numbers).
 
-Plain functions, no database: the controller passes the values in. Spanish and English; Kichwa reads Spanish
-like the rest of the portal until a speaker has reviewed a translation.
+Plain functions, no database: the controller passes the values in. Spanish, English and Kichwa.
 
 This text describes the system. The university still has to review it with whoever is in charge of personal
 data protection before it counts as its official policy; if it has one, put its address in
@@ -18,6 +17,10 @@ def _kept(lang, days, what):
         if days and days > 0:
             return '%s are kept for %d days.' % (what, days)
         return '%s are not erased automatically: an administrator erases them.' % what
+    if lang == 'qu':
+        if days and days > 0:
+            return '%s %d punchakama waqaychashka kan.' % (what, days)
+        return '%s kikinmanta mana pichashka kanchu: administrador pichan.' % what
     if days and days > 0:
         return '%s se conservan %d días.' % (what, days)
     return '%s no se borran solas: las borra un administrador.' % what
@@ -30,6 +33,11 @@ def _contact_line(lang, contact, brand):
         if email or phone:
             return 'To use any of these rights write or call: %s.' % ', '.join(x for x in (email, phone) if x)
         return 'To use any of these rights ask the transport office of %s.' % brand
+    if lang == 'qu':
+        if email or phone:
+            contact_data = ', '.join(x for x in (email, phone) if x)
+            return 'Kay allikunata llankachinkapak killkay o tapuy: %s.' % contact_data
+        return 'Kay allikunata llankachinkapak %s transporte oficinaman rishpa tapuy.' % brand
     if email or phone:
         return ('Para ejercer cualquiera de estos derechos escribe o llama a: %s.'
                 % ', '.join(x for x in (email, phone) if x))
@@ -40,6 +48,8 @@ def privacy_sections(lang, brand, contact=None, position_days=0, complaint_days=
     """The page as a list of sections: {'title': str, 'paragraphs': [str], 'bullets': [str]}."""
     if lang == 'en':
         return _english(brand, contact, position_days, complaint_days)
+    if lang == 'qu':
+        return _kichwa(brand, contact, position_days, complaint_days)
     return _spanish(brand, contact, position_days, complaint_days)
 
 
@@ -141,4 +151,56 @@ def _english(brand, contact, position_days, complaint_days):
             'You can ask what data of yours we have, have it corrected or erased, or object to its use. '
             'If something cannot be erased at once (for example, it is in a backup) we will tell you.',
             _contact_line('en', contact, brand)], 'bullets': []},
+    ]
+
+
+def _kichwa(brand, contact, position_days, complaint_days):
+    return [
+        {'title': 'Pita kay willaykunata llankan', 'paragraphs': [
+            '%s, bus kunata maskana sistemawan. Kay raku willan: ima willaykunata llankanchik, imapak, '
+            'mashna pacha waqaychanchik y imashina kanpa hatun kuskata hapinki.' % brand], 'bullets': []},
+        {'title': 'Mapallata rikukpika', 'paragraphs': [
+            'Bus kuna maypi kashkata rikunkapak shuti, correo, telefonota mana mañanchikchu. Llaktapa mapa sapan '
+            'busmanta maypi kashkata y ñanta rikuchin: pita pushakta y placata mana rikuchinchu.'], 'bullets': [
+            '"Kanpa sayana"ta waqaychikpika, kanpa navegadorpilla saqin; servidorman mana chayanchu.',
+            'Shuk shimita akllakpika, shuk watapak cookie (bus_lang) waqaychashka kan.',
+            'Servidor shuk cookie técnica (session_id, 7 punchakuna) ruran, kay raku llankankapak; '
+            'kanta riksinkapak mana llankachinchu.',
+            'Mana publicidad nishpa nitak katichik cookiekunata llankachinchu.']},
+        {'title': 'Willayta kachakpika', 'paragraphs': [
+            'Kanpa killkashkata (killka, ñan, bus y ima llaki) waqaychanchik, rikunkapak y servicioyta allichinkapak. '
+            'Correo o telefonota saquiyka munashpami, kutichinkapaklla llankan.'], 'bullets': [
+            ('Correo y telefonoka willayta allichishka washa %d punchapi pichashka kan.' % complaint_days
+             if complaint_days and complaint_days > 0 else
+             'Correo y telefonoka kikinmanta mana pichashka kanchu: administrador pichan.'),
+            'Willaypa killkashka y imashina kashkaka kikinmanta mana pichashka kanchu. Shuk runakunapa '
+            'pakashka willaykunata ama chaypi killkaychu.']},
+        {'title': 'Pushak kakpika', 'paragraphs': [
+            'Tabletapi app servicioyta llankachinkapak y kanpa harkaypak mutsurishka willaykunata llankan:'],
+         'bullets': [
+            'Kanpa yaykuk shuti y shutiyuk. Pakashka shimika harkashka waqaychashka kan, mana kichashka; '
+            'QR credencialka yaykunkapaklla sirwin.',
+            'Busmanta maypi kashka, pacha y utkay, kanpa llankay pacha kichashka kakpillami. Oficinaman '
+            'kachakun y llankakkunapa mapapi rikurin. Llankay pacha tukukpi, kachayka sayarin.',
+            'Kanpa llakita willay y SOS ñitishkakuna, pacha y maypi kashkawan, oficina yanapankapak.',
+            'Apppa llankay pachakuna (30 punchakuna) rikuchina shinalla waqaychashka kan, mana kichashka.',
+            'Cámaraka QR killkata ñawinchinkapaklla llankan: mana ima rikuchikunapash waqaychashka kanchu.',
+            _kept('qu', position_days, 'Maypi kashkakuna'),
+            'Llankay pacha killkashkakuna y willaykunaka kikinmanta mana pichashka kanchu.']},
+        {'title': 'Pita willaykunata rikuy ushan', 'paragraphs': [], 'bullets': [
+            'Transporte servicio kamachishka llankakkunalla, kikin yaykuk shutiwan. '
+            'Pasajerokunaka pushakkunapa willaykunata mana rikunchu.',
+            'Servicioyta ushachik yanapakkuna: sistema churashka servidor y, mapata ruranakpak, mapapa '
+            'rikuchikunata kuk yanapak (kikin shinaka CARTO, OpenStreetMap willaykunawan): '
+            'kanpa navegador o app mapapa rikuchikunata mañan, chaymanta kanpa IP direccionta '
+            'y maykan chaytami rikushkata yachan.',
+            'Llankakkunapa willaykunaka navegadorpa willachik serviciopi purin.']},
+        {'title': 'Waqaychashka kapiya', 'paragraphs': [
+            'Sistemaka waqaychashka kapiyakunata ruran. Pichashka willayka kapiyakunapi %d punchakama '
+            'kashkapash ushan (kikin shinaka; servidor kamachikmi churan).' % BACKUP_DAYS], 'bullets': []},
+        {'title': 'Kanpa allikuna', 'paragraphs': [
+            'Kanpa ima willaykuna kashkata tapuyta, allichichiyta, pichachiyta o chay llankachiyta '
+            'harkayta ushanki. Mayhan willayta ña mana pichayta ushashpaka (shinashpa, waqaychashka kapiyapi '
+            'kashpaka), kanman willashunmi.',
+            _contact_line('qu', contact, brand)], 'bullets': []},
     ]
