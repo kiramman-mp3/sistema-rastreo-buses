@@ -74,6 +74,13 @@ class BusTraccarApi(models.AbstractModel):
         return self._get('/positions')
 
     @api.model
+    def get_positions(self, device_id, since, until):
+        """The positions Traccar holds for a device between two UTC datetimes."""
+        stamp = '%Y-%m-%dT%H:%M:%SZ'
+        return self._get('/positions', params={
+            'deviceId': device_id, 'from': since.strftime(stamp), 'to': until.strftime(stamp)}) or []
+
+    @api.model
     def create_device(self, name, unique_id):
         return self._call('post', '/devices', json={'name': name, 'uniqueId': unique_id})
 

@@ -35,3 +35,9 @@ access_bus_trip_stop_user,bus.trip.stop user,model_bus_trip_stop,group_bus_user,
 access_bus_trip_stop_manager,bus.trip.stop manager,model_bus_trip_stop,group_bus_manager,1,1,0,0
 access_bus_trip_assign_manager,bus.trip.assign manager,model_bus_trip_assign,group_bus_manager,1,1,1,1
 access_bus_trip_simulate_manager,bus.trip.simulate manager,model_bus_trip_simulate,group_bus_manager,1,1,1,1
+access_bus_position_reject_user,bus.position.reject user,model_bus_position_reject,group_bus_user,1,0,0,0
+access_bus_position_reject_manager,bus.position.reject manager,model_bus_position_reject,group_bus_manager,1,0,0,1
+access_bus_sync_audit_user,bus.sync.audit user,model_bus_sync_audit,group_bus_user,1,0,0,0
+access_bus_sync_audit_manager,bus.sync.audit manager,model_bus_sync_audit,group_bus_manager,1,0,0,1
+access_bus_perf_sample_user,bus.perf.sample user,model_bus_perf_sample,group_bus_user,1,0,0,0
+access_bus_perf_sample_manager,bus.perf.sample manager,model_bus_perf_sample,group_bus_manager,1,0,0,1
