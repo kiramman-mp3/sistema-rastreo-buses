@@ -16,3 +16,4 @@ from . import test_driver_shift
 from . import test_driver_badge
 from . import test_driver_staff
 from . import test_privacy
+from . import test_trips
