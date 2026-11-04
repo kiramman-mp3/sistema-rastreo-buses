@@ -56,7 +56,7 @@ No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seg
 | La tableta no tiene GPS | Cámbiala o usa un celular Android con la misma app. |
 | Cambiaste de tableta | Entra con tu usuario o tu credencial. Un gestor puede *Cerrar sesión de la tableta* si la anterior sigue con sesión: esa tableta se apaga y cierra el turno, pero tu credencial QR sigue valiendo. |
 | GPS "Esperando señal" mucho rato | Abre el estado del GPS: la fila *Último error* dice por qué no se envía (sin red, Traccar rechaza el identificador, el servidor no responde). |
-| En iPhone no envía ubicación estando detenido | Verifica que el permiso de ubicación esté en "Siempre" y "Actualización en 2.° plano" activada. La app cuenta con un latido periódico cada 10 s para mantener la posición activa incluso si Apple CoreLocation entra en reposo por falta de movimiento. |
+| En iPhone no envía ubicación estando detenido | Verifica que el permiso de ubicación esté en "Siempre" y "Actualización en 2.° plano" activada. La app cuenta con un latido periódico cada 5 s para mantener la posición activa incluso si Apple CoreLocation entra en reposo por falta de movimiento. |
 | Perdiste la credencial QR | Pide al administrador que la revoque y genere otra en *Choferes*: la anterior deja de servir al instante. |
 
 ## Actualizar la app
