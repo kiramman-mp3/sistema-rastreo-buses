@@ -40,6 +40,7 @@ services:
     environment:
       CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
       # Push every position to Odoo as soon as it arrives
+      FORWARD_ENABLE: "true"
       FORWARD_TYPE: "json"
       FORWARD_RETRY_ENABLE: "true"
       FORWARD_URL: "http://odoo:8069/bus_tracking/traccar/webhook"
