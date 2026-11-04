@@ -78,28 +78,28 @@
     </record>
 
     <record id="action_bus_report_speeding" model="ir.actions.act_window">
-        <field name="name">Velocidad</field>
+        <field name="name">Speeding</field>
         <field name="res_model">bus.alert</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('kind', '=', 'speeding')]</field>
     </record>
 
     <record id="action_bus_report_offline" model="ir.actions.act_window">
-        <field name="name">Sin señal</field>
+        <field name="name">No signal</field>
         <field name="res_model">bus.alert</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('kind', '=', 'offline')]</field>
     </record>
 
     <record id="action_bus_report_long_stop" model="ir.actions.act_window">
-        <field name="name">Paradas largas</field>
+        <field name="name">Long stops</field>
         <field name="res_model">bus.alert</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('kind', '=', 'long_stop')]</field>
     </record>
 
     <record id="action_bus_report_off_route" model="ir.actions.act_window">
-        <field name="name">Desvíos de ruta</field>
+        <field name="name">Route deviations</field>
         <field name="res_model">bus.alert</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('kind', '=', 'off_route')]</field>
