@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Schedules: a line leaves at a time on some days of the week -->
+    <record id="view_bus_route_schedule_tree" model="ir.ui.view">
+        <field name="name">bus.route.schedule.tree</field>
+        <field name="model">bus.route.schedule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="route_id"/>
+                <field name="departure_time" widget="float_time"/>
+                <field name="arrival_time" widget="float_time"/>
+                <field name="monday"/>
+                <field name="tuesday"/>
+                <field name="wednesday"/>
+                <field name="thursday"/>
+                <field name="friday"/>
+                <field name="saturday"/>
+                <field name="sunday"/>
+                <field name="vehicle_id"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_route_schedule_form" model="ir.ui.view">
+        <field name="name">bus.route.schedule.form</field>
+        <field name="model">bus.route.schedule</field>
+        <field name="arch" type="xml">
+            <form>
+                <header groups="bus_tracking.group_bus_manager">
+                    <button name="action_assign_wizard" type="object" string="Assign a bus" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="route_id"/>
+                            <field name="departure_time" widget="float_time"/>
+                            <field name="arrival_time" widget="float_time"/>
+                            <field name="vehicle_id"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Days">
+                            <field name="monday"/>
+                            <field name="tuesday"/>
+                            <field name="wednesday"/>
+                            <field name="thursday"/>
+                            <field name="friday"/>
+                            <field name="saturday"/>
+                            <field name="sunday"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bus_route_schedule" model="ir.actions.act_window">
+        <field name="name">Schedules</field>
+        <field name="res_model">bus.route.schedule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Assign a bus to a schedule for some days -->
+    <record id="view_bus_trip_assign_form" model="ir.ui.view">
+        <field name="name">bus.trip.assign.form</field>
+        <field name="model">bus.trip.assign</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    The bus gets a scheduled trip on each day of the period on which the schedule runs.
+                    A bus cannot have two trips at the same time; it can do other routes at other times.
+                </p>
+                <group>
+                    <field name="schedule_id"/>
+                    <field name="vehicle_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+                <footer>
+                    <button name="action_assign" type="object" string="Assign" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Scheduled trips -->
+    <record id="view_bus_trip_tree" model="ir.ui.view">
+        <field name="name">bus.trip.tree</field>
+        <field name="model">bus.trip</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'running'" decoration-success="state == 'done'"
+                  decoration-danger="state == 'incomplete'" decoration-muted="state == 'cancelled'">
+                <field name="planned_start"/>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <field name="planned_end" optional="show"/>
+                <field name="simulated" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'running'"
+                       decoration-success="state == 'done'" decoration-danger="state == 'incomplete'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_bus_trip_form" model="ir.ui.view">
+        <field name="name">bus.trip.form</field>
+        <field name="model">bus.trip</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_cancel" type="object" string="Cancel the trip"
+                            groups="bus_tracking.group_bus_manager"
+                            attrs="{'invisible': [('state', 'not in', ('planned', 'running'))]}"
+                            confirm="The trip is kept but no longer counts."/>
+                    <field name="state" widget="statusbar" statusbar_visible="planned,running,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="vehicle_id"/>
+                            <field name="route_id"/>
+                            <field name="schedule_id"/>
+                        </group>
+                        <group>
+                            <field name="planned_start"/>
+                            <field name="planned_end"/>
+                            <field name="simulated"/>
+                            <field name="scenario" attrs="{'invisible': [('simulated', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Stops" name="stops">
+                            <field name="stop_line_ids" readonly="1">
+                                <tree decoration-danger="status in ('late', 'skipped')" decoration-success="status == 'on_time'"
+                                      decoration-warning="status == 'early'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="stop_id"/>
+                                    <field name="planned_time"/>
+                                    <field name="actual_time"/>
+                                    <field name="delay_min"/>
+                                    <field name="status" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_trip_search" model="ir.ui.view">
+        <field name="name">bus.trip.search</field>
+        <field name="model">bus.trip</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <filter name="today" string="Today"
+                        domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="planned" string="Planned" domain="[('state', '=', 'planned')]"/>
+                <filter name="running" string="On the way" domain="[('state', '=', 'running')]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="incomplete" string="Incomplete" domain="[('state', '=', 'incomplete')]"/>
+                <separator/>
+                <filter name="simulated" string="Simulated" domain="[('simulated', '=', True)]"/>
+                <filter name="real" string="Real" domain="[('simulated', '=', False)]"/>
+                <group expand="0" string="Group by">
+                    <filter name="group_route" string="Route" context="{'group_by': 'route_id'}"/>
+                    <filter name="group_vehicle" string="Bus" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'date'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_bus_trip_calendar" model="ir.ui.view">
+        <field name="name">bus.trip.calendar</field>
+        <field name="model">bus.trip</field>
+        <field name="arch" type="xml">
+            <calendar string="Scheduled trips" date_start="planned_start" date_stop="planned_end"
+                      color="route_id" mode="week" event_limit="5">
+                <field name="vehicle_id"/>
+                <field name="route_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_bus_trip_pivot" model="ir.ui.view">
+        <field name="name">bus.trip.pivot</field>
+        <field name="model">bus.trip</field>
+        <field name="arch" type="xml">
+            <pivot string="Scheduled trips">
+                <field name="route_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_bus_trip_graph" model="ir.ui.view">
+        <field name="name">bus.trip.graph</field>
+        <field name="model">bus.trip</field>
+        <field name="arch" type="xml">
+            <graph string="Scheduled trips" type="bar">
+                <field name="route_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_bus_trip" model="ir.actions.act_window">
+        <field name="name">Scheduled trips</field>
+        <field name="res_model">bus.trip</field>
+        <field name="view_mode">tree,calendar,pivot,graph,form</field>
+    </record>
+</odoo>

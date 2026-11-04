@@ -8,6 +8,7 @@
                 <field name="code"/>
                 <field name="name"/>
                 <field name="stop_count"/>
+                <field name="distance_km"/>
                 <field name="vehicle_count"/>
                 <field name="public" optional="show"/>
                 <field name="color" widget="color"/>
@@ -42,6 +43,9 @@
                             <field name="code"/>
                             <field name="color" widget="color"/>
                             <field name="public"/>
+                            <field name="origin_stop_id"/>
+                            <field name="destination_stop_id"/>
+                            <field name="distance_km"/>
                             <field name="track_points" string="Points of the recorded track"/>
                             <field name="active" invisible="1"/>
                         </group>
@@ -55,8 +59,25 @@
                                     <field name="latitude"/>
                                     <field name="longitude"/>
                                     <field name="radius"/>
+                                    <field name="planned_offset_min"/>
                                     <button name="action_pick_on_map" type="object" icon="fa-map-marker"
                                             title="Pick on the map"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Schedules" name="schedules">
+                            <field name="schedule_ids">
+                                <tree editable="bottom">
+                                    <field name="departure_time" widget="float_time"/>
+                                    <field name="arrival_time" widget="float_time" readonly="1"/>
+                                    <field name="monday"/>
+                                    <field name="tuesday"/>
+                                    <field name="wednesday"/>
+                                    <field name="thursday"/>
+                                    <field name="friday"/>
+                                    <field name="saturday"/>
+                                    <field name="sunday"/>
+                                    <field name="vehicle_id"/>
                                 </tree>
                             </field>
                         </page>
