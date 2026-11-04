@@ -37,6 +37,10 @@ export type StopState = {
   name: string;
   sequence: number;
   arrived_at: string | null;
+  /** When the bus should be at this stop on its scheduled trip (null when it has none right now). */
+  planned_at?: string | null;
+  /** Minutes after the planned time once the bus reached the stop (negative: early). */
+  delay_min?: number | null;
 };
 
 export type Alert = {
