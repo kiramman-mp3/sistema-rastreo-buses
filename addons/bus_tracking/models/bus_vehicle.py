@@ -27,6 +27,9 @@ class BusVehicle(models.Model):
     plate = fields.Char()
     capacity = fields.Integer()
     active = fields.Boolean(default=True)
+    simulated = fields.Boolean(
+        default=False, copy=False, index=True,
+        help="A bus made by the trip simulator. The live map and the public pages never show it.")
     driver_id = fields.Many2one('res.partner', string="Driver")
     route_id = fields.Many2one('bus.route', string="Route")
     traccar_device_id = fields.Integer(string="Traccar Device ID", copy=False)

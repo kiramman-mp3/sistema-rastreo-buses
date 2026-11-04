@@ -19,3 +19,4 @@ from . import test_privacy
 from . import test_trips
 from . import test_trip_run
 from . import test_trip_rules
+from . import test_trip_simulator
