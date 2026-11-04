@@ -23,13 +23,6 @@ export function calculateDistanceMeters(
   return Math.round(R * c);
 }
 
-export function formatDistance(meters: number | null): string {
-  if (meters === null || meters < 0) return '';
-  if (meters < 100) return 'Arribando ahora';
-  if (meters < 1000) return `En ${meters} metros`;
-  return `En ${(meters / 1000).toFixed(1)} km`;
-}
-
 function clock(): string {
   const now = new Date();
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -59,6 +52,5 @@ export function useCockpitTelemetry(
   return {
     currentTime,
     distanceMeters,
-    distanceFormatted: formatDistance(distanceMeters),
   };
 }
