@@ -156,4 +156,14 @@ if not Users2.search([('login', '=', 'chofer2')], limit=1):
 # Make the admin's panel Spanish and in Ecuador's time zone.
 env.ref('base.user_admin').write({'lang': 'es_EC', 'tz': 'America/Guayaquil'})
 env.cr.commit()
+# Planned minutes on every stop and two schedules a day per line, so the scheduled trips and the punctuality
+# rules have something to work on (the bus of each line is its default bus).
+Simulator = env['bus.trip.simulator']
+for code, (route, _stops) in routes.items():
+    Simulator._ensure_plan(route)
+    if not route.schedule_ids:
+        bus = Vehicle.search([('route_id', '=', route.id), ('simulated', '=', False)], limit=1)
+        for hour in (7.0, 12.0):
+            env['bus.route.schedule'].create({'route_id': route.id, 'departure_time': hour, 'vehicle_id': bus.id})
+
 print('dev seed ok: %d lines, %d buses' % (len(routes), Vehicle.search_count([])))
