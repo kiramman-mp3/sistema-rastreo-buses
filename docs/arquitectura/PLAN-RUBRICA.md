@@ -21,7 +21,7 @@ Estados: **[HECHO]** verificado en el código o en la documentación, **[PARCIAL
 | 10 recorridos de prueba documentados (Act. 5) | **[FALTA]** |
 | Reglas: retraso, parada omitida, recorrido incompleto, tiempo estimado contra real (Act. 6) | **[FALTA]** solo existen 4 alertas: velocidad, sin señal, parada larga y fuera de ruta. |
 | 8 métricas de transporte y 4 de software, con fórmula, fuente, unidad, resultado e interpretación (Act. 7) | **[PARCIAL]** el cuadro de mando de `04-resultados-y-metricas.md` mide la calidad del sistema; no hay tabla de las métricas pedidas. |
-| Tablero en Odoo o Power BI integrado (Act. 8) | **[FALTA]** no hay vistas de gráfico ni pivote. |
+| Tablero en Odoo o BI integrado (Act. 8) | **[FALTA]** no hay vistas de gráfico ni pivote. |
 | Pruebas, matriz de casos, ISO/IEC 25010 (Act. 9) | **[HECHO]** 289 pruebas de Odoo, 165 de la tableta, suite en vivo y auditoría. **[PARCIAL]** rendimiento por volumen de registros. |
 | **SonarQube** (Act. 9) | **[FALTA]** sin configuración ni reporte. |
 | Ishikawa, Pareto y PDCA (Act. 10) | **[HECHO]** 38 defectos, con causa raíz y comparación antes y después. |
@@ -38,7 +38,7 @@ Estados: **[HECHO]** verificado en el código o en la documentación, **[PARCIAL
 | 3 | Integración Odoo–Traccar y monitoreo GPS (15) | Bueno | R9, R5 (S2) | Prueba con Traccar Client, auditoría de sincronización |
 | 4 | Rutas, paradas y recorridos: horarios y asignaciones (10) | Falta | R1, R2, R8 | Formularios de horarios, asignación por fecha y hora, recorridos |
 | 5 | Historial e incidencias: retrasos, desvíos, incumplimientos (10) | Parcial | R2, R3, R4 | Alertas automáticas con sus reglas, 10 recorridos documentados |
-| 6 | Métricas y tablero (15) | Falta | R5, R6, R7 | Tabla de 12 métricas con fórmulas y consultas, tablero en Odoo, Power BI opcional |
+| 6 | Métricas y tablero (15) | Falta | R5, R6, R7 | Tabla de 12 métricas con fórmulas y consultas, tablero en Odoo, Grafana incrustado como complemento |
 | 7 | Pruebas funcionales, integración y rendimiento (10) | Bueno | R11 (más las de cada fase) | Matriz ampliada, rendimiento por volumen |
 | 8 | Calidad del software: ISO 25010 y SonarQube (10) | Parcial | R10, R12 | Reporte de SonarQube con el Quality Gate interpretado, ISO actualizada |
 | 9 | Mejora continua (5) | Bueno | R12 | Ishikawa, Pareto y PDCA con defectos nuevos de esta etapa |
@@ -62,7 +62,7 @@ R1 horarios y asignación ──► R2 recorrido y registro ──► R3 reglas 
                                                             │                    │
                                                             └────► R5 métricas ◄─┘
                                                                       │
-                                                    R6 tablero Odoo ◄─┘ ──► R7 Power BI (opcional)
+                                                    R6 tablero Odoo ◄─┘ ──► R7 Grafana incrustado
 R8 Fleet   R9 Traccar Client   R10 SonarQube        (independientes, en paralelo)
 R11 pruebas y rendimiento (después de R5)           R12 documentación y defensa (incremental, cierra al final)
 ```
@@ -75,7 +75,7 @@ R11 pruebas y rendimiento (después de R5)           R12 documentación y defens
 | R4 | Mediano | Que los datos simulados parezcan reales sin presentarse como reales |
 | R5 | Grande | Definir cada fórmula sin ambigüedad |
 | R6 | Grande | Que se vea bien y se actualice solo |
-| R7 | Mediano | Licencias y autenticación de Power BI, ajenas al repositorio |
+| R7 | Mediano | Acceso seguro al tablero incrustado y exposición controlada de la base de datos |
 | R8 | Pequeño | Migración de los buses existentes |
 | R9 | Pequeño | Prueba física con un celular |
 | R10 | Pequeño a mediano | Ruido de hallazgos que hay que clasificar |
@@ -180,7 +180,7 @@ Cada indicador tendrá fórmula, fuente de datos, unidad, resultado (calculado),
 | S3 | Tiempo de respuesta | muestras de tiempo de los endpoints de ingesta, mapa y tablero, con p50 y p95 |
 | S4 | Detección correcta de incidencias | sobre los recorridos simulados: detectadas que coinciden con lo esperado ÷ esperadas (precisión y exhaustividad) |
 
-**Tareas:** vistas SQL o consultas ORM por indicador; modelo de solo lectura `bus.kpi` para el tablero; contador de posiciones rechazadas; `qa/metricas_transporte.sql`;
+**Tareas:** vistas SQL `kpi_*` por indicador (las usan el tablero de Odoo y Grafana, así los dos muestran las mismas cifras); modelo de solo lectura `bus.kpi` para el tablero; contador de posiciones rechazadas; `qa/metricas_transporte.sql`;
 regeneración de `docs/calidad/04-resultados-y-metricas.md` por `qa/generar_docs.py`.
 **Pruebas:** cada indicador contra un conjunto de datos construido a mano con resultado conocido (caja blanca); cambiar un dato cambia el indicador (prueba de que no es estático).
 **Rama:** `feature/r5-metricas`.
@@ -204,22 +204,69 @@ Además, vistas `graph` y `pivot` sobre `bus.trip`, `bus.trip.stop` y `bus.alert
 **Evidencia:** tablero funcional dentro de Odoo con los indicadores y comparaciones entre rutas y periodos que enumera el PDF.
 **Rama:** `feature/r6-tablero`.
 
-### R7. Power BI integrado (Act. 8, alternativa B, opcional)
+### R7. Grafana incrustado en Odoo (Act. 8, tablero complementario a R6, criterio 6)
 
-El PDF pide elegir una de las dos alternativas. R6 es la entrega que no depende de licencias; R7 la complementa.
+**Por qué Grafana:** es gratuito (versión de código abierto), liviano (cabe en una VM pequeña), se conecta directo a PostgreSQL y sus tableros se escriben como archivos
+JSON versionados en el repositorio: se reproducen con un comando y se revisan como cualquier código. Se ve bien con la paleta de la marca y se actualiza solo.
 
-**Lo que se entrega desde el repositorio**
-- Capa de datos para Power BI: puntos de exportación autenticados `/bus_tracking/export/<conjunto>.csv|json` con token de gestor, sin datos personales
-  (sin nombre del chofer ni placa), para los conjuntos de recorridos, paradas, alertas, posiciones diarias, rutas e indicadores.
-- Carpeta `bi/powerbi/` con un proyecto de Power BI (formato PBIP): modelo con relaciones, las medidas DAX de los 12 indicadores, tema con la paleta de la marca y la
-  especificación de las páginas.
-- Un campo en *Configuración* con la dirección del informe y una pantalla «Power BI» dentro de Odoo que lo incrusta; cabecera de Caddy para permitir `app.powerbi.com`.
+**Relación con la rúbrica:** el PDF nombra el tablero hecho en Odoo (alternativa A) y Power BI (alternativa B). **R6 sigue siendo la entrega obligatoria**, porque es la alternativa A tal como
+está escrita. Grafana va incrustado dentro de Odoo como capa de análisis; antes de la defensa hay que confirmar con el docente que una herramienta distinta a Power BI, accesible desde Odoo,
+también vale. Si no valiera, R6 cubre la rúbrica por sí sola.
 
-**Lo que no se puede hacer desde aquí**
-- Publicar el informe en un espacio de trabajo y su licencia (Pro, Premium por usuario o capacidad Embedded). Lo hace la persona con la cuenta de Microsoft.
-- Comprobar cómo se ve: Power BI Desktop solo corre en Windows y no está en este entorno. La entrega se marca **[HECHO*]** hasta abrirla en Desktop.
-- **No se usará «Publicar en la web»:** hace público el informe y expondría posiciones de buses; contradice `docs/diseno/PRIVACIDAD.md`. Solo incrustación segura con inicio de sesión.
-**Rama:** `feature/r7-powerbi`.
+```
+Base de Odoo (vistas kpi_*) ◄── usuario grafana_reader (solo SELECT) ── Grafana ◄── Caddy (grafana.<dominio>) ◄── iframe en Odoo
+                                                                           ▲
+                                           Odoo firma un JWT de 5 min por usuario ┘
+```
+
+**Datos (se comparten con R5 y R6)**
+- Vistas SQL de solo lectura, sin datos personales (sin nombre del chofer ni placa): `kpi_trips`, `kpi_trip_stops`, `kpi_alerts`, `kpi_positions` (posiciones por recorrido, para el mapa),
+  `kpi_positions_daily`, `kpi_routes` y `kpi_software` (S1 a S4 por día). Las crea el módulo, con fechas en UTC para que funcionen los filtros de tiempo de Grafana.
+- Usuario `grafana_reader`: `SELECT` solo sobre esas vistas, `default_transaction_read_only`, `statement_timeout` de 10 s y pocas conexiones. Lo crea `scripts/grafana-role.sh`
+  (hace falta un superusuario; con una base externa se hace en la consola del proveedor).
+
+**Despliegue**
+- Servicio `grafana` en `docker-compose.prod.yml`, con la imagen fijada a una versión concreta (se fija al implementar), sin puertos publicados, volumen propio, límite de memoria, comprobación de salud
+  y reinicio automático. En desarrollo, un perfil `bi` en `docker-compose.yml`.
+- Aprovisionamiento como código: `bi/grafana/provisioning/` (fuente de datos y tableros) y `bi/grafana/dashboards/*.json`; los tableros quedan de solo lectura en la interfaz.
+- Caddy: bloque `grafana.<dominio>` con HTTPS, y `frame-ancestors` que solo permite el dominio de Odoo. `GRAFANA_DOMAIN` debe ser un subdominio del dominio de Odoo, para que las cookies sigan siendo del mismo sitio dentro del iframe.
+- Secretos en `.env.prod` (`GRAFANA_ADMIN_PASSWORD`, `GRAFANA_JWT_SECRET`) generados al azar por `init-prod.sh`, como el resto. El ejemplo `.env.prod.example` se actualiza.
+
+**Acceso e incrustación**
+- Ajustes de Odoo (solo gestores): dirección de Grafana. El secreto del JWT se guarda como parámetro del sistema.
+- Endpoint `/bus_tracking/grafana/token`: exige sesión y pertenecer al grupo de usuarios de buses, y devuelve un JWT firmado de 5 minutos con rol fijo de lector.
+- Menú «Indicadores > Grafana» con una pantalla de cliente que incrusta el tablero con ese token (`kiosk`, tema claro u oscuro según Odoo). Grafana acepta el JWT en la dirección con
+  `auth.jwt.url_login`; **se verifica con la versión fijada** y, si no se pudiera, la alternativa es la autenticación por proxy de Grafana a través de Caddy contra una comprobación de sesión de Odoo.
+
+**Tableros (JSON, colores fijos de la marca: granate, amarillo de señal, tinta; actualización cada 30 s; variables de ruta, bus y periodo; las alertas aparecen como anotaciones)**
+
+| Tablero | Paneles |
+|---|---|
+| Resumen | 12 indicadores con umbrales verde, ámbar y rojo, minigráfico y comparación con el periodo anterior |
+| Rutas | barras agrupadas por ruta: puntualidad, retraso, cumplimiento y distancia real contra estimada; tabla comparativa |
+| Puntualidad | mapa de calor de retraso por parada y hora, histograma de retrasos, puntualidad por día |
+| Recorridos | tabla con estado, retraso y distancias; mapa del trazado del recorrido elegido, con las paradas |
+| Incidencias | anillo por tipo, Pareto (barras más acumulado), frecuencia por día y por ruta |
+| Calidad del sistema | S1 a S4, latencia p50 y p95 en el tiempo, resultado de la auditoría de sincronización |
+
+Opcional: reglas de alerta de Grafana (por ejemplo, puntualidad del día por debajo del umbral) con aviso al equipo.
+
+**Privacidad y seguridad:** el rol de la base solo ve vistas sin datos personales; los usuarios de Grafana son solo lectores y el registro, el acceso anónimo y los tableros públicos están desactivados; Explore queda
+deshabilitado; todo por HTTPS; la base nunca se publica a Internet (Grafana está en la misma red de Docker). Cumple `docs/diseno/PRIVACIDAD.md`.
+
+**Pruebas**
+- Cada consulta de cada panel se ejecuta contra la base de pruebas y da las mismas cifras que las consultas de R5; si una columna cambia, la prueba falla.
+- Validación de los JSON de los tableros.
+- Endpoint del token: exige sesión y grupo, caduca a los 5 minutos, la firma se verifica y el rol es siempre lector; los choferes (usuarios de portal) no lo obtienen.
+- El rol `grafana_reader` lee las vistas `kpi_*`, no lee las tablas de usuarios ni de posiciones sin filtrar, y no puede escribir.
+- Prueba de humo `qa/grafana_smoke.py`: `/api/health`, estado de la fuente de datos, tableros presentes y cabeceras correctas para la incrustación.
+
+**Evidencia:** capturas de los seis tableros dentro de Odoo (escritorio y móvil, hechas con Playwright), los JSON en el repositorio, `docs/guias/GRAFANA.md` y `docs/calidad/15-tablero-grafana.md`.
+
+**Se puede comprobar aquí:** a diferencia de Power BI, Grafana corre en Docker, así que se levanta, se mira y se captura en este mismo entorno. Lo que sigue pendiente de fuera del repositorio es el subdominio en el DNS y que la VM de Azure tenga memoria libre para el servicio extra.
+
+Las mismas vistas `kpi_*` servirían a Power BI o a Metabase si más adelante se quisiera cambiar de herramienta.
+**Rama:** `feature/r7-grafana`.
 
 ### R8. Módulo Fleet (Act. 2, criterio 2)
 
@@ -285,7 +332,7 @@ críticos y justificación de los que se aceptan; `docs/calidad/14-sonarqube.md`
 ## 6. Riesgos y decisiones abiertas
 
 1. **Horarios reales.** No se tienen los horarios oficiales de la UTA: los de las 4 líneas serán simulados y se marcarán como tales hasta que la universidad confirme los reales.
-2. **Power BI** depende de una licencia y de una cuenta que no están en el repositorio (R7). Por eso R6 es la entrega obligatoria.
+2. **Grafana** necesita un subdominio en el DNS, memoria libre en la VM de Azure y una conexión de solo lectura a la base; además, el PDF nombra Power BI y no Grafana (R7). Por eso R6 es la entrega obligatoria y R7 se confirma con el docente.
 3. **Traccar Client contra la app propia.** La defensa exige datos de Traccar Client: hace falta un celular real (R9).
 4. **Producción.** Los cambios de R1, R2, R3 y R8 modifican el modelo de datos de la base que corre en Azure: respaldo antes y migración probada sobre una copia.
 5. **Plazos.** R1 a R6 son el camino crítico; R8 a R10 se pueden hacer en paralelo para reducir el riesgo.
