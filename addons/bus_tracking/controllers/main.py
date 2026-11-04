@@ -8,6 +8,7 @@ from odoo import fields, http
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
+from ..models.bus_trip import utc_to_local_date
 from ..models.utils import int_param, map_center, tile_url
 from .portal import line_positions
 
@@ -96,6 +97,19 @@ class BusTrackingController(http.Controller):
         if routes is not None:
             data['routes'] = routes
         return data
+
+    @http.route('/bus_tracking/dashboard', type='json', auth='user')
+    def dashboard(self, days=None, date_from=None, date_to=None, route_ids=None, scope='all', compare=True):
+        """The indicators and the series of the dashboard. `days` is a period that ends today (local date)."""
+        self._check_user()
+        if days:
+            try:
+                days = min(max(int(days), 1), 366)
+            except (TypeError, ValueError):
+                raise ValidationError("days must be a number.")
+            date_to = utc_to_local_date(fields.Datetime.now())
+            date_from = date_to - timedelta(days=days - 1)
+        return request.env['bus.kpi'].dashboard(date_from, date_to, route_ids, scope, bool(compare))
 
     @http.route('/bus_tracking/incident/ack', type='json', auth='user')
     def acknowledge_incident(self, incident_id):

@@ -219,7 +219,8 @@ class TestDefinitions(KpiCase):
         for value, status in ((4, 'good'), (8, 'warn'), (12, 'bad')):          # lower is better
             self.assertEqual(self.kpi._status('T3', value), status)
         self.assertEqual(self.kpi._status('T1', None), 'na')
-        self.assertEqual(self.kpi._status('T8', 3), 'na')                        # incidents have no threshold
+        self.assertEqual(self.kpi._status('T8', 3), 'info')                # no threshold for incidents, only a count
+        self.assertEqual(self.kpi._status('T8', None), 'na')
 
     def test_the_sql_can_be_run_as_shown(self):
         """The queries are the evidence: running T1 by hand gives the same figure."""
