@@ -34,7 +34,7 @@ class BusTrackingController(http.Controller):
             alerts.setdefault(alert.vehicle_id.id, []).append(alert.kind)
         alert_labels = dict(env['bus.alert']._fields['kind']._description_selection(env))
         vehicles = []
-        buses = env['bus.vehicle'].search([('last_fix_time', '!=', False)])
+        buses = env['bus.vehicle'].search([('last_fix_time', '!=', False), ('simulated', '=', False)])
         positions = {}
         for route in buses.mapped('route_id'):
             positions.update(line_positions(route, buses.filtered(lambda b, r=route: b.route_id == r)))
