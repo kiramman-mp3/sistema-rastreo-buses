@@ -22,8 +22,17 @@ uso oficial. Los textos están en `addons/bus_tracking/models/portal_i18n.py`,
 Se dejaron como en español las palabras que ya se dicen así: bus, GPS, QR, SOS, correo, telefono, servidor,
 accidente, tráfico, cámara.
 
-## Qué queda en español
+## El panel de Odoo (la oficina)
 
-- Los avisos que escribe el servidor (por ejemplo «Hasta 60 km/h», en las alertas) salen en el idioma de
-  Odoo del chofer: Odoo no tiene kichwa, así que la tableta los muestra en español.
-- El panel de Odoo (personal de la oficina) está en inglés y español.
+Odoo no trae kichwa. El módulo agrega el idioma `qu_EC` (`data/languages.xml`) y su catálogo
+`addons/bus_tracking/i18n/qu.po` con los 417 textos del módulo. Cada persona lo elige en
+**Preferencias > Idioma**. La tableta también lo pide, y por eso los avisos del servidor («Hasta 60 km/h»,
+etc.) salen en kichwa.
+
+Límites:
+
+- Solo están traducidos los textos de este módulo (menús, formularios, reportes, avisos). Lo que trae Odoo
+  de fábrica (Ajustes generales, Aplicaciones, Usuarios...) no tiene kichwa y se ve en inglés.
+- La página de ingreso del personal (`/web/login`) usa el idioma del navegador de cada persona; no hay selector.
+- Para regenerar los catálogos tras cambiar textos: exportar con `odoo --i18n-export` y completar `es.po` y
+  `qu.po` (ninguna entrada puede quedar vacía: una prueba lo comprueba).
