@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="action_push_setup" model="ir.actions.client">
-        <field name="name">Notificaciones en este dispositivo</field>
+        <field name="name">Notifications on this device</field>
         <field name="tag">bus_tracking.push_setup</field>
     </record>
 </odoo>
