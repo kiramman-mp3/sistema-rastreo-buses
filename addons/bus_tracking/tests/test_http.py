@@ -102,6 +102,14 @@ class TestHttp(HttpCase):
         self.assertEqual(self.post(data=body).status_code, 400)
         self.assertEqual(self.positions(), 0)
 
+    def test_a_refused_position_is_counted_for_the_integrity_indicator(self):
+        body = json.dumps({'position': traccar_position(7, 'ayer', -33.47, -70.62), 'device': {'id': 7}})
+        self.assertEqual(self.post(data=body).status_code, 400)
+        rejects = self.env['bus.position.reject'].search([])
+        self.assertEqual(len(rejects), 1)
+        self.assertEqual(rejects.vehicle_id, self.bus)
+        self.assertEqual(self.positions(), 0)
+
     def test_webhook_rejects_get(self):
         self.assertEqual(self.url_open(WEBHOOK + '?secret=s3cret').status_code, 405)
 

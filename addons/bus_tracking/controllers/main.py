@@ -148,7 +148,8 @@ class BusTrackingController(http.Controller):
         if isinstance(payload, dict):
             try:
                 env['bus.vehicle']._process_traccar_payload(payload)
-            except (ValueError, ValidationError):
+            except (ValueError, ValidationError) as error:
+                env['bus.position.reject']._log(payload, str(error.args[0]) if error.args else 'invalid')
                 return Response(status=400)
         return Response(status=200)
 
