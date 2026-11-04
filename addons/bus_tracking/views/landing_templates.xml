@@ -193,7 +193,7 @@
                                 <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
                                 <span class="fragmento-nombre" t-esc="featured['name']"/>
                             </div>
-                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus='El bus' if site_lang != 'en' else 'The bus', n=2)"/>
+                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus={'en': 'The bus', 'qu': 'Bus'}.get(site_lang, 'El bus'), n=2)"/>
                             <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
                                 <t t-foreach="featured['stops'][:5]" t-as="stop_name">
                                     <li t-if="stop_name_index == 1" class="demo-bus">

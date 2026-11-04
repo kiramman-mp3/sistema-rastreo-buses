@@ -60,9 +60,12 @@ class TestPrivacyPage(HttpCase):
         self.assertIn('Las posiciones se conservan 30 días', resp.text)
         self.assertIn('se borran 90 días después de resolver', resp.text)
 
-    def test_the_page_follows_the_language_and_kichwa_reads_spanish(self):
+    def test_the_page_follows_the_language(self):
         self.assertIn('Positions are kept for 30 days', self.url_open('/privacidad?lang=en').text)
-        self.assertIn('Las posiciones se conservan 30 días', self.url_open('/privacidad?lang=qu').text)
+        self.assertIn('Las posiciones se conservan 30 días', self.url_open('/privacidad?lang=es').text)
+        kichwa = self.url_open('/privacidad?lang=qu').text
+        self.assertIn('Maypi kashkakuna 30 punchakama waqaychashka kan', kichwa)
+        self.assertNotIn('Las posiciones se conservan', kichwa)
 
     def test_the_page_follows_a_changed_setting(self):
         self.icp.set_param('bus_tracking.retention_days', '7')
