@@ -20,7 +20,7 @@ class ViewCase(KpiCase):
     def rows(self, sql, *args):
         if not self.as_role:
             self.env.flush_all()                    # the views read the database: write what the ORM still holds
-        self.env.cr.execute(sql, args)
+        self.env.cr.execute(sql, args or None)           # no arguments: a % in the query is not a placeholder
         return self.env.cr.fetchall()
 
     def columns(self, view):

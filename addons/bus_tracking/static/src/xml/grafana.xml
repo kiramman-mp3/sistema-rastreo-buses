@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="bus_tracking.Grafana" owl="1">
+        <div class="o_graf">
+            <nav t-if="state.configured" class="o_graf_tabs" role="tablist" aria-label="Dashboards">
+                <button t-foreach="state.dashboards" t-as="dash" t-key="dash.uid" role="tab"
+                        t-att-aria-selected="state.current == dash.uid ? 'true' : 'false'"
+                        t-attf-class="o_graf_tab #{state.current == dash.uid ? 'is-on' : ''}"
+                        t-on-click="() => this.select(dash.uid)" t-esc="dash.title"/>
+            </nav>
+            <iframe t-if="state.configured" class="o_graf_frame" t-att-src="src" title="Grafana"
+                    referrerpolicy="no-referrer" allow="fullscreen"/>
+            <div t-elif="state.loading" class="o_graf_note">Loading…</div>
+            <div t-elif="state.error" class="o_graf_note" role="alert">
+                The dashboards could not be loaded. Trying again in a minute.
+            </div>
+            <div t-else="" class="o_graf_note" role="status">
+                <h2>Grafana is not set up yet</h2>
+                <p t-if="state.canManage">
+                    Set the Grafana address and the shared secret in Settings, under Buses, and come back.
+                </p>
+                <p t-else="">Ask a manager to set up Grafana.</p>
+            </div>
+        </div>
+    </t>
+</templates>

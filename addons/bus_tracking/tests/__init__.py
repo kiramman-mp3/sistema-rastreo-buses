@@ -24,3 +24,5 @@ from . import test_kpi
 from . import test_quality
 from . import test_dashboard
 from . import test_grafana_views
+from . import test_grafana_access
+from . import test_grafana_dashboards
