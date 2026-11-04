@@ -81,3 +81,14 @@ def simplify(points, tolerance_m):
             keep[far] = True
             stack.extend([(first, far), (far, last)])
     return [list(p) for p, flag in zip(points, keep) if flag]
+
+
+def compact(points, min_gap_m=10, tolerance_m=8, max_points=1500):
+    """A recorded or imported line reduced to what a map needs: points closer than min_gap_m are one,
+    and the line is simplified, loosening the tolerance until it fits max_points."""
+    line = thin(points, min_gap_m)
+    while True:
+        simple = simplify(line, tolerance_m)
+        if len(simple) <= max_points or tolerance_m >= 200:
+            return simple
+        tolerance_m *= 2
