@@ -1,3 +1,4 @@
+import hashlib
 import hmac
 import json
 import logging
@@ -23,7 +24,9 @@ class BusTrackingController(http.Controller):
             raise AccessError("Bus tracking access required.")
 
     @http.route('/bus_tracking/live', type='json', auth='user')
-    def live(self):
+    def live(self, routes_key=''):
+        """Everything the live map shows. The lines and stops are the heavy part and rarely change: they
+        only travel when `routes_key` (the one the page got last time) no longer matches."""
         self._check_user()
         env = request.env
         alerts = {}
@@ -71,7 +74,10 @@ class BusTrackingController(http.Controller):
             'time': fields.Datetime.to_string(incident.reported_at or incident.create_date),
         } for incident in env['bus.incident']._open_for_map()]
         new_complaints = env['bus.complaint'].search_count([('state', '=', 'new')])
-        routes = [{
+        all_routes = env['bus.route'].search([])
+        key = hashlib.sha1(repr([(r.id, r.write_date, r.stop_ids.ids, r.stop_ids.mapped('write_date'))
+                                 for r in all_routes]).encode()).hexdigest()
+        routes = None if routes_key == key else [{
             'id': r.id,
             'name': r.name,
             'code': r.code,
@@ -83,10 +89,13 @@ class BusTrackingController(http.Controller):
                 'lon': s.longitude,
                 'radius': s.radius,
             } for s in r.stop_ids],
-        } for r in env['bus.route'].search([])]
-        return {'vehicles': vehicles, 'routes': routes, 'alert_labels': alert_labels,
+        } for r in all_routes]
+        data = {'vehicles': vehicles, 'routes_key': key, 'alert_labels': alert_labels,
                 'incidents': incidents, 'new_complaints': new_complaints,
                 'map_center': list(map_center(env)), 'tile_url': tile_url(env)}
+        if routes is not None:
+            data['routes'] = routes
+        return data
 
     @http.route('/bus_tracking/incident/ack', type='json', auth='user')
     def acknowledge_incident(self, incident_id):
