@@ -76,7 +76,7 @@ Puntos a destacar:
 | **Azure con máquina virtual Linux** | Decisión del cliente. Traccar recibe conexiones de dispositivos que no encajan en servicios de aplicación web. **Aún no desplegado.** |
 | **Español, inglés y kichwa** | Decisión del cliente. Odoo 16 no trae kichwa; se hizo en el portal con un diccionario propio, marcado como borrador hasta que lo revise una persona hablante. |
 
-*"Todas estas decisiones se tomaron con el cliente en la fase 0 y están en `docs/PLAN.md`."*
+*"Todas estas decisiones se tomaron con el cliente en la fase 0 y están en `docs/arquitectura/PLAN.md`."*
 
 ---
 
@@ -84,7 +84,7 @@ Puntos a destacar:
 
 *"Seguimos un flujo Git con `main`, `develop` y ramas `feature/*`, `fix/*`, `refactor/*` y `chore/*`. Los commits son pequeños y siguen Conventional Commits, así que cualquiera se puede revertir."*
 
-- Cada sesión de trabajo queda en `docs/BITACORA.md`, y el avance por fases en `docs/PLAN.md`.
+- Cada sesión de trabajo queda en `docs/academico/BITACORA.md`, y el avance por fases en `docs/arquitectura/PLAN.md`.
 - **Decidimos recortar el alcance** el 27-oct para quedarnos con lo que se pueda defender: se eliminaron el roster oficial, los trazados por calle, el correo y los viajes con puntualidad. *"Preferimos pocas funciones bien probadas a muchas a medias."*
 - Un ejemplo de que el proceso funciona: al simplificar, una prueba atrapó un error real (un bus sin ruta rompía el cálculo de desvío, DEF-006) y quedó una prueba que lo protege.
 

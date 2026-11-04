@@ -2,7 +2,7 @@
 
     python qa/contraste.py
 
-The pairs and targets are the ones documented in docs/DISENO.md: 7:1 (AAA) for body text on the
+The pairs and targets are the ones documented in docs/diseno/DISENO.md: 7:1 (AAA) for body text on the
 portal and the tablet, 4.5:1 (AA) for the rest of the text, 3:1 for large text and non-text marks.
 """
 import sys

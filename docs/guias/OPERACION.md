@@ -1,6 +1,6 @@
 # Operación diaria
 
-Lo que hay que hacer, y quién, para que el sistema funcione cuando hay buses y choferes reales. La instalación y las actualizaciones están en `docs/PRODUCCION.md`; los datos personales, en `docs/PRIVACIDAD.md`.
+Lo que hay que hacer, y quién, para que el sistema funcione cuando hay buses y choferes reales. La instalación y las actualizaciones están en `docs/guias/PRODUCCION.md`; los datos personales, en `docs/diseno/PRIVACIDAD.md`.
 
 Lo marcado como **propuesta** es un valor razonable para empezar: la universidad debe confirmarlo.
 
@@ -93,7 +93,7 @@ Una vez al mes (30 minutos):
 | Dependencias de la app | `cd apps/conductor-tablet && npm audit --omit=dev`, `npx expo-doctor` y `npx expo install --check`. Los avisos de `glob`, `minimatch` y `@expo/*` vienen de las herramientas de compilación de Expo y no viajan en la app; no se arreglan bajando Expo. |
 | Imágenes de Docker | Fija y actualiza `ODOO_IMAGE`, `POSTGRES_IMAGE` y `TRACCAR_IMAGE` en `.env.prod`; prueba en desarrollo antes. |
 | Versión de Odoo | El sistema usa Odoo 16 (y Python 3.9 de su imagen). Según el ciclo de soporte de Odoo, esa versión ya no recibe correcciones oficiales: confirma el estado actual y decide por escrito migrar o aceptar el riesgo. |
-| Datos personales | Revisa los plazos de *Ajustes* contra `docs/PRIVACIDAD.md`. |
+| Datos personales | Revisa los plazos de *Ajustes* contra `docs/diseno/PRIVACIDAD.md`. |
 | Respaldo | Ensayo de restauración (sección 4). |
 
 ## 8. Pruebas en el equipo de desarrollo

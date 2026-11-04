@@ -37,7 +37,7 @@ Después, a mano:
 
 1. Entra a `https://<DOMAIN>` como `admin` con la contraseña que mostró el script y cámbiala.
 2. Crea las rutas y sus paradas, y un bus por cada tableta (o celular de respaldo).
-3. En cada bus pulsa **Register GPS in Traccar**. El identificador OsmAnd lo recibe la app al **iniciar el turno**, no se teclea en la tableta. Sigue `docs/GUIA-CHOFER.md`.
+3. En cada bus pulsa **Register GPS in Traccar**. El identificador OsmAnd lo recibe la app al **iniciar el turno**, no se teclea en la tableta. Sigue `docs/guias/GUIA-CHOFER.md`.
 
 No hace falta tocar el panel de Traccar: el script crea su cuenta de administrador (contraseña aleatoria guardada en Odoo), cierra el registro abierto, y Odoo crea los dispositivos por su API.
 
@@ -94,12 +94,12 @@ Las alertas llegan por push (notificaciones web), que funcionan solo sobre HTTPS
 
 `GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok", "version": "<versión del módulo>"}` con código 200, o `{"status": "stale", "version": "..."}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
 
-Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y que avise por correo o mensaje cuando falle. La operación diaria (quién vigila el SOS, el monitor, los errores de las tabletas, el ensayo de restauración, las etiquetas de versión y la reversión) está en `docs/OPERACION.md`; los datos personales y sus plazos, en `docs/PRIVACIDAD.md`. Ojo: si tus buses no circulan de noche, el endpoint devolverá 503 en ese horario; sube el plazo o pausa el monitor.
+Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y que avise por correo o mensaje cuando falle. La operación diaria (quién vigila el SOS, el monitor, los errores de las tabletas, el ensayo de restauración, las etiquetas de versión y la reversión) está en `docs/guias/OPERACION.md`; los datos personales y sus plazos, en `docs/diseno/PRIVACIDAD.md`. Ojo: si tus buses no circulan de noche, el endpoint devolverá 503 en ese horario; sube el plazo o pausa el monitor.
 
 ## Actualizar
 
 1. `./scripts/backup.sh`
-2. Trae el código nuevo y revisa el `docs/BITACORA.md`.
+2. Trae el código nuevo y revisa el `docs/academico/BITACORA.md`.
 3. `docker compose --env-file .env.prod -f docker-compose.prod.yml pull db traccar proxy` y luego `docker compose --env-file .env.prod -f docker-compose.prod.yml build --pull odoo` (la imagen de Odoo se construye con `docker/odoo/Dockerfile` para incluir el componente de push)
 4. `docker compose --env-file .env.prod -f docker-compose.prod.yml run --rm odoo odoo -d <ODOO_DB> -u bus_tracking --stop-after-init`
 5. `docker compose --env-file .env.prod -f docker-compose.prod.yml up -d`
@@ -150,7 +150,7 @@ eas build --profile production --platform android
 
 Instala el APK a mano en cada tableta. Para actualizar, otro build y se instala encima. El perfil `development` es el que admite GPS de fondo en pruebas; Expo Go no.
 
-Checklist de la tableta: GPS real, ubicación todo el tiempo, sin ahorro de batería para la app, cargador, pantalla encendida, modo aplicación fija si el aparato lo tiene. Guía del chofer: `docs/GUIA-CHOFER.md`.
+Checklist de la tableta: GPS real, ubicación todo el tiempo, sin ahorro de batería para la app, cargador, pantalla encendida, modo aplicación fija si el aparato lo tiene. Guía del chofer: `docs/guias/GUIA-CHOFER.md`.
 
 ## Lo que se probó y lo que no
 
