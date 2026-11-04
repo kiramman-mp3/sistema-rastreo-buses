@@ -10,6 +10,7 @@ import { alertLabel, t, tf, tp, type Message } from '../src/i18n';
 import { formatDistance } from '../src/i18n/format';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
+import { useDismissed } from '../src/shift/useDismissed';
 import { createMotionLock } from '../src/shift/motion';
 import { buildNotices } from '../src/shift/notices';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
@@ -58,6 +59,8 @@ export default function ShiftScreen() {
   const gps = useGpsHealth();
   const [stale, setStale] = useState(false);
   const [sosLocal, setSosLocal] = useState<SosLocal>(null);
+  // What the driver closed on this shift: an alert read once should not stay in the way.
+  const { dismissed, dismiss } = useDismissed(shift?.id);
 
   // A small state machine kept across renders; it only reads the last GPS sample.
   const [lock] = useState(() => createMotionLock());
@@ -95,10 +98,19 @@ export default function ShiftScreen() {
   }
 
   const notices = buildNotices({
-    sos: sosStatus ? { text: sosStatus, seen: Boolean(serverSos?.seen_at) } : null,
+    sos: sosStatus
+      ? {
+          text: sosStatus,
+          seen: Boolean(serverSos?.seen_at),
+          id: String(serverSos?.id ?? sosLocal?.at ?? 'local'),
+          // only an SOS the office has can be closed; one still sending or saved must stay in sight
+          delivered: phase === 'seen' || phase === 'sent',
+        }
+      : null,
     alerts: (shiftState?.alerts ?? [])
       .filter((a) => a.state === 'open')
       .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
+    dismissed,
   });
 
   useFocusEffect(
@@ -177,60 +189,85 @@ export default function ShiftScreen() {
   // next stop, a map of fixed height, then the buttons), stacked in either orientation.
   const pageScroll = layout.largeText;
   const side = layout.landscape && !pageScroll;
-  // A phone in portrait has no width for three buttons in a row: SOS on top, the other two below.
-  const stackedActions = layout.phone && !layout.landscape;
-  // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
-  const showStrip = !layout.short || pageScroll;
+  // Three buttons in a row need about 520 dp: a narrower phone puts the SOS on its own row (one line, title and
+  // hint together) and the other two below it. Either way they stay low and leave the map its room.
+  const stackedActions = layout.compact && layout.width < 520;
+  // A phone on its side has little height: smaller marks and one line per stop name, but every stop still shows.
+  const compactStrip = (layout.short || layout.height < 700) && !pageScroll;
+  const showStrip = true;
+  // Notices on a phone are one tight line with their Close button, so the next stop and the map keep their room.
+  const compactNotices = layout.compact && !pageScroll;
   // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
   // has room for one, and a shorter detail; the rest is counted.
-  const noticeBlock = <NoticeList items={notices} max={noticeCapacity(layout)} detailLines={layout.short && !pageScroll ? 1 : 2} />;
+  const noticeBlock = (
+    <NoticeList
+      items={notices}
+      max={noticeCapacity(layout)}
+      detailLines={layout.short && !pageScroll ? 1 : 2}
+      compact={compactNotices}
+      onDismiss={dismiss}
+    />
+  );
 
   const problem = (
     <Action
       label={t('actionProblem')}
-      sub={stackedActions ? undefined : t('actionProblemSub')}
+      sub={layout.compact ? undefined : t('actionProblemSub')}
       onPress={() => router.push('/incident')}
       disabled={locked}
-      style={stackedActions ? undefined : styles.actionWide}
+      style={stackedActions ? undefined : layout.compact ? styles.actionProblemPhone : styles.actionWide}
     />
   );
-  const sos = <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />;
+  const sos = (
+    <SosButton
+      onFire={fireSos}
+      title={t('actionSos')}
+      hint={t('actionSosSub')}
+      holding={t('sosHolding')}
+      inline={layout.short || stackedActions}
+    />
+  );
   const end = (
     <Action
       label={t('endShift')}
       onPress={confirmEnd}
       kind="quiet"
       disabled={locked}
-      style={stackedActions ? undefined : styles.actionNarrow}
+      style={stackedActions ? undefined : layout.compact ? styles.actionPhone : styles.actionNarrow}
     />
   );
 
   const nextContent = (
     <>
-      <Txt size="small" dim>
-        {t('cabinNext')}
+      {/* A phone has no height for a line of its own for each fact: the label, the distance and the count share one. */}
+      <Txt size="small" dim lines={1}>
+        {layout.compact && nextStop
+          ? [t('cabinNext'), distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
+              .filter(Boolean)
+              .join(' · ')
+          : t('cabinNext')}
       </Txt>
       <Animated.View style={stopCue}>
-        <Txt bold size="stop" lines={2} fit>
+        <Txt bold size={layout.short ? (layout.height < 400 ? 'data' : 'title') : 'stop'} lines={layout.short ? 1 : 2} fit>
           {nextStop ? nextStop.name : t('noNextStop')}
         </Txt>
       </Animated.View>
-      {nextStop ? (
+      {nextStop && !layout.compact ? (
         <Txt size="body" dim>
           {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
             .filter(Boolean)
             .join(' · ')}
         </Txt>
       ) : null}
-      {afterStop && !(layout.phone && showStrip) ? (
+      {afterStop && !(layout.compact && showStrip) ? (
         <Txt size="body">
           {t('cabinAfter')}: {afterStop.name}
         </Txt>
       ) : null}
 
       {showStrip ? (
-        <View style={styles.strip}>
-          <StopStrip stops={stops} color={color} ahead={layout.largeText ? 1 : 3} />
+        <View style={compactStrip ? styles.stripTight : styles.strip}>
+          <StopStrip stops={stops} color={color} ahead={layout.largeText ? 1 : 3} compact={compactStrip} />
         </View>
       ) : null}
     </>
@@ -267,8 +304,8 @@ export default function ShiftScreen() {
   return (
     <Screen scroll={pageScroll}>
       {/* Header: bus and line, real GPS state, time, day or night */}
-      <View style={[styles.header, { backgroundColor: palette.panel }]}>
-        <View style={[styles.identity, tallHeader && styles.identityTall]}>
+      <View style={[styles.header, layout.compact && styles.headerPhone, { backgroundColor: palette.panel }]}>
+        <View style={[styles.identity, tallHeader && styles.identityTall, layout.short && styles.identityShort]}>
           <View style={[styles.chip, { backgroundColor: color }]}>
             <Txt bold size="body" color={readableOn(color)}>
               {route?.code ?? ''}
@@ -278,13 +315,16 @@ export default function ShiftScreen() {
             <Txt bold size="body" lines={1}>
               {bus?.name ?? ''}
             </Txt>
-            <Txt size="small" dim lines={1}>
-              {route?.name ?? ''}
-            </Txt>
+            {/* On a phone on its side the line code already says which line it is: one row for the whole header. */}
+            {layout.short && layout.width < 760 ? null : (
+              <Txt size="small" dim lines={1}>
+                {route?.name ?? ''}
+              </Txt>
+            )}
           </View>
         </View>
         {tallHeader ? modeButton : null}
-        <View style={[styles.headerRight, tallHeader && styles.headerRightFull, { columnGap: layout.phone ? 12 : 24 }]}>
+        <View style={[styles.headerRight, tallHeader && styles.headerRightFull, { columnGap: layout.compact ? 8 : 24 }]}>
           <Press
             onPress={() => router.push('/gps')}
             disabled={locked}
@@ -308,7 +348,7 @@ export default function ShiftScreen() {
       >
         {/* Where the bus goes next. Beside the map the notices are pinned above it; the rest scrolls. */}
         {side ? (
-          <View style={styles.left}>
+          <View style={[styles.left, layout.short && styles.leftShort]}>
             {noticeBlock}
             {nextBlock}
           </View>
@@ -320,7 +360,9 @@ export default function ShiftScreen() {
         <View
           style={[
             styles.map,
-            pageScroll ? styles.mapFixed : side ? styles.mapSide : styles.mapStack,
+            pageScroll ? styles.mapFixed : side ? (layout.short ? styles.mapSideShort : styles.mapSide) : styles.mapStack,
+            // The stop strip comes before the map: on a screen with little height the map gives way first.
+            !pageScroll && !side && layout.height < 700 && styles.mapStackLow,
             { backgroundColor: palette.panel },
           ]}
         >
@@ -347,7 +389,7 @@ export default function ShiftScreen() {
       ) : (
         <View style={[styles.actions, { gap: layout.gap }]}>
           {problem}
-          <View style={styles.actionWide}>{sos}</View>
+          <View style={layout.compact ? styles.sosPhone : styles.actionWide}>{sos}</View>
           {end}
         </View>
       )}
@@ -367,6 +409,11 @@ const styles = StyleSheet.create({
     rowGap: space[2],
     ...shape.control,
   },
+  // On a phone every pixel counts: tighter sides so the GPS state and the clock fit one row of a 360 dp screen.
+  headerPhone: {
+    paddingHorizontal: space[3],
+    paddingVertical: space[2],
+  },
   identity: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -377,6 +424,10 @@ const styles = StyleSheet.create({
   },
   identityTall: {
     flexBasis: 140,
+  },
+  // A phone on its side: the bus takes only what it needs, so the GPS state, the clock and the button stay on its row.
+  identityShort: {
+    flexBasis: 100,
   },
   identityText: {
     flexShrink: 1,
@@ -399,10 +450,12 @@ const styles = StyleSheet.create({
   },
   headerRightFull: {
     flexBasis: '100%',
+    flexWrap: 'nowrap',
   },
   gpsTap: {
     minHeight: 48,
     justifyContent: 'center',
+    flexShrink: 1,
   },
   mode: {
     minHeight: 48,
@@ -434,6 +487,10 @@ const styles = StyleSheet.create({
     flexBasis: 0,
     gap: space[2],
   },
+  leftShort: {
+    flexGrow: 5,
+    gap: space[1],
+  },
   leftScroll: {
     flexGrow: 1,
     flexShrink: 1,
@@ -452,6 +509,10 @@ const styles = StyleSheet.create({
     marginTop: space[3],
     marginBottom: space[2],
   },
+  // Little height: the strip sits right under the name, with no air below.
+  stripTight: {
+    marginTop: space[1],
+  },
   map: {
     ...shape.control,
     overflow: 'hidden',
@@ -459,8 +520,14 @@ const styles = StyleSheet.create({
   mapSide: {
     flex: 6,
   },
+  mapSideShort: {
+    flex: 5,
+  },
   mapFixed: {
     height: 260,
+  },
+  mapStackLow: {
+    minHeight: 64,
   },
   mapStack: {
     flexGrow: 1,
@@ -490,5 +557,16 @@ const styles = StyleSheet.create({
   },
   actionNarrow: {
     flex: 2,
+  },
+  // On a phone the three buttons share the row: the SOS a little wider, all of them at least 56 high.
+  actionPhone: {
+    flex: 1,
+  },
+  // "Avisar un problema" is the longest label: a little more room keeps it on one line, so the row stays low.
+  actionProblemPhone: {
+    flex: 1.2,
+  },
+  sosPhone: {
+    flex: 1.3,
   },
 });

@@ -35,6 +35,30 @@ describe('layoutFor', () => {
     }
   });
 
+  test('a tablet-class screen with little height gets the compact layout (foldable opened, split window)', () => {
+    for (const [w, h] of [
+      [791, 820], // Pixel Fold inner screen, portrait
+      [820, 791], // and turned
+    ]) {
+      const l = layoutFor(w, h);
+      expect(l.phone).toBe(false);
+      expect(l.snug).toBe(true);
+      expect(l.compact).toBe(true);
+      expect(l.sizes).toBe(sizesPhone);
+      expect(l.hit).toBe(56);
+    }
+    // a real tablet keeps the big cabin sizes: tall enough, or wide enough to put the panes side by side
+    for (const [w, h] of [
+      [820, 1180],
+      [1180, 820],
+      [1280, 800],
+    ]) {
+      expect(layoutFor(w, h).snug).toBe(false);
+      expect(layoutFor(w, h).sizes).toBe(sizes);
+    }
+    expect(layoutFor(390, 844).compact).toBe(true); // a phone is compact too
+  });
+
   test('the shortest side decides phone or tablet, not the orientation', () => {
     expect(layoutFor(599, 1000).phone).toBe(true);
     expect(layoutFor(1000, 599).phone).toBe(true);

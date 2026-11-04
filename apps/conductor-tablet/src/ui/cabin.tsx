@@ -219,7 +219,7 @@ export function GpsBadge({ health, label }: { health: GpsHealth; label: string }
           health === 'off' && { backgroundColor: color, borderRadius: 2, transform: [{ rotate: '45deg' }] },
         ]}
       />
-      <Txt bold size="small" color={color}>
+      <Txt bold size="small" color={color} lines={1}>
         {label}
       </Txt>
     </View>
@@ -232,6 +232,8 @@ type SosProps = {
   hint: string;
   holding: string;
   status?: string | null;
+  /** Title and hint on one row: for screens with little height. */
+  inline?: boolean;
 };
 
 const SOS_HOLD_MS = 1500;
@@ -244,7 +246,7 @@ const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
  * (scaleX) run natively, so a busy JS thread (map, GPS) cannot make it stutter. With "reduce motion"
  * the fill appears at once as a state instead of travelling; the 1.5 s is still required.
  */
-export function SosButton({ onFire, title, hint, holding, status }: SosProps) {
+export function SosButton({ onFire, title, hint, holding, status, inline }: SosProps) {
   const { palette } = useTheme();
   const { hit } = useLayout();
   const [progress] = useState(() => new Animated.Value(0));
@@ -313,7 +315,12 @@ export function SosButton({ onFire, title, hint, holding, status }: SosProps) {
         hapticCommit();
         onFire();
       }}
-      style={[styles.action, styles.sos, { minHeight: hit, backgroundColor: palette.danger, borderColor: palette.danger }]}
+      style={[
+        styles.action,
+        styles.sos,
+        inline && styles.sosInline,
+        { minHeight: hit, backgroundColor: palette.danger, borderColor: palette.danger },
+      ]}
     >
       <Animated.View
         style={[
@@ -354,6 +361,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[2],
+    flexShrink: 1,
   },
   badgeMark: {
     width: 18,
@@ -361,6 +369,13 @@ const styles = StyleSheet.create({
   },
   sos: {
     overflow: 'hidden',
+  },
+  sosInline: {
+    paddingVertical: space[1],
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    columnGap: space[3],
   },
   sosFill: {
     position: 'absolute',
