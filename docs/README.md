@@ -15,7 +15,8 @@ docs/
 │   ├── PLAN-APP-CHOFER.md         # Plan de implementación de la app móvil (fases 16 a 22, 25 e iOS)
 │   ├── PLAN-UX.md                 # Plan de rediseño de experiencia de usuario y cabina
 │   ├── PLAN-UI-MOVIL.md           # Plan de adaptabilidad responsiva y ergonomía móvil
-│   └── PLAN-AUDITORIA.md          # Plan de remediación de auditoría integral ISO/IEC 25010
+│   ├── PLAN-AUDITORIA.md          # Plan de remediación de auditoría integral ISO/IEC 25010
+│   └── PLAN-RUBRICA.md            # Plan para cubrir la rúbrica del proyecto final (fases R1 a R12)
 │
 ├── guias/                         # Manuales operativos y guías de puesta en marcha
 │   ├── GUIA-CHOFER.md             # Manual de usuario para choferes en tableta o teléfono (Android/iOS)
@@ -93,6 +94,7 @@ Para optimizar la consulta según el perfil del lector, se recomiendan los sigui
 | **Arquitectura** | [`PLAN.md`](arquitectura/PLAN.md) | Roadmap general de fases 0 a 15 | Desarrolladores, Arquitectos |
 | **Arquitectura** | [`PLAN-APP-CHOFER.md`](arquitectura/PLAN-APP-CHOFER.md) | Diseño de la app del conductor | Desarrolladores móviles |
 | **Arquitectura** | [`PLAN-UX.md`](arquitectura/PLAN-UX.md) | Decisiones de interacción y flujo | Diseñadores, Frontend |
+| **Arquitectura** | [`PLAN-RUBRICA.md`](arquitectura/PLAN-RUBRICA.md) | Plan de implementación para cubrir la rúbrica del proyecto final | Equipo, docente |
 | **Arquitectura** | [`PLAN-UI-MOVIL.md`](arquitectura/PLAN-UI-MOVIL.md) | Accesibilidad y ergonomía táctil | Desarrolladores móviles |
 | **Arquitectura** | [`PLAN-AUDITORIA.md`](arquitectura/PLAN-AUDITORIA.md) | Plan de contingencia y hardening | Líderes técnicos, Seguridad |
 | **Guías** | [`GUIA-CHOFER.md`](guias/GUIA-CHOFER.md) | Manual operativo de cabina | Choferes de autobús |
