@@ -108,7 +108,7 @@
     </record>
 
     <record id="action_live_map" model="ir.actions.client">
-        <field name="name">Mapa en vivo</field>
+        <field name="name">Live Map</field>
         <field name="tag">bus_tracking.live_map</field>
     </record>
 </odoo>

@@ -7,7 +7,7 @@ El sistema está pensado para los buses de la Universidad Técnica de Ambato (UT
 | Tema | Valor por defecto |
 |---|---|
 | Zona horaria | `America/Guayaquil` (UTC-5, sin horario de verano). La fija el script de instalación para el administrador y la compañía; los reportes de actividad cortan los días en hora de Ecuador. |
-| Idioma del panel | Español de Ecuador (`es_EC`), que usa el catálogo `i18n/es.po`. Inglés es el idioma base: todos los textos fuente están en inglés, el módulo mantiene `en_US` activo y cada usuario elige su idioma en Preferencias. |
+| Idioma del panel | Español de Ecuador (`es_EC`, catálogo `i18n/es.po`), inglés y kichwa (`qu_EC`, catálogo `i18n/qu.po`). Inglés es el idioma base: todos los textos fuente están en inglés, el módulo mantiene `en_US` y `qu_EC` activos y cada usuario elige su idioma en Preferencias. |
 | Centro del mapa | -1.2417, -78.6167 (centro aproximado de Ambato). Se usa cuando una ruta no tiene paradas ni buses. |
 | Nombre mostrado | **Buses UTA** (provisional). |
 | Límite de velocidad | 50 km/h (velocidad urbana). Verifica con la normativa de tránsito vigente y con las rutas reales, porque una ruta por una vía perimetral puede admitir más. |
