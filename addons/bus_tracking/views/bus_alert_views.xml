@@ -98,6 +98,56 @@
         <field name="domain">[('kind', '=', 'long_stop')]</field>
     </record>
 
+    <record id="action_bus_report_late_arrival" model="ir.actions.act_window">
+        <field name="name">Late arrivals</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="domain">[('kind', '=', 'late_arrival')]</field>
+    </record>
+
+    <record id="action_bus_report_skipped_stop" model="ir.actions.act_window">
+        <field name="name">Skipped stops</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="domain">[('kind', '=', 'skipped_stop')]</field>
+    </record>
+
+    <record id="action_bus_report_incomplete_trip" model="ir.actions.act_window">
+        <field name="name">Incomplete trips</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="domain">[('kind', '=', 'incomplete_trip')]</field>
+    </record>
+
+    <record id="action_bus_report_late_start" model="ir.actions.act_window">
+        <field name="name">Late starts</field>
+        <field name="res_model">bus.alert</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="domain">[('kind', '=', 'late_start')]</field>
+    </record>
+
+    <record id="view_bus_alert_pivot" model="ir.ui.view">
+        <field name="name">bus.alert.pivot</field>
+        <field name="model">bus.alert</field>
+        <field name="arch" type="xml">
+            <pivot string="Alerts">
+                <field name="route_id" type="row"/>
+                <field name="kind" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_bus_alert_graph" model="ir.ui.view">
+        <field name="name">bus.alert.graph</field>
+        <field name="model">bus.alert</field>
+        <field name="arch" type="xml">
+            <graph string="Alerts" type="bar">
+                <field name="kind"/>
+                <field name="route_id"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="action_bus_report_off_route" model="ir.actions.act_window">
         <field name="name">Route deviations</field>
         <field name="res_model">bus.alert</field>
