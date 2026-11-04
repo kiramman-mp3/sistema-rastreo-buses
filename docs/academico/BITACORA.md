@@ -14,7 +14,7 @@ Registro cronológico de lo que se hace en el proyecto. Cada entrada indica qué
    - Cron de respaldo cada minuto y cron diario de purga de posiciones.
    - Vistas, menús, grupos User/Manager y pantalla de configuración con "Test connection" e importación de dispositivos.
    - Mapa en vivo (acción de cliente OWL + Leaflet 1.9.4 incluido en `static/lib/leaflet`).
-3. **Documentación**: `README.md` (puesta en marcha) y `docs/PLAN.md` (fases del proyecto).
+3. **Documentación**: `README.md` (puesta en marcha) y `docs/arquitectura/PLAN.md` (fases del proyecto).
 
 ### Qué se verificó
 
@@ -53,7 +53,7 @@ Los contenedores, volúmenes, la base `bustest` y el `.env` de prueba se elimina
 2. **Login rediseñado** (`views/login_templates.xml`, `static/src/css/login.css`): panel con foto y frase a la izquierda, formulario a la derecha; en pantallas angostas la foto pasa a ser un banner superior.
 3. **Tema del backend**: variables SCSS (`static/src/scss/primary_variables.scss`) y `static/src/css/backend.css`: barra superior color tinta con línea amarilla, botones primarios verde azulado, tipografías nuevas. El mapa en vivo usa los mismos colores.
 4. **Activos libres**: tres fotos de Unsplash y dos familias tipográficas con licencia OFL, guardadas dentro del módulo (sin dependencias externas en tiempo de ejecución, salvo los mapas de OpenStreetMap).
-5. Detalle del diseño y créditos en `docs/DISENO.md`.
+5. Detalle del diseño y créditos en `docs/diseno/DISENO.md`.
 
 ### Qué se verificó
 
@@ -132,7 +132,7 @@ Contenedores, volúmenes y la base de pruebas eliminados.
 4. **Traccar sobre Postgres** en producción (en desarrollo sigue la base H2 de pruebas).
 5. **Secreto del webhook en una cabecera** (`X-Webhook-Secret`, o `Authorization: Bearer`): antes iba en la URL y los logs de Odoo la mostraban completa. El parámetro de URL se mantiene por compatibilidad. El `docker-compose.yml` de desarrollo también usa la cabecera ahora.
 6. **Endpoint `/bus_tracking/health`** (200 mientras llegan posiciones, 503 si no) y el ajuste `Report as down after (minutes)` en Settings.
-7. **Documentación**: `docs/PRODUCCION.md` (instalación, respaldos, monitoreo, actualización, limitaciones) y `.gitignore` para secretos y respaldos.
+7. **Documentación**: `docs/guias/PRODUCCION.md` (instalación, respaldos, monitoreo, actualización, limitaciones) y `.gitignore` para secretos y respaldos.
 8. **Traducción**: 3 textos nuevos en `i18n/es.po`.
 
 ### Qué se verificó
@@ -189,7 +189,7 @@ La fase 0 del plan sigue sin respuesta. Para no frenar el proyecto implementé l
 2. **Reporte de actividad diaria** (`models/bus_report.py`): vista SQL por bus y día con kilómetros, minutos en movimiento, minutos detenido y velocidad máxima; gráfico de barras, tabla dinámica y lista. La distancia solo cuenta tramos con el bus en movimiento (la deriva del GPS estacionado no suma kilómetros) y se saltan los huecos de más de 5 minutos sin señal.
 3. **Interfaz**: menú `Alertas`, menú `Reportes > Daily Activity`, etiqueta roja con el tipo de alerta en cada bus de la lista del mapa en vivo, y tres ajustes nuevos.
 4. **Traducción**: 35 textos nuevos en `i18n/es.po` (146 en total).
-5. `docs/PLAN.md` y `README.md` actualizados.
+5. `docs/arquitectura/PLAN.md` y `README.md` actualizados.
 
 ### Qué se verificó
 
@@ -230,7 +230,7 @@ El cliente respondió la fase 0: los pasajeros solo ven los buses de una ruta y 
 
 ### Qué se hizo
 
-1. `docs/PLAN.md`: la fase 0 quedó respondida, con la recomendación de frecuencia (10 segundos en movimiento) y una tabla de volumen estimado de posiciones. Se agregaron las fases 9 a 14: celulares como GPS, portal de pasajeros, quejas, notificaciones por correo y push, idiomas y despliegue en Azure, con orden recomendado.
+1. `docs/arquitectura/PLAN.md`: la fase 0 quedó respondida, con la recomendación de frecuencia (10 segundos en movimiento) y una tabla de volumen estimado de posiciones. Se agregaron las fases 9 a 14: celulares como GPS, portal de pasajeros, quejas, notificaciones por correo y push, idiomas y despliegue en Azure, con orden recomendado.
 2. Decisiones guardadas en la memoria del proyecto.
 
 No se escribió código en esta sesión.
@@ -263,7 +263,7 @@ El cliente respondió las preguntas pendientes: país Ecuador (quechua: kichwa),
 6. **Prueba de punta a punta con Traccar real** (dominios `localhost` y `gps.localhost`): el registro abierto quedó cerrado (HTTP 400 a un alta anónima); Odoo creó el dispositivo; una posición enviada por GET y otra por POST de formulario, ambas por HTTPS, llegaron a Odoo; el puerto 5055 no está publicado en el host; la API de Traccar no es alcanzable por el dominio GPS.
 7. **Interfaz revisada en Chrome**: la ficha del bus con GPS registrado muestra identificador, enlace y QR; la de un bus sin GPS muestra el botón de registro y oculta esa sección. Sin errores de consola.
 8. **Traducción**: 11 textos nuevos al español (157 en total).
-9. `docs/PLAN.md`: recomendación de GPS corregida (precisión **Highest**; ver más abajo).
+9. `docs/arquitectura/PLAN.md`: recomendación de GPS corregida (precisión **Highest**; ver más abajo).
 
 ### Corrección a una recomendación anterior
 
@@ -271,8 +271,8 @@ Escribí que bastaba "alta precisión". La documentación oficial de Traccar Cli
 
 ### Falta para cerrar la fase 9
 
-- Escribir `docs/GUIA-CHOFER.md` (instalar la app, dirección, identificador, ajustes, batería sin restricción, cuándo iniciar y detener el turno, aviso de privacidad).
-- Actualizar `docs/PRODUCCION.md`: ahora `GPS_DOMAIN` en lugar de `TRACCAR_DOMAIN`, puertos GPS cerrados, la cuenta de Traccar se crea sola, y el endurecimiento de los GPS por HTTPS ya no es una limitación.
+- Escribir `docs/guias/GUIA-CHOFER.md` (instalar la app, dirección, identificador, ajustes, batería sin restricción, cuándo iniciar y detener el turno, aviso de privacidad).
+- Actualizar `docs/guias/PRODUCCION.md`: ahora `GPS_DOMAIN` en lugar de `TRACCAR_DOMAIN`, puertos GPS cerrados, la cuenta de Traccar se crea sola, y el endurecimiento de los GPS por HTTPS ya no es una limitación.
 - Actualizar `README.md` (cómo registrar el GPS de un bus).
 - Prueba con un celular real durante 30 minutos con la pantalla apagada (no hecha: solo se simuló con peticiones HTTP).
 - El `docker-compose.yml` de desarrollo sigue publicando el puerto 5055 sin cifrar; es solo para desarrollo.
@@ -289,7 +289,7 @@ Contenedores y volúmenes eliminados; sin `.env.prod`, configuración de producc
 
 ### Qué se hizo
 
-1. **Fase 9, documentación**: `docs/GUIA-CHOFER.md` (instalar la app, ajustes recomendados, batería, turno, privacidad, qué hacer si falla), y `docs/PRODUCCION.md` y `README.md` actualizados al flujo nuevo (dominio `GPS_DOMAIN`, solo 80/443 abiertos, cuenta de Traccar automática, registro del GPS desde Odoo).
+1. **Fase 9, documentación**: `docs/guias/GUIA-CHOFER.md` (instalar la app, ajustes recomendados, batería, turno, privacidad, qué hacer si falla), y `docs/guias/PRODUCCION.md` y `README.md` actualizados al flujo nuevo (dominio `GPS_DOMAIN`, solo 80/443 abiertos, cuenta de Traccar automática, registro del GPS desde Odoo).
 2. **Fase 10, portal público de pasajeros**:
    - `/rutas`: lista las rutas activas con la casilla nueva *Visible to passengers* y cuántos buses están en servicio.
    - `/rutas/<código>`: mapa con la ruta, sus paradas y sus buses en vivo (se actualiza cada 10 segundos), con lista de buses y su estado; en pausa si la pestaña no está visible.
@@ -391,7 +391,7 @@ El cliente aclaró que el sistema es para la ciudad de Ambato (Ecuador) y para l
 5. **Español de Ecuador (`es_EC`)** como idioma por defecto de la instalación en producción.
 6. **Enlace opcional a la política de privacidad** de la universidad en el formulario de quejas (solo se acepta una dirección `http` o `https`).
 7. **Copia de la landing** dirigida a la comunidad universitaria ("Estudiantes, docentes y personal ven por dónde va...").
-8. Documentación: `docs/PERSONALIZACION.md` (qué ya viene ajustado, qué se cambia en Ajustes y qué debe aportar la universidad), contexto agregado a `docs/PLAN.md`, nota en `docs/DISENO.md` y `README.md`. Traducción: 7 textos nuevos (203 en total).
+8. Documentación: `docs/guias/PERSONALIZACION.md` (qué ya viene ajustado, qué se cambia en Ajustes y qué debe aportar la universidad), contexto agregado a `docs/arquitectura/PLAN.md`, nota en `docs/diseno/DISENO.md` y `README.md`. Traducción: 7 textos nuevos (203 en total).
 
 ### Qué se verificó
 
@@ -406,7 +406,7 @@ El cliente aclaró que el sistema es para la ciudad de Ambato (Ecuador) y para l
 
 ### Problemas y advertencias
 
-- **La foto de la portada no es de Ambato**: muestra un paradero de otra ciudad con un letrero en portugués. Las tres fotos del proyecto deben reemplazarse por fotos propias de la universidad (guía en `docs/PERSONALIZACION.md`).
+- **La foto de la portada no es de Ambato**: muestra un paradero de otra ciudad con un letrero en portugués. Las tres fotos del proyecto deben reemplazarse por fotos propias de la universidad (guía en `docs/guias/PERSONALIZACION.md`).
 - **El nombre "Buses UTA" y el aviso de privacidad son provisionales**: la universidad debe aprobar el nombre y entregar logo y manual de marca, y su área legal debe revisar el aviso frente a la ley de protección de datos de Ecuador. Yo no puedo dar ese criterio legal.
 - **El límite de 50 km/h** es mi supuesto urbano; hay que contrastarlo con la normativa vigente y con las vías reales de cada ruta.
 - Un test mío falló porque el orden de los atributos del enlace de privacidad en el HTML no era el que yo suponía; se corrigió el test.
@@ -522,7 +522,7 @@ El cliente pidió que rutas, conductores y todo lo demás salgan del documento o
 - Confirmar con la universidad los días de cada recorrido, las coordenadas de los campus y las anomalías del documento.
 - Informe de puntualidad y alerta de recorrido no iniciado (necesitan posiciones reales).
 - Fase 13 (kichwa), fase 14 (Azure), prueba con un celular real, geometría de cada tramo.
-- Si la universidad entrega su escudo y colores, aplicarlos (`docs/PERSONALIZACION.md`).
+- Si la universidad entrega su escudo y colores, aplicarlos (`docs/guias/PERSONALIZACION.md`).
 
 ### Estado del entorno
 
@@ -676,7 +676,7 @@ Los documentos 03, 04, 05 y 07 y las figuras de Pareto e Ishikawa los escribe `q
 
 ### Qué se hizo
 
-Se escribió `docs/GUION_DEFENSA.md`: guion de 15 minutos más 5 de preguntas, con apertura, problema y motivo, demostración, arquitectura, decisiones, proceso, calidad, estándares, defectos abiertos y cierre. Incluye 15 preguntas difíciles con respuesta, una tabla de cifras para memorizar y una lista de cosas que no hay que afirmar.
+Se escribió `docs/academico/GUION_DEFENSA.md`: guion de 15 minutos más 5 de preguntas, con apertura, problema y motivo, demostración, arquitectura, decisiones, proceso, calidad, estándares, defectos abiertos y cierre. Incluye 15 preguntas difíciles con respuesta, una tabla de cifras para memorizar y una lista de cosas que no hay que afirmar.
 
 ### Qué se verificó
 
@@ -803,7 +803,7 @@ Fase 22: tableta real, QA, APK y documentación.
 
 ### Qué se hizo
 
-Casos en vivo F13–F14 y E23–E25 (login, turno, estado, incidente, 401, bus sin GPS, incidente sin turno). Guía del chofer reescrita para la app de tableta. Sección de usuarios, tokens, revocación y APK en `docs/PRODUCCION.md`. README, PLAN, política de calidad y `eas.json` perfil `production`.
+Casos en vivo F13–F14 y E23–E25 (login, turno, estado, incidente, 401, bus sin GPS, incidente sin turno). Guía del chofer reescrita para la app de tableta. Sección de usuarios, tokens, revocación y APK en `docs/guias/PRODUCCION.md`. README, PLAN, política de calidad y `eas.json` perfil `production`.
 
 ### Qué se verificó
 
@@ -907,11 +907,11 @@ Transformación de la experiencia de usuario y arquitectura frontend del sistema
 
 ## 2026-11-02: rediseño de experiencia (fases 26 a 31) y corrección de la bitácora anterior
 
-Plan y hallazgos en `docs/PLAN-UX.md`; identidad en `docs/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
+Plan y hallazgos en `docs/arquitectura/PLAN-UX.md`; identidad en `docs/diseno/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
 
 ### Corrección de la entrada del 2026-11-01
 
-Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de llegada "probabilísticos" (eran minutos calculados con el número de parada), una barra de cadencia (datos fijos que pedían acelerar a un bus fuera de ruta), contrastes AAA "verificados" (sin medición) y objetivos táctiles de 72 px (había botones de 46 px). Además, `develop` tenía 4 pruebas en fallo y 2 con error, aunque la entrada del 2026-10-30 decía "247 tests, 0 fallos". El detalle está en `docs/PLAN.md`, sección de las fases 23 a 25.
+Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de llegada "probabilísticos" (eran minutos calculados con el número de parada), una barra de cadencia (datos fijos que pedían acelerar a un bus fuera de ruta), contrastes AAA "verificados" (sin medición) y objetivos táctiles de 72 px (había botones de 46 px). Además, `develop` tenía 4 pruebas en fallo y 2 con error, aunque la entrada del 2026-10-30 decía "247 tests, 0 fallos". El detalle está en `docs/arquitectura/PLAN.md`, sección de las fases 23 a 25.
 
 ### Qué se hizo
 
@@ -950,7 +950,7 @@ Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de ll
 
 ## 2026-11-02: auditoría integral y su plan (fases 1 a 8)
 
-Auditoría del back, el front y la app de tableta: 63 hallazgos (5 críticos, 18 altos, 27 medios, 13 bajos) en `docs/PLAN-AUDITORIA.md`, con el plan por fases. El equipo decidió: quitar la contraseña del historial, choferes de portal, descartar posiciones sin turno y apagar el GPS al terminar el turno aunque no haya señal.
+Auditoría del back, el front y la app de tableta: 63 hallazgos (5 críticos, 18 altos, 27 medios, 13 bajos) en `docs/arquitectura/PLAN-AUDITORIA.md`, con el plan por fases. El equipo decidió: quitar la contraseña del historial, choferes de portal, descartar posiciones sin turno y apagar el GPS al terminar el turno aunque no haya señal.
 
 ### Qué se hizo
 
@@ -1022,7 +1022,7 @@ Sin hacer: el informe PDF (`Informe_calidad_rastreo_buses.pdf`) sigue siendo el 
 
 ### Qué se hizo
 
-Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-layout`; cada fase salió de ella en su propia rama y volvió con `--no-ff`.
+Plan completo en `docs/arquitectura/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-layout`; cada fase salió de ella en su propia rama y volvió con `--no-ff`.
 
 1. **Adaptabilidad.** La app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto menor a 600 dp es teléfono) y decide tamaños de letra, alto de controles y si los paneles van lado a lado o apilados. `Screen` cuida muescas, barras del sistema y teclado.
 2. **Fase 32, entorno de pruebas** (`chore/qa-movil`): `qa/mock_driver_api.py` (la API del chofer con escenarios normal, peor caso, una parada, vacío y bus ocupado), `qa/capturas_movil.py` (88 capturas web: 4 tamaños, día y noche) y `qa/capturas_android.py` (recorrido real en el emulador por tamaño y escala de fuente; restaura el emulador siempre).
@@ -1072,8 +1072,8 @@ Parte del análisis de preparación para producción. Ramas de trabajo hijas de 
 
 1. **Dependencias** (`chore/dependencias`): `npm audit fix` quitó las 2 vulnerabilidades altas (`@expo/cli`, `zod`); parches de Expo SDK 58 (`expo`, `expo-dev-client`, `expo-router`, `expo-task-manager`); Jest 29 a 30.5; `eas-cli` sale de las dependencias del proyecto y los scripts usan `npx eas-cli`; el `react` fijado a propósito para EAS se declara en `expo.install.exclude`. `expo-doctor`: 20 de 20. Quedan 11 avisos moderados de la cadena de herramientas de Expo (`glob`, `minimatch`, `@expo/*`), cuyo "arreglo" sería bajar Expo a la 51: no se aplicó.
 2. **Observabilidad** (`feature/observabilidad`): `/bus_tracking/health` informa la versión instalada del módulo; `POST /bus_tracking/driver/client_error` (con sesión de chofer, límite de 20 por minuto, entradas acotadas y saneadas) deja las fallas de la app en el registro de Odoo como `Tablet error`. La app registra los errores no atrapados con su pantalla, los guarda en una cola persistente (10, sin repetidos seguidos) y los envía al volver la señal; *Estado del GPS* muestra la última falla de los últimos 7 días.
-3. **Privacidad** (`feature/privacidad`): página pública `/privacidad` (es y en; el kichwa lee español) armada con los plazos reales de *Ajustes*, enlazada desde el pie y el formulario de quejas (o la política oficial si se configura); la app avisa al chofer al ingresar y antes de iniciar turno de que la oficina ve la posición; `docs/PRIVACIDAD.md` con el inventario y cómo atender un pedido de derechos.
-4. **Operación** (`chore/operaciones`): la cookie de sesión de Odoo sale con `Secure; SameSite=Lax` desde el proxy (probado con un Caddy real); `gitleaks` en el CI (`.gitleaks.toml`, solo permite la URL pública de teselas); `docs/OPERACION.md` (quién vigila el SOS, monitor, errores de tabletas, respaldos y ensayo de restauración, etiquetas y reversión, mantenimiento mensual).
+3. **Privacidad** (`feature/privacidad`): página pública `/privacidad` (es y en; el kichwa lee español) armada con los plazos reales de *Ajustes*, enlazada desde el pie y el formulario de quejas (o la política oficial si se configura); la app avisa al chofer al ingresar y antes de iniciar turno de que la oficina ve la posición; `docs/diseno/PRIVACIDAD.md` con el inventario y cómo atender un pedido de derechos.
+4. **Operación** (`chore/operaciones`): la cookie de sesión de Odoo sale con `Secure; SameSite=Lax` desde el proxy (probado con un Caddy real); `gitleaks` en el CI (`.gitleaks.toml`, solo permite la URL pública de teselas); `docs/guias/OPERACION.md` (quién vigila el SOS, monitor, errores de tabletas, respaldos y ensayo de restauración, etiquetas y reversión, mantenimiento mensual).
 
 ### Qué se verificó
 

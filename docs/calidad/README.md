@@ -2,7 +2,7 @@
 
 Aquí vive todo lo que se documenta sobre la calidad del sistema de rastreo de buses: política, reglas, pruebas, resultados, defectos, análisis de causas, cumplimiento de las ISO y evidencias. Se basa en el Taller de la Unidad 2 (`Taller ACS`) y en el informe de la Unidad 3 (`Manzano_Rodriguez_trabajoFinalU3`).
 
-Regla del proyecto: **cada vez que se pruebe, se mida o se corrija algo relacionado con la calidad, se actualiza esta carpeta** (además de `docs/BITACORA.md` y `docs/PLAN.md`).
+Regla del proyecto: **cada vez que se pruebe, se mida o se corrija algo relacionado con la calidad, se actualiza esta carpeta** (además de `docs/academico/BITACORA.md` y `docs/arquitectura/PLAN.md`).
 
 ## Índice
 
