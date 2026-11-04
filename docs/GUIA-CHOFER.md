@@ -4,16 +4,18 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 
 ## Qué necesitas
 
-- Tableta Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS). Si la tableta no tiene GPS, usa un celular Android del chofer con la misma app: la pantalla se adapta al celular y funciona de pie o acostado.
+- Dispositivo con GPS: Tableta o celular Android **con GPS** (muchas tabletas solo Wi-Fi no tienen chip GNSS), o iPhone con chip GNSS (modelos celulares). Si la tableta no tiene GPS, usa un teléfono celular con la misma app: la pantalla se adapta al dispositivo y funciona de pie o acostado.
 - Datos móviles o Wi-Fi del bus.
 - Tu **Credencial QR de Chofer** asignada por el administrador en Odoo (menú *Choferes*), o tu usuario y contraseña de chofer. Esa cuenta sólo sirve en la tableta: no abre el panel de Odoo. No es el identificador de Traccar: ese dato no se escribe a mano.
-- La app instalada como APK (no hace falta Play Store). Expo Go no sirve: el GPS de fondo necesita el APK de desarrollo o de producción.
+- La app instalada nativamente (APK en Android o build nativo en iOS). Expo Go no sirve: el GPS de fondo necesita la compilación nativa.
 
 ## Instalar (el administrador lo hace una vez)
 
-1. Instala el APK de `eas build --profile production --platform android` (o el de *development* para pruebas).
+1. Instala el APK de `eas build --profile production --platform android` (o build nativo de iOS para pruebas en iPhone).
 2. El APK de producción ya trae configurado `https://busesuta2340.eastus2.cloudapp.azure.com`. Para iniciar sesión, el chofer simplemente pulsa **Escanear credencial QR** y apunta a su carnet de conductor.
-3. En Ajustes de Android: ubicación precisa; batería de **Buses UTA** sin restricciones; pantalla encendida mientras carga. Guía por marca: [dontkillmyapp.com](https://dontkillmyapp.com).
+3. En Ajustes del sistema:
+   - **Android**: ubicación precisa (*Todo el tiempo*); batería de **Buses UTA** sin restricciones; pantalla encendida mientras carga. Guía por marca: [dontkillmyapp.com](https://dontkillmyapp.com).
+   - **iOS (iPhone)**: Ajustes → Buses UTA → Ubicación: seleccionar **Siempre** y marcar **Ubicación exacta**. Habilitar **Actualización en segundo plano**. Durante el turno activo se muestra el indicador azul de ubicación en la barra de estado.
 4. Si el modelo lo permite, fija la app (modo aplicación fija / *screen pinning*) para que no se salga al escritorio.
 5. Deja la tableta **cargando** en el bus.
 
@@ -54,6 +56,7 @@ No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seg
 | La tableta no tiene GPS | Cámbiala o usa un celular Android con la misma app. |
 | Cambiaste de tableta | Entra con tu usuario o tu credencial. Un gestor puede *Cerrar sesión de la tableta* si la anterior sigue con sesión: esa tableta se apaga y cierra el turno, pero tu credencial QR sigue valiendo. |
 | GPS "Esperando señal" mucho rato | Abre el estado del GPS: la fila *Último error* dice por qué no se envía (sin red, Traccar rechaza el identificador, el servidor no responde). |
+| En iPhone no envía ubicación estando detenido | Verifica que el permiso de ubicación esté en "Siempre" y "Actualización en 2.° plano" activada. La app cuenta con un latido periódico cada 10 s para mantener la posición activa incluso si Apple CoreLocation entra en reposo por falta de movimiento. |
 | Perdiste la credencial QR | Pide al administrador que la revoque y genere otra en *Choferes*: la anterior deja de servir al instante. |
 
 ## Actualizar la app
