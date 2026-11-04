@@ -1,6 +1,6 @@
 # Plan de rediseño de experiencia: portal público, panel Odoo y tableta del chofer
 
-Continúa la numeración de `docs/PLAN.md` y `docs/PLAN-APP-CHOFER.md` (fases 26 a 31).
+Continúa la numeración de `docs/arquitectura/PLAN.md` y `docs/arquitectura/PLAN-APP-CHOFER.md` (fases 26 a 31).
 Fecha del análisis: 2026-11-01. Base revisada: `develop` en `9118fc7`.
 
 **Estado (2026-11-02):** fases 26 a 30 hechas e integradas en `develop`; fase 31 con la medición automática hecha y las pruebas con personas pendientes (`docs/calidad/12-validacion-ux.md`). Desvíos respecto del plan: la tableta no recibió `react-native-svg` (los íconos se dibujan con vistas), el portal no usa Lighthouse sino axe y el inspector de diseño, y la hoja de incidentes no tiene dictado por voz.
@@ -10,7 +10,7 @@ Fecha del análisis: 2026-11-01. Base revisada: `develop` en `9118fc7`.
 El sistema funciona, pero la interfaz actual, sobre todo desde las fases 23 a 25, **dice cosas que no son ciertas** y **se ve como una plantilla**. Esas dos cosas explican la sensación de que "no tiene alma":
 
 1. **Contenido inventado.** Noticias con fechas ficticias, "15,000+ estudiantes", un teléfono y redes sociales que no son de la UTA, tiempos de llegada calculados con `índice × 3`, un contador que muestra "8 buses" cuando hay cero, y en la tableta una barra de "cadencia" con un "Bus #02" que no existe. Una persona lo nota en segundos y deja de confiar en todo lo demás, incluido el mapa, que sí es real.
-2. **Estética genérica.** Paleta *slate* de Tailwind, fuentes del sistema, emojis como íconos, *glassmorphism*, pulsos infinitos, etiquetas en mayúsculas con "人", flechas "→" en cada enlace, un *mockup* de teléfono y una foto generada por IA de un bus con un logo UTA falso. Además, el commit `f1c8a5c` dice que copia el layout de "CasaBus". Es justo lo que `docs/DISENO.md` prohibía, y la identidad original (la línea de la ruta, Bricolage Grotesque y Atkinson Hyperlegible) se perdió: las fuentes siguen en `static/fonts/`, pero ya no se cargan.
+2. **Estética genérica.** Paleta *slate* de Tailwind, fuentes del sistema, emojis como íconos, *glassmorphism*, pulsos infinitos, etiquetas en mayúsculas con "人", flechas "→" en cada enlace, un *mockup* de teléfono y una foto generada por IA de un bus con un logo UTA falso. Además, el commit `f1c8a5c` dice que copia el layout de "CasaBus". Es justo lo que `docs/diseno/DISENO.md` prohibía, y la identidad original (la línea de la ruta, Bricolage Grotesque y Atkinson Hyperlegible) se perdió: las fuentes siguen en `static/fonts/`, pero ya no se cargan.
 
 La propuesta: **primero la verdad, después el estilo**. La fase 26 quita lo falso y corrige los fallos. Las fases 27 a 30 reconstruyen las tres interfaces alrededor de una sola idea visual, la línea de la ruta con sus paradas, y de una voz cercana y honesta. La fase 31 lo valida con personas reales.
 
@@ -25,7 +25,7 @@ Severidad: **S1** engaña al usuario o pone en riesgo a alguien; **S2** rompe un
 | P1 | S1 | Tiempos de llegada falsos: "Llega en (i×3+2)–(i×3+5) min" para cada parada, sin importar dónde estén los buses. | `views/portal_templates.xml:215` |
 | P2 | S1 | Si no hay buses, la página dice "8 buses en servicio activo" (`total_active_buses or 8`). | `views/portal_templates.xml:37` |
 | P3 | S1 | Datos fijos que no salen del sistema: "Frecuencia 8-12 min", "~10 min", "♿ Accesible", "24 a 48 horas", "Comprobante oficial". | `portal_templates.xml:37,78,80,323,523`; `landing_templates.xml:188` |
-| P4 | S1 | Noticias ficticias con fechas (31, 28 y 24 de octubre), "15,000+ estudiantes", "100% gratuito", teléfono `+593 3 284-8487`, correo `transporte@uta.edu.ec` y redes a `facebook.com` genérico. Nada de esto lo entregó la universidad (ver `docs/PERSONALIZACION.md`). | `landing_templates.xml:76-98,330-352,363-430` |
+| P4 | S1 | Noticias ficticias con fechas (31, 28 y 24 de octubre), "15,000+ estudiantes", "100% gratuito", teléfono `+593 3 284-8487`, correo `transporte@uta.edu.ec` y redes a `facebook.com` genérico. Nada de esto lo entregó la universidad (ver `docs/guias/PERSONALIZACION.md`). | `landing_templates.xml:76-98,330-352,363-430` |
 | P5 | S1 | La foto de portada es una imagen generada por IA: un bus con el logo y el nombre de la UTA inventados, texto deformado ("Side 838") y una placa falsa. Se presenta como si fuera real y usa la marca institucional sin aprobación. | `static/img/landing/hero-bus.jpg` (y probablemente el resto de `img/landing/`) |
 | P6 | S2 | Los tipos de queja del formulario (`lost_item`, `conduct`) no existen en el modelo, que solo admite `delay`, `behavior`, `safety`, `cleanliness` y `other`. Todo lo que no es "Demora" se guarda **en silencio** como "Otro", así que el filtro por tipo del panel no sirve. | `portal_templates.xml:384,389` frente a `models/bus_complaint.py:8-14` |
 | P7 | S2 | Las tarjetas de motivo son `<div>` con clic: no se alcanzan con teclado ni las anuncia un lector de pantalla. | `portal_templates.xml:379-398`, `portal/complaint.js` |
@@ -150,7 +150,7 @@ Cercana, de tú, español de Ecuador, frases cortas. Nunca promete lo que el sis
 | RETRASADO · AGILIZA EL PASO | *(se elimina)* |
 | 🛑 FINALIZAR TURNO | Terminar turno |
 
-Guía corta en `docs/DISENO.md`: tuteo, sin mayúsculas sostenidas, sin superlativos ("integral", "garantizado", "neurálgico"), sin "satelital", números siempre del sistema.
+Guía corta en `docs/diseno/DISENO.md`: tuteo, sin mayúsculas sostenidas, sin superlativos ("integral", "garantizado", "neurálgico"), sin "satelital", números siempre del sistema.
 
 ### 4.3 Paleta
 
@@ -234,7 +234,7 @@ Criterio de aceptación: ningún número, plazo, nombre o dato de contacto en la
 2. **Fuentes:** `@font-face` con `font-display: swap` para Bricolage y Atkinson en web; `expo-font` en la tableta.
 3. **Componentes base del portal** en CSS sin dependencias: botón, campo, tarjeta de línea, línea de paradas (SVG), estado en vivo, aviso vacío, aviso de error.
 4. **Accesibilidad base:** `:focus-visible` con anillo `--senal` de 3 px, `prefers-reduced-motion`, objetivos táctiles ≥ 48 px en portal y ≥ 72 px en cabina, sin `!important` salvo para sobrescribir Odoo.
-5. **`docs/DISENO.md` reescrito**: idea de la línea, voz, paleta con contrastes **medidos**, tipografía, movimiento y la lista de "no hacer" (emojis como íconos, mayúsculas sostenidas, imágenes IA, datos de ejemplo, *glassmorphism*, pulsos decorativos).
+5. **`docs/diseno/DISENO.md` reescrito**: idea de la línea, voz, paleta con contrastes **medidos**, tipografía, movimiento y la lista de "no hacer" (emojis como íconos, mayúsculas sostenidas, imágenes IA, datos de ejemplo, *glassmorphism*, pulsos decorativos).
 6. **Calculadora de contraste** como prueba (`qa/` o Jest) que falla si un par de tokens baja del umbral.
 
 ### Fase 28. Portal público — `feature/portal-pasajero-v2`

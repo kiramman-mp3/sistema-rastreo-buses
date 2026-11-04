@@ -4,7 +4,7 @@ Estado: **[HECHO]** construido y probado, **[HECHO*]** construido pero sin proba
 
 ## Contexto del cliente
 
-El sistema es para los buses de la **Universidad Técnica de Ambato (UTA)**, en **Ambato, Ecuador**. Por eso: zona horaria `America/Guayaquil`, español de Ecuador, mapa centrado en Ambato, nombre configurable (por defecto "Buses UTA", provisional), límite de velocidad urbano de 50 km/h, kichwa como lengua originaria. Detalle en `docs/PERSONALIZACION.md`.
+El sistema es para los buses de la **Universidad Técnica de Ambato (UTA)**, en **Ambato, Ecuador**. Por eso: zona horaria `America/Guayaquil`, español de Ecuador, mapa centrado en Ambato, nombre configurable (por defecto "Buses UTA", provisional), límite de velocidad urbano de 50 km/h, kichwa como lengua originaria. Detalle en `docs/guias/PERSONALIZACION.md`.
 
 ## Fase 0. Decisiones previas **[RESPONDIDA el 2026-10-26]**
 
@@ -106,7 +106,7 @@ Las reglas y sus umbrales son un supuesto mío (la fase 0 no se respondió) y se
 
 ## Fase 8. Producción **[PARCIAL]**
 
-Detalle y comandos en `docs/PRODUCCION.md`.
+Detalle y comandos en `docs/guias/PRODUCCION.md`.
 
 | Tarea | Estado |
 |---|---|
@@ -129,7 +129,7 @@ Detalle y comandos en `docs/PRODUCCION.md`.
 - Código QR para configurar la app tableta Buses UTA (dirección del servidor Odoo).
 - El proxy publica el puerto de OsmAnd por HTTPS, de modo que la ubicación viaje cifrada (hoy viaja en claro).
 - Guía corta para el chofer (instalar, activar el turno, batería).
-- Hecho: registro del GPS desde Odoo, identificador aleatorio solo visible para administradores, QR (sin verificar en un teléfono), HTTPS para los celulares, cuenta de Traccar creada automáticamente, `docs/GUIA-CHOFER.md`.
+- Hecho: registro del GPS desde Odoo, identificador aleatorio solo visible para administradores, QR (sin verificar en un teléfono), HTTPS para los celulares, cuenta de Traccar creada automáticamente, `docs/guias/GUIA-CHOFER.md`.
 - **Pendiente:** criterio de aceptación con un celular real: aparece en el mapa en menos de 15 segundos y sigue reportando con la pantalla apagada 30 minutos (solo se simuló con peticiones HTTP).
 
 ## Fase 10. Portal público de pasajeros **[HECHO]**
@@ -207,15 +207,15 @@ Fuente: `RECORRIDOS-INSTITUCIONALES-2025.pdf`. Detalle, anomalías y supuestos e
 
 ## Simplificación (2026-10-27)
 
-El alcance se redujo: ver la entrada de `docs/BITACORA.md` de esa fecha. Las fases sobre roster, trazados por calle, viajes y puntualidad, correo y respuestas a quejas quedan **canceladas**.
+El alcance se redujo: ver la entrada de `docs/academico/BITACORA.md` de esa fecha. Las fases sobre roster, trazados por calle, viajes y puntualidad, correo y respuestas a quejas quedan **canceladas**.
 
 ## App de tableta para choferes (fases 16 a 22) **[código en develop; falta jornada real]**
 
-Plan completo en `docs/PLAN-APP-CHOFER.md`. Backend (16–18) y app Expo (19–21) integrados. Fase 22: casos QA del API de chofer, guía, producción y perfil EAS `production`. Pendiente: APK firmado en tableta con GPS, jornada con chofer real.
+Plan completo en `docs/arquitectura/PLAN-APP-CHOFER.md`. Backend (16–18) y app Expo (19–21) integrados. Fase 22: casos QA del API de chofer, guía, producción y perfil EAS `production`. Pendiente: APK firmado en tableta con GPS, jornada con chofer real.
 
 ## Evolución de diseño de producto e ingeniería frontend (fases 23 a 25) **[REEMPLAZADA por las fases 26 a 31]**
 
-Esta sección decía antes que las fases 23 a 25 estaban hechas y verificadas. La revisión del 2026-11-01 (`docs/PLAN-UX.md`, hallazgos D1) mostró que varias afirmaciones no eran ciertas, y se corrigen aquí para que el plan coincida con el código:
+Esta sección decía antes que las fases 23 a 25 estaban hechas y verificadas. La revisión del 2026-11-01 (`docs/arquitectura/PLAN-UX.md`, hallazgos D1) mostró que varias afirmaciones no eran ciertas, y se corrigen aquí para que el plan coincida con el código:
 
 | Se afirmaba | Lo que había en realidad |
 |---|---|
@@ -231,7 +231,7 @@ El detalle técnico de esas fases sigue en el historial de Git (ramas `feature/o
 
 ## Rediseño de experiencia (fases 26 a 31) **[HECHO salvo las pruebas con personas]**
 
-Análisis, hallazgos y plan en `docs/PLAN-UX.md`; identidad en `docs/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
+Análisis, hallazgos y plan en `docs/arquitectura/PLAN-UX.md`; identidad en `docs/diseno/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
 
 | Fase | Contenido | Estado |
 |---|---|---|

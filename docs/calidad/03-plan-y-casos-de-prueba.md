@@ -10,7 +10,7 @@ Documento de pruebas en el sentido de ISO/IEC/IEEE 29119-3: estrategia, diseño 
 | Suite en vivo | El sistema como lo usan un celular, un pasajero y un administrador, por HTTP y XML-RPC | `qa/qa_suite.py` | 47 casos |
 | Auditoría aleatoria | Robustez ante entradas normales y límite, con semilla fija, sobre 15 áreas | `qa/auditoria.py` | 1.000 peticiones |
 | Datos | Estado real de la base tras las pruebas (rangos, duplicados, coherencia) | Consultas SQL en `qa/metricas.py` | 11 consultas |
-| Mutación (manual) | Que las pruebas fallen si se rompe una regla | Registradas en `docs/BITACORA.md` | 16 mutaciones, todas detectadas |
+| Mutación (manual) | Que las pruebas fallen si se rompe una regla | Registradas en `docs/academico/BITACORA.md` | 16 mutaciones, todas detectadas |
 | Exploratoria (manual) | Interfaz, móvil de 390 px, idiomas | Chrome (ver bitácora) | Por sesión |
 
 ## 2. Criterios de aceptación
