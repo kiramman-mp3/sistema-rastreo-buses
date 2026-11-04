@@ -22,6 +22,7 @@ docs/
 │   ├── GUIA-CHOFER.md             # Manual de usuario para choferes en tableta o teléfono (Android/iOS)
 │   ├── OPERACION.md               # Guía diaria de operación y despacho en consola de Odoo
 │   ├── PRODUCCION.md              # Guía de despliegue en servidor Azure VM, Caddy HTTPS y backups
+│   ├── GRAFANA.md                 # Grafana incrustado en Odoo: rol de solo lectura, token, despliegue y operación
 │   └── PERSONALIZACION.md         # Parámetros institucionales UTA, mapa en Ambato y límites
 │
 ├── diseno/                        # Identidad visual, tokens y marco normativo
@@ -42,6 +43,8 @@ docs/
 │   ├── 10-evidencias-y-reproduccion.md # Instrucciones para reproducir pruebas y verificar evidencias
 │   ├── 11-elementos-acs.md        # Administración de la Configuración del Software (SCM/ACS)
 │   ├── 12-validacion-ux.md        # Protocolo de evaluación heurística y usabilidad con usuarios
+│   ├── 13-recorridos-de-prueba.md # 12 recorridos simulados y la comparación entre lo esperado y lo detectado
+│   ├── 15-tablero-grafana.md      # Tablero de Odoo y Grafana incrustado: contenido, pruebas y hallazgos
 │   ├── Informe_calidad_rastreo_buses.pdf # Informe formal compilado para auditoría externa
 │   ├── evidencias/                # Registros crudos en JSON y logs de pruebas y auditorías
 │   └── figuras/                   # Gráficos de cobertura, Pareto e Ishikawa generados
@@ -101,6 +104,7 @@ Para optimizar la consulta según el perfil del lector, se recomiendan los sigui
 | **Guías** | [`OPERACION.md`](guias/OPERACION.md) | Gestión de tráfico y alertas | Supervisores de flota |
 | **Guías** | [`PRODUCCION.md`](guias/PRODUCCION.md) | Manual de administración de servidores | Administradores de sistemas |
 | **Guías** | [`PERSONALIZACION.md`](guias/PERSONALIZACION.md) | Parámetros específicos de la UTA | Administradores de Odoo |
+| **Guías** | [`GRAFANA.md`](guias/GRAFANA.md) | Tableros de Grafana dentro de Odoo | Administradores de sistemas |
 | **Diseño** | [`DISENO.md`](diseno/DISENO.md) | Tokens, colores y componentes UI | Diseñadores, Frontend |
 | **Diseño** | [`PRIVACIDAD.md`](diseno/PRIVACIDAD.md) | Tratamiento de datos y retención | Oficial de privacidad, Jurídico |
 | **Calidad** | [`calidad/`](calidad/) | Carpeta completa de calidad ISO 25010 | Auditores, QA Engineers |
