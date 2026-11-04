@@ -47,11 +47,11 @@ class BusVehicle(models.Model):
     current_stop_id = fields.Many2one('bus.route.stop', readonly=True, copy=False)
     off_route_since = fields.Datetime(readonly=True, copy=False)
     connection = fields.Selection(
-        [('online', "🟢 Conectado"), ('offline', "🔴 Sin conexión")], string="Connection",
+        [('online', "🟢 Connected"), ('offline', "🔴 Offline")], string="Connection",
         compute='_compute_status', help="Green while the phone keeps sending its position, even if the bus is parked.")
     connected = fields.Boolean(compute='_compute_status')
     status = fields.Selection(
-        [('moving', "En movimiento"), ('stopped', "Parado")], compute='_compute_status',
+        [('moving', "Moving"), ('stopped', "Stopped")], compute='_compute_status',
         help="From the last speed reported.")
 
     _sql_constraints = [

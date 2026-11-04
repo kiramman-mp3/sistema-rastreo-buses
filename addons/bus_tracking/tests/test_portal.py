@@ -1,7 +1,9 @@
+import re
 from datetime import timedelta
 
 from odoo import fields
 from odoo.tests import HttpCase, tagged
+from odoo.tests.common import TransactionCase
 
 from ..controllers import portal
 from ..models.portal_i18n import STRINGS
@@ -175,12 +177,17 @@ class TestPassengerPortal(HttpCase):
         english = self.url_open('/rutas?lang=en').text
         self.assertIn('<html lang="en"', english)
 
-    def test_language_follows_the_browser_then_the_choice(self):
+    def test_the_site_opens_in_spanish_whatever_the_browser_says(self):
         self.assertIn('Elige tu ruta', self.url_open('/rutas').text)
-        english = self.url_open('/rutas', headers={'Accept-Language': 'en-US,en;q=0.9'}).text
-        self.assertIn('Pick your route', english)
-        unknown = self.url_open('/rutas', headers={'Accept-Language': 'fr'}).text
-        self.assertIn('Elige tu ruta', unknown)
+        for header in ('en-US,en;q=0.9', 'fr', 'qu', 'en'):
+            page = self.url_open('/rutas', headers={'Accept-Language': header}).text
+            self.assertIn('Elige tu ruta', page, header)
+            self.assertNotIn('Pick your route', page, header)
+
+    def test_the_choice_wins_over_the_default(self):
+        self.assertIn('Pick your route', self.url_open('/rutas?lang=en').text)
+        self.assertIn('Kanpa ñanta akllay', self.url_open('/rutas?lang=qu').text)
+        self.assertIn('<html lang="qu"', self.url_open('/rutas?lang=qu').text)
 
     def test_choosing_a_language_is_remembered(self):
         resp = self.url_open('/rutas?lang=en')
@@ -237,3 +244,23 @@ class TestPassengerPortal(HttpCase):
 
     def test_landing_sends_passengers_to_the_routes(self):
         self.assertIn('href="/rutas"', self.url_open('/').text)
+
+
+@tagged('post_install', '-at_install')
+class TestPortalLanguages(TransactionCase):
+
+    def test_the_three_languages_have_the_same_keys_and_placeholders(self):
+        keys = set(STRINGS['es'])
+        for code in ('en', 'qu'):
+            self.assertEqual(set(STRINGS[code]), keys, code)
+            for key in keys:
+                self.assertEqual(sorted(re.findall(r'\{\w+\}', STRINGS[code][key])),
+                                 sorted(re.findall(r'\{\w+\}', STRINGS['es'][key])), (code, key))
+
+    def test_kichwa_is_translated_not_copied_from_spanish(self):
+        # names and examples that read the same in every language
+        same = {'brand_sub', 'footer_what', 'field_bus', 'search_placeholder', 'cap_tungurahua'}
+        copied = [k for k, v in STRINGS['qu'].items() if v == STRINGS['es'][k] and k not in same and len(v) > 12]
+        self.assertEqual(copied, [])
+        self.assertEqual(STRINGS['qu']['lang_name'], 'Kichwa')
+        self.assertEqual(STRINGS['en']['lang_name'], 'English')

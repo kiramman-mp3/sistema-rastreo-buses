@@ -15,7 +15,7 @@ from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
 SHOW_BUSES_FOR = timedelta(minutes=15)
-CACHE_SECONDS = 5
+CACHE_SECONDS = 3
 RATE_LIMIT = 60          # uncached requests per IP and window, per worker process
 RATE_WINDOW = 60.0
 LANG_COOKIE = 'bus_lang'

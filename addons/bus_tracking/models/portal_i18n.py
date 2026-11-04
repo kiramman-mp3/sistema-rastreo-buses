@@ -1,8 +1,7 @@
 """Strings of the public passenger portal.
 
-Kept in plain dictionaries so a language is added by adding a key. Kichwa (`qu`) is a
-draft: a few strings over the Spanish ones, marked as a draft in the language picker, until a
-native speaker reviews a full translation.
+Kept in plain dictionaries so a language is added by adding a key. Spanish (`es`) is the default;
+English (`en`) and Kichwa (`qu`) are complete and chosen from the language picker.
 """
 
 DEFAULT_LANG = 'es'
@@ -119,29 +118,6 @@ STRINGS = {
 }
 STRINGS['es'].update(path_pick='Ver un recorrido', path_all='Todos los recorridos', path_reset='Restablecer')
 STRINGS['en'].update(path_pick='Show one trip route', path_all='All routes', path_reset='Reset')
-
-# Kichwa (Ecuador). DRAFT written without a native speaker: it must be reviewed before it is published.
-# Whatever is missing falls back to Spanish. See docs/PLAN.md, phase 13.
-KICHWA_DRAFT = {
-    'lang_name': 'Kichwa (borrador)',
-    'title_routes': 'Bus kunaka kunan',
-    'pick_route': 'Ñanta akllay',
-    'pick_route_help': 'Ñanpi bus kuna ima ladopi richun kunan rikuy.',
-    'no_routes': 'Ñan kuna mana tiyanchu.',
-    'all_routes': 'Tukuy ñankuna',
-    'stops': 'Sayana kuna',
-    'buses_now': 'Kay ñanpi bus kuna',
-    'no_buses': 'Kunan kay ñanpi mana bus rikurinchu.',
-    'status_moving': 'purishka',
-    'status_stopped': 'sayashka',
-    'status_offline': 'mana rikurin',
-    'updated': 'Hawa {s} s kutin rikuchishka',
-    'update_error': 'Mana kutin rikuchi ushashkachu. Kutin ruranchik…',
-    'report': 'Llakita willay',
-    'staff_login': 'Yaykuy',
-    'back_to_routes': 'Ñankunaman kutiy',
-    'path_reset': 'Kutin churay',
-}
 
 # Site redesign (docs/PLAN-UX.md, phase 28). Every visible word of the public pages lives here.
 SITE_ES = {'skip': 'Saltar al contenido',
@@ -283,18 +259,143 @@ SITE_EN = {'skip': 'Skip to content',
  'contact_title': 'If you want an answer'}
 STRINGS['es'].update(SITE_ES)
 STRINGS['en'].update(SITE_EN)
-KICHWA_DRAFT.update({'nav_lines': 'Ñankuna',
- 'lines_title': 'Ñankuna',
- 'back_to_lines': 'Ñankunaman kutiy'})
+# Kichwa (Ecuador, kichwa unificado). Same keys as Spanish and English: a test checks that none is missing.
+# The words follow the glossary of docs/guias/GLOSARIO-KICHWA.md so the tablet and the site agree.
+KICHWA = {
+    'lang_name': 'Kichwa',
+    'title_routes': 'Bus kuna kunan',
+    'pick_route': 'Kanpa ñanta akllay',
+    'pick_route_help': 'Kanpa ñanpi bus kuna maypi kashkata kunan rikuy.',
+    'no_routes': 'Ñan kuna mana tiyanchu.',
+    'buses_in_service': '{n} llankakun',
+    'no_service': 'Mana bus rikurinchu',
+    'all_routes': 'Tukuy ñankuna',
+    'stops': 'Sayana kuna',
+    'buses_now': 'Kay ñanpi bus kuna',
+    'no_buses': 'Kunan kay ñanpi mana bus rikurinchu.',
+    'status_moving': 'purishka',
+    'status_stopped': 'sayashka',
+    'status_offline': 'mana rikurin',
+    'updated': 'Musuyachishka: {s} s ñawpa',
+    'update_error': 'Mana musuyachiy ushashkanchu. Kutin ruranchik…',
+    'report': 'Llakita willay',
+    'staff_login': 'Yaykuy',
+    'footer': 'Bus kunapa maypi kashka uchilla pachapi musuyan.',
+    'map_label': 'Ñanpi bus kunapa mapa',
+    'report_title': 'Llakita willay',
+    'report_intro': 'Ima pasashkata willaway. Llankak ayllupi shuk runa rikunka.',
+    'field_route': 'Ñan',
+    'field_route_none': 'Mana yachanichu o mana tupunchu',
+    'field_bus': 'Bus',
+    'field_bus_none': 'Mayta mana yachanichu',
+    'field_kind': 'Ima pasashka',
+    'kind_delay': 'Unay tukushka o mana pasashka bus',
+    'kind_behavior': 'Pushak o llankakkunapa ruraykuna',
+    'kind_safety': 'Harkaylla o pushay shina',
+    'kind_cleanliness': 'Bus pichashka o imashina kashka',
+    'kind_other': 'Shuk',
+    'field_description': 'Willay',
+    'field_description_help': 'Chunkamanta ishkay waranka killkakama. Ushashpaka, maypi y ima pachapi kashkata willay.',
+    'field_email': 'Correo (munashpa)',
+    'field_phone': 'Telefono (munashpa)',
+    'contact_help': 'Mana imata killkashpapash willayta kachayta ushanki. Mana killkashpaka, mana kutichiyta ushashunchu.',
+    'privacy': 'Kay willaykunataka kanpa willayta rikunkapakllami llankanchik. Correo o telefonota saquishpaka, allichishka washa {days} punchapi pichashun.',
+    'submit': 'Willayta kachay',
+    'err_title': 'Kay willaykunata allichiy',
+    'err_description': 'Chunkamanta ishkay waranka killkakama killkay.',
+    'err_email': 'Kay correo mana allichu rikurin.',
+    'err_phone': 'Kay telefono mana allichu rikurin.',
+    'err_rate': 'Sinchi pakta willayta kacharkanki. Washaman kutin ruray.',
+    'err_expired': 'Kay raku unay kichashka karka. Willaykunata rikushpa kutin kachay.',
+    'err_fast': 'Willayta rikushpa kutin «Kachay»ta ñitiy.',
+    'thanks_title': 'Kanpa willayta chaskirkanchik',
+    'thanks_text': 'Willashkamanta yupaychani. Llankak ayllupi shuk runa rikunka.',
+    'thanks_folio': 'Kanpa folio kaymi',
+    'thanks_no_contact': 'Mana tantachinakuy willayta saquishkamanta, mana kutichiyta ushashunchu.',
+    'back_to_routes': 'Ñankunaman kutiy',
+    'privacy_more': 'Pakashka willaykunapa kamachiy',
+    'path_pick': 'Shuk purishkata rikuy',
+    'path_all': 'Tukuy purishkakuna',
+    'path_reset': 'Kutin churay',
+    'skip': 'Willaykunaman pasay',
+    'nav_lines': 'Ñankuna',
+    'nav_write': 'Transporteman killkay',
+    'staff': 'Llankakkunapa yaykuy',
+    'brand_sub': 'Universidad Técnica de Ambato',
+    'footer_what': 'Universidad Técnica de Ambatopa bus kuna',
+    'photos_credit': 'Ambatopa rikuchikuna Wikimedia Commonspi:',
+    'home_title': 'Maypi shamun kanpa bus?',
+    'home_lead': 'Universidad Técnica de Ambatopa bus kuna, kunan. Kanpa sayanata maskay o kanpa ñanta akllay.',
+    'search_label': 'Kanpa sayanata maskay',
+    'search_placeholder': 'Shin. Mall de los Andes',
+    'search_go': 'Maskay',
+    'featured_hint': 'Maypi shuyashkanki chay sayanata ñitiy.',
+    'buses_now_total': '{n} bus kuna kunan rikurin',
+    'buses_now_one': '1 bus kunan rikurin',
+    'buses_now_none': 'Kunan mana bus rikurinchu',
+    'lines_title': 'Ñankuna',
+    'line_from_to': '{a}manta {b}kama',
+    'line_stops_n': '{n} sayana',
+    'how_title': 'Imashina llankana',
+    'how_1': 'Kanpa ñanta akllay.',
+    'how_1b': 'Sapan ñanka sayanakunata tantashka rikuchin, shinallatak kunan mashna bus rikurishkatapash.',
+    'how_2': 'Maypi shuyashkanki chay sayanata ñitiy.',
+    'how_2b': 'Kay raku kay telefonopi kutin shamukpak yuyarinka.',
+    'how_3': 'Busmanta kanpa sayanakama mashna sayana kakshkata rikuy.',
+    'how_3b': 'Sayanakunata yupanchik, mana minutukunata: Ambatopi purina sinchi tikrarin, chaymanta pachata mana nishun.',
+    'city_title': 'Maykunata pasan',
+    'city_lead': 'Purishka ñankunapi ima ima kuna.',
+    'cap_atahualpa': 'Atahualpa Hatun Ñan, Mall de los Andes ñawpaq',
+    'cap_huachi': 'Huachi Grandepa tantanakuna',
+    'cap_terminal': 'Terminal Terrestre Sur, tutapi',
+    'cap_uta': 'Universidad Técnica de Ambatopa shuk wasi',
+    'cap_vista': 'Ambato hawamanta',
+    'cap_tungurahua': 'Tungurahua',
+    'write_q1': 'Ima mana alli pasarka?',
+    'write_q2': 'Willaway.',
+    'write_field': 'Ima pasashka',
+    'write_placeholder': 'Bus mana sayarka…',
+    'write_note': 'Kanpa killkashkawan formularioman apashun. Kanpa willaykunata mana saquishpapash kachayta ushanki.',
+    'write_go': 'Katiy',
+    'next_title': 'Chaymanta ima pasan',
+    'next_1': 'Transporte llankak ayllupi shuk runa ñawinchinka.',
+    'next_2': 'Kanpa correota saquishpaka, chaypi kutichinka.',
+    'next_3': 'Kanpa tantachinakuy willaykuna, willayta allichishka washa pichashka kanka.',
+    'pick_stop_hint': 'Kanpa sayanata ñitiy, bus mashna sayana kakshkata yachankapak.',
+    'mine_tag': 'kanpa sayana',
+    'live': 'Kunan',
+    'searching': 'Bus kunata maskashpa…',
+    'updated_min': 'Musuyachishka: {m} min ñawpa',
+    'stale': 'Kay willaykuna {m} min kan; bus ñawpaman rishka kanman.',
+    'rate': 'Sinchi pakta tapuykuna. 30 s washa kutin ruranchik.',
+    'bus_at_mine': '{bus} kanpa sayanapi kan.',
+    'bus_one_stop': '{bus} kanpa sayanamanta 1 sayana karupi kan.',
+    'bus_n_stops': '{bus} kanpa sayanamanta {n} sayana karupi kan.',
+    'none_coming': 'Kunan rikurik bus mana kanpa sayanaman shamunchu.',
+    'position_unknown': 'Bus kuna rikurin, shinapash ñanpa maypi kashkata ñapash mana yachanchikchu.',
+    'bus_between': '{a} y {b} chawpipi',
+    'bus_at': '{a}pi',
+    'report_line': 'Kay ñanpi llakita willay',
+    'search_results': '«{q}»ta pasak ñankuna',
+    'search_none': 'Mana ima ñanpash «{q}»ta pasanchu.',
+    'search_all': 'Tukuy ñankunata rikuy',
+    'passes_by': '{stops}ta pasan',
+    'thanks_keep': 'Waqaychiy, kanpa willaymanta tapunayta munashpaka.',
+    'back_to_lines': 'Ñankunaman kutiy',
+    'write_title': 'Transporteman killkay',
+    'kind_title': 'Imamanta?',
+    'contact_title': 'Kutichiyta munashpaka',
+}
 
-STRINGS['qu'] = {**STRINGS['es'], **KICHWA_DRAFT}
+STRINGS['qu'] = dict(KICHWA)
 
 
 def pick_lang(accept_languages, requested=None, remembered=None):
-    """Explicit request, then remembered choice, then the browser, then Spanish."""
+    """Explicit request, then the remembered choice, then Spanish.
+
+    The browser's language is deliberately not used: the site opens in Spanish for everybody and a
+    visitor who wants English or Kichwa picks it once (it is remembered)."""
     for candidate in (requested, remembered):
         if candidate in STRINGS:
             return candidate
-    # Kichwa is never picked from the browser: it is a draft until a speaker has reviewed it.
-    best = accept_languages.best_match(['es', 'en']) if accept_languages else None
-    return best or DEFAULT_LANG
+    return DEFAULT_LANG

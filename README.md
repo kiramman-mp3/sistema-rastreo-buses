@@ -47,6 +47,7 @@ En desarrollo el puerto 5055 (OsmAnd) va sin cifrar; en producción los celulare
 | `bus.vehicle` | Bus (nombre único), enlazado a `traccar_device_id`; guarda última posición y estado (moving / stopped / offline: sin datos hace 5 min) |
 | `bus.route` / `bus.route.stop` | Rutas con paradas ordenadas y radio de llegada (5 a 1000 m); el campo `public` decide qué rutas ve el pasajero |
 | `bus.route.record` | Asistente que graba el trazado de una ruta desde las posiciones de un bus |
+| `bus.route.gpx` | Asistente que carga el trazado de una ruta desde un archivo GPX (la pista más larga, simplificada a 1500 puntos como máximo; opcionalmente crea las paradas desde los puntos de referencia) |
 | `bus.position` | Historial de posiciones (se purga según *Keep positions (days)*) |
 | `bus.stop.arrival` | Registro de llegadas a paradas (reporte de puntualidad) |
 | `bus.run` | Recorridos: cada viaje de un extremo de la ruta al otro, con su duración |

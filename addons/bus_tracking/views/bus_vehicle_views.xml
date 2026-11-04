@@ -50,15 +50,15 @@
                         </group>
                         <group string="Traccar">
                             <field name="traccar_device_id"/>
-                            <field name="traccar_unique_id" string="Identificador Traccar" readonly="1"/>
+                            <field name="traccar_unique_id" string="Traccar Unique ID" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Tableta del conductor (App Buses UTA)" groups="bus_tracking.group_bus_manager">
+                    <group string="Driver tablet (Buses UTA app)" groups="bus_tracking.group_bus_manager">
                         <group>
                             <field name="tablet_setup_link"/>
                             <div colspan="2" class="text-muted">
-                                En la app Buses UTA pulsa "Escanear QR". Este código contiene la dirección del servidor Odoo.
-                                Las credenciales de rastreo se asignan automáticamente cuando el chofer inicia su turno.
+                                In the Buses UTA app, tap "Scan QR". This code holds the address of the Odoo server.
+                                The tracking credentials are assigned automatically when the driver starts a shift.
                             </div>
                         </group>
                         <group>
@@ -108,7 +108,7 @@
     </record>
 
     <record id="action_live_map" model="ir.actions.client">
-        <field name="name">Mapa en vivo</field>
+        <field name="name">Live Map</field>
         <field name="tag">bus_tracking.live_map</field>
     </record>
 </odoo>

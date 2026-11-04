@@ -1,4 +1,4 @@
-import { buildMapHtml } from './html';
+import { buildMapHtml, FOLLOW_ZOOM, mapUpdateScript } from './html';
 import type { RouteMap } from '../api/types';
 
 describe('buildMapHtml', () => {
@@ -39,5 +39,30 @@ describe('buildMapHtml', () => {
     expect(html).toContain('Ruta Troncal');
     expect(html).toContain('"bus":null');
     expect(html).toContain('"nextStopId":null');
+  });
+
+  it('opens close to the bus and follows it, never resetting the zoom the driver chose', () => {
+    const html = buildMapHtml(sampleRoute, { lat: -1.245, lon: -78.625 }, 11);
+    expect(FOLLOW_ZOOM).toBeGreaterThanOrEqual(16);
+    expect(html).toContain(`"zoom":${FOLLOW_ZOOM}`);
+    expect(html).toContain('window.busMap = { update: update }');
+    // follow with panTo (keeps the zoom), and stop following when the driver drags the map
+    expect(html).toContain('map.panTo(here');
+    expect(html).toContain("map.on('dragstart'");
+  });
+
+  it('writes the labels it is given, not fixed Spanish text', () => {
+    const html = buildMapHtml(sampleRoute, null, null, { stop: 'Stop', you: 'Your current location', recenter: 'Follow my location' });
+    expect(html).toContain('"labels":{"stop":"Stop","you":"Your current location","recenter":"Follow my location"}');
+    expect(html).not.toContain('Tu ubicación actual');
+  });
+});
+
+describe('mapUpdateScript', () => {
+  it('moves the bus and the next stop on the open page', () => {
+    expect(mapUpdateScript({ lat: -1.2, lon: -78.6 }, 4)).toBe(
+      'window.busMap && window.busMap.update({"bus":{"lat":-1.2,"lon":-78.6},"nextStopId":4}); true;',
+    );
+    expect(mapUpdateScript(null, null)).toContain('"bus":null');
   });
 });

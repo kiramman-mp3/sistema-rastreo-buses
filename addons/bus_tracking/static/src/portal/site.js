@@ -7,7 +7,7 @@
 (function () {
     "use strict";
 
-    var REFRESH_MS = 10000;
+    var REFRESH_MS = 5000;
     var STALE_AFTER_S = 90;
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var BUS_SVG = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">' +
