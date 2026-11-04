@@ -7,6 +7,9 @@
     <menuitem id="menu_bus_live_map" name="Live Map" parent="menu_bus_root"
               action="action_live_map" sequence="10"/>
 
+    <menuitem id="menu_bus_dashboard" name="Indicators" parent="menu_bus_root"
+              action="action_live_dashboard" sequence="12"/>
+
     <!-- Operation: what happens today. Fleet: what the service is made of. -->
     <menuitem id="menu_bus_operation" name="Operations" parent="menu_bus_root" sequence="15"/>
     <menuitem id="menu_bus_fleet" name="Fleet" parent="menu_bus_root" sequence="20"/>

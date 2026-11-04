@@ -86,6 +86,49 @@ SQL = {
 }
 
 
+# Series of the dashboard. They use the same trips as the indicators (the CTE `f` of BASE).
+ALERT_FILTER = """(%(routes)s::int[] IS NULL OR a.route_id = ANY(%(routes)s::int[]))
+                       AND (%(scope)s = 'all' OR (%(scope)s = 'real' AND NOT v.simulated)
+                            OR (%(scope)s = 'simulated' AND v.simulated))"""
+SERIES = {
+    'route_trips': BASE + """SELECT f.route_id, COUNT(*), COUNT(*) FILTER (WHERE f.state = 'done'),
+                                 COALESCE(SUM(f.distance_est_km) FILTER (WHERE f.distance_real_km > 0), 0),
+                                 COALESCE(SUM(f.distance_real_km), 0)
+                            FROM f GROUP BY f.route_id""",
+    'route_stops': BASE + """SELECT f.route_id, COUNT(*) FILTER (WHERE s.status <> 'late'), COUNT(*),
+                                 AVG(COALESCE(s.delay_min, 0)) FILTER (WHERE s.status = 'late')
+                            FROM bus_trip_stop s JOIN f ON f.id = s.trip_id
+                           WHERE s.actual_time IS NOT NULL GROUP BY f.route_id""",
+    'route_alerts': """SELECT a.route_id, COUNT(*) FROM bus_alert a JOIN bus_vehicle v ON v.id = a.vehicle_id
+                         WHERE (a.start_time - interval '5 hours')::date BETWEEN %(d1)s AND %(d2)s
+                           AND """ + ALERT_FILTER + " GROUP BY a.route_id",
+    'day_trips': BASE + """SELECT f.date, COUNT(*) FILTER (WHERE f.state = 'done'),
+                                 COUNT(*) FILTER (WHERE f.state = 'incomplete') FROM f GROUP BY f.date""",
+    'day_stops': BASE + """SELECT f.date, COUNT(*) FILTER (WHERE s.status <> 'late'), COUNT(*)
+                            FROM bus_trip_stop s JOIN f ON f.id = s.trip_id
+                           WHERE s.actual_time IS NOT NULL GROUP BY f.date""",
+    'day_alerts': """SELECT (a.start_time - interval '5 hours')::date, COUNT(*)
+                         FROM bus_alert a JOIN bus_vehicle v ON v.id = a.vehicle_id
+                        WHERE (a.start_time - interval '5 hours')::date BETWEEN %(d1)s AND %(d2)s
+                          AND """ + ALERT_FILTER + " GROUP BY 1",
+    'delay_buckets': BASE + """SELECT CASE WHEN COALESCE(s.delay_min, 0) < -5 THEN 0
+                                       WHEN COALESCE(s.delay_min, 0) <= 5 THEN 1
+                                       WHEN s.delay_min <= 10 THEN 2 WHEN s.delay_min <= 15 THEN 3
+                                       WHEN s.delay_min <= 20 THEN 4 ELSE 5 END, COUNT(*)
+                                 FROM bus_trip_stop s JOIN f ON f.id = s.trip_id
+                                WHERE s.actual_time IS NOT NULL GROUP BY 1""",
+    'stop_delays': BASE + """SELECT st.name, r.code, AVG(COALESCE(s.delay_min, 0)), COUNT(*)
+                              FROM bus_trip_stop s JOIN f ON f.id = s.trip_id
+                              JOIN bus_route_stop st ON st.id = s.stop_id JOIN bus_route r ON r.id = f.route_id
+                             WHERE s.actual_time IS NOT NULL GROUP BY st.id, st.name, r.code
+                             ORDER BY 3 DESC LIMIT 12""",
+    'perf_days': """SELECT (created - interval '5 hours')::date, percentile_cont(0.5) WITHIN GROUP (ORDER BY ms),
+                           percentile_cont(0.95) WITHIN GROUP (ORDER BY ms), COUNT(*)
+                      FROM bus_perf_sample WHERE (created - interval '5 hours')::date BETWEEN %(d1)s AND %(d2)s
+                     GROUP BY 1""",
+}
+
+
 def pct(part, whole):
     return round(100.0 * part / whole, 1) if whole else None
 
@@ -152,9 +195,12 @@ class BusKpi(models.AbstractModel):
 
     @api.model
     def _status(self, code, value):
-        """'good', 'warn', 'bad' or 'na' for a value, from the thresholds of the indicator."""
-        if value is None or code not in THRESHOLDS:
+        """'good', 'warn', 'bad' from the thresholds of the indicator; 'info' for a figure without a threshold
+        (a count, nothing to judge it by) and 'na' when there is no figure at all."""
+        if value is None:
             return 'na'
+        if code not in THRESHOLDS:
+            return 'info'
         good, ok, higher = THRESHOLDS[code]
         if higher:
             return 'good' if value >= good else 'warn' if value >= ok else 'bad'
@@ -214,6 +260,91 @@ class BusKpi(models.AbstractModel):
                 'metrics': [results[code] for code in sorted(results, key=lambda c: (c[0] != 'T', int(c[1:])))]}
 
     @api.model
+    def dashboard(self, date_from=None, date_to=None, route_ids=None, scope='all', compare=True):
+        """Everything the dashboard shows: the indicators (with the previous period for comparison) and the series
+        of its charts, for a period, some routes and real or simulated data."""
+        current = self.compute(date_from, date_to, route_ids, scope)          # also flushes the cache
+        p = self._params(date_from, date_to, route_ids, scope)
+        previous = None
+        if compare:
+            length = (p['d2'] - p['d1']).days
+            end = p['d1'] - timedelta(days=1)
+            before = self.compute(end - timedelta(days=length), end, route_ids, scope)
+            previous = {m['code']: m['value'] for m in before['metrics']}
+
+        def rows(key):
+            self.env.cr.execute(SERIES[key], p)
+            return self.env.cr.fetchall()
+
+        routes = self.env['bus.route'].search([])
+        trips = {r[0]: r for r in rows('route_trips')}
+        stops = {r[0]: r for r in rows('route_stops')}
+        alerts = dict(rows('route_alerts'))
+        by_route = []
+        for route in routes:
+            if p['routes'] and route.id not in p['routes']:
+                continue
+            _id, n, done, est, real = trips.get(route.id, (route.id, 0, 0, 0, 0))
+            _id, ok, total, delay = stops.get(route.id, (route.id, 0, 0, None))
+            by_route.append({
+                'id': route.id, 'code': route.code, 'name': route.name, 'color': route.color or '#7A1A22',
+                'trips': n, 'compliance': pct(done, n), 'punctuality': pct(ok, total),
+                'delay': round(float(delay), 1) if delay is not None else None,
+                'est_km': round(float(est), 1), 'real_km': round(float(real), 1), 'alerts': alerts.get(route.id, 0)})
+
+        days = {}
+        for day, done, incomplete in rows('day_trips'):
+            days.setdefault(day, {})['done'], days[day]['incomplete'] = done, incomplete
+        for day, ok, total in rows('day_stops'):
+            days.setdefault(day, {})['punctuality'] = pct(ok, total)
+        for day, count in rows('day_alerts'):
+            days.setdefault(day, {})['alerts'] = count
+        by_day = [dict({'done': 0, 'incomplete': 0, 'punctuality': None, 'alerts': 0}, date=str(day), **values)
+                  for day, values in sorted(days.items())]
+
+        buckets = dict(rows('delay_buckets'))
+        incidents = {}
+        for origin, kind, n in self._rows('T8', p):
+            incidents[kind] = incidents.get(kind, 0) + n
+        pareto, running = [], 0
+        total_incidents = sum(incidents.values())
+        for kind, n in sorted(incidents.items(), key=lambda item: -item[1]):
+            running += n
+            pareto.append({'kind': kind, 'count': n, 'cumulative': pct(running, total_incidents)})
+
+        recent = self.env['bus.trip'].search(
+            [('state', 'in', ('done', 'incomplete', 'running')), ('date', '>=', p['d1']), ('date', '<=', p['d2'])]
+            + ([('route_id', 'in', p['routes'])] if p['routes'] else [])
+            + ([('simulated', '=', scope == 'simulated')] if p['scope'] != 'all' else []),
+            order='planned_start desc', limit=60)
+        state_names = dict(self.env['bus.trip']._fields['state']._description_selection(self.env))
+        labels = dict(self.env['bus.incident']._fields['kind']._description_selection(self.env))
+        labels.update(dict(self.env['bus.alert']._fields['kind']._description_selection(self.env)))
+        current.update({
+            'can_manage': self.env.user.has_group('bus_tracking.group_bus_manager'),
+            'kind_labels': labels,
+            'previous': previous,
+            'routes': [{'id': r.id, 'code': r.code, 'name': r.name, 'color': r.color or '#7A1A22'} for r in routes],
+            'by_route': by_route,
+            'by_day': by_day,
+            'delay_buckets': [{'label': label, 'count': buckets.get(i, 0)} for i, label in enumerate((
+                _("early (more than 5 min)"), _("on time (within 5 min)"), _("5 to 10 min"), _("10 to 15 min"),
+                _("15 to 20 min"), _("more than 20 min")))],
+            'stop_delays': [{'stop': name, 'route': code, 'delay': round(float(avg), 1), 'arrivals': n}
+                            for name, code, avg, n in rows('stop_delays')],
+            'incident_kinds': pareto,
+            'perf_days': [{'date': str(day), 'p50': round(float(a), 1), 'p95': round(float(b), 1), 'samples': n}
+                          for day, a, b, n in sorted(rows('perf_days'))],
+            'trips': [{
+                'id': t.id, 'name': t.name, 'route': t.route_id.code, 'date': str(t.date), 'state': t.state,
+                'state_name': state_names.get(t.state, t.state), 'simulated': t.simulated,
+                'visited': t.stops_visited, 'total': t.stops_total, 'late': t.stops_late, 'skipped': t.stops_skipped,
+                'delay_end': round(t.delay_end_min, 1), 'km_est': round(t.distance_est_km, 1),
+                'km_real': round(t.distance_real_km, 1), 'flags': t.detected_flags or ''} for t in recent],
+        })
+        return current
+
+    @api.model
     def _shown_sql(self, code):
         """The query (or queries) that reproduce an indicator: T8 and S1 use more than one."""
         keys = [key for key in sorted(SQL) if key == code or (key.startswith(code) and len(key) > len(code))]
@@ -269,7 +400,10 @@ class BusKpi(models.AbstractModel):
         total = alerts + incidents
         km = float(self._row('T8km', p)[0])
         rate = round(total / km * 100.0, 1) if km else None
-        by_kind = ', '.join('%s %s' % (kind, n) for _origin, kind, n in sorted(rows, key=lambda r: -r[2])[:4])
+        names = dict(self.env['bus.incident']._fields['kind']._description_selection(self.env))
+        names.update(dict(self.env['bus.alert']._fields['kind']._description_selection(self.env)))
+        by_kind = ', '.join('%s %s' % (names.get(kind, kind), n)
+                            for _origin, kind, n in sorted(rows, key=lambda r: -r[2])[:4])
         return total, _("%(alerts)s alerts and %(incidents)s incidents; %(rate)s per 100 km. %(kinds)s",
                         alerts=alerts, incidents=incidents, rate=rate if rate is not None else '—', kinds=by_kind), None
 
