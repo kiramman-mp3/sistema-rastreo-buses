@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { normalizeOdooUrl, parseDriverBadge } from '../src/config/odooUrl';
 import { t, tf } from '../src/i18n';
@@ -10,13 +10,14 @@ import { useSession } from '../src/state/SessionContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Action, Screen, Txt } from '../src/ui/cabin';
+import { showDialog } from '../src/ui/dialog';
 import { useLayout } from '../src/ui/layout';
 import { space } from '../src/ui/theme';
 
 /** A QR can point the tablet at another server: the driver's password and the GPS would go there. */
 function confirmServer(url: string): Promise<boolean> {
   return new Promise((resolve) => {
-    Alert.alert(tf('serverChange', { url }), undefined, [
+    showDialog(tf('serverChange', { url }), undefined, [
       { text: t('cancel'), style: 'cancel', onPress: () => resolve(false) },
       { text: t('continue'), onPress: () => resolve(true) },
     ]);
