@@ -25,6 +25,8 @@
                             class="btn-primary"/>
                     <button name="action_record_track" type="object" string="Record the track from a bus"
                             class="btn-primary"/>
+                    <button name="action_load_gpx" type="object" string="Load a GPX file"
+                            class="btn-primary"/>
                     <button name="action_clear_track" type="object" string="Clear the recorded track"
                             attrs="{'invisible': [('track_points', '=', 0)]}"
                             confirm="The route will be drawn again as straight lines between its stops."/>
@@ -91,6 +93,31 @@
                 </group>
                 <footer>
                     <button name="action_record" type="object" string="Record" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_route_gpx_form" model="ir.ui.view">
+        <field name="name">bus.route.gpx.form</field>
+        <field name="model">bus.route.gpx</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    The line of the route is drawn along the track of the file (the longest one, or the route
+                    if it has no track). The file is simplified to a few points; it can come from a phone app
+                    or a mapping site.
+                </p>
+                <group>
+                    <field name="route_id" invisible="1"/>
+                    <field name="has_stops" invisible="1"/>
+                    <field name="gpx_file" filename="gpx_filename"/>
+                    <field name="gpx_filename" invisible="1"/>
+                    <field name="create_stops" attrs="{'invisible': [('has_stops', '=', True)]}"/>
+                </group>
+                <footer>
+                    <button name="action_load" type="object" string="Load" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
