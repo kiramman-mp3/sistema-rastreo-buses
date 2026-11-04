@@ -337,3 +337,19 @@ export function alertLabel(kind: string): string {
 }
 
 export const LANGS: Lang[] = ['es', 'en', 'qu'];
+
+/**
+ * The language to start in when the driver has not chosen one: the device's, English or Spanish.
+ * Kichwa is a draft and is never picked for someone: it is only chosen by hand.
+ */
+export function languageForLocale(locale: string | null | undefined): Lang {
+  return /^en([-_]|$)/i.test(locale ?? '') ? 'en' : 'es';
+}
+
+export function deviceLocale(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().locale;
+  } catch {
+    return null;
+  }
+}
