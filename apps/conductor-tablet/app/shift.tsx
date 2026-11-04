@@ -100,29 +100,6 @@ export default function ShiftScreen() {
       .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
   });
 
-  // Coords for next stop to calculate live distance
-  const nextStopCoords = useMemo(() => {
-    if (!nextStop || !routeMap?.stops) return null;
-    const found = routeMap.stops.find((s) => s.id === nextStop.id);
-    return found ? { lat: found.lat, lon: found.lon } : null;
-  }, [nextStop, routeMap?.stops]);
-
-  // Live cockpit telemetry: 1-second digital clock & live distance calculation
-  const { currentTime, distanceFormatted } = useCockpitTelemetry(busFix, nextStopCoords);
-
-  // Dynamic Headway calculation based on alerts / status
-  const headwayStatus: HeadwayStatus = useMemo(() => {
-    if (alerts.some((a) => a.kind === 'speeding')) return 'ahead';
-    if (alerts.some((a) => a.kind === 'long_stop' || a.kind === 'off_route')) return 'delayed';
-    return 'on_time';
-  }, [alerts]);
-
-  const diffMinutes = useMemo(() => {
-    if (headwayStatus === 'ahead') return -3;
-    if (headwayStatus === 'delayed') return 5;
-    return 1;
-  }, [headwayStatus]);
-
   useFocusEffect(
     useCallback(() => {
       let live = true;
@@ -142,7 +119,6 @@ export default function ShiftScreen() {
           if (error instanceof NetworkError && live) setStale(true);
         }
       }
-
       tick();
       const id = setInterval(tick, 12_000);
       return () => {
