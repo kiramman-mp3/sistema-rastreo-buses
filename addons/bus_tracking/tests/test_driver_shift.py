@@ -56,8 +56,10 @@ class TestOdooLanguagePick(TransactionCase):
     def test_any_other_spanish_is_better_than_none(self):
         self.assertEqual(pick_odoo_lang('es', ['en_US', 'es_AR', 'es_MX']), 'es_AR')
 
-    def test_english_and_the_kichwa_draft(self):
+    def test_english_and_kichwa(self):
         self.assertEqual(pick_odoo_lang('en', ['es_EC', 'en_US']), 'en_US')
+        self.assertEqual(pick_odoo_lang('qu', ['en_US', 'es_EC', 'qu_EC']), 'qu_EC')
+        # where Kichwa is not installed the driver reads Spanish
         self.assertEqual(pick_odoo_lang('qu', ['en_US', 'es_EC']), 'es_EC')
 
     def test_nothing_installed_or_nonsense_falls_back(self):
@@ -243,8 +245,10 @@ class TestDriverShiftApi(HttpCase):
             self.assertIn('alerts', resp.json())
 
     def test_alert_details_follow_the_language_of_the_app(self):
-        """The Odoo user of the driver reads English; the app asks for Spanish, English or the Kichwa draft."""
+        """The Odoo user of the driver reads English; the app asks for Spanish, English or Kichwa."""
         self.env['res.lang']._activate_lang('es_EC')
+        self.env['ir.module.module'].search([('name', '=', 'bus_tracking')])._update_translations(
+            filter_lang='qu_EC', overwrite=True)
         token = self.token()
         self.start(token)
         self.env['bus.alert'].create({
@@ -252,12 +256,13 @@ class TestDriverShiftApi(HttpCase):
             'distance_m': 400.0, 'threshold': 150.0})
         english = 'Up to 400 m away from its route (limit 150 m)'
         spanish = 'Hasta 400 m fuera de su ruta (límite 150 m)'
+        kichwa = 'Ñanmanta 400 m karukama (límite 150 m)'
 
         def detail(body):
             return self.post(STATE, body, token=token).json()['alerts'][0]['detail']
 
         self.assertEqual(detail({'lang': 'es'}), spanish)
-        self.assertEqual(detail({'lang': 'qu'}), spanish)   # the Kichwa draft reads Spanish
+        self.assertEqual(detail({'lang': 'qu'}), kichwa)
         self.assertEqual(detail({'lang': 'en'}), english)
         self.assertEqual(detail({}), english)               # no language sent: the one of the Odoo user
         self.assertEqual(detail({'lang': 'zz'}), english)   # not an app language: ignored

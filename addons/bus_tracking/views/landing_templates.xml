@@ -63,11 +63,11 @@
                             </button>
                         </t>
                     </form>
-                    <a href="/web/login" class="boton-acceso" t-att-aria-label="s.get('staff_login', 'Iniciar sesión')" t-att-title="s.get('staff_login', 'Iniciar sesión')">
+                    <a href="/web/login" class="boton-acceso" t-att-aria-label="s.get('staff_login', 'Sign in')" t-att-title="s.get('staff_login', 'Sign in')">
                         <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false">
                             <path fill-rule="evenodd" d="M10 2a4 4 0 100 8 4 4 0 000-8zm-6 14a6 6 0 1112 0H4z" clip-rule="evenodd"/>
                         </svg>
-                        <span t-esc="s.get('staff_login', 'Iniciar sesión')"/>
+                        <span t-esc="s.get('staff_login', 'Sign in')"/>
                     </a>
                 </div>
             </div>
@@ -193,7 +193,7 @@
                                 <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
                                 <span class="fragmento-nombre" t-esc="featured['name']"/>
                             </div>
-                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus='El bus' if site_lang != 'en' else 'The bus', n=2)"/>
+                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus={'en': 'The bus', 'qu': 'Bus'}.get(site_lang, 'El bus'), n=2)"/>
                             <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
                                 <t t-foreach="featured['stops'][:5]" t-as="stop_name">
                                     <li t-if="stop_name_index == 1" class="demo-bus">

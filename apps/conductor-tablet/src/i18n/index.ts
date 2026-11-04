@@ -1,4 +1,4 @@
-/** Overlapping keys match addons/bus_tracking/models/portal_i18n.py. qu is a draft. */
+/** Overlapping keys match addons/bus_tracking/models/portal_i18n.py. */
 export type Lang = 'es' | 'en' | 'qu';
 
 const es = {
@@ -71,6 +71,9 @@ const es = {
   nextStopHero: 'PRÓXIMA PARADA',
   noNextStop: 'Fin del recorrido',
   loadingMap: 'Cargando mapa de la ruta…',
+  mapStop: 'Parada',
+  mapYou: 'Tu ubicación actual',
+  mapRecenter: 'Seguir mi ubicación',
   driverLabel: 'Conductor',
   availableBuses: '1. Elige el bus',
   availableRoutes: '2. Elige la ruta',
@@ -201,6 +204,9 @@ const en: typeof es = {
   nextStopHero: 'NEXT STOP',
   noNextStop: 'End of route',
   loadingMap: 'Loading route map…',
+  mapStop: 'Stop',
+  mapYou: 'Your current location',
+  mapRecenter: 'Follow my location',
   driverLabel: 'Driver',
   availableBuses: '1. Choose bus',
   availableRoutes: '2. Choose route',
@@ -262,12 +268,136 @@ const en: typeof es = {
 };
 
 const qu: typeof es = {
-  ...es,
-  lang_name: 'Kichwa (borrador)',
+  offlineRetry: 'Mana rikurin. Kanpa llankay mana tukurishkachu y GPS waqaychashpa katin; kikinmi kutin ruranchik.',
   login: 'Yaykuy',
+  user: 'Yaykuk',
+  password: 'Pakashka shimi',
+  badCredentials: 'Yaykuk o pakashka shimi mana allichu.',
+  network: 'Mana red tiyan. Kutin ruray.',
+  chooseBus: 'Busta akllay',
+  chooseRoute: 'Ñanta akllay',
+  startShift: 'Llankay pachata kallarichiy',
+  taken: 'Llankachishka',
+  onShift: 'Llankay pacha purin',
+  bus: 'Bus',
+  route: 'Ñan',
+  signOut: 'Llukshiy',
+  loading: 'Kargashpa…',
+  conflict: 'Chay bus o kanpa yaykuk ña llankay pachata charin.',
+  noGps: 'Chay busmanka GPS mana killkashkachu.',
+  gpsPermission: 'Bus GPSpak tukuy pacha maypi kashkata rikunkapak ari ninami kan.',
+  gpsStatus: 'GPS imashina kashka',
+  gpsForeground: 'Maypi kashka (kunan llankakpi)',
+  gpsBackground: 'Maypi kashka (washapi)',
+  gpsQueue: 'Shuyashka puntukuna',
+  gpsLast: 'Tukuri kachashka',
+  gpsNone: 'Ñapash mana maypi kashkapash kachashkachu.',
+  granted: 'Ari ninashka',
+  denied: 'Mana ninashka',
+  lang_name: 'Kichwa',
   stops: 'Sayana kuna',
+  nextStop: 'Katik',
+  alerts: 'Yuyachikuna',
+  noAlerts: 'Mana yuyachik.',
+  incident: 'Llakita willay',
+  endShift: 'Llankay pachata tukuchiy',
+  confirmEnd: 'Llankay pachata tukuchinkichu?',
+  confirmEndBody: 'Kay busmanta GPS kachayta sayachinka.',
+  cancel: 'Ama',
+  continue: 'Katiy',
+  note: 'Willay (munashpa)',
+  queued: 'Mana red tiyan. Llakika red tiyakpi kachashka kanka.',
+  sent: 'Llaki kachashka.',
+  field_kind: 'Ima pasashka',
+  field_description: 'Willay',
+  submit: 'Willayta kachay',
+  kind_other: 'Shuk',
+  kind_breakdown: 'Pakirishka',
+  kind_traffic: 'Ñan tantarishka',
+  kind_accident: 'Accidente',
+  alert_speeding: 'Sinchi utka',
   alert_offline: 'mana rikurin',
-  update_error: 'Mana kutin rikuchi ushashkachu. Kutin ruranchik…',
+  alert_long_stop: 'Unay sayashka',
+  alert_off_route: 'Ñanmanta llukshishka',
+  update_error: 'Mana musuyachiy ushashkanchu. Kutin ruranchik…',
+  map_label: 'Ñanpi bus kunapa mapa',
+  scanQr: 'QR killkata ñawinchiy',
+  scanDriverBadge: 'Pushakpa credencial QRta ñawinchiy',
+  badgeLoggingIn: 'Pushakta riksishpa…',
+  badgeError: 'Credencial mana allichu o hurkushka.',
+  orManualLogin: 'Shuk shinapash makiwan yaykuy',
+  odooUrl: 'Odoo servidor',
+  qrBad: 'Chay killka mana allichu. Kanpa pushak credencialta o Odoopa QRta ñawinchiy.',
+  cameraNeed: 'QRta ñawinchinkapak cámarata ari ninami kan.',
+  confirmStartShift: 'Llankay pachata kallarichinkichu?',
+  confirmStartBody: 'Ñanta killkashpa, busmanta GPS maypi kashkata kunan kachashpa kallarinka.',
+  confirmSignOut: 'Llukshinkichu?',
+  confirmSignOutBody: 'Kay tabletapi pushakpa yaykuyta tukuchinka.',
+  confirmSignOutShiftBody: 'Purik llankay pachata tukuchishpa, kay tabletapi yaykuyta tukuchinka.',
+  nextStopHero: 'KATIK SAYANA',
+  noNextStop: 'Ñan tukurin',
+  loadingMap: 'Ñanpa mapata kargashpa…',
+  mapStop: 'Sayana',
+  mapYou: 'Kunan kanpa maypi kashka',
+  mapRecenter: 'Kanpa maypi kashkata katiy',
+  driverLabel: 'Pushak',
+  availableBuses: '1. Busta akllay',
+  availableRoutes: '2. Ñanta akllay',
+  noStopsAvailable: 'Kay ñanmanka sayanakuna mana killkashkachu.',
+  backToShift: 'Llankay pachaman kutiy',
+  cabinNext: 'Katik sayana',
+  cabinAfter: 'Washa',
+  cabinStopsLeft: '{n} sayana saki',
+  cabinLastStop: 'Tukuri sayana',
+  moreNotice_one: '1 shuk willay',
+  moreNotice_other: '{n} shuk willay',
+  gpsSending: 'GPS kachashpa',
+  gpsSaving_one: 'Mana red: 1 punto waqaychashka',
+  gpsSaving_other: 'Mana red: {n} punto waqaychashka',
+  noBuses: 'Akllankapak bus mana tiyan. Centralman willay.',
+  noRoutes: 'Akllankapak ñan mana tiyan. Centralman willay.',
+  allBusesTaken: 'Tukuy bus kuna kunan llankakun.',
+  gpsWaiting: 'GPS willayta shuyashpa',
+  gpsOff: 'GPSmanka mana ari ninashkachu',
+  lockedMoving: 'Purishpa. Pantallata llankachinkapak busta sayachiy.',
+  actionProblem: 'Llakita willay',
+  actionProblemSub: 'Tráfico, pakirishka, accidente',
+  actionSos: 'SOS',
+  actionSosSub: 'Ñitishpa charina',
+  sosHolding: 'Ñitishpa katiy…',
+  sosSending: 'SOS kachashpa…',
+  sosSent: 'SOS kachashka. Centralta shuyashpa.',
+  sosSeen: 'Central kanpa SOSta rikurka · {by} · {time}',
+  sosQueued: 'SOS waqaychashka. Red tiyakpi llukshinka.',
+  modeDay: 'Punchay',
+  modeNight: 'Tuta',
+  incidentWhat: 'Ima pasan?',
+  incidentNote: 'Willay (munashpa)',
+  incidentNoteHint: 'Kaykunashina: maypi ñan tantarishka',
+  incidentSend: 'Willayta kachay',
+  loginTitle: 'Pushakpa yaykuy',
+  loginHelp: 'Kanpa credencialta ñawinchiy o yaykuk shutita y pakashka shimita killkay.',
+  trackingNoticeLogin: 'Busmanta maypi kashka, kanpa llankay pacha kichashka kakpillami oficinaman kachakun.',
+  trackingNoticeStart: 'Llankay pachata kallarichikpi, oficina busmanta maypi kashkata rikun, kan tukuchinkakama.',
+  serverHint: 'Servidor (yachak yanapakpakllami)',
+  selectTitle: 'Kanpa busta y ñanta akllay',
+  selectHello: 'Alli puncha, {name}',
+  busTaken: 'Llankakun',
+  clockLabel: 'Pacha',
+  gpsDevice: 'Traccarpi dispositivo',
+  gpsRefresh: 'Musuyachiy',
+  gpsOpen: 'GPS imashina kashkata rikuy',
+  endQueued: 'Llankay pacha tukurishka, GPS wañuchishka. Red tiyakpi centralman willashun.',
+  serverError: 'Servidorpi llaki karka. Shuk kutin ruray.',
+  tooMany: 'Sinchi kutin ruraykuna. Shuk minututa shuyashpa kutin ruray.',
+  noGpsUrl: 'Odoopi GPS direccion illan. Administradorman willay.',
+  busNoGps: 'GPS illak',
+  serverChange: 'Kay killka servidorta {url}man tikrachin. Katinkichu?',
+  serverHttps: 'Servidorka https://wan kallarina kan',
+  gpsLastAppError: 'Tukuri app pantay',
+  gpsLastError: 'Tukuri pantay',
+  gpsServiceTitle: 'Buses UTA: GPS purin',
+  gpsServiceBody: 'Busmanta maypi kashkata kachashpa',
 };
 
 export const messages: Record<Lang, typeof es> = { es, en, qu };
@@ -307,7 +437,7 @@ export type PluralKey = Message extends infer K ? (K extends `${infer Base}_one`
 
 /**
  * A message that depends on a count, with {n} filled in: tp('moreNotice', 1) is "1 aviso más".
- * Kichwa has no plural marking in the draft, so it follows the Spanish rule.
+ * Kichwa marks the plural with the same word, so it follows the Spanish rule.
  */
 export function tp(key: PluralKey, n: number, values: Record<string, string | number> = {}): string {
   let one = n === 1;
@@ -331,3 +461,19 @@ export function alertLabel(kind: string): string {
 }
 
 export const LANGS: Lang[] = ['es', 'en', 'qu'];
+
+/**
+ * The language to start in when the driver has not chosen one: the device's, English or Spanish.
+ * Kichwa is only chosen by hand, never guessed from the device.
+ */
+export function languageForLocale(locale: string | null | undefined): Lang {
+  return /^en([-_]|$)/i.test(locale ?? '') ? 'en' : 'es';
+}
+
+export function deviceLocale(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().locale;
+  } catch {
+    return null;
+  }
+}
