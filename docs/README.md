@@ -23,6 +23,7 @@ docs/
 │   ├── OPERACION.md               # Guía diaria de operación y despacho en consola de Odoo
 │   ├── PRODUCCION.md              # Guía de despliegue en servidor Azure VM, Caddy HTTPS y backups
 │   ├── GRAFANA.md                 # Grafana incrustado en Odoo: rol de solo lectura, token, despliegue y operación
+│   ├── DEMO-TRACCAR-CLIENT.md     # Demostración con un celular y Traccar Client, evidencias y Azure frente a Cloudflare
 │   └── PERSONALIZACION.md         # Parámetros institucionales UTA, mapa en Ambato y límites
 │
 ├── diseno/                        # Identidad visual, tokens y marco normativo
@@ -105,6 +106,7 @@ Para optimizar la consulta según el perfil del lector, se recomiendan los sigui
 | **Guías** | [`PRODUCCION.md`](guias/PRODUCCION.md) | Manual de administración de servidores | Administradores de sistemas |
 | **Guías** | [`PERSONALIZACION.md`](guias/PERSONALIZACION.md) | Parámetros específicos de la UTA | Administradores de Odoo |
 | **Guías** | [`GRAFANA.md`](guias/GRAFANA.md) | Tableros de Grafana dentro de Odoo | Administradores de sistemas |
+| **Guías** | [`DEMO-TRACCAR-CLIENT.md`](guias/DEMO-TRACCAR-CLIENT.md) | Demostración con celular y Traccar Client | Equipo del proyecto, defensa |
 | **Diseño** | [`DISENO.md`](diseno/DISENO.md) | Tokens, colores y componentes UI | Diseñadores, Frontend |
 | **Diseño** | [`PRIVACIDAD.md`](diseno/PRIVACIDAD.md) | Tratamiento de datos y retención | Oficial de privacidad, Jurídico |
 | **Calidad** | [`calidad/`](calidad/) | Carpeta completa de calidad ISO 25010 | Auditores, QA Engineers |

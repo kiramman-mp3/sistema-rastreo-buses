@@ -27,3 +27,4 @@ from . import test_grafana_views
 from . import test_grafana_access
 from . import test_grafana_dashboards
 from . import test_fleet
+from . import test_demo_report
