@@ -1,4 +1,4 @@
-import { alertLabel, getLang, LANGS, messages, setLang, t, tp } from './index';
+import { alertLabel, getLang, LANGS, languageForLocale, messages, setLang, t, tp } from './index';
 
 describe('driver i18n', () => {
   afterEach(() => setLang('es'));
@@ -25,6 +25,15 @@ describe('driver i18n', () => {
     expect(t('lang_name')).toBe('Kichwa (borrador)');
     expect(t('alert_offline')).toBe('mana rikurin');
     expect(t('kind_other')).toBe('Otro');
+  });
+
+  test('starts in the language of the device: English or Spanish, never the Kichwa draft', () => {
+    expect(languageForLocale('en-US')).toBe('en');
+    expect(languageForLocale('en')).toBe('en');
+    expect(languageForLocale('es-EC')).toBe('es');
+    expect(languageForLocale('qu-EC')).toBe('es');
+    expect(languageForLocale('de-DE')).toBe('es');
+    expect(languageForLocale(null)).toBe('es');
   });
 
   test('alert kinds map in the active language', () => {
