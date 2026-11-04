@@ -34,3 +34,4 @@ access_bus_trip_manager,bus.trip manager,model_bus_trip,group_bus_manager,1,1,1,
 access_bus_trip_stop_user,bus.trip.stop user,model_bus_trip_stop,group_bus_user,1,0,0,0
 access_bus_trip_stop_manager,bus.trip.stop manager,model_bus_trip_stop,group_bus_manager,1,1,0,0
 access_bus_trip_assign_manager,bus.trip.assign manager,model_bus_trip_assign,group_bus_manager,1,1,1,1
+access_bus_trip_simulate_manager,bus.trip.simulate manager,model_bus_trip_simulate,group_bus_manager,1,1,1,1

@@ -102,6 +102,7 @@
                 <field name="delay_end_min" optional="show"/>
                 <field name="distance_real_km" optional="hide"/>
                 <field name="simulated" optional="show"/>
+                <field name="detected_flags" optional="hide"/>
                 <field name="state" widget="badge" decoration-info="state == 'running'"
                        decoration-success="state == 'done'" decoration-danger="state == 'incomplete'"/>
             </tree>
@@ -133,6 +134,9 @@
                             <field name="planned_end"/>
                             <field name="simulated"/>
                             <field name="scenario" attrs="{'invisible': [('simulated', '=', False)]}"/>
+                            <field name="expected_flags" attrs="{'invisible': [('simulated', '=', False)]}"/>
+                            <field name="detected_flags"/>
+                            <field name="detection_ok" attrs="{'invisible': [('simulated', '=', False)]}"/>
                         </group>
                     </group>
                     <group string="What really happened">
@@ -260,6 +264,39 @@
                 <field name="state"/>
             </graph>
         </field>
+    </record>
+
+    <!-- Simulator -->
+    <record id="view_bus_trip_simulate_form" model="ir.ui.view">
+        <field name="name">bus.trip.simulate.form</field>
+        <field name="model">bus.trip.simulate</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    A simulated bus drives the route through the same ingestion the real GPS uses, and the rules decide
+                    what was late, skipped or off the route. The trips are marked as simulated and never appear on the
+                    live map or the public pages.
+                </p>
+                <group>
+                    <field name="route_id"/>
+                    <field name="scenario"/>
+                </group>
+                <footer>
+                    <button name="action_simulate" type="object" string="Simulate this trip" class="btn-primary"/>
+                    <button name="action_demo_set" type="object" string="Create the demo set (12 trips)"
+                            class="btn-secondary"
+                            confirm="Twelve simulated trips are created on the lines L1 to L4."/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bus_trip_simulate" model="ir.actions.act_window">
+        <field name="name">Simulate trips</field>
+        <field name="res_model">bus.trip.simulate</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
     </record>
 
     <record id="action_bus_trip" model="ir.actions.act_window">
