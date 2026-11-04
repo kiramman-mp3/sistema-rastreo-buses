@@ -4,45 +4,45 @@
               web_icon="bus_tracking,static/description/icon.png"
               groups="bus_tracking.group_bus_user"/>
 
-    <menuitem id="menu_bus_live_map" name="Mapa en vivo" parent="menu_bus_root"
+    <menuitem id="menu_bus_live_map" name="Live Map" parent="menu_bus_root"
               action="action_live_map" sequence="10"/>
 
     <!-- Operation: what happens today. Fleet: what the service is made of. -->
-    <menuitem id="menu_bus_operation" name="Operación" parent="menu_bus_root" sequence="15"/>
-    <menuitem id="menu_bus_fleet" name="Flota" parent="menu_bus_root" sequence="20"/>
+    <menuitem id="menu_bus_operation" name="Operations" parent="menu_bus_root" sequence="15"/>
+    <menuitem id="menu_bus_fleet" name="Fleet" parent="menu_bus_root" sequence="20"/>
     <menuitem id="menu_bus_vehicle" name="Buses" parent="menu_bus_fleet"
               action="action_bus_vehicle" sequence="10"/>
-    <menuitem id="menu_bus_run" name="Recorridos" parent="menu_bus_fleet"
+    <menuitem id="menu_bus_run" name="Trips" parent="menu_bus_fleet"
               action="action_bus_run" sequence="20"/>
-    <menuitem id="menu_bus_route" name="Rutas" parent="menu_bus_fleet"
+    <menuitem id="menu_bus_route" name="Routes" parent="menu_bus_fleet"
               action="action_bus_route" sequence="30"/>
-    <menuitem id="menu_bus_shift" name="Turnos" parent="menu_bus_operation"
+    <menuitem id="menu_bus_shift" name="Shifts" parent="menu_bus_operation"
               action="action_bus_shift" sequence="30"/>
-    <menuitem id="menu_bus_driver" name="Choferes" parent="menu_bus_fleet"
+    <menuitem id="menu_bus_driver" name="Drivers" parent="menu_bus_fleet"
               action="action_bus_driver" sequence="45"/>
-    <menuitem id="menu_bus_incident" name="Incidentes" parent="menu_bus_operation"
+    <menuitem id="menu_bus_incident" name="Incidents" parent="menu_bus_operation"
               action="action_bus_incident" sequence="10"/>
 
-    <menuitem id="menu_bus_complaint" name="Mensajes de pasajeros" parent="menu_bus_operation"
+    <menuitem id="menu_bus_complaint" name="Passenger messages" parent="menu_bus_operation"
               action="action_bus_complaint" sequence="20"/>
 
-    <menuitem id="menu_bus_reports" name="Reportes" parent="menu_bus_root" sequence="40"/>
-    <menuitem id="menu_bus_report_speeding" name="Velocidad" parent="menu_bus_reports"
+    <menuitem id="menu_bus_reports" name="Reports" parent="menu_bus_root" sequence="40"/>
+    <menuitem id="menu_bus_report_speeding" name="Speeding" parent="menu_bus_reports"
               action="action_bus_report_speeding" sequence="10"/>
-    <menuitem id="menu_bus_report_offline" name="Sin señal" parent="menu_bus_reports"
+    <menuitem id="menu_bus_report_offline" name="No signal" parent="menu_bus_reports"
               action="action_bus_report_offline" sequence="20"/>
-    <menuitem id="menu_bus_report_long_stop" name="Paradas largas" parent="menu_bus_reports"
+    <menuitem id="menu_bus_report_long_stop" name="Long stops" parent="menu_bus_reports"
               action="action_bus_report_long_stop" sequence="30"/>
-    <menuitem id="menu_bus_report_off_route" name="Desvíos de ruta" parent="menu_bus_reports"
+    <menuitem id="menu_bus_report_off_route" name="Route deviations" parent="menu_bus_reports"
               action="action_bus_report_off_route" sequence="40"/>
-    <menuitem id="menu_bus_stop_arrival" name="Llegada a paradas" parent="menu_bus_reports"
+    <menuitem id="menu_bus_stop_arrival" name="Stop arrivals" parent="menu_bus_reports"
               action="action_bus_stop_arrival" sequence="50"/>
 
-    <menuitem id="menu_bus_config" name="Configuración" parent="menu_bus_root" sequence="90"
+    <menuitem id="menu_bus_config" name="Configuration" parent="menu_bus_root" sequence="90"
               groups="bus_tracking.group_bus_manager"/>
-    <menuitem id="menu_bus_settings" name="Ajustes" parent="menu_bus_config"
+    <menuitem id="menu_bus_settings" name="Settings" parent="menu_bus_config"
               action="action_bus_settings" sequence="10"/>
-    <menuitem id="menu_bus_push_setup" name="Notificaciones en este dispositivo" parent="menu_bus_config"
+    <menuitem id="menu_bus_push_setup" name="Notifications on this device" parent="menu_bus_config"
               action="action_push_setup" sequence="20"/>
 
     <!-- The Discuss chat app is not used by this system: keep it for administrators only. -->
