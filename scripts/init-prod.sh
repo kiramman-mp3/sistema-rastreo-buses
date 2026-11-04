@@ -12,7 +12,7 @@ rand() { head -c 96 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c "${1:-3
 
 if [ ! -f "$ENV_FILE" ]; then
   cp .env.prod.example "$ENV_FILE"
-  for key in DB_PASSWORD TRACCAR_DB_PASSWORD WEBHOOK_SECRET; do
+  for key in DB_PASSWORD TRACCAR_DB_PASSWORD WEBHOOK_SECRET GRAFANA_ADMIN_PASSWORD GRAFANA_DB_PASSWORD GRAFANA_JWT_SECRET; do
     sed -i "s|^$key=CHANGE_ME|$key=$(rand 40)|" "$ENV_FILE"
   done
   echo "Created $ENV_FILE with random secrets."
@@ -89,6 +89,25 @@ EOF
 fi
 
 $DC up -d
+
+# Grafana (optional): the read-only database role, the address and the shared secret in Odoo.
+if [ "${COMPOSE_PROFILES:-}" != "${COMPOSE_PROFILES/bi/}" ] && [ -n "${GRAFANA_DOMAIN:-}" ]; then
+  # The views of the indicators are created by the module: update it so they exist before the role reads them.
+  $DC run --rm -T odoo odoo -d "$ODOO_DB" -u bus_tracking --stop-after-init
+  if [ "${DB_HOST:-db}" = "db" ]; then
+    GRAFANA_DB_PASSWORD="$GRAFANA_DB_PASSWORD" ODOO_DB="$ODOO_DB" COMPOSE="$DC" scripts/grafana-role.sh
+  else
+    echo "External database: run scripts/grafana-role.sh with PSQL set to a superuser connection (docs/guias/GRAFANA.md)."
+  fi
+  $DC run --rm -T -e GRAFANA_URL="https://$GRAFANA_DOMAIN" -e GRAFANA_SECRET="$GRAFANA_JWT_SECRET" odoo odoo shell -d "$ODOO_DB" --log-level=error <<'EOF'
+import os
+icp = env['ir.config_parameter']
+icp.set_param('bus_tracking.grafana_url', os.environ['GRAFANA_URL'])
+icp.set_param('bus_tracking.grafana_jwt_secret', os.environ['GRAFANA_SECRET'])
+env.cr.commit()
+EOF
+  $DC up -d grafana
+fi
 
 echo "Waiting for Traccar..."
 until $DC ps traccar --format '{{.Status}}' | grep -q healthy; do sleep 3; done

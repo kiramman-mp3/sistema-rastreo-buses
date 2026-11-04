@@ -1,0 +1,1384 @@
+{
+ "uid": "bus-resumen",
+ "title": "Resumen",
+ "description": "Los doce indicadores del proyecto, con su estado y la comparación con el periodo anterior.",
+ "tags": [
+  "bus-tracking"
+ ],
+ "schemaVersion": 39,
+ "version": 1,
+ "editable": false,
+ "graphTooltip": 1,
+ "liveNow": false,
+ "refresh": "30s",
+ "timezone": "America/Guayaquil",
+ "time": {
+  "from": "now-30d",
+  "to": "now"
+ },
+ "timepicker": {
+  "refresh_intervals": [
+   "30s",
+   "1m",
+   "5m",
+   "15m"
+  ]
+ },
+ "links": [],
+ "templating": {
+  "list": [
+   {
+    "name": "route",
+    "label": "Línea",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT route_code FROM kpi_routes WHERE active ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "bus",
+    "label": "Bus",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT bus FROM (SELECT bus FROM kpi_trips UNION SELECT bus FROM kpi_alerts) b ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "scope",
+    "label": "Datos",
+    "type": "custom",
+    "multi": false,
+    "includeAll": false,
+    "query": "Reales y simulados : all, Solo reales : real, Solo simulados : simulated",
+    "current": {
+     "text": "Reales y simulados",
+     "value": "all"
+    },
+    "options": [
+     {
+      "text": "Reales y simulados",
+      "value": "all",
+      "selected": true
+     },
+     {
+      "text": "Solo reales",
+      "value": "real",
+      "selected": false
+     },
+     {
+      "text": "Solo simulados",
+      "value": "simulated",
+      "selected": false
+     }
+    ]
+   }
+  ]
+ },
+ "annotations": {
+  "list": [
+   {
+    "name": "Alertas",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "enable": false,
+    "iconColor": "#A1221B",
+    "target": {
+     "refId": "Anno",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT happened_at AS time, CASE kind WHEN 'speeding' THEN 'Exceso de velocidad' WHEN 'offline' THEN 'Sin señal' WHEN 'long_stop' THEN 'Parada larga' WHEN 'off_route' THEN 'Fuera de ruta' WHEN 'late_arrival' THEN 'Llegada tarde' WHEN 'skipped_stop' THEN 'Parada omitida' WHEN 'incomplete_trip' THEN 'Recorrido incompleto' WHEN 'late_start' THEN 'Salida tarde' WHEN 'breakdown' THEN 'Avería' WHEN 'traffic' THEN 'Tráfico' WHEN 'accident' THEN 'Accidente' WHEN 'other' THEN 'Otro' WHEN 'sos' THEN 'Emergencia (SOS)' ELSE kind END AS text, kind AS tags FROM kpi_alerts WHERE $__timeFilter(happened_at) AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND origin = 'alert' ORDER BY 1"
+    }
+   }
+  ]
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "row",
+   "title": "Servicio de transporte (T1 a T8)",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "type": "stat",
+   "title": "T1 · Cumplimiento de ruta",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE state = 'done') / NULLIF(COUNT(*), 0) AS value FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated))"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#A1221B",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 75
+       },
+       {
+        "color": "#1D6B44",
+        "value": 90
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 2,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T2 · Puntualidad",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE status <> 'late') / NULLIF(COUNT(*), 0) AS value FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#A1221B",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 70
+       },
+       {
+        "color": "#1D6B44",
+        "value": 85
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 3,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 6,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T3 · Retraso promedio",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT AVG(delay_min) AS value FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND status = 'late'"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "m",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#1D6B44",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 5.000000001
+       },
+       {
+        "color": "#A1221B",
+        "value": 10.000000001
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 4,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T4 · Paradas atendidas",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE actual_time IS NOT NULL) / NULLIF(COUNT(*), 0) AS value FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated))"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#A1221B",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 85
+       },
+       {
+        "color": "#1D6B44",
+        "value": 95
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 5,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 18,
+    "y": 1,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T5 · Desviación de la ruta",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT AVG(deviation_avg_m) AS value FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND distance_real_km > 0"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "lengthm",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#1D6B44",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 50.000000001
+       },
+       {
+        "color": "#A1221B",
+        "value": 150.000000001
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 6,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 5,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T6 · Distancia estimada y recorrida (diferencia)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT ABS(100.0 * (SUM(distance_real_km) - SUM(distance_est_km)) / NULLIF(SUM(distance_est_km), 0)) AS value FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND distance_real_km > 0"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#1D6B44",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 5.000000001
+       },
+       {
+        "color": "#A1221B",
+        "value": 10.000000001
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 7,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 6,
+    "y": 5,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T7 · Tiempo de recorrido contra el plan (diferencia)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT ABS(100.0 * (AVG(duration_real_min) - AVG(duration_est_min)) / NULLIF(AVG(duration_est_min), 0)) AS value FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND state = 'done' AND duration_real_min > 0"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#1D6B44",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 15.000000001
+       },
+       {
+        "color": "#A1221B",
+        "value": 30.000000001
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 8,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 5,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "T8 · Incidencias",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT COUNT(*) AS value FROM kpi_alerts WHERE $__timeFilter(happened_at) AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated))"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "decimals": 0,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "#172025"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#172025",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "none",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 9,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 18,
+    "y": 5,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "id": 10,
+   "type": "row",
+   "title": "Calidad del software (S1 a S4)",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 9,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "type": "stat",
+   "title": "S1 · Integridad de los registros GPS",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT 100.0 * SUM(positions_stored) / NULLIF(SUM(positions_stored) + SUM(positions_rejected), 0) AS value FROM kpi_software WHERE $__timeFilter(day_start)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#A1221B",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 95
+       },
+       {
+        "color": "#1D6B44",
+        "value": 99
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 11,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 10,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "S2 · Exactitud de la sincronización con Traccar",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT 100.0 * SUM(audit_matched) / NULLIF(SUM(audit_total), 0) AS value FROM kpi_software WHERE $__timeFilter(day_start)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#A1221B",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 95
+       },
+       {
+        "color": "#1D6B44",
+        "value": 99
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 12,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 6,
+    "y": 10,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "S3 · Tiempo de respuesta (p95)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT percentile_cont(0.95) WITHIN GROUP (ORDER BY ms) AS value FROM kpi_response WHERE $__timeFilter(sampled_at)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ms",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#1D6B44",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 500.000000001
+       },
+       {
+        "color": "#A1221B",
+        "value": 2000.000000001
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 13,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 10,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "type": "stat",
+   "title": "S4 · Detección correcta de incidencias",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT 100.0 * COUNT(*) FILTER (WHERE detection_ok) / NULLIF(COUNT(*), 0) AS value FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND simulated AND expected_flags IS NOT NULL"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "decimals": 1,
+     "noValue": "Sin datos",
+     "mappings": [
+      {
+       "type": "special",
+       "options": {
+        "match": "null",
+        "result": {
+         "text": "Sin datos",
+         "color": "#6B7A80"
+        }
+       }
+      }
+     ],
+     "color": {
+      "mode": "thresholds"
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "#A1221B",
+        "value": null
+       },
+       {
+        "color": "#C98A00",
+        "value": 75
+       },
+       {
+        "color": "#1D6B44",
+        "value": 90
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "background",
+    "graphMode": "none",
+    "textMode": "value",
+    "justifyMode": "center",
+    "orientation": "auto"
+   },
+   "id": 14,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 18,
+    "y": 10,
+    "w": 6,
+    "h": 4
+   }
+  },
+  {
+   "id": 15,
+   "type": "row",
+   "title": "Evolución",
+   "collapsed": false,
+   "gridPos": {
+    "x": 0,
+    "y": 14,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "type": "timeseries",
+   "title": "Recorridos por día",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "time_series",
+     "rawQuery": true,
+     "rawSql": "SELECT date_trunc('day', starts_at - interval '5 hours') + interval '5 hours' AS time,\n        COUNT(*) FILTER (WHERE state = 'done') AS \"Completos\", COUNT(*) FILTER (WHERE state = 'incomplete') AS \"Incompletos\"\n        FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 2,
+      "fillOpacity": 80,
+      "showPoints": "auto",
+      "spanNulls": true,
+      "barAlignment": 0,
+      "stacking": {
+       "mode": "normal",
+       "group": "A"
+      }
+     },
+     "color": {
+      "mode": "palette-classic"
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Completos"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#1D6B44"
+        }
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Incompletos"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#A1221B"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 16,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 15,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Puntualidad por día (%)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "time_series",
+     "rawQuery": true,
+     "rawSql": "SELECT date_trunc('day', starts_at - interval '5 hours') + interval '5 hours' AS time,\n        100.0 * COUNT(*) FILTER (WHERE status <> 'late') / NULLIF(COUNT(*), 0) AS \"Puntualidad\"\n        FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 18,
+      "showPoints": "auto",
+      "spanNulls": true,
+      "barAlignment": 0,
+      "stacking": {
+       "mode": "none",
+       "group": "A"
+      }
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "percent",
+     "max": 100,
+     "min": 0
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Puntualidad"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#7A1A22"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 17,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 15,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "table",
+   "title": "Este periodo contra el anterior",
+   "description": "El periodo anterior es el de igual duración justo antes del elegido.",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT *, \"Este periodo\" - \"Periodo anterior\" AS \"Cambio\" FROM (SELECT 'T1 · Cumplimiento de ruta' AS \"Indicador\", '%' AS \"Unidad\", ROUND((SELECT 100.0 * COUNT(*) FILTER (WHERE state = 'done') / NULLIF(COUNT(*), 0) FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)))::numeric, 1) AS \"Este periodo\", ROUND((SELECT 100.0 * COUNT(*) FILTER (WHERE state = 'done') / NULLIF(COUNT(*), 0) FROM kpi_trips WHERE starts_at >= $__timeFrom()::timestamptz - ($__timeTo()::timestamptz - $__timeFrom()::timestamptz) AND starts_at < $__timeFrom()::timestamptz AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)))::numeric, 1) AS \"Periodo anterior\" UNION ALL SELECT 'T2 · Puntualidad' AS \"Indicador\", '%' AS \"Unidad\", ROUND((SELECT 100.0 * COUNT(*) FILTER (WHERE status <> 'late') / NULLIF(COUNT(*), 0) FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL)::numeric, 1) AS \"Este periodo\", ROUND((SELECT 100.0 * COUNT(*) FILTER (WHERE status <> 'late') / NULLIF(COUNT(*), 0) FROM kpi_trip_stops WHERE starts_at >= $__timeFrom()::timestamptz - ($__timeTo()::timestamptz - $__timeFrom()::timestamptz) AND starts_at < $__timeFrom()::timestamptz AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL)::numeric, 1) AS \"Periodo anterior\" UNION ALL SELECT 'T3 · Retraso promedio' AS \"Indicador\", 'min' AS \"Unidad\", ROUND((SELECT AVG(delay_min) FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND status = 'late')::numeric, 1) AS \"Este periodo\", ROUND((SELECT AVG(delay_min) FROM kpi_trip_stops WHERE starts_at >= $__timeFrom()::timestamptz - ($__timeTo()::timestamptz - $__timeFrom()::timestamptz) AND starts_at < $__timeFrom()::timestamptz AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND status = 'late')::numeric, 1) AS \"Periodo anterior\" UNION ALL SELECT 'T4 · Paradas atendidas' AS \"Indicador\", '%' AS \"Unidad\", ROUND((SELECT 100.0 * COUNT(*) FILTER (WHERE actual_time IS NOT NULL) / NULLIF(COUNT(*), 0) FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)))::numeric, 1) AS \"Este periodo\", ROUND((SELECT 100.0 * COUNT(*) FILTER (WHERE actual_time IS NOT NULL) / NULLIF(COUNT(*), 0) FROM kpi_trip_stops WHERE starts_at >= $__timeFrom()::timestamptz - ($__timeTo()::timestamptz - $__timeFrom()::timestamptz) AND starts_at < $__timeFrom()::timestamptz AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)))::numeric, 1) AS \"Periodo anterior\" UNION ALL SELECT 'T8 · Incidencias' AS \"Indicador\", 'n' AS \"Unidad\", ROUND((SELECT COUNT(*) FROM kpi_alerts WHERE $__timeFilter(happened_at) AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)))::numeric, 1) AS \"Este periodo\", ROUND((SELECT COUNT(*) FROM kpi_alerts WHERE happened_at >= $__timeFrom()::timestamptz - ($__timeTo()::timestamptz - $__timeFrom()::timestamptz) AND happened_at < $__timeFrom()::timestamptz AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)))::numeric, 1) AS \"Periodo anterior\") c ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "align": "auto",
+      "cellOptions": {
+       "type": "auto"
+      },
+      "filterable": true
+     },
+     "noValue": "—"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Cambio"
+      },
+      "properties": [
+       {
+        "id": "decimals",
+        "value": 1
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "sortBy": [],
+    "footer": {
+     "show": false
+    }
+   },
+   "id": 18,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 23,
+    "w": 24,
+    "h": 7
+   }
+  }
+ ]
+}

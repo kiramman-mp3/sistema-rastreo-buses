@@ -87,6 +87,42 @@ services:
       start_period: 60s
     logging: *logging
 
+  # Grafana, the second dashboard, embedded in Odoo. Optional: it starts only with the profile "bi"
+  # (COMPOSE_PROFILES=bi in .env.prod, or --profile bi). See docs/guias/GRAFANA.md.
+  grafana:
+    profiles: ["bi"]
+    image: ${GRAFANA_IMAGE:-grafana/grafana-oss:11.6.0}
+    restart: unless-stopped
+    env_file:
+      - ./bi/grafana/grafana.env
+    environment:
+      GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:?set GRAFANA_DOMAIN in .env.prod}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_DOMAIN}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env.prod}
+      GF_SECURITY_COOKIE_SECURE: "true"
+      GF_SECURITY_COOKIE_SAMESITE: lax
+      GRAFANA_DB_HOST: ${DB_HOST:-db}:${DB_PORT:-5432}
+      GRAFANA_DB_NAME: ${ODOO_DB:-buses}
+      GRAFANA_DB_SSLMODE: ${GRAFANA_DB_SSLMODE:-disable}
+      GRAFANA_DB_PASSWORD: ${GRAFANA_DB_PASSWORD:?set GRAFANA_DB_PASSWORD in .env.prod}
+      GRAFANA_JWT_SECRET: ${GRAFANA_JWT_SECRET:?set GRAFANA_JWT_SECRET in .env.prod}
+    entrypoint: ["/bin/sh", "/etc/grafana/entrypoint.sh"]
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./bi/grafana/entrypoint.sh:/etc/grafana/entrypoint.sh:ro
+      - ./bi/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./bi/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    expose:
+      - "3000"
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    logging: *logging
+
   proxy:
     image: caddy:2
     restart: unless-stopped
@@ -97,6 +133,7 @@ services:
       DOMAIN: ${DOMAIN:?set DOMAIN in .env.prod}
       GPS_DOMAIN: ${GPS_DOMAIN:?set GPS_DOMAIN in .env.prod}
       TRACCAR_DOMAIN: ${TRACCAR_DOMAIN:-traccar.20.119.213.192.nip.io}
+      GRAFANA_DOMAIN: ${GRAFANA_DOMAIN:-grafana.localhost}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env.prod}
     ports:
       - "${HTTP_PORT:-80}:80"
@@ -111,5 +148,6 @@ volumes:
   db-data:
   odoo-data:
   traccar-logs:
+  grafana-data:
   caddy-data:
   caddy-config:

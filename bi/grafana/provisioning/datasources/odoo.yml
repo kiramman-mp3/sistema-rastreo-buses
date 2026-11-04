@@ -1,0 +1,19 @@
+apiVersion: 1
+datasources:
+  - name: Odoo KPI
+    uid: bus-kpi
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: $GRAFANA_DB_HOST
+    user: grafana_reader
+    isDefault: true
+    editable: false
+    jsonData:
+      database: $GRAFANA_DB_NAME
+      sslmode: $GRAFANA_DB_SSLMODE
+      postgresVersion: 1500
+      maxOpenConns: 3
+      maxIdleConns: 2
+      timeInterval: 30s
+    secureJsonData:
+      password: $GRAFANA_DB_PASSWORD
