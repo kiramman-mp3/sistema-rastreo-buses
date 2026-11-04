@@ -24,58 +24,7 @@
    "15m"
   ]
  },
- "links": [
-  {
-   "title": "Rutas",
-   "type": "link",
-   "url": "/d/bus-rutas",
-   "icon": "dashboard",
-   "keepTime": true,
-   "includeVars": true,
-   "asDropdown": false,
-   "targetBlank": false
-  },
-  {
-   "title": "Puntualidad",
-   "type": "link",
-   "url": "/d/bus-puntualidad",
-   "icon": "dashboard",
-   "keepTime": true,
-   "includeVars": true,
-   "asDropdown": false,
-   "targetBlank": false
-  },
-  {
-   "title": "Recorridos",
-   "type": "link",
-   "url": "/d/bus-recorridos",
-   "icon": "dashboard",
-   "keepTime": true,
-   "includeVars": true,
-   "asDropdown": false,
-   "targetBlank": false
-  },
-  {
-   "title": "Incidencias",
-   "type": "link",
-   "url": "/d/bus-incidencias",
-   "icon": "dashboard",
-   "keepTime": true,
-   "includeVars": true,
-   "asDropdown": false,
-   "targetBlank": false
-  },
-  {
-   "title": "Calidad del sistema",
-   "type": "link",
-   "url": "/d/bus-calidad",
-   "icon": "dashboard",
-   "keepTime": true,
-   "includeVars": true,
-   "asDropdown": false,
-   "targetBlank": false
-  }
- ],
+ "links": [],
  "templating": {
   "list": [
    {

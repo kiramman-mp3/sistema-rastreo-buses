@@ -121,9 +121,7 @@ class Board:
             'schemaVersion': 39, 'version': 1, 'editable': False, 'graphTooltip': 1, 'liveNow': False,
             'refresh': refresh, 'timezone': 'America/Guayaquil', 'time': {'from': 'now-30d', 'to': 'now'},
             'timepicker': {'refresh_intervals': ['30s', '1m', '5m', '15m']},
-            'links': [{'title': name, 'type': 'link', 'url': f'/d/{uid}', 'icon': 'dashboard', 'keepTime': True,
-                       'includeVars': True, 'asDropdown': False, 'targetBlank': False}
-                      for uid, name in LINKS if uid != self.uid],
+            'links': [],             # Odoo shows the tabs; Grafana is only the screen inside
             'templating': {'list': self.variables or filters()},
             'annotations': {'list': self.annotations},
             'panels': self.panels,

@@ -14,6 +14,19 @@
 	}
 }
 
+# Grafana is shown inside an iframe of the Odoo site, so it must be allowed to be framed by that site and no other.
+(grafana_headers) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Content-Security-Policy "frame-ancestors https://{$DOMAIN}"
+		-X-Frame-Options
+		-Server
+	}
+}
+
 {$DOMAIN} {
 	import security_headers
 
@@ -46,4 +59,10 @@
 {$TRACCAR_DOMAIN} {
 	import security_headers
 	reverse_proxy traccar:8082
+}
+
+# Grafana dashboards (profile "bi"). Without GRAFANA_DOMAIN this is a local name nobody reaches.
+{$GRAFANA_DOMAIN:grafana.localhost} {
+	import grafana_headers
+	reverse_proxy grafana:3000
 }
