@@ -84,6 +84,13 @@ export default function ShiftScreen() {
   const nextCoords = routeMap?.stops.find((s) => s.id === nextStop?.id);
   const meters = busFix && nextCoords ? calculateDistanceMeters(busFix.lat, busFix.lon, nextCoords.lat, nextCoords.lon) : null;
 
+  // The planned time of the next stop and how late or early the bus is, when it has a scheduled trip.
+  const dueText = nextStop?.plannedAt ? tf('cabinDue', { time: localTime(nextStop.plannedAt) }) : '';
+  const lastDelay = [...stops].reverse().find((s) => s.status === 'arrived' && s.delayMin !== null)?.delayMin ?? null;
+  const delayText =
+    lastDelay === null ? '' : lastDelay > 0.5 ? tf('cabinLate', { n: Math.round(lastDelay) }) : t('cabinOnTime');
+  const planText = [dueText, delayText].filter(Boolean).join(' · ');
+
   const serverSos = shiftState?.sos ?? null;
   const phase = sosPhase(serverSos, sosLocal);
   let sosStatus: string | null = null;
@@ -242,7 +249,13 @@ export default function ShiftScreen() {
       {/* A phone has no height for a line of its own for each fact: the label, the distance and the count share one. */}
       <Txt size="small" dim lines={1}>
         {layout.compact && nextStop
-          ? [t('cabinNext'), distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
+          ? [
+              t('cabinNext'),
+              distance(meters),
+              left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop'),
+              // on a screen with little height the schedule shares the line, it does not take a new one
+              layout.short ? planText : '',
+            ]
               .filter(Boolean)
               .join(' · ')
           : t('cabinNext')}
@@ -252,6 +265,11 @@ export default function ShiftScreen() {
           {nextStop ? nextStop.name : t('noNextStop')}
         </Txt>
       </Animated.View>
+      {planText && !layout.short ? (
+        <Txt size="small" bold>
+          {planText}
+        </Txt>
+      ) : null}
       {nextStop && !layout.compact ? (
         <Txt size="body" dim>
           {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
