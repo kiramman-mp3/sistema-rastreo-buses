@@ -63,11 +63,11 @@
                             </button>
                         </t>
                     </form>
-                    <a href="/web/login" class="boton-acceso" t-att-aria-label="s.get('staff_login', 'Iniciar sesión')" t-att-title="s.get('staff_login', 'Iniciar sesión')">
+                    <a href="/web/login" class="boton-acceso" t-att-aria-label="s.get('staff_login', 'Sign in')" t-att-title="s.get('staff_login', 'Sign in')">
                         <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false">
                             <path fill-rule="evenodd" d="M10 2a4 4 0 100 8 4 4 0 000-8zm-6 14a6 6 0 1112 0H4z" clip-rule="evenodd"/>
                         </svg>
-                        <span t-esc="s.get('staff_login', 'Iniciar sesión')"/>
+                        <span t-esc="s.get('staff_login', 'Sign in')"/>
                     </a>
                 </div>
             </div>

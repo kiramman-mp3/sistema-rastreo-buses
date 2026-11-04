@@ -56,7 +56,7 @@
                                     <field name="longitude"/>
                                     <field name="radius"/>
                                     <button name="action_pick_on_map" type="object" icon="fa-map-marker"
-                                            title="Elegir en el mapa"/>
+                                            title="Pick on the map"/>
                                 </tree>
                             </field>
                         </page>

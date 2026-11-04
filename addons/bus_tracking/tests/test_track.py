@@ -148,8 +148,9 @@ class TestGpx(BusCase):
         self.assertGreaterEqual(self.route.track_points, 2)
 
     def test_waypoints_become_stops_only_on_a_route_without_stops(self):
+        named = (('Terminal', self.LINE[0]), ('Plaza', self.LINE[20]), ('', self.LINE[-1]))
         wpts = ''.join('<wpt lat="%s" lon="%s"><name>%s</name></wpt>' % (lat, lon, name)
-                       for name, (lat, lon) in (('Terminal', self.LINE[0]), ('Plaza', self.LINE[20]), ('', self.LINE[-1])))
+                       for name, (lat, lon) in named)
         data = gpx_with(wpts, trk(self.LINE))
         self.load(data, create_stops=True)           # this route already has stops: untouched
         self.assertEqual(len(self.route.stop_ids), 3)

@@ -1,6 +1,6 @@
 {
     'name': 'Bus Tracking (Traccar)',
-    'version': '16.0.1.3.0',
+    'version': '16.0.1.4.0',
     'category': 'Operations',
     'summary': 'Track bus routes in real time with Traccar',
     'description': """
@@ -19,6 +19,7 @@ Live bus tracking and route monitoring backed by a Traccar server.
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/sequences.xml',
+        'data/languages.xml',
         'views/bus_vehicle_views.xml',
         'views/bus_route_views.xml',
         'views/bus_position_views.xml',
