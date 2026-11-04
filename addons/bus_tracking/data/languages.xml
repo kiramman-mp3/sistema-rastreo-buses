@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English is the language the texts are written in, Spanish the one they are translated to (i18n/es.po):
+     both must be there for a user to pick either in the preferences. -->
+<odoo noupdate="1">
+    <record id="base.lang_en" model="res.lang">
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
