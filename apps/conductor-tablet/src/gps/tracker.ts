@@ -2,6 +2,7 @@ import * as Battery from 'expo-battery';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
+import { GPS_INTERVAL_MS } from './interval';
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
 import { flushFixes, ingestLocations } from './runtime';
 import { gpsStore, locationQueue, readLastSent, writeLastError, writeLastSample, writeLastSent } from './store';
@@ -49,7 +50,7 @@ export const liveGps: GpsController = {
       if (running) await Location.stopLocationUpdatesAsync(GPS_TASK);
       await Location.startLocationUpdatesAsync(GPS_TASK, {
         accuracy: Location.Accuracy.High,
-        timeInterval: 10_000,
+        timeInterval: GPS_INTERVAL_MS,
         distanceInterval: 0,
         pausesUpdatesAutomatically: false,
         showsBackgroundLocationIndicator: true,
@@ -68,7 +69,7 @@ export const liveGps: GpsController = {
         foregroundWatcher = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
-            timeInterval: 10_000,
+            timeInterval: GPS_INTERVAL_MS,
             distanceInterval: 0,
           },
           (location) => {
@@ -82,19 +83,19 @@ export const liveGps: GpsController = {
 
     // iOS CoreLocation ignores timeInterval and enters sleep mode when the device is stationary.
     // This periodic heartbeat ensures stationary fixes (e.g. at traffic lights, terminals or testing)
-    // are sent to Traccar every 10 seconds while the app is running in the cockpit.
+    // are sent to Traccar every few seconds while the app is running in the cockpit.
     stationaryHeartbeat = setInterval(async () => {
       try {
         const lastSent = await readLastSent();
         const now = Date.now();
-        if (!lastSent || now - lastSent.at >= 9_500) {
+        if (!lastSent || now - lastSent.at >= GPS_INTERVAL_MS - 500) {
           const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
           await runLocationTask([loc]);
         }
       } catch {
         // Ignored
       }
-    }, 10_000);
+    }, GPS_INTERVAL_MS);
   },
   async stop() {
     if (stationaryHeartbeat) {
