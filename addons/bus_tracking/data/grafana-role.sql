@@ -19,5 +19,5 @@ ALTER ROLE grafana_reader SET idle_in_transaction_session_timeout = '30s';
 GRANT CONNECT ON DATABASE "__DB__" TO grafana_reader;
 GRANT USAGE ON SCHEMA public TO grafana_reader;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM grafana_reader;
-GRANT SELECT ON kpi_routes, kpi_trips, kpi_trip_stops, kpi_alerts, kpi_positions, kpi_positions_daily, kpi_software
-    TO grafana_reader;
+GRANT SELECT ON kpi_routes, kpi_route_stops, kpi_trips, kpi_trip_stops, kpi_alerts, kpi_positions,
+    kpi_positions_daily, kpi_response, kpi_software TO grafana_reader;
