@@ -1,0 +1,1648 @@
+{
+ "uid": "bus-puntualidad",
+ "title": "Puntualidad",
+ "description": "Cuándo y dónde se retrasan los buses.",
+ "tags": [
+  "bus-tracking"
+ ],
+ "schemaVersion": 39,
+ "version": 1,
+ "editable": false,
+ "graphTooltip": 1,
+ "liveNow": false,
+ "refresh": "30s",
+ "timezone": "America/Guayaquil",
+ "time": {
+  "from": "now-30d",
+  "to": "now"
+ },
+ "timepicker": {
+  "refresh_intervals": [
+   "30s",
+   "1m",
+   "5m",
+   "15m"
+  ]
+ },
+ "links": [
+  {
+   "title": "Resumen",
+   "type": "link",
+   "url": "/d/bus-resumen",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Rutas",
+   "type": "link",
+   "url": "/d/bus-rutas",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Recorridos",
+   "type": "link",
+   "url": "/d/bus-recorridos",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Incidencias",
+   "type": "link",
+   "url": "/d/bus-incidencias",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Calidad del sistema",
+   "type": "link",
+   "url": "/d/bus-calidad",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  }
+ ],
+ "templating": {
+  "list": [
+   {
+    "name": "route",
+    "label": "Línea",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT route_code FROM kpi_routes WHERE active ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "bus",
+    "label": "Bus",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT bus FROM (SELECT bus FROM kpi_trips UNION SELECT bus FROM kpi_alerts) b ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "scope",
+    "label": "Datos",
+    "type": "custom",
+    "multi": false,
+    "includeAll": false,
+    "query": "Reales y simulados : all, Solo reales : real, Solo simulados : simulated",
+    "current": {
+     "text": "Reales y simulados",
+     "value": "all"
+    },
+    "options": [
+     {
+      "text": "Reales y simulados",
+      "value": "all",
+      "selected": true
+     },
+     {
+      "text": "Solo reales",
+      "value": "real",
+      "selected": false
+     },
+     {
+      "text": "Solo simulados",
+      "value": "simulated",
+      "selected": false
+     }
+    ]
+   }
+  ]
+ },
+ "annotations": {
+  "list": [
+   {
+    "name": "Alertas",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "enable": false,
+    "iconColor": "#A1221B",
+    "target": {
+     "refId": "Anno",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT happened_at AS time, CASE kind WHEN 'speeding' THEN 'Exceso de velocidad' WHEN 'offline' THEN 'Sin señal' WHEN 'long_stop' THEN 'Parada larga' WHEN 'off_route' THEN 'Fuera de ruta' WHEN 'late_arrival' THEN 'Llegada tarde' WHEN 'skipped_stop' THEN 'Parada omitida' WHEN 'incomplete_trip' THEN 'Recorrido incompleto' WHEN 'late_start' THEN 'Salida tarde' WHEN 'breakdown' THEN 'Avería' WHEN 'traffic' THEN 'Tráfico' WHEN 'accident' THEN 'Accidente' WHEN 'other' THEN 'Otro' WHEN 'sos' THEN 'Emergencia (SOS)' ELSE kind END AS text, kind AS tags FROM kpi_alerts WHERE $__timeFilter(happened_at) AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND origin = 'alert' ORDER BY 1"
+    }
+   }
+  ]
+ },
+ "panels": [
+  {
+   "type": "timeseries",
+   "title": "Puntualidad por día (%)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "time_series",
+     "rawQuery": true,
+     "rawSql": "SELECT date_trunc('day', starts_at - interval '5 hours') + interval '5 hours' AS time,\n        100.0 * COUNT(*) FILTER (WHERE status <> 'late') / NULLIF(COUNT(*), 0) AS \"Puntualidad\"\n        FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 18,
+      "showPoints": "auto",
+      "spanNulls": true,
+      "barAlignment": 0,
+      "stacking": {
+       "mode": "none",
+       "group": "A"
+      }
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "percent",
+     "max": 100,
+     "min": 0
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Puntualidad"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#7A1A22"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 1,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Retraso promedio por día (min)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "time_series",
+     "rawQuery": true,
+     "rawSql": "SELECT date_trunc('day', starts_at - interval '5 hours') + interval '5 hours' AS time,\n        AVG(delay_min) AS \"Retraso promedio\" FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND status = 'late' GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 18,
+      "showPoints": "auto",
+      "spanNulls": true,
+      "barAlignment": 0,
+      "stacking": {
+       "mode": "none",
+       "group": "A"
+      }
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "m"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Retraso promedio"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#9A4A14"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 2,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "barchart",
+   "title": "Cómo llegan los buses a las paradas",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT label AS \"Llegada\", n AS \"Paradas\" FROM (\n        SELECT CASE WHEN delay_min < -5 THEN 0 WHEN delay_min <= 5 THEN 1 WHEN delay_min <= 10 THEN 2\n                    WHEN delay_min <= 15 THEN 3 WHEN delay_min <= 20 THEN 4 ELSE 5 END AS ord,\n               CASE WHEN delay_min < -5 THEN 'Adelantado (más de 5 min)' WHEN delay_min <= 5 THEN 'A tiempo (hasta 5 min)'\n                    WHEN delay_min <= 10 THEN 'Retraso de 5 a 10 min' WHEN delay_min <= 15 THEN 'Retraso de 10 a 15 min'\n                    WHEN delay_min <= 20 THEN 'Retraso de 15 a 20 min' ELSE 'Retraso de más de 20 min' END AS label,\n               COUNT(*) AS n\n          FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL GROUP BY 1, 2) b ORDER BY ord"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Paradas"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#7A1A22"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "vertical",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 3,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "barchart",
+   "title": "Las paradas con más retraso (min)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT stop_name || ' (' || route_code || ')' AS \"Parada\",\n        AVG(delay_min) AS \"Retraso promedio\" FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL\n        GROUP BY stop_name, route_code ORDER BY 2 DESC LIMIT 12"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "m"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Retraso promedio"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#9A4A14"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "horizontal",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 4,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "table",
+   "title": "Retraso promedio por parada y hora de salida (min)",
+   "description": "Verde hasta 5 min, ámbar hasta 10 min, rojo más allá. La hora es la planificada, hora local.",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT stop_name AS \"Parada\", route_code AS \"Línea\", AVG(delay_min) FILTER (WHERE local_hour = 5) AS \"05 h\", AVG(delay_min) FILTER (WHERE local_hour = 6) AS \"06 h\", AVG(delay_min) FILTER (WHERE local_hour = 7) AS \"07 h\", AVG(delay_min) FILTER (WHERE local_hour = 8) AS \"08 h\", AVG(delay_min) FILTER (WHERE local_hour = 9) AS \"09 h\", AVG(delay_min) FILTER (WHERE local_hour = 10) AS \"10 h\", AVG(delay_min) FILTER (WHERE local_hour = 11) AS \"11 h\", AVG(delay_min) FILTER (WHERE local_hour = 12) AS \"12 h\", AVG(delay_min) FILTER (WHERE local_hour = 13) AS \"13 h\", AVG(delay_min) FILTER (WHERE local_hour = 14) AS \"14 h\", AVG(delay_min) FILTER (WHERE local_hour = 15) AS \"15 h\", AVG(delay_min) FILTER (WHERE local_hour = 16) AS \"16 h\", AVG(delay_min) FILTER (WHERE local_hour = 17) AS \"17 h\", AVG(delay_min) FILTER (WHERE local_hour = 18) AS \"18 h\", AVG(delay_min) FILTER (WHERE local_hour = 19) AS \"19 h\", AVG(delay_min) FILTER (WHERE local_hour = 20) AS \"20 h\", AVG(delay_min) FILTER (WHERE local_hour = 21) AS \"21 h\", AVG(delay_min) FILTER (WHERE local_hour = 22) AS \"22 h\"\n        FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL GROUP BY stop_name, route_code\n        ORDER BY route_code, MIN(sequence)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "align": "auto",
+      "cellOptions": {
+       "type": "auto"
+      },
+      "filterable": true
+     },
+     "noValue": "—"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "05 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "06 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "07 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "08 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "09 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "10 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "11 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "12 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "13 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "14 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "15 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "16 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "17 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "18 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "19 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "20 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "21 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "22 h"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "m"
+       },
+       {
+        "id": "decimals",
+        "value": 1
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       },
+       {
+        "id": "custom.width",
+        "value": 62
+       },
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "special",
+          "options": {
+           "match": "null",
+           "result": {
+            "text": "",
+            "color": "transparent"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "sortBy": [],
+    "footer": {
+     "show": false
+    }
+   },
+   "id": 5,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 16,
+    "w": 24,
+    "h": 9
+   }
+  }
+ ]
+}

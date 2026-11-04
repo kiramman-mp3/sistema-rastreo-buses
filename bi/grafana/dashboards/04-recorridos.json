@@ -1,0 +1,518 @@
+{
+ "uid": "bus-recorridos",
+ "title": "Recorridos",
+ "description": "Cada recorrido programado: lo que se planeó y lo que pasó.",
+ "tags": [
+  "bus-tracking"
+ ],
+ "schemaVersion": 39,
+ "version": 1,
+ "editable": false,
+ "graphTooltip": 1,
+ "liveNow": false,
+ "refresh": "30s",
+ "timezone": "America/Guayaquil",
+ "time": {
+  "from": "now-30d",
+  "to": "now"
+ },
+ "timepicker": {
+  "refresh_intervals": [
+   "30s",
+   "1m",
+   "5m",
+   "15m"
+  ]
+ },
+ "links": [
+  {
+   "title": "Resumen",
+   "type": "link",
+   "url": "/d/bus-resumen",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Rutas",
+   "type": "link",
+   "url": "/d/bus-rutas",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Puntualidad",
+   "type": "link",
+   "url": "/d/bus-puntualidad",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Incidencias",
+   "type": "link",
+   "url": "/d/bus-incidencias",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  },
+  {
+   "title": "Calidad del sistema",
+   "type": "link",
+   "url": "/d/bus-calidad",
+   "icon": "dashboard",
+   "keepTime": true,
+   "includeVars": true,
+   "asDropdown": false,
+   "targetBlank": false
+  }
+ ],
+ "templating": {
+  "list": [
+   {
+    "name": "route",
+    "label": "Línea",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT route_code FROM kpi_routes WHERE active ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "bus",
+    "label": "Bus",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT bus FROM (SELECT bus FROM kpi_trips UNION SELECT bus FROM kpi_alerts) b ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "scope",
+    "label": "Datos",
+    "type": "custom",
+    "multi": false,
+    "includeAll": false,
+    "query": "Reales y simulados : all, Solo reales : real, Solo simulados : simulated",
+    "current": {
+     "text": "Reales y simulados",
+     "value": "all"
+    },
+    "options": [
+     {
+      "text": "Reales y simulados",
+      "value": "all",
+      "selected": true
+     },
+     {
+      "text": "Solo reales",
+      "value": "real",
+      "selected": false
+     },
+     {
+      "text": "Solo simulados",
+      "value": "simulated",
+      "selected": false
+     }
+    ]
+   },
+   {
+    "name": "trip",
+    "label": "Recorrido",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "refresh": 2,
+    "multi": false,
+    "includeAll": false,
+    "sort": 0,
+    "query": "SELECT 'Recorrido ' || trip_id || ' · ' || route_code || ' · ' ||\n        to_char(local_day, 'DD/MM') || CASE WHEN simulated THEN ' (simulado)' ELSE '' END AS __text, trip_id::text AS __value\n        FROM kpi_trips WHERE state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) ORDER BY starts_at DESC LIMIT 100"
+   }
+  ]
+ },
+ "annotations": {
+  "list": []
+ },
+ "panels": [
+  {
+   "type": "table",
+   "title": "Recorridos del periodo",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT trip_id AS \"N.º\", to_char(local_day, 'YYYY-MM-DD') AS \"Fecha\", route_code AS \"Línea\", bus AS \"Bus\", state AS \"Estado\",\n        CASE WHEN simulated THEN 'Simulado' ELSE 'Real' END AS \"Origen\", stops_visited AS \"Paradas atendidas\",\n        stops_total AS \"Paradas\", stops_late AS \"Con retraso\", stops_skipped AS \"Omitidas\",\n        ROUND(delay_end_min::numeric, 1) AS \"Retraso al final (min)\", ROUND(distance_est_km::numeric, 1) AS \"Km estimados\",\n        ROUND(distance_real_km::numeric, 1) AS \"Km recorridos\", COALESCE(NULLIF(detected_flags, ''), '—') AS \"Detectado\"\n        FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) ORDER BY starts_at DESC LIMIT 200"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "align": "auto",
+      "cellOptions": {
+       "type": "auto"
+      },
+      "filterable": true
+     },
+     "noValue": "—"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Estado"
+      },
+      "properties": [
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "value",
+          "options": {
+           "done": {
+            "text": "Completo",
+            "color": "#1D6B44"
+           },
+           "incomplete": {
+            "text": "Incompleto",
+            "color": "#A1221B"
+           }
+          }
+         }
+        ]
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-text"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "sortBy": [],
+    "footer": {
+     "show": false
+    }
+   },
+   "id": 1,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 9
+   }
+  },
+  {
+   "type": "table",
+   "title": "Paradas del recorrido elegido",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT sequence AS \"N.º\", stop_name AS \"Parada\", to_char(planned_time - interval '5 hours', 'HH24:MI') AS \"Hora planificada\",\n        to_char(actual_time - interval '5 hours', 'HH24:MI') AS \"Hora real\", status AS \"Estado\", ROUND(delay_min::numeric, 1) AS \"Retraso (min)\"\n        FROM kpi_trip_stops WHERE trip_id = $trip ORDER BY sequence"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "align": "auto",
+      "cellOptions": {
+       "type": "auto"
+      },
+      "filterable": true
+     },
+     "noValue": "—"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Estado"
+      },
+      "properties": [
+       {
+        "id": "mappings",
+        "value": [
+         {
+          "type": "value",
+          "options": {
+           "on_time": {
+            "text": "A tiempo",
+            "color": "#1D6B44"
+           },
+           "late": {
+            "text": "Tarde",
+            "color": "#A1221B"
+           },
+           "early": {
+            "text": "Adelantado",
+            "color": "#1E5560"
+           },
+           "skipped": {
+            "text": "Omitida",
+            "color": "#A1221B"
+           },
+           "pending": {
+            "text": "Pendiente",
+            "color": "#172025"
+           }
+          }
+         }
+        ]
+       },
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-text"
+        }
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Retraso (min)"
+      },
+      "properties": [
+       {
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background",
+         "mode": "basic"
+        }
+       },
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "rgba(29,107,68,0.35)",
+           "value": null
+          },
+          {
+           "color": "rgba(201,138,0,0.55)",
+           "value": 5.0001
+          },
+          {
+           "color": "rgba(161,34,27,0.65)",
+           "value": 10.0001
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "sortBy": [],
+    "footer": {
+     "show": false
+    }
+   },
+   "id": 2,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 9,
+    "w": 10,
+    "h": 10
+   }
+  },
+  {
+   "type": "geomap",
+   "title": "Trazado del recorrido elegido y sus paradas",
+   "description": "Las posiciones GPS recibidas durante el recorrido (granate) y las paradas de la línea (amarillo).",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT fix_time AS time, latitude, longitude, speed AS \"Velocidad\" FROM kpi_positions WHERE trip_id = $trip ORDER BY fix_time"
+    },
+    {
+     "refId": "B",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT s.stop_name AS \"Parada\", s.latitude, s.longitude FROM kpi_route_stops s JOIN kpi_trips t ON t.route_code = s.route_code WHERE t.trip_id = $trip ORDER BY s.sequence"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "options": {
+    "view": {
+     "id": "fit",
+     "allLayers": true,
+     "zoom": 14,
+     "lat": -1.25,
+     "lon": -78.62
+    },
+    "controls": {
+     "showZoom": true,
+     "mouseWheelZoom": true,
+     "showAttribution": true
+    },
+    "basemap": {
+     "type": "osm-standard",
+     "name": "OpenStreetMap"
+    },
+    "layers": [
+     {
+      "type": "route",
+      "name": "Trazado",
+      "config": {
+       "style": {
+        "color": {
+         "fixed": "#7A1A22"
+        },
+        "opacity": 0.9,
+        "size": {
+         "fixed": 3
+        },
+        "lineWidth": 3,
+        "rotation": {
+         "fixed": 0,
+         "min": -360,
+         "max": 360,
+         "mode": "mod"
+        }
+       }
+      },
+      "filterData": {
+       "id": "byRefId",
+       "options": "A"
+      },
+      "location": {
+       "mode": "coords",
+       "latitude": "latitude",
+       "longitude": "longitude"
+      }
+     },
+     {
+      "type": "markers",
+      "name": "Paradas",
+      "config": {
+       "showLegend": false,
+       "style": {
+        "color": {
+         "fixed": "#FFC62B"
+        },
+        "opacity": 1,
+        "size": {
+         "fixed": 9
+        },
+        "symbol": {
+         "fixed": "img/icons/marker/circle.svg",
+         "mode": "fixed"
+        },
+        "text": {
+         "field": "Parada",
+         "fixed": "",
+         "mode": "field"
+        },
+        "textConfig": {
+         "fontSize": 11,
+         "offsetY": -14,
+         "textAlign": "center",
+         "textBaseline": "middle"
+        }
+       }
+      },
+      "filterData": {
+       "id": "byRefId",
+       "options": "B"
+      },
+      "location": {
+       "mode": "coords",
+       "latitude": "latitude",
+       "longitude": "longitude"
+      }
+     }
+    ],
+    "tooltip": {
+     "mode": "details"
+    }
+   },
+   "id": 3,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 10,
+    "y": 9,
+    "w": 14,
+    "h": 10
+   }
+  }
+ ]
+}
