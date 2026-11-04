@@ -83,6 +83,17 @@ class BusRoute(models.Model):
             'context': {'default_route_id': self.id, 'default_vehicle_id': self.vehicle_ids[:1].id},
         }
 
+    def action_load_gpx(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Load the track from a GPX file"),
+            'res_model': 'bus.route.gpx',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_route_id': self.id},
+        }
+
     def action_add_stop_on_map(self):
         self.ensure_one()
         return self.env['bus.route.stop']._open_map_picker(self.id)

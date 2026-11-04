@@ -26,3 +26,4 @@ access_bus_driver_token_manager,bus.driver.token manager,model_bus_driver_token,
 access_bus_incident_user,bus.incident user,model_bus_incident,group_bus_user,1,0,0,0
 access_bus_incident_manager,bus.incident manager,model_bus_incident,group_bus_manager,1,0,0,1
 access_bus_route_record_manager,bus.route.record manager,model_bus_route_record,group_bus_manager,1,1,1,1
+access_bus_route_gpx_manager,bus.route.gpx manager,model_bus_route_gpx,group_bus_manager,1,1,1,1
