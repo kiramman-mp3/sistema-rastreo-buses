@@ -11,7 +11,7 @@ Estados: **Hecha** (funciona y tiene prueba), **Hecha, sin prueba real** (funcio
 | Categoría | Ideas | Hechas | Retiradas | Descartadas | Pendientes |
 |---|---|---|---|---|---|
 | A. Pasajeros y portal público | 13 | 6 | 3 | 2 | 2 |
-| B. GPS y captura de datos | 10 | 7 | 1 | 0 | 2 |
+| B. GPS y captura de datos | 13 | 10 | 1 | 0 | 2 |
 | C. Operación y administración | 12 | 7 | 5 | 0 | 0 |
 | D. Alertas y notificaciones | 10 | 5 | 5 | 0 | 0 |
 | E. Seguridad y privacidad | 10 | 7 | 0 | 0 | 3 |
@@ -19,7 +19,7 @@ Estados: **Hecha** (funciona y tiene prueba), **Hecha, sin prueba real** (funcio
 | G. Infraestructura y producción | 11 | 5 | 0 | 0 | 6 |
 | H. Interfaz, marca e idiomas | 10 | 7 | 0 | 0 | 3 |
 | I. Alcance y gestión | 7 | 6 | 0 | 0 | 1 |
-| **Total** | **94** | **57** | **14** | **2** | **21** |
+| **Total** | **97** | **60** | **14** | **2** | **21** |
 
 Los totales se verificaron contando las filas de las tablas de abajo. "Hechas" incluye 3 ideas "hechas, sin prueba real" (B1, B4 y D7: funcionan con datos simulados). La idea A7 (kichwa) tiene un borrador y se cuenta como pendiente.
 
@@ -55,6 +55,9 @@ Los totales se verificaron contando las filas de las tablas de abajo. "Hechas" i
 | B8 | Enviar la ubicación del celular por HTTPS (proxy al puerto 5055) | Equipo | Hecha | Los puertos GPS ya no se abren al público |
 | B9 | Guía para el chofer y consentimiento por escrito del seguimiento | Equipo | Pendiente | La guía está hecha; falta el consentimiento y la revisión legal |
 | B10 | Probar un celular real 30 minutos con la pantalla apagada | Equipo | Pendiente | Criterio de aceptación de la fase 9 |
+| B11 | Forzar envío periódico en reposo en iOS (Stationary Heartbeat cada 10 s) | Equipo | Hecha | Resuelve la suspensión por inactividad de CoreLocation (`tracker.ts`) |
+| B12 | Activar reenvío explícito forward.enable en Traccar para webhook Odoo | Equipo | Hecha | Traccar no instanciaba PositionForwarder sin la clave |
+| B13 | Modo background de localización en iOS (UIBackgroundModes location) | Equipo | Hecha | Configurado en `app.json` para builds nativos de iPhone |
 
 ## C. Operación y administración
 

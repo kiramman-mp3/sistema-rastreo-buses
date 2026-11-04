@@ -42,8 +42,12 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-032 | 02-nov-2026 | Auditoría de diseño móvil (P2) | Había valores de espaciado fuera de la cuadrícula de 4 px y sin tokens | apps/conductor-tablet/app/*.tsx, src/ui/*.tsx | Cerrado |
 | DEF-033 | 02-nov-2026 | Auditoría de diseño móvil (P2) | Con la fuente del sistema al 130 % o más el turno se desbordaba y el SOS y Terminar turno quedaban inalcanzables | apps/conductor-tablet/app/shift.tsx, select.tsx, incident.tsx, gps.tsx | Cerrado |
 | DEF-034 | 02-nov-2026 | Auditoría de diseño móvil (P2) | La selección de bus y línea quedaba en blanco sin buses, sin líneas o con todos los buses en uso | apps/conductor-tablet/app/select.tsx | Cerrado |
+| DEF-035 | 04-nov-2026 | Diagnóstico en producción (Traccar/Odoo) | Traccar no reenviaba posiciones al webhook de Odoo por faltar FORWARD_ENABLE | docker-compose.yml, docker-compose.prod.yml | Cerrado |
+| DEF-036 | 04-nov-2026 | Diagnóstico en producción (logs de Odoo) | Saturación del pool de conexiones PostgreSQL en Odoo (PoolError: The Connection Pool Is Full) | config/odoo.prod.conf (db_maxconn) | Cerrado |
+| DEF-037 | 04-nov-2026 | Prueba en dispositivo móvil (pantalla Estado del GPS) | Dispositivo en Traccar mostraba guion (-) aun con credenciales guardadas en el almacenamiento | apps/conductor-tablet/app/gps.tsx | Cerrado |
+| DEF-038 | 04-nov-2026 | Prueba de campo en iOS (iPhone quieto) | El iPhone dejaba de transmitir ubicación por GPS al permanecer detenido o estático | apps/conductor-tablet/src/gps/tracker.ts, app.json | Cerrado |
 
-Resumen: 34 registrados, 33 cerrados (97 %), 1 abiertos. Densidad: 11,8 defectos por KLOC (2,871 KLOC de Python sin pruebas).
+Resumen: 38 registrados, 37 cerrados (97 %), 1 abiertos. Densidad: 13,2 defectos por KLOC (2,871 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -250,6 +254,30 @@ Resumen: 34 registrados, 33 cerrados (97 %), 1 abiertos. Densidad: 11,8 defectos
 - **Causa raíz:** No se pensó el estado vacío ni el caso de flota ocupada.
 - **Categoría:** Accesibilidad y diseño
 - **Prueba que lo protege:** Capturas de los escenarios empty y busy de qa/capturas_movil.py
+
+### DEF-035: Traccar no reenviaba posiciones al webhook de Odoo por faltar FORWARD_ENABLE
+
+- **Causa raíz:** Se asumió que FORWARD_TYPE=json reemplazaba a FORWARD_ENABLE en Traccar 6, pero forward.enable es obligatorio para inicializar el reenviador de posiciones.
+- **Categoría:** Configuración
+- **Prueba que lo protege:** Comprobación con curl hacia Traccar y verificación de ingesta de posiciones en Odoo y /bus_tracking/health en 200 OK
+
+### DEF-036: Saturación del pool de conexiones PostgreSQL en Odoo (PoolError: The Connection Pool Is Full)
+
+- **Causa raíz:** El límite db_maxconn=3 era insuficiente para soportar peticiones web concurrentes, cron y webhook en Supabase.
+- **Categoría:** Configuración
+- **Prueba que lo protege:** Ajuste de db_maxconn=10 en odoo.prod.conf y verificación de consultas concurrentes sin error
+
+### DEF-037: Dispositivo en Traccar mostraba guion (-) aun con credenciales guardadas en el almacenamiento
+
+- **Causa raíz:** La vista leía session.snapshot.gps (en memoria) en vez de leer de forma asíncrona gpsStore del almacenamiento seguro.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** Carga de uniqueId desde gpsStore en loadFacts() y tsc --noEmit PASS
+
+### DEF-038: El iPhone dejaba de transmitir ubicación por GPS al permanecer detenido o estático
+
+- **Causa raíz:** Apple CoreLocation ignora timeInterval (solo Android) y entra en reposo si no hay desplazamiento; además deferredUpdatesInterval retrasaba eventos hasta detectar movimiento.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** Implementación de Stationary Heartbeat periódico (10s), disparo inmediato al iniciar turno y eliminación de deferredUpdatesInterval; jest PASS (149 tests) y expo lint PASS
 
 ## 3. Qué falta para cerrar los abiertos
 
