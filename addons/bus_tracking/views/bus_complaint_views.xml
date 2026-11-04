@@ -124,7 +124,7 @@
     </record>
 
     <record id="action_bus_complaint" model="ir.actions.act_window">
-        <field name="name">Mensajes de pasajeros</field>
+        <field name="name">Passenger messages</field>
         <field name="res_model">bus.complaint</field>
         <field name="view_mode">kanban,tree,form</field>
         <field name="context">{'search_default_unresolved': 1}</field>
