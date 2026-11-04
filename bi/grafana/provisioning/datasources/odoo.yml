@@ -10,7 +10,7 @@ datasources:
     editable: false
     jsonData:
       database: $GRAFANA_DB_NAME
-      sslmode: disable
+      sslmode: $GRAFANA_DB_SSLMODE
       postgresVersion: 1500
       maxOpenConns: 3
       maxIdleConns: 2
