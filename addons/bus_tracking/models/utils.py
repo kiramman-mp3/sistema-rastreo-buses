@@ -70,10 +70,11 @@ def public_contact(env):
 
 
 # The driver app speaks Spanish, English and Kichwa; Odoo names its languages differently
-# (es_EC, en_US...). Kichwa has no Odoo translation, so it reads in Spanish.
+# (es_EC, en_US, qu_EC...). Kichwa is a language this module adds to Odoo (data/languages.xml); where it is
+# not installed the driver reads Spanish.
 APP_LANGUAGES = {
     'es': ('es_EC', 'es_419', 'es_ES'),
-    'qu': ('es_EC', 'es_419', 'es_ES'),
+    'qu': ('qu_EC', 'es_EC', 'es_419', 'es_ES'),
     'en': ('en_US', 'en_GB'),
 }
 

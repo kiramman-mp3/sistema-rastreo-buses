@@ -106,3 +106,19 @@ class TestLanguages(TransactionCase):
         menu = self.env.ref('bus_tracking.menu_bus_live_map')
         self.assertEqual(menu.with_context(lang='en_US').name, 'Live Map')
         self.assertEqual(menu.with_context(lang='es_ES').name, 'Mapa en vivo')
+
+    def test_kichwa_is_a_language_of_the_panel(self):
+        lang = self.env['res.lang'].with_context(active_test=False).search([('code', '=', 'qu_EC')])
+        self.assertTrue(lang.active)
+        self.assertEqual(lang.iso_code, 'qu')
+        self.env['ir.module.module'].search([('name', '=', 'bus_tracking')])._update_translations(
+            filter_lang='qu_EC', overwrite=True)
+        root = self.env.ref('bus_tracking.menu_bus_root')
+        names = root.with_context(lang='qu_EC').child_id.mapped('name')
+        self.assertEqual(names, ['Kunan mapa', 'Llankaykuna', 'Bus tantakuna', 'Willaykuna', 'Churana'])
+        # every text of the module has a Kichwa translation
+        import polib
+        import os
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'i18n', 'qu.po')
+        empty = [e.msgid for e in polib.pofile(path) if e.msgid and not e.msgstr]
+        self.assertEqual(empty, [])
