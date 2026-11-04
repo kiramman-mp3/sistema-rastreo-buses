@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Animated, AppState, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
@@ -15,6 +15,7 @@ import { buildNotices } from '../src/shift/notices';
 import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { showDialog } from '../src/ui/dialog';
 import { hapticCommit } from '../src/ui/haptics';
 import { readableOn } from '../src/ui/contrast';
 import { noticeCapacity, useLayout } from '../src/ui/layout';
@@ -135,7 +136,7 @@ export default function ShiftScreen() {
   );
 
   function confirmEnd() {
-    Alert.alert(t('confirmEnd'), t('confirmEndBody'), [
+    showDialog(t('confirmEnd'), t('confirmEndBody'), [
       { text: t('cancel'), style: 'cancel' },
       {
         text: t('endShift'),
@@ -145,10 +146,10 @@ export default function ShiftScreen() {
           session
             .endShift()
             .then((result) => {
-              if (result === 'queued') Alert.alert(t('endQueued'));
+              if (result === 'queued') showDialog(t('endQueued'));
               router.replace('/select');
             })
-            .catch(() => Alert.alert(t('serverError')));
+            .catch(() => showDialog(t('serverError')));
         },
       },
     ]);
@@ -164,7 +165,7 @@ export default function ShiftScreen() {
     } catch {
       // The server refused it (for example the shift was closed): say so, never "saved".
       setSosLocal(null);
-      Alert.alert(t('serverError'));
+      showDialog(t('serverError'));
     }
   }
 
