@@ -21,7 +21,8 @@
         <field name="category_id" ref="module_category_bus_tracking"/>
         <!-- Managers are not drivers: implying Driver would let any manager sign in on a tablet and would
              apply the "own shifts only" rule to them, hiding everyone else's shifts. -->
-        <field name="implied_ids" eval="[(6, 0, [ref('group_bus_user')])]"/>
+        <!-- ... but they run the fleet: Fleet's own Officer only sees the vehicle they drive, its Administrator sees all. -->
+        <field name="implied_ids" eval="[(6, 0, [ref('group_bus_user'), ref('fleet.fleet_group_manager')])]"/>
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 

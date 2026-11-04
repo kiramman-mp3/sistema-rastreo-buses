@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- The make and model every bus of the company has in Fleet (a vehicle needs a model). -->
+    <record id="fleet_brand_uta" model="fleet.vehicle.model.brand">
+        <field name="name">UTA</field>
+    </record>
+    <record id="fleet_model_bus" model="fleet.vehicle.model">
+        <field name="name">Bus</field>
+        <field name="brand_id" ref="fleet_brand_uta"/>
+    </record>
+</odoo>
