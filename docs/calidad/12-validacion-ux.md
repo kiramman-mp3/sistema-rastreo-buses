@@ -1,6 +1,6 @@
 # 12. Validación de la experiencia (fase 31)
 
-Cierre de las fases 26 a 30 de `docs/PLAN-UX.md`. Este documento separa lo que **se midió** (automático, repetible) de lo que **todavía no se hizo** (pruebas con personas), y deja el protocolo para hacerlo.
+Cierre de las fases 26 a 30 de `docs/arquitectura/PLAN-UX.md`. Este documento separa lo que **se midió** (automático, repetible) de lo que **todavía no se hizo** (pruebas con personas), y deja el protocolo para hacerlo.
 
 Fecha: 2026-11-02. Entorno: Docker local (Odoo 16 en el puerto 8070, base `buses` cargada con `scripts/dev_seed.py`), Chromium de Playwright, app de tableta en modo web (Expo).
 
@@ -86,4 +86,4 @@ Cinco personas por perfil. Sesiones individuales de 20 minutos, en el dispositiv
 
 ### Registro
 
-Por cada sesión: perfil, dispositivo, éxito o fracaso por tarea, tiempo, frases textuales de la persona y problemas observados. Cada problema que se repita en dos o más personas entra al registro de defectos (`05-registro-de-defectos.md`) con severidad S1 a S4 (definidas en `docs/PLAN-UX.md`).
+Por cada sesión: perfil, dispositivo, éxito o fracaso por tarea, tiempo, frases textuales de la persona y problemas observados. Cada problema que se repita en dos o más personas entra al registro de defectos (`05-registro-de-defectos.md`) con severidad S1 a S4 (definidas en `docs/arquitectura/PLAN-UX.md`).

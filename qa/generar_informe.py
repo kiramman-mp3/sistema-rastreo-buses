@@ -149,7 +149,7 @@ add([p('El coeficiente de variación (CV = desviación estándar ÷ media) se us
        'porque el curso no fija un número.')])
 
 add(table([['Código', 'Fuente', 'Qué aporta'],
-           ['B1', 'Bitácora (docs/BITACORA.md) y plan (docs/PLAN.md)', '16 entradas de trabajo, defectos hallados y corregidos, mutaciones manuales, limitaciones declaradas.'],
+           ['B1', 'Bitácora (docs/academico/BITACORA.md) y plan (docs/arquitectura/PLAN.md)', '16 entradas de trabajo, defectos hallados y corregidos, mutaciones manuales, limitaciones declaradas.'],
            ['R1', 'Pruebas de Odoo (150) – evidencias/odoo_test.log', 'Pruebas unitarias y de integración (TransactionCase y HttpCase) en base limpia, con tiempos por prueba.'],
            ['R2', 'Suite en vivo (%d casos) – qa/qa_suite.py, suite.json, suite.log' % n_suite, 'Casos funcionales, de error, de rendimiento y de usabilidad contra el servidor, con resultado, mensaje y tiempo.'],
            ['R3', 'Auditoría aleatoria (%s) – qa/auditoria.py, auditoria.json' % thousands(n_aud), 'Peticiones generadas al azar (semilla fija) sobre 15 áreas, para comprobar robustez ante entradas normales y límite.'],
