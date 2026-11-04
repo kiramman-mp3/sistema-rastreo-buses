@@ -98,6 +98,11 @@
         <field name="domain">[('kind', '=', 'long_stop')]</field>
     </record>
 
+    <record id="action_live_dashboard" model="ir.actions.client">
+        <field name="name">Indicators</field>
+        <field name="tag">bus_tracking.dashboard</field>
+    </record>
+
     <record id="action_bus_report_late_arrival" model="ir.actions.act_window">
         <field name="name">Late arrivals</field>
         <field name="res_model">bus.alert</field>
