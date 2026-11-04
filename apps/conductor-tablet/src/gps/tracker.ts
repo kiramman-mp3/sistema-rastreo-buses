@@ -4,13 +4,14 @@ import * as TaskManager from 'expo-task-manager';
 
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
 import { flushFixes, ingestLocations } from './runtime';
-import { gpsStore, locationQueue, writeLastError, writeLastSample, writeLastSent } from './store';
+import { gpsStore, locationQueue, readLastSent, writeLastError, writeLastSample, writeLastSent } from './store';
 import { t } from '../i18n';
 import type { GpsController } from './types';
 
 export const GPS_TASK = 'uta-bus-location';
 
 let foregroundWatcher: Location.LocationSubscription | null = null;
+let stationaryHeartbeat: ReturnType<typeof setInterval> | null = null;
 
 async function batteryPercent(): Promise<number | null> {
   try {
@@ -33,6 +34,16 @@ export const liveGps: GpsController = {
       foregroundWatcher.remove();
       foregroundWatcher = null;
     }
+    if (stationaryHeartbeat) {
+      clearInterval(stationaryHeartbeat);
+      stationaryHeartbeat = null;
+    }
+
+    // Immediate initial fix upon starting the shift so the driver doesn't wait for the first interval.
+    Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High })
+      .then((loc) => runLocationTask([loc]))
+      .catch(() => undefined);
+
     try {
       const running = await Location.hasStartedLocationUpdatesAsync(GPS_TASK);
       if (running) await Location.stopLocationUpdatesAsync(GPS_TASK);
@@ -40,8 +51,9 @@ export const liveGps: GpsController = {
         accuracy: Location.Accuracy.High,
         timeInterval: 10_000,
         distanceInterval: 0,
-        deferredUpdatesInterval: 10_000,
         pausesUpdatesAutomatically: false,
+        showsBackgroundLocationIndicator: true,
+        activityType: Location.ActivityType.AutomotiveNavigation,
         foregroundService: {
           notificationTitle: t('gpsServiceTitle'),
           notificationBody: t('gpsServiceBody'),
@@ -50,7 +62,7 @@ export const liveGps: GpsController = {
         },
       });
     } catch {
-      // In Expo Go on iOS or environments where background task manager is not supported,
+      // In Expo Go or platforms without background tasks support,
       // fallback to foreground watchPositionAsync so positions are actively sent.
       try {
         foregroundWatcher = await Location.watchPositionAsync(
@@ -67,8 +79,28 @@ export const liveGps: GpsController = {
         // Handled by permission snapshot & health view
       }
     }
+
+    // iOS CoreLocation ignores timeInterval and enters sleep mode when the device is stationary.
+    // This periodic heartbeat ensures stationary fixes (e.g. at traffic lights, terminals or testing)
+    // are sent to Traccar every 10 seconds while the app is running in the cockpit.
+    stationaryHeartbeat = setInterval(async () => {
+      try {
+        const lastSent = await readLastSent();
+        const now = Date.now();
+        if (!lastSent || now - lastSent.at >= 9_500) {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+          await runLocationTask([loc]);
+        }
+      } catch {
+        // Ignored
+      }
+    }, 10_000);
   },
   async stop() {
+    if (stationaryHeartbeat) {
+      clearInterval(stationaryHeartbeat);
+      stationaryHeartbeat = null;
+    }
     if (foregroundWatcher) {
       foregroundWatcher.remove();
       foregroundWatcher = null;
