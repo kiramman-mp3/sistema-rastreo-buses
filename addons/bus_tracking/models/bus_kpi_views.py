@@ -14,6 +14,12 @@ VIEWS = {
                COALESCE(r.distance_km, 0)::float AS distance_km, r.active
           FROM bus_route r""",
 
+    # The stops of each line with their coordinates: the marks of the map of a trip.
+    'kpi_route_stops': """
+        SELECT s.id AS stop_id, r.code AS route_code, s.sequence, s.name AS stop_name,
+               s.latitude::float AS latitude, s.longitude::float AS longitude
+          FROM bus_route_stop s JOIN bus_route r ON r.id = s.route_id""",
+
     'kpi_trips': """
         SELECT t.id AS trip_id,
                COALESCE(t.planned_start, t.real_start, t.date::timestamp + interval '5 hours') AS starts_at,
@@ -78,6 +84,11 @@ VIEWS = {
           LEFT JOIN bus_route r ON r.id = v.route_id
          GROUP BY 1, 2, 3""",
 
+    # The timed queries of the system (S3): one row per measurement.
+    'kpi_response': """
+        SELECT id AS sample_id, created AS sampled_at, name AS query_name, ms, COALESCE(rows, 0) AS rows
+          FROM bus_perf_sample""",
+
     # The four software indicators (S1 to S4), one row per day with something to say.
     'kpi_software': """
         WITH stored AS (
@@ -112,8 +123,8 @@ VIEWS = {
 }
 
 # The creation order matters: a view that reads another one comes after it.
-ORDER = ['kpi_routes', 'kpi_trips', 'kpi_trip_stops', 'kpi_alerts', 'kpi_positions', 'kpi_positions_daily',
-         'kpi_software']
+ORDER = ['kpi_routes', 'kpi_route_stops', 'kpi_trips', 'kpi_trip_stops', 'kpi_alerts', 'kpi_positions',
+         'kpi_positions_daily', 'kpi_response', 'kpi_software']
 
 
 def grant_views(cr, role=ROLE):
