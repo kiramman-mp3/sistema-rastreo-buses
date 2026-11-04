@@ -6,7 +6,7 @@ import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Action, Field, Screen, Txt } from '../src/ui/cabin';
+import { Action, Field, Press, Screen, Txt } from '../src/ui/cabin';
 import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
@@ -22,6 +22,7 @@ export default function Login() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [reveal, setReveal] = useState(false);
   const [error, setError] = useState('');
   const [odooUrl, setOdooUrl] = useState(session.snapshot.odooUrl);
   // The server address is for technical support only: it opens with a long press on the mark.
@@ -34,6 +35,8 @@ export default function Login() {
   );
 
   async function submit() {
+    // Enter on the keyboard and a double tap both land here: one attempt at a time, and never an empty one.
+    if (busy || !login.trim() || !password) return;
     setBusy(true);
     setError('');
     try {
@@ -90,14 +93,34 @@ export default function Login() {
           autoCorrect={false}
           placeholder={t('user')}
           accessibilityLabel={t('user')}
+          returnKeyType="next"
         />
-        <Field
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholder={t('password')}
-          accessibilityLabel={t('password')}
-        />
+        {/* The "show" button sits inside the field: a row of its own pushed the sign-in button off a small phone. */}
+        <View>
+          <Field
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!reveal}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={t('password')}
+            accessibilityLabel={t('password')}
+            returnKeyType="go"
+            onSubmitEditing={submit}
+            style={styles.passwordInput}
+          />
+          <Press
+            onPress={() => setReveal((on) => !on)}
+            accessibilityRole="switch"
+            accessibilityLabel={`${t('password')}: ${reveal ? t('hidePassword') : t('showPassword')}`}
+            accessibilityState={{ checked: reveal }}
+            style={styles.reveal}
+          >
+            <Txt size="small" bold>
+              {reveal ? t('hidePassword') : t('showPassword')}
+            </Txt>
+          </Press>
+        </View>
         {showServer ? (
           <View style={styles.server}>
             <Txt size="small" dim>
@@ -169,6 +192,20 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 560,
     alignSelf: 'center',
+  },
+  passwordInput: {
+    // room for the Show/Hide button that sits inside the field
+    paddingRight: space[12] * 2 + space[4],
+  },
+  reveal: {
+    position: 'absolute',
+    right: 4,
+    top: 0,
+    bottom: 0,
+    minWidth: 48,
+    paddingHorizontal: space[3],
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   or: {
     textAlign: 'center',
