@@ -1098,3 +1098,68 @@ Parte del análisis de preparación para producción. Ramas de trabajo hijas de 
 - El panel de Traccar sigue público (`traccar.20.119.213.192.nip.io`) y la documentación aún dice que no se expone; el respaldo fuera del servidor, la jornada de campo con tableta física y el plan para Odoo 16 no se tocaron.
 - La política de privacidad es el texto del sistema: la universidad debe revisarla con quien lleve la protección de datos antes de adoptarla como oficial.
 - `expo-haptics` y los cambios de la app necesitan un build de EAS nuevo para llegar a las tabletas.
+
+## 2026-11-04: diagnóstico de transmisión GPS en vivo, corrección del webhook de Traccar (DEF-035/036) y adaptación para iOS CoreLocation (DEF-037/038)
+
+Resolución de incidencias reportadas en campo donde los teléfonos conectados no reflejaban posición en la plataforma web, creyendo inicialmente que se debía a descarte por inactividad o uso de ubicación simulada (*Fake GPS*).
+
+### Hipótesis y lluvia de ideas
+
+1. **Hipótesis 1 (Filtro de inmovilidad o Mock Location):** Se sospechó que Traccar o Android/iOS descartan ubicaciones si la velocidad es 0.0 km/h o la distancia es 0 m, o que el proveedor simulado no emitía pulsos continuos. *Resultado:* Descartada en Traccar/Android (Traccar no tiene filtros de distancia activos y Android Fused Provider emite tics regulares por `timeInterval`), pero **confirmada en iOS**, donde Apple CoreLocation suspende las actualizaciones si no hay desplazamiento físico.
+2. **Hipótesis 2 (Falta de turno activo en Odoo):** Odoo descarta posiciones de buses sin turno abierto (`accept_without_shift = False`). *Resultado:* El turno existía y estaba activo en Odoo para Bus 1 (`Shift id=5`), pero Odoo nunca recibía la petición HTTP.
+3. **Hipótesis 3 (Conectividad o proxy Caddy):** El subdominio `gps.20.119.213.192.nip.io` no era accesible o Caddy no enrutaba al puerto 5055. *Resultado:* Descartada. Caddy tenía certificados TLS válidos de Let's Encrypt y respondía 400 Bad Request ante peticiones sin parámetros (comportamiento esperado de OsmAnd).
+4. **Hipótesis 4 (Webhook Traccar -> Odoo desactivado):** Traccar recibía las posiciones pero no las enviaba a Odoo. *Resultado:* **Confirmada (Causa raíz principal DEF-035).** Faltaba la variable de entorno `FORWARD_ENABLE: "true"` en los archivos Docker Compose; sin ella, Traccar 6 no instancia el servicio de reenvío.
+5. **Hipótesis 5 (Saturación del pool de base de datos):** Odoo rechazaba el webhook por agotamiento de conexiones hacia Supabase. *Resultado:* **Confirmada (DEF-036).** El log de Odoo registraba `psycopg2.pool.PoolError: The Connection Pool Is Full` debido a `db_maxconn = 3`.
+6. **Hipótesis 6 (Inconsistencia en la interfaz móvil):** En la pantalla de Estado del GPS el identificador salía como `-` haciendo pensar que no había credenciales cargadas. *Resultado:* **Confirmada (DEF-037).** La vista leía la variable reactiva en memoria en vez de consultar `gpsStore` del almacenamiento asíncrono.
+7. **Hipótesis 7 (Comportamiento de CoreLocation en iOS):** En iPhone el GPS no envía datos si el usuario está quieto. *Resultado:* **Confirmada (DEF-038).** CoreLocation ignora `timeInterval` (parámetro exclusivo de Android) y `deferredUpdatesInterval` congela la entrega hasta detectar movimiento físico.
+
+### Qué se hizo
+
+1. **Diagnóstico de la infraestructura en producción (Azure VM `vm-buses`)**:
+   - Inspección remota mediante Azure CLI (`RG-BUSES-EASTUS2`).
+   - Verificación de los 3 contenedores: `rastreo-prod-proxy-1` (Caddy), `rastreo-prod-traccar-1` (Traccar), `rastreo-prod-odoo-1` (Odoo).
+   - Consulta a la base de datos de Odoo: se verificó que el **Bus 1** tenía `traccar_unique_id: b-5a7622ada23ff3c3` y un turno activo del chofer.
+2. **Corrección de Traccar y activación de reenvío (DEF-035)**:
+   - Se añadió `FORWARD_ENABLE: "true"` en `docker-compose.yml`, `docker-compose.prod.yml` y en el servidor de Azure.
+   - En Traccar 6+, definir `FORWARD_TYPE: "json"` y `FORWARD_URL` no es suficiente si `forward.enable` no está explícitamente en `true`.
+3. **Ampliación del pool de conexiones PostgreSQL (DEF-036)**:
+   - Se modificó `config/odoo.prod.conf` en el servidor de producción elevando `db_maxconn = 3` a `db_maxconn = 10`.
+   - Esto eliminó los errores `PoolError` frente al tráfico concurrente de Caddy, cron interno y webhook de Traccar sobre el pooler de Supabase.
+4. **Prueba de ingesta en vivo con Android / Fake GPS**:
+   - Tras reiniciar Traccar y Odoo, el teléfono Android transmitió coordenadas fijas a 0.0 km/h (`-1.270728, -78.624307`).
+   - Odoo comenzó a persistir cada paquete con intervalo exacto de 10 segundos, marcando el bus en estado "detenido" (`stopped`).
+   - `/bus_tracking/health` pasó de `503 Service Unavailable (stale)` a `200 OK (ok)`.
+5. **Corrección del identificador en pantalla de diagnóstico móvil (DEF-037)**:
+   - En `apps/conductor-tablet/app/gps.tsx`, la función `loadFacts` ahora consulta de forma asíncrona `gpsStore.get()`, garantizando que el `uniqueId` real se muestre en pantalla en lugar del guion `-`.
+6. **Adaptación para Apple CoreLocation en iOS (DEF-038)**:
+   - En `apps/conductor-tablet/src/gps/tracker.ts`, se eliminó `deferredUpdatesInterval: 10_000` (el cual en iOS bloquea las entregas hasta que haya desplazamiento).
+   - Se añadieron `showsBackgroundLocationIndicator: true` y `activityType: Location.ActivityType.AutomotiveNavigation`.
+   - Se implementó un **Stationary Heartbeat** cada 10 s: si no se han recibido tics del sistema en los últimos 9.5 s (porque el iPhone está quieto), solicita activamente `Location.getCurrentPositionAsync` y despacha el fix.
+   - Se agregó captura inmediata al presionar *Iniciar turno*.
+   - Se añadió un fallback automático a `Location.watchPositionAsync` en caso de ejecutarse en entornos sin soporte de background task manager (como Expo Go en iOS).
+   - En `apps/conductor-tablet/app.json` se configuraron `UIBackgroundModes: ["location", "fetch"]` e `isIosBackgroundLocationEnabled: true`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Ingesta HTTP OsmAnd en Traccar (`gps.20.119.213.192.nip.io`) | 200 OK; log registra `id: b-5a7622ada23ff3c3, lat: -1.26120, lon: -78.62540` |
+| Webhook Traccar -> Odoo con `FORWARD_ENABLE: true` | Webhook ejecutado con éxito; 5 posiciones de Bus 1 registradas de forma consecutiva cada 10 s |
+| Endpoint `/bus_tracking/health` en Azure | `HTTP/1.1 200 OK`, `{"status": "ok", "version": "16.0.1.3.0"}` |
+| Suite de pruebas unitarias móviles (Jest) | 25 suites pasadas, 149 pruebas OK (100% PASS) |
+| Verificación de tipos TypeScript en app móvil | `npm run typecheck` (`tsc --noEmit`) sin errores (PASS) |
+| Linter de Expo en app móvil | `npm run lint` (`expo lint`) 0 errores y 0 avisos (PASS) |
+| Generación de documentación de calidad (`qa/generar_docs.py`) | Regenerados 03, 04, 05 y 07; 38 defectos totales registrados (37 cerrados, 97.4%) |
+
+### Problemas encontrados
+
+- `FORWARD_ENABLE` faltaba en los archivos docker-compose porque durante la migración a Traccar 6 se asumió erróneamente que `FORWARD_TYPE=json` lo reemplazaba. Traccar 6 requiere ambos (DEF-035).
+- El límite de 3 conexiones en `odoo.prod.conf` provocaba fallas silenciosas en la recepción del webhook cuando coincidía con la ejecución de crons o peticiones del mapa en vivo (DEF-036).
+- `gps.tsx` mostraba un guion en *Dispositivo en Traccar* porque consultaba el snapshot en memoria de React antes de que se sincronizara, a pesar de que el valor ya estaba en `AsyncStorage` (DEF-037).
+- Apple CoreLocation en iOS no implementa temporizadores basados en tiempo (`timeInterval` es ignorado). Un dispositivo completamente estático deja de emitir actualizaciones de posición hasta que se fuerza un latido explícito o detecta movimiento (DEF-038).
+
+### Pendiente o sin confirmar
+
+- Compilar un nuevo build nativo de iOS (`npx eas-cli build --profile ios-altstore --platform ios`) para desplegar en el iPhone los permisos de `UIBackgroundModes` y el heartbeat de CoreLocation.
+- Probar el comportamiento del iPhone en un recorrido vehicular real en movimiento para validar el handoff entre el latido estacionario y los eventos continuos de desplazamiento de CoreLocation.
+
