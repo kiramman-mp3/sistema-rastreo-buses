@@ -1,8 +1,8 @@
 # Plan de implementación: calidad de diseño, espaciado y movimiento de la app móvil
 
-Continúa la numeración de `docs/PLAN.md` y `docs/BITACORA.md` (última fase: 31). Aquí van las fases 32 a 37.
+Continúa la numeración de `docs/arquitectura/PLAN.md` y `docs/academico/BITACORA.md` (última fase: 31). Aquí van las fases 32 a 37.
 
-Nace de la auditoría del 2-nov-2026 sobre `apps/conductor-tablet`, hecha con las skills de diseño (impeccable nativo/Android, emil-design-eng, apple-design, animate-expo, find-animation-opportunities, break-ui y vercel-react-native) y con `docs/DISENO.md` como regla propia del proyecto.
+Nace de la auditoría del 2-nov-2026 sobre `apps/conductor-tablet`, hecha con las skills de diseño (impeccable nativo/Android, emil-design-eng, apple-design, animate-expo, find-animation-opportunities, break-ui y vercel-react-native) y con `docs/diseno/DISENO.md` como regla propia del proyecto.
 
 ## Punto de partida y meta
 

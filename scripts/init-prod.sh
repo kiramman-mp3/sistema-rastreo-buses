@@ -108,5 +108,5 @@ echo
 echo "Stack is up. Next:"
 echo "  1. Open https://$DOMAIN and sign in as admin with the password shown above."
 echo "  2. Create your routes and stops, and one bus per driver's phone."
-echo "  3. On each bus press 'Register GPS in Traccar' and follow the 'Driver's phone' section (docs/GUIA-CHOFER.md)."
-echo "  4. Schedule scripts/backup.sh (see docs/PRODUCCION.md)."
+echo "  3. On each bus press 'Register GPS in Traccar' and follow the 'Driver's phone' section (docs/guias/GUIA-CHOFER.md)."
+echo "  4. Schedule scripts/backup.sh (see docs/guias/PRODUCCION.md)."
