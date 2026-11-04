@@ -127,7 +127,7 @@ DEFECTOS = [
      'Seguridad', 'Cerrado', 'test_only_managers_read_the_badge_link'),
     ('DEF-013', '02-nov-2026', 'Auditoría integral (SEC-03)', 'La contraseña del admin de producción estaba escrita en un script del repositorio público',
      'scripts/clean-azure-db.sh', 'Un script de emergencia se versionó con el secreto en vez de leerlo de .env.prod; no hay revisión de secretos antes del commit.',
-     'Seguridad', 'Abierto', 'Historial reescrito en local; falta el push forzado y cambiar la contraseña'),
+     'Seguridad', 'Cerrado', 'Contraseña de producción rotada (confirmado por el responsable el 04-nov-2026), script reescrito sin secretos y gitleaks en el CI; el historial público conserva la clave anterior, ya inservible'),
     ('DEF-014', '02-nov-2026', 'Auditoría integral (OPS-01)', 'El script de reinicio borraba producción sin confirmar y luego fallaba por llamar métodos inexistentes',
      'scripts/clean-azure-db.sh', 'Se escribió a mano sin reutilizar init-prod.sh ni probarlo en un servidor de prueba.',
      'Configuración', 'Cerrado', 'scripts/reset-prod.sh (confirmación, respaldo previo, init-prod.sh)'),

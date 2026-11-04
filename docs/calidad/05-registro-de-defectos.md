@@ -20,7 +20,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-010 | 28-oct-2026 | Suite en vivo (E9) y auditoría | Una hora GPS inválida produce HTTP 500 en el webhook | models/utils.py (parse_traccar_dt), controllers/main.py | Cerrado |
 | DEF-011 | 02-nov-2026 | Auditoría integral (SEC-01) | Cualquier usuario interno podía emitir o revocar la credencial QR de otro chofer por RPC | models/res_users.py | Cerrado |
 | DEF-012 | 02-nov-2026 | Auditoría integral (SEC-02) | El enlace con el token de la credencial QR se guardaba en claro y lo leía cualquier usuario interno | models/res_users.py | Cerrado |
-| DEF-013 | 02-nov-2026 | Auditoría integral (SEC-03) | La contraseña del admin de producción estaba escrita en un script del repositorio público | scripts/clean-azure-db.sh | Abierto |
+| DEF-013 | 02-nov-2026 | Auditoría integral (SEC-03) | La contraseña del admin de producción estaba escrita en un script del repositorio público | scripts/clean-azure-db.sh | Cerrado |
 | DEF-014 | 02-nov-2026 | Auditoría integral (OPS-01) | El script de reinicio borraba producción sin confirmar y luego fallaba por llamar métodos inexistentes | scripts/clean-azure-db.sh | Cerrado |
 | DEF-015 | 02-nov-2026 | Auditoría integral (SEC-04) | La credencial QR servía como sesión y una sesión robada se renovaba para siempre por login_badge | models/bus_driver_token.py, controllers/driver_api.py | Cerrado |
 | DEF-016 | 02-nov-2026 | Auditoría integral (SEC-05) | Los choferes eran usuarios internos y podían abrir el panel con la clave de la tableta | models/res_users.py | Cerrado |
@@ -47,7 +47,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-037 | 04-nov-2026 | Prueba en dispositivo móvil (pantalla Estado del GPS) | Dispositivo en Traccar mostraba guion (-) aun con credenciales guardadas en el almacenamiento | apps/conductor-tablet/app/gps.tsx | Cerrado |
 | DEF-038 | 04-nov-2026 | Prueba de campo en iOS (iPhone quieto) | El iPhone dejaba de transmitir ubicación por GPS al permanecer detenido o estático | apps/conductor-tablet/src/gps/tracker.ts, app.json | Cerrado |
 
-Resumen: 38 registrados, 37 cerrados (97 %), 1 abiertos. Densidad: 13,2 defectos por KLOC (2,871 KLOC de Python sin pruebas).
+Resumen: 38 registrados, 38 cerrados (100 %), 0 abiertos. Densidad: 13,2 defectos por KLOC (2,871 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -127,7 +127,7 @@ Resumen: 38 registrados, 37 cerrados (97 %), 1 abiertos. Densidad: 13,2 defectos
 
 - **Causa raíz:** Un script de emergencia se versionó con el secreto en vez de leerlo de .env.prod; no hay revisión de secretos antes del commit.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Historial reescrito en local; falta el push forzado y cambiar la contraseña
+- **Prueba que lo protege:** Contraseña de producción rotada (confirmado por el responsable el 04-nov-2026), script reescrito sin secretos y gitleaks en el CI; el historial público conserva la clave anterior, ya inservible
 
 ### DEF-014: El script de reinicio borraba producción sin confirmar y luego fallaba por llamar métodos inexistentes
 
