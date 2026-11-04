@@ -11,6 +11,7 @@ from .gpx import GpxError, parse_gpx
 MAX_POINTS = 1500
 STOP_RADIUS = 50
 
+
 class BusRouteGpx(models.TransientModel):
     _name = 'bus.route.gpx'
     _description = 'Load the track of a route from a GPX file'
