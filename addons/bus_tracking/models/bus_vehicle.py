@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from psycopg2 import IntegrityError
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import mute_logger
 
 from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
@@ -16,6 +16,7 @@ from .utils import KNOTS_TO_KMH, MOVING_ABOVE_KMH, haversine_m, parse_traccar_dt
 _logger = logging.getLogger(__name__)
 
 CONNECTED_WITHIN = timedelta(minutes=3)     # the phone sends every few seconds while the app is open
+DEMO_HOURS = 8                              # how long a demonstration report lasts before it switches itself off
 
 
 class BusVehicle(models.Model):
@@ -33,6 +34,12 @@ class BusVehicle(models.Model):
     driver_id = fields.Many2one('res.partner', string="Driver")
     route_id = fields.Many2one('bus.route', string="Route")
     traccar_device_id = fields.Integer(string="Traccar Device ID", copy=False)
+    demo_report_until = fields.Datetime(
+        string="Demo report until", copy=False, readonly=True,
+        help="Until then this bus keeps the positions of its phone without a driver shift, to show the system with "
+             "Traccar Client. It switches itself off.")
+    demo_report = fields.Boolean(string="Demo report", compute='_compute_demo_report',
+                                 help="The bus is accepting positions without a shift right now.")
     # In the OsmAnd protocol the identifier is the only credential: only managers may read it.
     traccar_unique_id = fields.Char(string="Traccar Unique ID", copy=False,
                                     groups='bus_tracking.group_bus_manager')
@@ -81,6 +88,28 @@ class BusVehicle(models.Model):
         for bus in self:
             bus.tablet_setup_link = link
             bus.tablet_qr = qr
+
+    @api.depends('demo_report_until')
+    def _compute_demo_report(self):
+        now = fields.Datetime.now()
+        for bus in self:
+            bus.demo_report = bool(bus.demo_report_until and bus.demo_report_until > now)
+
+    def action_start_demo_report(self):
+        """Managers: this bus keeps the positions of its phone without a shift for the next hours. Only this bus,
+        and only for a while: the setting that accepts everything is for tests with curl."""
+        if not self.env.user.has_group('bus_tracking.group_bus_manager'):
+            raise AccessError(_("Only managers can start a demo report."))
+        until = fields.Datetime.now() + timedelta(hours=DEMO_HOURS)
+        for bus in self:
+            if not bus.traccar_device_id:
+                raise UserError(_("%s has no GPS device yet: register it in Traccar first.", bus.name))
+        self.sudo().write({'demo_report_until': until})
+
+    def action_stop_demo_report(self):
+        if not self.env.user.has_group('bus_tracking.group_bus_manager'):
+            raise AccessError(_("Only managers can stop a demo report."))
+        self.sudo().write({'demo_report_until': False})
 
     @api.depends('last_fix_time', 'last_speed')
     def _compute_status(self):
@@ -208,6 +237,9 @@ class BusVehicle(models.Model):
         icp = self.env['ir.config_parameter'].sudo()
         if icp.get_param('bus_tracking.accept_without_shift') in ('1', 'True', 'true'):
             return True
+        until = self.demo_report_until
+        if until and until - timedelta(hours=DEMO_HOURS) <= fix_time <= until:
+            return True
         return bool(self.env['bus.shift'].sudo().search_count([
             ('vehicle_id', '=', self.id), ('start', '<=', fix_time),
             '|', ('end', '=', False), ('end', '>=', fix_time)]))
@@ -218,6 +250,8 @@ class BusVehicle(models.Model):
         self.ensure_one()
         icp = self.env['ir.config_parameter'].sudo()
         if icp.get_param('bus_tracking.accept_without_shift') in ('1', 'True', 'true'):
+            return True
+        if self.demo_report:
             return True
         return bool(self.env['bus.shift'].sudo().search_count(
             [('vehicle_id', '=', self.id), ('state', '=', 'active')]))
