@@ -38,7 +38,7 @@ Siete reglas obligatorias. La columna "Estado hoy" dice si se cumplen en la vers
 | 4 | **Prioridad de defectos.** Un defecto hallado por las pruebas bloquea las funciones nuevas hasta corregirse. | `05-registro-de-defectos.md` | Aplica desde esta evaluación: DEF-008 a DEF-010 van primero. |
 | 5 | **Prevención de regresiones.** Todo defecto corregido deja una prueba nueva en la suite de Odoo. | Prueba citada en cada defecto | Cumplida en DEF-001 a DEF-007; pendiente portar E7, E8 y E9. |
 | 6 | **Privacidad por diseño.** El pasajero solo ve nombre, posición, rumbo y estado del bus (nunca placa, conductor, velocidad exacta ni historial); el contacto de una queja solo lo ven los administradores y se borra a los 90 días de resuelta; el identificador del GPS del celular solo lo ven los administradores. | F9, tests de portal y de quejas | Cumplida. Falta el consentimiento escrito de los choferes y la revisión legal. |
-| 7 | **Trazabilidad.** Flujo Git (`main`, `develop`, `feature/*`, `fix/*`), commits pequeños con Conventional Commits, y cada trabajo registrado en `docs/BITACORA.md` y `docs/PLAN.md`. | Historial de Git y bitácora | Cumplida. |
+| 7 | **Trazabilidad.** Flujo Git (`main`, `develop`, `feature/*`, `fix/*`), commits pequeños con Conventional Commits, y cada trabajo registrado en `docs/academico/BITACORA.md` y `docs/arquitectura/PLAN.md`. | Historial de Git y bitácora | Cumplida. |
 
 ## 4. Matriz de roles y responsabilidades (RACI)
 

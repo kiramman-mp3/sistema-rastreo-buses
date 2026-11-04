@@ -1,6 +1,6 @@
 # Lluvia de ideas del proyecto, categorizada
 
-Todas las ideas que aparecieron entre el 26 y el 28 de octubre de 2026, ordenadas por categoría y con lo que pasó con cada una. **No es el acta de una sesión de lluvia de ideas:** se reconstruyó leyendo `docs/PLAN.md`, `docs/BITACORA.md` y los pedidos del cliente, de modo que cada idea tiene rastro en esos documentos. Si falta alguna, se agrega con el mismo formato.
+Todas las ideas que aparecieron entre el 26 y el 28 de octubre de 2026, ordenadas por categoría y con lo que pasó con cada una. **No es el acta de una sesión de lluvia de ideas:** se reconstruyó leyendo `docs/arquitectura/PLAN.md`, `docs/academico/BITACORA.md` y los pedidos del cliente, de modo que cada idea tiene rastro en esos documentos. Si falta alguna, se agrega con el mismo formato.
 
 Origen: **Cliente** (la UTA, por medio de quien pidió el sistema), **Equipo** (propuesta del desarrollo y del asistente de código) o **Taller** (idea tomada de los talleres de la Unidad 2 o 3).
 
@@ -46,7 +46,7 @@ Los totales se verificaron contando las filas de las tablas de abajo. "Hechas" i
 | ID | Idea | Origen | Estado | Nota |
 |---|---|---|---|---|
 | B1 | Usar el celular de cada chofer como GPS (Traccar Client) | Cliente | Hecha, sin prueba real | Solo se simuló con peticiones HTTP |
-| B2 | Enviar la posición cada 10 s en movimiento | Equipo (el cliente delegó) | Hecha (documentada) | `docs/PLAN.md`, `docs/GUIA-CHOFER.md` |
+| B2 | Enviar la posición cada 10 s en movimiento | Equipo (el cliente delegó) | Hecha (documentada) | `docs/arquitectura/PLAN.md`, `docs/guias/GUIA-CHOFER.md` |
 | B3 | Identificador aleatorio por bus, visible solo para administradores | Equipo | Hecha | Es la única credencial del celular |
 | B4 | Código QR para configurar la app del chofer | Equipo | Hecha, sin prueba real | El formato del enlace no está documentado por Traccar |
 | B5 | Crear el dispositivo en Traccar desde Odoo | Equipo | Hecha | Botón "Registrar GPS" |
