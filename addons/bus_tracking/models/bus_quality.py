@@ -5,7 +5,7 @@ import time
 from datetime import timedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 from .utils import parse_traccar_dt
 
@@ -94,6 +94,13 @@ class BusSyncAudit(models.Model):
         return audits
 
     @api.model
+    def action_run(self):
+        """From the dashboard: managers compare Traccar with Odoo now. Returns how many buses were compared."""
+        if not self.env.user.has_group('bus_tracking.group_bus_manager'):
+            raise AccessError(_("Only managers can audit the synchronisation."))
+        return len(self._run())
+
+    @api.model
     def _cron_run(self):
         if self.env['bus.traccar.api'].is_configured():
             try:
@@ -140,6 +147,13 @@ class BusPerfSample(models.Model):
             samples |= self.create({'name': name, 'ms': (time.perf_counter() - started) * 1000.0, 'rows': rows})
         self.search([('created', '<', fields.Datetime.now() - timedelta(days=PERF_KEEP_DAYS))]).unlink()
         return samples
+
+    @api.model
+    def action_measure(self):
+        """From the dashboard: managers time the main queries now. Returns how many measurements were taken."""
+        if not self.env.user.has_group('bus_tracking.group_bus_manager'):
+            raise AccessError(_("Only managers can measure the response time."))
+        return len(self._measure())
 
     @api.model
     def _cron_measure(self):
