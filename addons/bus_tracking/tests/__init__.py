@@ -22,3 +22,4 @@ from . import test_trip_rules
 from . import test_trip_simulator
 from . import test_kpi
 from . import test_quality
+from . import test_dashboard

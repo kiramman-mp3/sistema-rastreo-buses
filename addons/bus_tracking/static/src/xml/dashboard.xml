@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- One indicator: its name, the figure, a word and a shape for its state, the change against the previous period -->
+    <t t-name="bus_tracking.DashCard" owl="1">
+        <article t-attf-class="o_dash_card is-#{metric.status}">
+            <header>
+                <h3 t-esc="metric.name"/>
+                <span class="o_dash_card_state"><i t-attf-class="o_dash_shape is-#{metric.status}" aria-hidden="true"/><t t-esc="statusText(metric)"/></span>
+            </header>
+            <p class="o_dash_card_value"><b t-esc="valueText(metric)"/><small t-if="metric.value !== null" t-esc="metric.unit"/></p>
+            <p class="o_dash_card_detail" t-esc="metric.detail"/>
+            <p t-if="deltaText(metric)" t-attf-class="o_dash_card_delta is-#{deltaClass(metric)}">
+                <span t-esc="deltaText(metric)"/> <span class="o_dash_card_vs">vs. previous period</span>
+            </p>
+        </article>
+    </t>
+
+    <t t-name="bus_tracking.Dashboard" owl="1">
+        <div class="o_dash">
+            <header class="o_dash_head">
+                <div>
+                    <h1>Indicators</h1>
+                    <p class="o_dash_sub"><t t-esc="periodText"/> · <t t-esc="scopeText"/></p>
+                </div>
+                <div class="o_dash_filters">
+                    <label>
+                        <span>Period</span>
+                        <select t-on-change="onRange">
+                            <option value="7" t-att-selected="state.range == '7'">Last 7 days</option>
+                            <option value="30" t-att-selected="state.range == '30'">Last 30 days</option>
+                            <option value="90" t-att-selected="state.range == '90'">Last 90 days</option>
+                            <option value="custom" t-att-selected="state.range == 'custom'">Choose dates…</option>
+                        </select>
+                    </label>
+                    <t t-if="state.range == 'custom'">
+                        <label><span>From</span><input type="date" t-att-value="state.from" t-on-change="onFrom"/></label>
+                        <label><span>Until</span><input type="date" t-att-value="state.to" t-on-change="onTo"/></label>
+                    </t>
+                    <label>
+                        <span>Line</span>
+                        <select t-on-change="onRoute">
+                            <option value="" t-att-selected="!state.routeId">All lines</option>
+                            <t t-if="state.data">
+                                <option t-foreach="state.data.routes" t-as="route" t-key="route.id" t-att-value="route.id"
+                                        t-att-selected="routeSelected(route)" t-esc="route.code + ' · ' + route.name"/>
+                            </t>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Data</span>
+                        <select t-on-change="onScope">
+                            <option value="all" t-att-selected="state.scope == 'all'">Real and simulated</option>
+                            <option value="real" t-att-selected="state.scope == 'real'">Real only</option>
+                            <option value="simulated" t-att-selected="state.scope == 'simulated'">Simulated only</option>
+                        </select>
+                    </label>
+                    <span class="o_dash_sync" role="status" t-esc="syncText"/>
+                </div>
+            </header>
+
+            <nav class="o_dash_tabs" role="tablist" aria-label="Sections">
+                <button t-foreach="tabs" t-as="tab" t-key="tab.key" role="tab" t-att-aria-selected="state.tab == tab.key ? 'true' : 'false'"
+                        t-attf-class="o_dash_tab #{state.tab == tab.key ? 'is-on' : ''}" t-on-click="() => this.setTab(tab.key)"
+                        t-esc="tab.label"/>
+            </nav>
+
+            <div t-if="state.error" class="o_dash_error" role="alert" t-esc="state.error"/>
+            <div t-if="!state.data and !state.error" class="o_dash_empty">Loading…</div>
+
+            <t t-if="state.data">
+                <!-- ============================ Summary ============================ -->
+                <section t-if="state.tab == 'summary'" role="tabpanel">
+                    <h2 class="o_dash_group">Transport service</h2>
+                    <div class="o_dash_cards">
+                        <t t-foreach="group('transport')" t-as="metric" t-key="metric.code">
+                            <t t-call="bus_tracking.DashCard"/>
+                        </t>
+                    </div>
+                    <h2 class="o_dash_group">Software quality</h2>
+                    <div class="o_dash_cards">
+                        <t t-foreach="group('software')" t-as="metric" t-key="metric.code">
+                            <t t-call="bus_tracking.DashCard"/>
+                        </t>
+                    </div>
+                    <div class="o_dash_charts two">
+                        <figure><figcaption>Trips per day</figcaption><div class="o_dash_chart"><canvas t-ref="chart_days" role="img" aria-label="Trips per day"/></div></figure>
+                        <figure><figcaption>Incidents by kind</figcaption><div class="o_dash_chart"><canvas t-ref="chart_kinds" role="img" aria-label="Incidents by kind"/></div></figure>
+                    </div>
+                </section>
+
+                <!-- ============================ Routes ============================ -->
+                <section t-if="state.tab == 'routes'" role="tabpanel">
+                    <div class="o_dash_charts two">
+                        <figure><figcaption>Punctuality by line (%)</figcaption><div class="o_dash_chart"><canvas t-ref="chart_route_punctuality" role="img" aria-label="Punctuality by line"/></div></figure>
+                        <figure><figcaption>Route compliance by line (%)</figcaption><div class="o_dash_chart"><canvas t-ref="chart_route_compliance" role="img" aria-label="Route compliance by line"/></div></figure>
+                        <figure><figcaption>Average delay by line (min)</figcaption><div class="o_dash_chart"><canvas t-ref="chart_route_delay" role="img" aria-label="Average delay by line"/></div></figure>
+                        <figure><figcaption>Estimated and driven distance by line (km)</figcaption><div class="o_dash_chart"><canvas t-ref="chart_route_km" role="img" aria-label="Estimated and driven distance by line"/></div></figure>
+                    </div>
+                    <div class="o_dash_table_wrap">
+                        <table class="o_dash_table">
+                            <thead><tr>
+                                <th>Line</th><th class="n">Trips</th><th class="n">Compliance %</th><th class="n">Punctuality %</th>
+                                <th class="n">Average delay (min)</th><th class="n">Estimated km</th><th class="n">Driven km</th><th class="n">Alerts</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr t-foreach="state.data.by_route" t-as="row" t-key="row.id">
+                                    <td><i class="o_dash_dot" t-att-style="'background:' + row.color" aria-hidden="true"/><b t-esc="row.code"/> <t t-esc="row.name"/></td>
+                                    <td class="n" t-esc="row.trips"/><td class="n" t-esc="num(row.compliance)"/><td class="n" t-esc="num(row.punctuality)"/>
+                                    <td class="n" t-esc="num(row.delay)"/><td class="n" t-esc="num(row.est_km)"/><td class="n" t-esc="num(row.real_km)"/><td class="n" t-esc="row.alerts"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ============================ Punctuality ============================ -->
+                <section t-if="state.tab == 'punctuality'" role="tabpanel">
+                    <div class="o_dash_charts two">
+                        <figure><figcaption>Punctuality per day (%)</figcaption><div class="o_dash_chart"><canvas t-ref="chart_punctuality_days" role="img" aria-label="Punctuality per day"/></div></figure>
+                        <figure><figcaption>How late or early the buses arrive</figcaption><div class="o_dash_chart"><canvas t-ref="chart_buckets" role="img" aria-label="Distribution of delays"/></div></figure>
+                    </div>
+                    <figure class="o_dash_wide"><figcaption>Stops with the largest average delay (min)</figcaption>
+                        <div class="o_dash_chart tall"><canvas t-ref="chart_stops" role="img" aria-label="Stops with the largest average delay"/></div>
+                    </figure>
+                </section>
+
+                <!-- ============================ Trips ============================ -->
+                <section t-if="state.tab == 'trips'" role="tabpanel">
+                    <p class="o_dash_note">The latest trips of the period. Open one to see its stops, times, alerts and incidents.</p>
+                    <div class="o_dash_table_wrap">
+                        <table class="o_dash_table">
+                            <thead><tr>
+                                <th>Date</th><th>Line</th><th>State</th><th class="n">Stops reached</th><th class="n">Late</th><th class="n">Skipped</th>
+                                <th class="n">Delay at the end (min)</th><th class="n">Estimated / driven km</th><th>Detected</th><th/>
+                            </tr></thead>
+                            <tbody>
+                                <tr t-foreach="state.data.trips" t-as="trip" t-key="trip.id" t-attf-class="is-#{trip.state}">
+                                    <td t-esc="trip.date"/>
+                                    <td><b t-esc="trip.route"/> <span t-if="trip.simulated" class="o_dash_tag">simulated</span></td>
+                                    <td t-esc="trip.state_name"/>
+                                    <td class="n"><t t-esc="trip.visited"/> / <t t-esc="trip.total"/></td>
+                                    <td class="n" t-esc="trip.late"/><td class="n" t-esc="trip.skipped"/>
+                                    <td class="n" t-esc="num(trip.delay_end)"/>
+                                    <td class="n"><t t-esc="num(trip.km_est)"/> / <t t-esc="num(trip.km_real)"/></td>
+                                    <td t-esc="flagsText(trip.flags)"/>
+                                    <td><button class="o_dash_link" t-att-aria-label="'Open the trip ' + trip.name" t-on-click="() => this.openTrip(trip.id)">Open</button></td>
+                                </tr>
+                                <tr t-if="!state.data.trips.length"><td colspan="10" class="o_dash_empty">No trips in this period.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- ============================ Incidents ============================ -->
+                <section t-if="state.tab == 'incidents'" role="tabpanel">
+                    <div class="o_dash_charts two">
+                        <figure><figcaption>Incidents by kind</figcaption><div class="o_dash_chart"><canvas t-ref="chart_kinds" role="img" aria-label="Incidents by kind"/></div></figure>
+                        <figure><figcaption>Pareto: the few kinds that cause most incidents</figcaption><div class="o_dash_chart"><canvas t-ref="chart_pareto" role="img" aria-label="Pareto of incidents"/></div></figure>
+                        <figure><figcaption>Alerts per day</figcaption><div class="o_dash_chart"><canvas t-ref="chart_alert_days" role="img" aria-label="Alerts per day"/></div></figure>
+                        <figure><figcaption>Alerts by line</figcaption><div class="o_dash_chart"><canvas t-ref="chart_route_alerts" role="img" aria-label="Alerts by line"/></div></figure>
+                    </div>
+                </section>
+
+                <!-- ============================ System quality ============================ -->
+                <section t-if="state.tab == 'quality'" role="tabpanel">
+                    <div class="o_dash_cards">
+                        <t t-foreach="group('software')" t-as="metric" t-key="metric.code">
+                            <t t-call="bus_tracking.DashCard"/>
+                        </t>
+                    </div>
+                    <figure class="o_dash_wide"><figcaption>Response time per day (ms): median and 95th percentile</figcaption>
+                        <div class="o_dash_chart tall"><canvas t-ref="chart_perf" role="img" aria-label="Response time per day"/></div>
+                    </figure>
+                    <p t-if="canMeasure" class="o_dash_note">
+                        <button class="o_dash_btn" t-on-click="measure">Measure the response time now</button>
+                        <button class="o_dash_btn" t-on-click="auditSync">Audit the synchronisation with Traccar</button>
+                    </p>
+                </section>
+
+                <!-- ============================ Formulas ============================ -->
+                <section t-if="state.tab == 'formulas'" role="tabpanel">
+                    <p class="o_dash_note">Every figure is calculated from the stored records. The query of each indicator is shown so that anybody can run it and check the number.</p>
+                    <div class="o_dash_table_wrap">
+                        <table class="o_dash_table formulas">
+                            <thead><tr><th>Indicator</th><th>Formula</th><th>Source</th><th>Unit</th><th class="n">Result</th><th>Interpretation</th></tr></thead>
+                            <tbody>
+                                <t t-foreach="state.data.metrics" t-as="metric" t-key="metric.code">
+                                    <tr>
+                                        <td><b t-esc="metric.code"/> <t t-esc="metric.name"/></td>
+                                        <td t-esc="metric.formula"/><td t-esc="metric.source"/><td t-esc="metric.unit"/>
+                                        <td class="n"><b t-esc="valueText(metric)"/></td>
+                                        <td t-esc="metric.interpretation"/>
+                                    </tr>
+                                    <tr class="o_dash_sql_row"><td colspan="6">
+                                        <details><summary>Query of <t t-esc="metric.code"/></summary><pre t-esc="metric.sql"/></details>
+                                    </td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </t>
+        </div>
+    </t>
+</templates>
