@@ -175,6 +175,7 @@ class BusTrip(models.Model):
         compute='_compute_stats', store=True, help="Largest delay of the trip (0 when nothing was late).")
     delay_end_min = fields.Float(
         compute='_compute_stats', store=True, help="Delay at the last stop reached: the delay the trip piled up.")
+    late_start_alerted = fields.Boolean(default=False, readonly=True)
     alert_ids = fields.One2many('bus.alert', 'trip_id', string="Alerts")
     incident_ids = fields.One2many('bus.incident', 'trip_id', string="Incidents")
     alert_count = fields.Integer(compute='_compute_counts')
@@ -312,6 +313,10 @@ class BusTrip(models.Model):
         })
         if self.state == 'planned':
             self.write({'state': 'running', 'real_start': arrival.arrival_time})
+        if line.status == 'late':
+            self.env['bus.alert']._trip_event(
+                self, 'late_arrival', arrival.arrival_time,
+                stop_id=line.stop_id.id, delay_min=delay, threshold=tolerance)
         if line == lines[-1]:
             self._finalize(arrival.arrival_time)
 
@@ -328,6 +333,20 @@ class BusTrip(models.Model):
                 'real_end': max(visited.mapped('actual_time')) if visited else False,
             })
             trip._compute_real_figures()
+            trip._evaluate_rules(len(skipped), bool(visited))
+
+    def _evaluate_rules(self, skipped, visited):
+        """The rules that need the whole trip: stops never reached, an incomplete trip, a duration far from the plan."""
+        self.ensure_one()
+        Alert = self.env['bus.alert']
+        when = self.real_end or self.planned_end
+        if visited:
+            for line in self.stop_line_ids.filtered(lambda ln: ln.status == 'skipped'):
+                Alert._trip_event(self, 'skipped_stop', when, stop_id=line.stop_id.id)
+        if self.state == 'incomplete':
+            Alert._trip_event(self, 'incomplete_trip', when, threshold=skipped)
+        limit = int_param(self.env, 'bus_tracking.time_diff_pct', 25)
+        self.time_flag = bool(self.duration_real_min and limit > 0 and abs(self.duration_diff_pct) > limit)
 
     def _compute_real_figures(self):
         """Distance driven and how far from the line of the route, from the positions stored during the trip."""
@@ -354,7 +373,16 @@ class BusTrip(models.Model):
 
     @api.model
     def _cron_close_trips(self):
-        """A trip whose window (and margin) is over is closed with what it has."""
+        """Late starts are reported; a trip whose window (and margin) is over is closed with what it has."""
+        now = fields.Datetime.now()
+        late = int_param(self.env, 'bus_tracking.late_start_minutes', 10)
+        if late > 0:
+            for trip in self.search([('state', '=', 'planned'), ('late_start_alerted', '=', False),
+                                     ('planned_start', '<', now - timedelta(minutes=late))]):
+                self.env['bus.alert']._trip_event(
+                    trip, 'late_start', trip.planned_start + timedelta(minutes=late),
+                    delay_min=late, threshold=late)
+                trip.late_start_alerted = True
         margin = timedelta(minutes=int_param(self.env, 'bus_tracking.trip_margin_min', 30))
         self.search([('state', 'in', ('planned', 'running')),
                      ('planned_end', '<', fields.Datetime.now() - margin)])._finalize()
