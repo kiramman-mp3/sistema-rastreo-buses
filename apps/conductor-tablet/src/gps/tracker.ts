@@ -10,6 +10,8 @@ import type { GpsController } from './types';
 
 export const GPS_TASK = 'uta-bus-location';
 
+let foregroundWatcher: Location.LocationSubscription | null = null;
+
 async function batteryPercent(): Promise<number | null> {
   try {
     const level = await Battery.getBatteryLevelAsync();
@@ -27,23 +29,50 @@ export const liveGps: GpsController = {
   },
   async start(uniqueId, url) {
     await gpsStore.set({ uniqueId, url });
-    const running = await Location.hasStartedLocationUpdatesAsync(GPS_TASK);
-    if (running) await Location.stopLocationUpdatesAsync(GPS_TASK);
-    await Location.startLocationUpdatesAsync(GPS_TASK, {
-      accuracy: Location.Accuracy.High,
-      timeInterval: 10_000,
-      distanceInterval: 0,
-      deferredUpdatesInterval: 10_000,
-      pausesUpdatesAutomatically: false,
-      foregroundService: {
-        notificationTitle: t('gpsServiceTitle'),
-        notificationBody: t('gpsServiceBody'),
-        notificationColor: '#B91C1C',
-        killServiceOnDestroy: false,
-      },
-    });
+    if (foregroundWatcher) {
+      foregroundWatcher.remove();
+      foregroundWatcher = null;
+    }
+    try {
+      const running = await Location.hasStartedLocationUpdatesAsync(GPS_TASK);
+      if (running) await Location.stopLocationUpdatesAsync(GPS_TASK);
+      await Location.startLocationUpdatesAsync(GPS_TASK, {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 10_000,
+        distanceInterval: 0,
+        deferredUpdatesInterval: 10_000,
+        pausesUpdatesAutomatically: false,
+        foregroundService: {
+          notificationTitle: t('gpsServiceTitle'),
+          notificationBody: t('gpsServiceBody'),
+          notificationColor: '#B91C1C',
+          killServiceOnDestroy: false,
+        },
+      });
+    } catch {
+      // In Expo Go on iOS or environments where background task manager is not supported,
+      // fallback to foreground watchPositionAsync so positions are actively sent.
+      try {
+        foregroundWatcher = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 10_000,
+            distanceInterval: 0,
+          },
+          (location) => {
+            void runLocationTask([location]);
+          },
+        );
+      } catch {
+        // Handled by permission snapshot & health view
+      }
+    }
   },
   async stop() {
+    if (foregroundWatcher) {
+      foregroundWatcher.remove();
+      foregroundWatcher = null;
+    }
     const registered = await TaskManager.isTaskRegisteredAsync(GPS_TASK);
     if (registered) {
       try {
