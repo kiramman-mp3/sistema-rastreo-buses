@@ -40,5 +40,5 @@ El nombre, el logo y los colores institucionales son de la universidad. Este pro
 
 - **Rutas y paradas**: se crean a mano en *Administración de Buses > Rutas*. La ruta se dibuja como línea recta entre paradas.
 - **Horarios de servicio**: los buses probablemente no circulan de noche ni fines de semana. La alerta de "sin señal" solo vigila buses que reportaron en las últimas 6 horas, pero el control de salud `/bus_tracking/health` falla fuera de servicio; ajusta `Report as down after` o pausa ese monitor en esos horarios.
-- **Frecuencia y celulares**: ver `docs/GUIA-CHOFER.md` y la recomendación del plan.
+- **Frecuencia y celulares**: ver `docs/guias/GUIA-CHOFER.md` y la recomendación del plan.
 - **Correo institucional**: el servidor de correo saliente de la universidad se configura en la fase 12.

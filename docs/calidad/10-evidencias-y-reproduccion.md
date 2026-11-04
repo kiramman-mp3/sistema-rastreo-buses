@@ -24,7 +24,7 @@ Las figuras de los informes están en `figuras/`.
 - [ ] La auditoría aleatoria no supera el 10 % de error.
 - [ ] La cobertura no baja de 80 %.
 - [ ] Cada defecto corregido tiene su prueba nueva.
-- [ ] `05-registro-de-defectos.md` y `docs/BITACORA.md` están al día.
+- [ ] `05-registro-de-defectos.md` y `docs/academico/BITACORA.md` están al día.
 - [ ] Las evidencias de la tabla anterior se regeneraron para esta versión.
 
 ## 3. Entorno de pruebas

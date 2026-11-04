@@ -1,4 +1,4 @@
-"""Quality data that comes from reading docs/BITACORA.md and docs/PLAN.md, not from running tests.
+"""Quality data that comes from reading docs/academico/BITACORA.md and docs/arquitectura/PLAN.md, not from running tests.
 
 Used by generar_docs.py to draw the Pareto and Ishikawa diagrams and to write docs/calidad/*.md,
 so the tables and the figures always agree.
@@ -118,7 +118,7 @@ DEFECTOS = [
     ('DEF-010', '28-oct-2026', 'Suite en vivo (E9) y auditoría', 'Una hora GPS inválida produce HTTP 500 en el webhook',
      'models/utils.py (parse_traccar_dt), controllers/main.py', 'parse_traccar_dt llama a isoparse sin capturar el error de formato.',
      'Validación de entrada', 'Cerrado', 'E9; test_webhook_rejects_invalid_fixtime y test_invalid_fixtime_raises_validation_error'),
-    # Audit of 2026-11-02 (docs/PLAN-AUDITORIA.md): one defect per critical or high finding.
+    # Audit of 2026-11-02 (docs/arquitectura/PLAN-AUDITORIA.md): one defect per critical or high finding.
     ('DEF-011', '02-nov-2026', 'Auditoría integral (SEC-01)', 'Cualquier usuario interno podía emitir o revocar la credencial QR de otro chofer por RPC',
      'models/res_users.py', 'Se protegió el botón en la vista y no el método; sudo() saltaba los permisos.',
      'Seguridad', 'Cerrado', 'test_only_managers_issue_or_revoke_badges'),
