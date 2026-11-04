@@ -1,3 +1,4 @@
+import { GPS_INTERVAL_MS } from './interval';
 import type { Fix } from './osmand';
 
 export type KeyValue = {
@@ -8,8 +9,8 @@ export type KeyValue = {
 
 export const QUEUE_KEY = 'uta.gps.queue';
 export const MAX_QUEUE_AGE_MS = 2 * 60 * 60 * 1000;
-/** Two hours at one fix every ten seconds, the same span as the maximum age. */
-export const MAX_QUEUE_ITEMS = MAX_QUEUE_AGE_MS / 10_000;
+/** Two hours at one fix per interval, the same span as the maximum age. */
+export const MAX_QUEUE_ITEMS = MAX_QUEUE_AGE_MS / GPS_INTERVAL_MS;
 
 export function memoryKv(initial: Record<string, string> = {}): KeyValue {
   const data = { ...initial };
