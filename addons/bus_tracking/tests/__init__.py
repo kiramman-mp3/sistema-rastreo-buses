@@ -18,3 +18,4 @@ from . import test_driver_staff
 from . import test_privacy
 from . import test_trips
 from . import test_trip_run
+from . import test_trip_rules
