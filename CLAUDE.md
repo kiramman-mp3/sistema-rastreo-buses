@@ -229,4 +229,4 @@ Verificaciones:
 
 La prioridad es mantener un historial Git limpio, entendible y fácil de revertir.
 
-App de tableta: `apps/conductor-tablet` (Expo). El GPS va a Traccar por OsmAnd; el login de chofer es `/bus_tracking/driver/*`. Guía: `docs/GUIA-CHOFER.md`. Plan: `docs/PLAN-APP-CHOFER.md`.
+App de tableta: `apps/conductor-tablet` (Expo). El GPS va a Traccar por OsmAnd; el login de chofer es `/bus_tracking/driver/*`. Guía: `docs/guias/GUIA-CHOFER.md`. Plan: `docs/arquitectura/PLAN-APP-CHOFER.md`.

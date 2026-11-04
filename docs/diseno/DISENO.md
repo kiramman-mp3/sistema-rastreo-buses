@@ -1,6 +1,6 @@
 # Diseño de Buses UTA
 
-Guía de identidad para el portal público, el panel de Odoo y la tableta del chofer. Reemplaza la versión anterior, que describía una identidad que el código ya no usaba. Plan y hallazgos: `docs/PLAN-UX.md`.
+Guía de identidad para el portal público, el panel de Odoo y la tableta del chofer. Reemplaza la versión anterior, que describía una identidad que el código ya no usaba. Plan y hallazgos: `docs/arquitectura/PLAN-UX.md`.
 
 ## La idea: la línea
 
