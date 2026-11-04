@@ -95,7 +95,12 @@
                 <field name="planned_start"/>
                 <field name="vehicle_id"/>
                 <field name="route_id"/>
-                <field name="planned_end" optional="show"/>
+                <field name="planned_end" optional="hide"/>
+                <field name="stops_visited" optional="show"/>
+                <field name="stops_late" optional="show"/>
+                <field name="stops_skipped" optional="show"/>
+                <field name="delay_end_min" optional="show"/>
+                <field name="distance_real_km" optional="hide"/>
                 <field name="simulated" optional="show"/>
                 <field name="state" widget="badge" decoration-info="state == 'running'"
                        decoration-success="state == 'done'" decoration-danger="state == 'incomplete'"/>
@@ -130,6 +135,34 @@
                             <field name="scenario" attrs="{'invisible': [('simulated', '=', False)]}"/>
                         </group>
                     </group>
+                    <group string="What really happened">
+                        <group>
+                            <field name="real_start"/>
+                            <field name="real_end"/>
+                            <field name="duration_est_min" widget="float_time" string="Planned duration (h:min)"/>
+                            <field name="duration_real_min" widget="float_time" string="Real duration (h:min)"/>
+                            <field name="duration_diff_pct"/>
+                            <field name="time_flag"/>
+                        </group>
+                        <group>
+                            <field name="distance_est_km"/>
+                            <field name="distance_real_km"/>
+                            <field name="deviation_avg_m"/>
+                            <field name="deviation_max_m"/>
+                            <field name="corridor_pct"/>
+                        </group>
+                        <group>
+                            <field name="stops_total"/>
+                            <field name="stops_visited"/>
+                            <field name="stops_late"/>
+                            <field name="stops_skipped"/>
+                        </group>
+                        <group>
+                            <field name="delay_avg_min"/>
+                            <field name="delay_max_min"/>
+                            <field name="delay_end_min"/>
+                        </group>
+                    </group>
                     <notebook>
                         <page string="Stops" name="stops">
                             <field name="stop_line_ids" readonly="1">
@@ -141,6 +174,24 @@
                                     <field name="actual_time"/>
                                     <field name="delay_min"/>
                                     <field name="status" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Alerts" name="alerts">
+                            <field name="alert_ids" readonly="1">
+                                <tree>
+                                    <field name="start_time"/>
+                                    <field name="kind"/>
+                                    <field name="detail"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Incidents" name="incidents">
+                            <field name="incident_ids" readonly="1">
+                                <tree>
+                                    <field name="reported_at"/>
+                                    <field name="kind"/>
+                                    <field name="note"/>
                                 </tree>
                             </field>
                         </page>

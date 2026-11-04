@@ -20,6 +20,16 @@
         <field name="numbercall">-1</field>
     </record>
 
+    <record id="cron_close_trips" model="ir.cron">
+        <field name="name">Bus Tracking: close the scheduled trips whose time is over</field>
+        <field name="model_id" ref="model_bus_trip"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_close_trips()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+    </record>
+
     <record id="cron_push_alerts" model="ir.cron">
         <field name="name">Bus Tracking: push new alerts to the managers</field>
         <field name="model_id" ref="model_bus_alert"/>

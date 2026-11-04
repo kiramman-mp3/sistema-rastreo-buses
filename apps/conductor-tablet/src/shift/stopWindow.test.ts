@@ -6,6 +6,8 @@ function stops(next: number, total = 7): StopView[] {
     name: `P${i + 1}`,
     sequence: i,
     arrivedAt: null,
+    plannedAt: null,
+    delayMin: null,
     status: i < next ? 'arrived' : i === next ? 'next' : 'later',
   }));
 }
