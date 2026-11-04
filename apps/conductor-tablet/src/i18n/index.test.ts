@@ -22,12 +22,22 @@ describe('driver i18n', () => {
     expect(t('update_error')).toBe("We couldn't update. Retrying…");
     setLang('qu');
     expect(t('stops')).toBe('Sayana kuna');
-    expect(t('lang_name')).toBe('Kichwa (borrador)');
+    expect(t('lang_name')).toBe('Kichwa');
     expect(t('alert_offline')).toBe('mana rikurin');
-    expect(t('kind_other')).toBe('Otro');
+    expect(t('kind_other')).toBe('Shuk');
   });
 
-  test('starts in the language of the device: English or Spanish, never the Kichwa draft', () => {
+  test('Kichwa is translated, not copied from Spanish', () => {
+    // names and words that read the same in every language
+    const same = new Set(['bus', 'actionSos', 'actionProblemSub']);
+    const copied = Object.keys(messages.es).filter((key) => {
+      const k = key as keyof typeof messages.es;
+      return messages.qu[k] === messages.es[k] && messages.es[k].length > 12 && !same.has(key);
+    });
+    expect(copied).toEqual([]);
+  });
+
+  test('starts in the language of the device: English or Spanish, never Kichwa', () => {
     expect(languageForLocale('en-US')).toBe('en');
     expect(languageForLocale('en')).toBe('en');
     expect(languageForLocale('es-EC')).toBe('es');
@@ -51,7 +61,7 @@ describe('driver i18n', () => {
     expect(tp('moreNotice', 1)).toBe('1 more notice');
     expect(tp('moreNotice', 2)).toBe('2 more notices');
     setLang('qu');
-    expect(tp('moreNotice', 2)).toBe('2 avisos más');
+    expect(tp('moreNotice', 2)).toBe('2 shuk willay');
   });
 
   test('every singular form has its plural form in every language', () => {
