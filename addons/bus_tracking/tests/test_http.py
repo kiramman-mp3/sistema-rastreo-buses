@@ -15,6 +15,8 @@ class TestHttp(HttpCase):
     def setUp(self):
         super().setUp()
         self.env['ir.config_parameter'].set_param('bus_tracking.webhook_secret', 's3cret')
+        # These tests are about the webhook itself, not about shifts (see test_ingest).
+        self.env['ir.config_parameter'].set_param('bus_tracking.accept_without_shift', '1')
         self.bus = self.env['bus.vehicle'].create({'name': 'Bus 1', 'traccar_device_id': 7})
         self.body = json.dumps({
             'position': traccar_position(7, '2026-10-26T12:00:00Z', -33.47, -70.62, speed_knots=5.0),
@@ -59,12 +61,14 @@ class TestHttp(HttpCase):
         bus.write({'last_fix_time': fields.Datetime.now()})
         resp = self.url_open('/bus_tracking/health')
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json(), {'status': 'ok'})
+        self.assertEqual(resp.json()['status'], 'ok')
 
     def test_health_goes_stale_and_can_be_disabled(self):
         self.bus.write({'last_fix_time': fields.Datetime.now() - timedelta(minutes=11)})
         self.assertEqual(self.url_open('/bus_tracking/health').status_code, 503)
-        self.assertEqual(self.url_open('/bus_tracking/health').json(), {'status': 'stale'})
+        stale = self.url_open('/bus_tracking/health').json()
+        self.assertEqual(stale['status'], 'stale')
+        self.assertRegex(stale['version'], r'^16\.0\.\d+\.\d+\.\d+$')  # which release is running
         self.env['ir.config_parameter'].set_param('bus_tracking.stale_minutes', '30')
         self.assertEqual(self.url_open('/bus_tracking/health').status_code, 200)
         self.env['ir.config_parameter'].set_param('bus_tracking.stale_minutes', '0')
@@ -135,7 +139,7 @@ class TestHttp(HttpCase):
     def test_landing_is_public_and_login_is_themed(self):
         landing = self.url_open('/')
         self.assertEqual(landing.status_code, 200)
-        self.assertIn('Tu bus ya viene', landing.text)
+        self.assertIn('¿Dónde viene tu bus?', landing.text)
         self.assertIn('/web/login', landing.text)
         self.assertIn('o_bus_login_shell', self.url_open('/web/login').text)
 
@@ -144,3 +148,50 @@ class TestHttp(HttpCase):
         resp = self.url_open('/', allow_redirects=False)
         self.assertEqual(resp.status_code, 303)
         self.assertIn('/web', resp.headers['Location'])
+
+    def track(self, **params):
+        self.authenticate('admin', 'admin')
+        return self.url_open('/bus_tracking/track', data=json.dumps(
+            {'jsonrpc': '2.0', 'method': 'call', 'params': params}),
+            headers={'Content-Type': 'application/json'}).json()
+
+    def test_track_is_bounded_and_validated(self):
+        self.bus._apply_position(traccar_position(
+            7, fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'), -33.47, -70.62))
+        self.assertEqual(self.track(vehicle_id=self.bus.id, hours=10 ** 9)['result'], [[-33.47, -70.62]])
+        self.assertEqual(len(self.track(vehicle_id=self.bus.id, hours='nan')['result']), 1)
+        bad = self.track(vehicle_id='x')
+        self.assertIn('error', bad)
+        self.assertNotIn('Overflow', json.dumps(bad))
+
+    def test_webhook_still_accepts_the_secret_in_the_url_for_now(self):
+        self.assertEqual(self.post().status_code, 200)
+        self.assertEqual(self.positions(), 1)
+
+    def rpc(self, path, **params):
+        return self.url_open(path, data=json.dumps({'jsonrpc': '2.0', 'method': 'call', 'params': params}),
+                             headers={'Content-Type': 'application/json'}).json()
+
+    def test_the_stop_picker_loads_and_saves_through_http(self):
+        route = self.env['bus.route'].create({
+            'name': 'R', 'code': 'R1', 'stop_ids': [(0, 0, {'name': 'A', 'latitude': -1.24, 'longitude': -78.62})]})
+        self.authenticate('admin', 'admin')
+        data = self.rpc('/bus_tracking/stop/load', route_id=route.id)['result']
+        self.assertEqual([s['name'] for s in data['stops']], ['A'])
+        self.assertTrue(data['tile_url'].startswith('https://'))
+        saved = self.rpc('/bus_tracking/stop/save', route_id=route.id, stop_id=False, name='B',
+                         latitude=-1.25, longitude=-78.63, radius=40)['result']
+        self.assertEqual(self.env['bus.route.stop'].browse(saved['id']).name, 'B')
+
+    def test_an_incident_is_marked_as_seen_through_http(self):
+        route = self.env['bus.route'].create({'name': 'R', 'code': 'R1'})
+        driver = self.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'Chofer HTTP', 'login': 'chofer_http', 'password': 'x' * 12,
+            'groups_id': [(6, 0, [self.env.ref('base.group_portal').id,
+                                  self.env.ref('bus_tracking.group_bus_driver').id])]})
+        shift = self.env['bus.shift'].create({'user_id': driver.id, 'vehicle_id': self.bus.id, 'route_id': route.id})
+        incident = self.env['bus.incident'].create({'shift_id': shift.id, 'vehicle_id': self.bus.id, 'kind': 'sos'})
+        self.authenticate('admin', 'admin')
+        self.assertEqual(self.rpc('/bus_tracking/incident/ack', incident_id=incident.id)['result']['ok'], True)
+        self.assertTrue(incident.acknowledged_at)
+        self.assertEqual(self.rpc('/bus_tracking/incident/ack', incident_id=999999)['result'], {'ok': False})

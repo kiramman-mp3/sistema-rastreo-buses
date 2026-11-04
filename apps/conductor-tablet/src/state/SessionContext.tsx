@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { createClient, defaultBaseUrl } from '../api/client';
+import { errorQueue } from '../diagnostics';
 import { gpsKv, gpsStore } from '../gps/store';
 import { liveGps } from '../gps/tracker';
 import { IncidentQueue } from '../incidents/queue';
-import { odooUrlStore, secureStore } from './secureStore';
+import { odooUrlStore, pendingEndStore, secureStore } from './secureStore';
 import { Session, type SessionSnapshot } from './session';
 
 const SessionContext = createContext<Session | null>(null);
@@ -20,6 +21,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         gpsStore,
         new IncidentQueue(gpsKv),
         odooUrlStore,
+        pendingEndStore,
+        errorQueue,
       ),
     [],
   );
@@ -58,4 +61,15 @@ export function useSession(): Session {
       },
     });
   }, [session, snapshot]);
+}
+
+/**
+ * The session itself, stable for the whole life of the app. Use it in effects and timers: the object
+ * from useSession() changes on every state update, so an effect that depends on it restarts each time
+ * (and a refresh that updates the state would restart its own timer forever).
+ */
+export function useSessionActions(): Session {
+  const session = useContext(SessionContext);
+  if (!session) throw new Error('SessionProvider is missing');
+  return session;
 }

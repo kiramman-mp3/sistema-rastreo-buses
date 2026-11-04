@@ -1,5 +1,8 @@
-import { AuthError, createClient, type TokenStore } from '../api/client';
+import { ApiError, AuthError, createClient, type TokenStore } from '../api/client';
+import { ErrorQueue, memoryKv } from '../diagnostics/queue';
+import type { ErrorReport } from '../diagnostics/report';
 import { GpsPermissionError, type GpsController, type GpsStore } from '../gps/types';
+import { IncidentQueue } from '../incidents/queue';
 import { Session } from './session';
 
 function memoryStore(initial: string | null = null): TokenStore {
@@ -84,6 +87,45 @@ describe('session', () => {
     expect(session.snapshot.token).toBeNull();
     expect(session.snapshot.shift).toBeNull();
     expect(await tokens.get()).toBeNull();
+  });
+
+  test('boot without signal keeps the session and the GPS instead of logging out', async () => {
+    const tokens = memoryStore('saved');
+    const gps = gpsMock();
+    const stored = gpsMemory();
+    await stored.set({ uniqueId: 'dev-9', url: 'http://gps:5055' });
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: () => Promise.reject(new TypeError('Network request failed')),
+    });
+    const session = new Session(tokens, client, gps, stored);
+    await session.boot();
+    expect(session.snapshot.ready).toBe(true);
+    expect(session.snapshot.token).toBe('saved');
+    expect(session.snapshot.offline).toBe(true);
+    expect(gps.started).toEqual(['dev-9@http://gps:5055']);
+    expect(await tokens.get()).toBe('saved');
+  });
+
+  test('refreshMe after an offline start loads the shift', async () => {
+    const tokens = memoryStore('saved');
+    let online = false;
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: () =>
+        online
+          ? json(200, { ...me, shift: { id: 9, vehicle_id: 1, route_id: 2, start: '2026-10-30T15:00:00Z' } })
+          : Promise.reject(new TypeError('Network request failed')),
+    });
+    const session = new Session(tokens, client);
+    await session.boot();
+    expect(session.snapshot.offline).toBe(true);
+    online = true;
+    await session.refreshMe();
+    expect(session.snapshot.offline).toBe(false);
+    expect(session.snapshot.shift?.id).toBe(9);
   });
 
   test('login stores the token and loads /me', async () => {
@@ -218,5 +260,178 @@ describe('session', () => {
     expect(session.snapshot.driver?.name).toBe('Chofer Uno');
     expect(session.snapshot.vehicles).toHaveLength(1);
     expect(session.snapshot.routes).toHaveLength(1);
+  });
+
+  test('loginWithBadge never keeps the badge as a session when the server rejects it', async () => {
+    const tokens = memoryStore(null);
+    const fetchMock = jest.fn(async () => json(404, { error: 'not_found' }));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client);
+    await expect(session.loginWithBadge('raw-badge-token-abc')).rejects.toBeInstanceOf(ApiError);
+    expect(await tokens.get()).toBeNull();
+    expect(session.snapshot.token).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  const activeShift = { id: 3, vehicle_id: 1, route_id: 2, start: '2026-10-30T16:00:00Z' };
+
+  function routed(routes: Record<string, () => Promise<Response>>) {
+    return jest.fn(async (url: string) => {
+      const path = Object.keys(routes).find((key) => String(url).endsWith(key));
+      return path ? routes[path]() : json(200, { ok: true });
+    });
+  }
+
+  test('a shift closed by the office stops the gps', async () => {
+    const tokens = memoryStore('tok');
+    const gps = gpsMock();
+    gps.started.push('running');
+    const fetchMock = routed({ '/state': () => json(409, { error: 'no_shift' }) });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    session.snapshot.shift = activeShift;
+    await expect(session.pullState()).rejects.toBeInstanceOf(ApiError);
+    expect(gps.started).toEqual([]);
+    expect(session.snapshot.shift).toBeNull();
+  });
+
+  test('ending a shift the server already closed still ends it on the tablet', async () => {
+    const tokens = memoryStore('tok');
+    const gps = gpsMock();
+    gps.started.push('running');
+    const fetchMock = routed({ '/shift/end': () => json(409, { error: 'no_shift' }) });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    session.snapshot.shift = activeShift;
+    await expect(session.endShift()).resolves.toBe('ended');
+    expect(gps.started).toEqual([]);
+    expect(session.snapshot.shift).toBeNull();
+  });
+
+  test('ending without signal turns the gps off and closes the shift once back online', async () => {
+    const tokens = memoryStore('tok');
+    const pending = memoryStore(null);
+    const gps = gpsMock();
+    gps.started.push('running');
+    let online = false;
+    const ends: string[] = [];
+    const fetchMock = jest.fn(async (url: string) => {
+      if (!online) throw new TypeError('Network request failed');
+      if (String(url).endsWith('/shift/end')) ends.push('end');
+      if (String(url).endsWith('/me')) return json(200, { ...me, shift: activeShift });
+      return json(200, { ok: true });
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory(), undefined, undefined, pending);
+    session.snapshot.shift = activeShift;
+    await expect(session.endShift()).resolves.toBe('queued');
+    expect(gps.started).toEqual([]);
+    expect(await pending.get()).toBe('3');
+
+    online = true;
+    await session.refreshMe();
+    expect(ends).toEqual(['end']);
+    expect(await pending.get()).toBeNull();
+    // The server answered /me before seeing the end: the tablet does not bring the shift back.
+    expect(gps.started).toEqual([]);
+  });
+
+  test('incidents wait on server errors, are dropped when refused and keep their time', async () => {
+    const tokens = memoryStore('tok');
+    const kv = new Map<string, string>();
+    const queue = new IncidentQueue({
+      getItem: async (key) => kv.get(key) ?? null,
+      setItem: async (key, value) => {
+        kv.set(key, value);
+      },
+    });
+    let status = 500;
+    const bodies: { reported_at?: string }[] = [];
+    const fetchMock = jest.fn(async (url: string, init?: RequestInit) => {
+      if (String(url).endsWith('/incident')) {
+        bodies.push(JSON.parse(String(init?.body)));
+        return json(status, status === 200 ? { id: 1 } : { error: 'x' });
+      }
+      return json(200, { ok: true });
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, undefined, undefined, queue);
+    await expect(session.reportIncident({ kind: 'sos', note: '', lat: null, lon: null })).resolves.toBe('queued');
+    expect(await queue.size()).toBe(1);
+    const pressed = bodies[0].reported_at;
+    expect(pressed).toMatch(/Z$/);
+
+    await session.flushIncidents();
+    expect(await queue.size()).toBe(1);
+    status = 200;
+    await session.flushIncidents();
+    expect(await queue.size()).toBe(0);
+    expect(bodies[bodies.length - 1].reported_at).toBe(pressed);
+
+    status = 400;
+    await expect(session.reportIncident({ kind: 'traffic', note: '', lat: null, lon: null })).rejects.toBeInstanceOf(ApiError);
+    expect(await queue.size()).toBe(0);
+  });
+
+  describe('app failures waiting for the office', () => {
+    const waiting: ErrorReport = { message: 'Error: boom', app: '1.0.0', at: '2026-11-02T20:00:00.000Z' };
+
+    async function arrange(answer: (url: string) => Promise<Response>) {
+      const tokens = memoryStore('saved');
+      const calls: string[] = [];
+      const client = createClient({
+        baseUrl: 'http://odoo:8069',
+        store: tokens,
+        fetch: (url) => {
+          calls.push(String(url));
+          return answer(String(url));
+        },
+      });
+      const errors = new ErrorQueue(memoryKv());
+      await errors.push(waiting);
+      const session = new Session(tokens, client, undefined, undefined, undefined, undefined, undefined, errors);
+      return { session, errors, calls };
+    }
+
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+    const answers = (clientError: () => Promise<Response>) => (url: string) =>
+      url.endsWith('/driver/client_error') ? clientError() : json(200, me);
+
+    test('are sent once the driver is signed in and then forgotten', async () => {
+      const { session, errors, calls } = await arrange(answers(() => json(200, { ok: true })));
+      await session.boot();
+      await settle();
+      expect(calls.filter((u) => u.endsWith('/client_error'))).toHaveLength(1);
+      expect(await errors.size()).toBe(0);
+      expect((await errors.last())?.message).toBe('Error: boom');
+    });
+
+    test('stay for later without signal or with a failing server', async () => {
+      for (const reply of [() => Promise.reject(new Error('offline')), () => json(500, { error: 'x' })]) {
+        const { session, errors } = await arrange(answers(reply));
+        await session.boot();
+        await settle();
+        expect(await errors.size()).toBe(1);
+      }
+    });
+
+    test('stay when the server is busy (429) and go when it refuses them for good (400)', async () => {
+      const busy = await arrange(answers(() => json(429, { error: 'too_many_requests' })));
+      await busy.session.boot();
+      await settle();
+      expect(await busy.errors.size()).toBe(1);
+      const refused = await arrange(answers(() => json(400, { error: 'bad_request' })));
+      await refused.session.boot();
+      await settle();
+      expect(await refused.errors.size()).toBe(0);
+    });
+
+    test('a session without an error queue works as before', async () => {
+      const tokens = memoryStore('saved');
+      const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: () => json(200, me) });
+      const session = new Session(tokens, client);
+      await session.boot();
+      await expect(session.flushErrors()).resolves.toBeUndefined();
+    });
   });
 });

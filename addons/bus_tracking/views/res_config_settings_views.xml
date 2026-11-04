@@ -27,6 +27,27 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_right_pane">
+                                <label for="bus_tile_url"/>
+                                <div class="text-muted">
+                                    Map tiles for the panel, the passenger pages and the tablet.
+                                    Empty uses CARTO Voyager (OpenStreetMap data).
+                                </div>
+                                <field name="bus_tile_url" placeholder="https://{s}.example.com/{z}/{x}/{y}.png"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="bus_accept_without_shift"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="bus_accept_without_shift"/>
+                                <div class="text-muted">
+                                    Only for tests. Without it, positions from a bus with no open shift are dropped.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
                                 <label for="tablet_qr"/>
                                 <div class="text-muted">
                                     Scan this QR in the Buses UTA tablet app to save the Odoo address
@@ -124,6 +145,20 @@
                             <div class="o_setting_right_pane">
                                 <label for="bus_privacy_url"/>
                                 <field name="bus_privacy_url" placeholder="https://"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_contact_phone"/>
+                                <div class="text-muted">Only the official number. Empty: no phone is shown.</div>
+                                <field name="bus_contact_phone"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_contact_email"/>
+                                <div class="text-muted">Only the official address. Empty: no email is shown.</div>
+                                <field name="bus_contact_email"/>
                             </div>
                         </div>
                     </div>

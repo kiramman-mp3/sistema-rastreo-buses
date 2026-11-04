@@ -4,12 +4,22 @@ export function defaultBaseUrl(): string {
   return normalizeOdooUrl(process.env.EXPO_PUBLIC_ODOO_URL || PRODUCTION_ODOO_URL) || PRODUCTION_ODOO_URL;
 }
 
+/** Plain http is only for a server on this network (development, a lab); anything else needs https. */
+export function isLocalHost(hostname: string): boolean {
+  const host = hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (host === 'localhost' || host === '::1' || host.endsWith('.local')) return true;
+  const parts = host.split('.').map(Number);
+  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return false;
+  const [a, b] = parts;
+  return a === 127 || a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31);
+}
+
 export function normalizeOdooUrl(raw: string): string | null {
   const fromQr = odooFromPayload(raw.trim());
   if (!fromQr) return null;
   try {
     const url = new URL(fromQr);
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLocalHost(url.hostname))) return null;
     url.hash = '';
     url.search = '';
     url.pathname = url.pathname.replace(/\/web\/?$/, '').replace(/\/+$/, '');

@@ -1,8 +1,9 @@
-// Backend palette and fonts. Loaded before Odoo's primary_variables so its !default values yield.
-$o-community-color: #8B1D24;
-$o-brand-odoo: #0F172A;
-$o-brand-primary: #8B1D24;
-$o-brand-secondary: #475569;
+// Backend palette and fonts, same tokens as static/src/css/brand.css.
+// Loaded before Odoo's primary_variables so its !default values yield.
+$o-community-color: #7A1A22;
+$o-brand-odoo: #172025;
+$o-brand-primary: #7A1A22;
+$o-brand-secondary: #3E4C51;
 
-$o-system-fonts: (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
-$o-headings-font-family: (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif);
+$o-system-fonts: ("Atkinson Hyperlegible", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+$o-headings-font-family: ("Bricolage Grotesque", "Atkinson Hyperlegible", -apple-system, "Segoe UI", sans-serif);

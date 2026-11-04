@@ -7,8 +7,9 @@ export type KeyValue = {
 };
 
 export const QUEUE_KEY = 'uta.gps.queue';
-export const MAX_QUEUE_ITEMS = 360;
 export const MAX_QUEUE_AGE_MS = 2 * 60 * 60 * 1000;
+/** Two hours at one fix every ten seconds, the same span as the maximum age. */
+export const MAX_QUEUE_ITEMS = MAX_QUEUE_AGE_MS / 10_000;
 
 export function memoryKv(initial: Record<string, string> = {}): KeyValue {
   const data = { ...initial };
@@ -24,6 +25,8 @@ export function memoryKv(initial: Record<string, string> = {}): KeyValue {
 }
 
 export class LocationQueue {
+  private chain: Promise<unknown> = Promise.resolve();
+
   constructor(
     private kv: KeyValue,
     private now: () => number = Date.now,
@@ -54,9 +57,20 @@ export class LocationQueue {
   }
 
   async push(fix: Fix) {
+    await this.pushMany([fix]);
+  }
+
+  async pushMany(fixes: Fix[]) {
     const items = await this.load();
-    items.push(fix);
+    items.push(...fixes);
     await this.save(items);
+  }
+
+  /** Run `task` alone: every other exclusive task on this queue waits for it to finish. */
+  exclusive<T>(task: () => Promise<T>): Promise<T> {
+    const run = this.chain.then(task, task);
+    this.chain = run.catch(() => undefined);
+    return run;
   }
 
   async size() {

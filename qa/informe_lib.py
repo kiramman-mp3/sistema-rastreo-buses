@@ -8,8 +8,8 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import (BaseDocTemplate, Frame, Image, KeepTogether, PageBreak, PageTemplate, Paragraph,
-                                Preformatted, Spacer, Table, TableStyle)
+from reportlab.platypus import (BaseDocTemplate, Frame, Image, KeepTogether, PageBreak,  # noqa: F401 (re-exported)
+                                PageTemplate, Paragraph, Preformatted, Spacer, Table, TableStyle)
 
 FONTS = r'C:\Windows\Fonts'
 HERE = os.path.dirname(os.path.abspath(__file__))

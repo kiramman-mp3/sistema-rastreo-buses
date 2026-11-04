@@ -14,10 +14,12 @@ from ..models.bus_push import b64url, endpoint_allowed
 
 GOOD_ENDPOINT = 'https://fcm.googleapis.com/fcm/send/abc123'
 
+
 def new_device(user, endpoint=GOOD_ENDPOINT):
     """A browser: its key pair and auth secret, and the matching subscription row values."""
     receiver = ec.generate_private_key(ec.SECP256R1())
-    public = receiver.public_key().public_bytes(serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)
+    public = receiver.public_key().public_bytes(
+        serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)
     auth = os.urandom(16)
     return receiver, auth, {'user_id': user.id, 'endpoint': endpoint, 'p256dh': b64url(public), 'auth': b64url(auth)}
 
@@ -30,7 +32,8 @@ class TestPushModel(TransactionCase):
         self.Sub = self.env['bus.push.subscription']
         self.user = self.env['res.users'].create({
             'name': 'Mgr', 'login': 'mgr', 'email': 'mgr@example.org',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_manager').id])]})
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_manager').id])]})
 
     def test_only_the_big_push_services_are_accepted(self):
         for good in (GOOD_ENDPOINT,
@@ -110,11 +113,15 @@ class TestPushEndpoints(HttpCase):
     def setUp(self):
         super().setUp()
         Users = self.env['res.users']
-        group = lambda xmlid: self.env.ref(xmlid).id
+
+        def group(xmlid):
+            return self.env.ref(xmlid).id
         self.viewer = Users.create({'name': 'Viewer', 'login': 'viewer5', 'password': 'viewer5-pass',
-                                    'groups_id': [(6, 0, [group('base.group_user'), group('bus_tracking.group_bus_user')])]})
+                                    'groups_id': [(6, 0, [group('base.group_user'),
+                                                          group('bus_tracking.group_bus_user')])]})
         self.manager = Users.create({'name': 'Manager', 'login': 'manager5', 'password': 'manager5-pass',
-                                     'groups_id': [(6, 0, [group('base.group_user'), group('bus_tracking.group_bus_manager')])]})
+                                     'groups_id': [(6, 0, [group('base.group_user'),
+                                                           group('bus_tracking.group_bus_manager')])]})
 
     def call(self, path, **params):
         resp = self.url_open(path, data=json.dumps({'jsonrpc': '2.0', 'method': 'call', 'params': params}),
@@ -162,9 +169,11 @@ class TestPushEndpoints(HttpCase):
     def test_bad_endpoints_and_keys_are_refused(self):
         self.authenticate('manager5', 'manager5-pass')
         keys = {'p256dh': 'x' * 87, 'auth': 'y' * 22}
-        self.assertEqual(self.call('/bus_tracking/push/subscribe', endpoint='https://evil.example/x', keys=keys)['result'],
+        evil = self.call('/bus_tracking/push/subscribe', endpoint='https://evil.example/x', keys=keys)
+        self.assertEqual(evil['result'],
                          {'ok': False, 'error': 'endpoint'})
-        self.assertEqual(self.call('/bus_tracking/push/subscribe', endpoint='http://fcm.googleapis.com/x', keys=keys)['result']['ok'], False)
+        plain = self.call('/bus_tracking/push/subscribe', endpoint='http://fcm.googleapis.com/x', keys=keys)
+        self.assertEqual(plain['result']['ok'], False)
         for bad_keys in (None, {}, {'p256dh': 'x'}, {'p256dh': 'x' * 500, 'auth': 'y'}, {'p256dh': 1, 'auth': 2}):
             self.assertEqual(self.call('/bus_tracking/push/subscribe', endpoint=GOOD_ENDPOINT, keys=bad_keys)['result'],
                              {'ok': False, 'error': 'keys'})
@@ -187,3 +196,30 @@ class TestPushEndpoints(HttpCase):
             result = self.call('/bus_tracking/push/test')['result']
         self.assertEqual(result, {'sent': 2})
         self.assertEqual(calls, [('manager5', 'Test notification')])
+
+
+@tagged('post_install', '-at_install')
+class TestPushQueue(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.Sub = self.env['bus.push.subscription']
+        self.manager = self.env['res.users'].create({
+            'name': 'Mgr Queue', 'login': 'mgr_queue',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_manager').id])]})
+        self.Sub.create(new_device(self.manager)[2])
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus Q'})
+
+    def test_a_network_error_does_not_stop_the_queue_nor_repeat_it(self):
+        import requests
+        self.env['bus.alert'].search([]).write({'notified': True})
+        alert = self.env['bus.alert'].create({
+            'vehicle_id': self.bus.id, 'kind': 'speeding', 'start_time': '2026-10-26 12:00:00'})
+        with patch('pywebpush.webpush', side_effect=requests.ConnectionError('down')) as sent:
+            self.env['bus.alert']._cron_push()        # must not raise
+            self.assertTrue(alert.notified)
+            calls = sent.call_count
+            self.env['bus.alert']._cron_push()
+            self.assertEqual(sent.call_count, calls)
+        self.assertTrue(self.Sub.search([('user_id', '=', self.manager.id)]))

@@ -1,3 +1,4 @@
+import type { ErrorReport } from '../diagnostics/report';
 import type { IncidentDraft, MeResponse, RouteMap, StartResponse, StateResponse } from './types';
 
 export class AuthError extends Error {
@@ -118,11 +119,16 @@ export function createClient(options: ClientOptions) {
     endShift() {
       return post<{ ok: boolean }>('/bus_tracking/driver/shift/end');
     },
-    state() {
-      return post<StateResponse>('/bus_tracking/driver/state');
+    /** `lang` is the language of the app: the server writes the alert details in it, not in the language of the Odoo user. */
+    state(lang?: string) {
+      return post<StateResponse>('/bus_tracking/driver/state', lang ? { lang } : {});
     },
     routeMap() {
       return post<RouteMap>('/bus_tracking/driver/route');
+    },
+    /** A failure of the app itself, for the operators of the system (it goes to the Odoo log). */
+    clientError(report: ErrorReport) {
+      return post<{ ok: boolean }>('/bus_tracking/driver/client_error', report);
     },
     incident(draft: IncidentDraft) {
       const body: Record<string, unknown> = { kind: draft.kind, note: draft.note };
@@ -130,6 +136,7 @@ export function createClient(options: ClientOptions) {
         body.lat = draft.lat;
         body.lon = draft.lon;
       }
+      if (draft.reported_at) body.reported_at = draft.reported_at;
       return post<{ id: number }>('/bus_tracking/driver/incident', body);
     },
   };
