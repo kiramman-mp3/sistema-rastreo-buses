@@ -65,7 +65,6 @@ export class BusLiveMap extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.mapRef = useRef("map");
-
         this.state = useState({
             vehicles: [],
             routes: [],
