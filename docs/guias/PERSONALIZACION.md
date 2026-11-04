@@ -7,11 +7,13 @@ El sistema está pensado para los buses de la Universidad Técnica de Ambato (UT
 | Tema | Valor por defecto |
 |---|---|
 | Zona horaria | `America/Guayaquil` (UTC-5, sin horario de verano). La fija el script de instalación para el administrador y la compañía; los reportes de actividad cortan los días en hora de Ecuador. |
-| Idioma del panel | Español de Ecuador (`es_EC`), que usa el catálogo `i18n/es.po`. Inglés es el idioma base. |
+| Idioma del panel | Español de Ecuador (`es_EC`), que usa el catálogo `i18n/es.po`. Inglés es el idioma base: todos los textos fuente están en inglés, el módulo mantiene `en_US` activo y cada usuario elige su idioma en Preferencias. |
 | Centro del mapa | -1.2417, -78.6167 (centro aproximado de Ambato). Se usa cuando una ruta no tiene paradas ni buses. |
 | Nombre mostrado | **Buses UTA** (provisional). |
 | Límite de velocidad | 50 km/h (velocidad urbana). Verifica con la normativa de tránsito vigente y con las rutas reales, porque una ruta por una vía perimetral puede admitir más. |
 | Idiomas del portal de pasajeros | Español e inglés. El kichwa espera a que una persona hablante revise la traducción (fase 13). |
+| Idioma de la tableta | Español, inglés y kichwa (borrador). La primera vez usa el idioma del dispositivo (inglés o español); después, el que elige el chofer. |
+| Frecuencia de las posiciones | La tableta envía el GPS cada 5 s; el mapa en vivo de Odoo se actualiza cada 4 s y el mapa público cada 5 s. |
 
 ## Se cambia desde Ajustes (sin programar)
 
