@@ -10,7 +10,8 @@ from datetime import datetime, time, timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from .utils import int_param
+from .geo import thin
+from .utils import haversine_m, int_param
 
 _logger = logging.getLogger(__name__)
 
@@ -149,6 +150,36 @@ class BusTrip(models.Model):
     stop_line_ids = fields.One2many('bus.trip.stop', 'trip_id', string="Stops")
     stop_count = fields.Integer(compute='_compute_stop_count')
 
+    # What really happened
+    real_start = fields.Datetime(readonly=True, help="When the bus reached its first stop of this trip.")
+    real_end = fields.Datetime(readonly=True, help="When the bus reached its last stop of this trip.")
+    distance_est_km = fields.Float(
+        digits=(10, 2), help="Estimated distance: the length of the route when the trip was planned.")
+    distance_real_km = fields.Float(
+        digits=(10, 2), readonly=True, help="Distance driven between the first and the last position of the trip.")
+    duration_est_min = fields.Float(compute='_compute_durations', store=True, string="Planned duration (min)")
+    duration_real_min = fields.Float(compute='_compute_durations', store=True, string="Real duration (min)")
+    duration_diff_pct = fields.Float(compute='_compute_durations', store=True, string="Duration difference (%)")
+    time_flag = fields.Boolean(
+        readonly=True, help="The real duration differs from the planned one by more than the tolerance.")
+    deviation_avg_m = fields.Float(
+        readonly=True, help="Average distance of the positions of the trip to the line of the route.")
+    deviation_max_m = fields.Float(readonly=True)
+    corridor_pct = fields.Float(readonly=True, help="Share of the positions inside the corridor around the route.")
+    stops_total = fields.Integer(compute='_compute_stats', store=True)
+    stops_visited = fields.Integer(compute='_compute_stats', store=True)
+    stops_late = fields.Integer(compute='_compute_stats', store=True)
+    stops_skipped = fields.Integer(compute='_compute_stats', store=True)
+    delay_avg_min = fields.Float(compute='_compute_stats', store=True, help="Average delay of the late arrivals.")
+    delay_max_min = fields.Float(
+        compute='_compute_stats', store=True, help="Largest delay of the trip (0 when nothing was late).")
+    delay_end_min = fields.Float(
+        compute='_compute_stats', store=True, help="Delay at the last stop reached: the delay the trip piled up.")
+    alert_ids = fields.One2many('bus.alert', 'trip_id', string="Alerts")
+    incident_ids = fields.One2many('bus.incident', 'trip_id', string="Incidents")
+    alert_count = fields.Integer(compute='_compute_counts')
+    incident_count = fields.Integer(compute='_compute_counts')
+
     @api.depends('route_id.code', 'vehicle_id.name', 'planned_start')
     def _compute_name(self):
         for trip in self:
@@ -173,6 +204,36 @@ class BusTrip(models.Model):
         for trip in self:
             trip.stop_count = len(trip.stop_line_ids)
 
+    def _compute_counts(self):
+        for trip in self:
+            trip.alert_count = len(trip.alert_ids)
+            trip.incident_count = len(trip.incident_ids)
+
+    @api.depends('planned_start', 'planned_end', 'real_start', 'real_end')
+    def _compute_durations(self):
+        for trip in self:
+            planned = (trip.planned_end - trip.planned_start).total_seconds() / 60.0 if trip.planned_end else 0.0
+            real = 0.0
+            if trip.real_start and trip.real_end:
+                real = (trip.real_end - trip.real_start).total_seconds() / 60.0
+            trip.duration_est_min = planned
+            trip.duration_real_min = real
+            trip.duration_diff_pct = (real - planned) / planned * 100.0 if planned and real else 0.0
+
+    @api.depends('stop_line_ids.status', 'stop_line_ids.delay_min', 'stop_line_ids.actual_time')
+    def _compute_stats(self):
+        for trip in self:
+            lines = trip.stop_line_ids.sorted(lambda ln: (ln.sequence, ln.id))
+            arrived = lines.filtered('actual_time')
+            late = lines.filtered(lambda ln: ln.status == 'late')
+            trip.stops_total = len(lines)
+            trip.stops_visited = len(arrived)
+            trip.stops_late = len(late)
+            trip.stops_skipped = len(lines.filtered(lambda ln: ln.status == 'skipped'))
+            trip.delay_avg_min = sum(late.mapped('delay_min')) / len(late) if late else 0.0
+            trip.delay_max_min = max(arrived.mapped('delay_min') + [0.0])
+            trip.delay_end_min = arrived[-1].delay_min if arrived else 0.0
+
     @api.constrains('planned_start', 'planned_end')
     def _check_planned_times(self):
         for trip in self:
@@ -193,6 +254,9 @@ class BusTrip(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for values in vals_list:
+            if 'distance_est_km' not in values and values.get('route_id'):
+                values['distance_est_km'] = self.env['bus.route'].browse(values['route_id']).distance_km
         trips = super().create(vals_list)
         lines = []
         for trip in trips:
@@ -206,6 +270,94 @@ class BusTrip(models.Model):
 
     def action_cancel(self):
         self.filtered(lambda t: t.state in ('planned', 'running')).write({'state': 'cancelled'})
+
+    # ------------------------------------------------------------------
+    # What happens on the road
+    # ------------------------------------------------------------------
+    @api.model
+    def _trips_around(self, vehicle, when, states=('planned', 'running'), route=None):
+        """The trips of the bus whose planned window, widened by the margin, holds `when`; the closest start first."""
+        margin = timedelta(minutes=int_param(self.env, 'bus_tracking.trip_margin_min', 30))
+        domain = [('vehicle_id', '=', vehicle.id), ('state', 'in', states),
+                  ('planned_start', '<=', when + margin), ('planned_end', '>=', when - margin)]
+        if route:
+            domain.append(('route_id', '=', route.id))
+        return self.search(domain).sorted(lambda t: abs((t.planned_start - when).total_seconds()))
+
+    @api.model
+    def _trip_at(self, vehicle, when):
+        """The trip a bus was on at `when` (also a finished one): where an alert or an incident belongs."""
+        return self._trips_around(vehicle, when, ('planned', 'running', 'done', 'incomplete'))[:1]
+
+    @api.model
+    def _on_arrival(self, arrival):
+        """A bus entered the radius of a stop: it belongs to the planned trip of that route whose window
+        holds the time."""
+        trip = self._trips_around(arrival.vehicle_id, arrival.arrival_time, route=arrival.stop_id.route_id)[:1]
+        if trip:
+            trip._register_arrival(arrival)
+
+    def _register_arrival(self, arrival):
+        self.ensure_one()
+        lines = self.stop_line_ids.sorted(lambda ln: (ln.sequence, ln.id))
+        line = lines.filtered(lambda ln: ln.stop_id == arrival.stop_id)[:1]
+        if not line or line.actual_time:
+            return
+        tolerance = int_param(self.env, 'bus_tracking.punctuality_tolerance_min', 5)
+        delay = (arrival.arrival_time - line.planned_time).total_seconds() / 60.0
+        line.write({
+            'actual_time': arrival.arrival_time,
+            'delay_min': delay,
+            'status': 'late' if delay > tolerance else ('early' if delay < -tolerance else 'on_time'),
+        })
+        if self.state == 'planned':
+            self.write({'state': 'running', 'real_start': arrival.arrival_time})
+        if line == lines[-1]:
+            self._finalize(arrival.arrival_time)
+
+    def _finalize(self, end_time=None):
+        """Close the trips: the stops never reached are skipped; reaching every stop is a done trip, anything else
+        an incomplete one. Then measure what was driven."""
+        for trip in self.filtered(lambda t: t.state in ('planned', 'running')):
+            lines = trip.stop_line_ids
+            lines.filtered(lambda ln: ln.status == 'pending').write({'status': 'skipped'})
+            visited = lines.filtered('actual_time')
+            skipped = lines.filtered(lambda ln: ln.status == 'skipped')
+            trip.write({
+                'state': 'done' if visited and not skipped else 'incomplete',
+                'real_end': max(visited.mapped('actual_time')) if visited else False,
+            })
+            trip._compute_real_figures()
+
+    def _compute_real_figures(self):
+        """Distance driven and how far from the line of the route, from the positions stored during the trip."""
+        Position = self.env['bus.position']
+        corridor = int_param(self.env, 'bus_tracking.off_route_meters', 150) or 150
+        for trip in self:
+            start = trip.real_start or trip.planned_start
+            end = trip.real_end or trip.planned_end
+            positions = Position.search([
+                ('vehicle_id', '=', trip.vehicle_id.id), ('fix_time', '>=', start), ('fix_time', '<=', end)],
+                order='fix_time asc')
+            points = thin([(p.latitude, p.longitude) for p in positions], 10)
+            values = {'distance_real_km': round(sum(
+                haversine_m(a[0], a[1], b[0], b[1]) for a, b in zip(points, points[1:])) / 1000.0, 3)}
+            measure = trip.route_id._path_measure()
+            if measure and points:
+                offsets = [measure.locate(lat, lon)[1] for lat, lon in points]
+                values.update({
+                    'deviation_avg_m': sum(offsets) / len(offsets),
+                    'deviation_max_m': max(offsets),
+                    'corridor_pct': 100.0 * sum(1 for o in offsets if o <= corridor) / len(offsets),
+                })
+            trip.write(values)
+
+    @api.model
+    def _cron_close_trips(self):
+        """A trip whose window (and margin) is over is closed with what it has."""
+        margin = timedelta(minutes=int_param(self.env, 'bus_tracking.trip_margin_min', 30))
+        self.search([('state', 'in', ('planned', 'running')),
+                     ('planned_end', '<', fields.Datetime.now() - margin)])._finalize()
 
 
 class BusTripStop(models.Model):

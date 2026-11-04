@@ -171,11 +171,12 @@ class BusVehicle(models.Model):
             if dist <= stop.radius and (nearest_dist is None or dist < nearest_dist):
                 nearest, nearest_dist = stop, dist
         if nearest and nearest != self.current_stop_id:
-            self.env['bus.stop.arrival'].create({
+            arrival = self.env['bus.stop.arrival'].create({
                 'vehicle_id': self.id,
                 'stop_id': nearest.id,
                 'arrival_time': when,
             })
+            self.env['bus.trip']._on_arrival(arrival)
         if nearest != self.current_stop_id:
             self.current_stop_id = nearest
             self.env['bus.run']._on_stop_change(self, previous, nearest or self.env['bus.route.stop'], when)

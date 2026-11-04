@@ -34,6 +34,7 @@ class BusAlert(models.Model):
     latitude = fields.Float(digits=(10, 7))
     longitude = fields.Float(digits=(10, 7))
     detail = fields.Char(compute='_compute_detail')
+    trip_id = fields.Many2one('bus.trip', string="Trip", ondelete='set null', index=True)
 
     def init(self):
         # One open alert per bus and kind, enforced by the database.
@@ -86,6 +87,7 @@ class BusAlert(models.Model):
             vals,
             vehicle_id=vehicle.id,
             route_id=vehicle.route_id.id,
+            trip_id=self.env['bus.trip']._trip_at(vehicle, start_time).id,
             kind=kind,
             start_time=start_time,
             latitude=vehicle.last_latitude,

@@ -5,6 +5,8 @@ export type StopView = {
   name: string;
   sequence: number;
   arrivedAt: string | null;
+  plannedAt: string | null;
+  delayMin: number | null;
   status: 'arrived' | 'next' | 'later';
 };
 
@@ -22,6 +24,8 @@ export function classifyStops(
     name: stop.name,
     sequence: stop.sequence,
     arrivedAt: stop.arrived_at,
+    plannedAt: stop.planned_at ?? null,
+    delayMin: stop.delay_min ?? null,
     status: stop.arrived_at ? 'arrived' : stop.id === effectiveNextId ? 'next' : 'later',
   }));
 }
