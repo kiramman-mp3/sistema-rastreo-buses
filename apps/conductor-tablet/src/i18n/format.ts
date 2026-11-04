@@ -1,6 +1,6 @@
 import { getLang } from './index';
 
-/** The locale for numbers: Ecuador for Spanish (comma decimals) and the Kichwa draft, plain English for English. */
+/** The locale for numbers: Ecuador for Spanish (comma decimals) and Kichwa, plain English for English. */
 function locale(): string {
   return getLang() === 'en' ? 'en' : 'es-EC';
 }
