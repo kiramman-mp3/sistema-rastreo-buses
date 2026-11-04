@@ -11,8 +11,8 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 - La app es **nueva, en Expo (TypeScript)**. Traccar Client es Flutter, así que no se puede hacer un fork literal con Expo. Se replica su comportamiento (envío OsmAnd en segundo plano, cola sin red). Licencia Apache 2.0: se cita el origen en un `NOTICE`.
 - GPS por Traccar, igual que hoy (`GPS_DOMAIN` → Caddy → `traccar:5055`).
 - Login con usuario de Odoo por chofer, en el grupo `group_bus_driver`. Token propio, porque Odoo 16 solo acepta API keys en sus endpoints RPC.
-- Primera versión solo Android. iOS queda fuera.
-- Se necesita *development build* (EAS Build): Expo Go no sirve para GPS en segundo plano.
+- Primera versión orientada a Android en tabletas/teléfonos. Soporte para iOS añadido en 2026-11-04 (DEF-038: adaptación de Apple CoreLocation con stationary heartbeat, `showsBackgroundLocationIndicator` y `UIBackgroundModes: ["location", "fetch"]`).
+- Se necesita *development build* o standalone build (EAS Build): Expo Go no sirve para GPS en segundo plano.
 
 ## Mapa de fases
 
@@ -105,6 +105,14 @@ Archivos en `src/gps/`.
 - Atribución a Traccar Client en `NOTICE`.
 
 Tests: construcción de la URL OsmAnd (conversión de unidades), cola (orden, reintento, tope), tarea con ubicación simulada.
+
+### Adaptación para iOS y corrección de reenvío Traccar (2026-11-04, DEF-035 a DEF-038)
+
+- **Diferencia CoreLocation vs Android**: En Android `timeInterval: 10_000` emite pulsos periódicos continuos del proveedor GNSS. En iOS, Apple CoreLocation ignora `timeInterval` y suspende las emisiones si el dispositivo está detenido. El parámetro `deferredUpdatesInterval` agravaba esto congelando los eventos hasta detectar desplazamiento físico.
+- **Stationary Heartbeat**: En `src/gps/tracker.ts`, se incorporó un latido periódico cada 10 s que verifica si han transcurrido más de 9.5 s sin eventos de posición. En reposo, ejecuta `Location.getCurrentPositionAsync` para emitir la coordenada fija a velocidad 0.0 km/h.
+- **Configuración nativa iOS**: En `app.json` se definieron `UIBackgroundModes: ["location", "fetch"]`, `showsBackgroundLocationIndicator: true` y `activityType: Location.ActivityType.AutomotiveNavigation`.
+- **Fallback en primer plano**: Si la app corre sin gestor de tareas en segundo plano (p. ej. Expo Go en iOS), conmuta de manera segura a `Location.watchPositionAsync`.
+- **Reenvío en Traccar 6 (DEF-035)**: Se requiere `FORWARD_ENABLE: "true"` en docker-compose para que Traccar reenvíe por HTTP POST JSON las posiciones a Odoo.
 
 Criterio de aceptación: URL OsmAnd (nudos, timestamp en segundos), cola (orden, reintento, topes) y tarea con ubicación simulada cubiertos por Jest. `tsc --noEmit`, `expo lint` y 20 tests: PASS. El id se pide en permisos **antes** de `shift/start`. Falta la prueba con pantalla apagada 30 min y cola 5 min sin red (fase 22, development build).
 
