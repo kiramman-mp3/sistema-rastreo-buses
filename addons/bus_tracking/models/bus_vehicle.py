@@ -201,6 +201,17 @@ class BusVehicle(models.Model):
             return False
         return vehicle._apply_position(pos)
 
+    def _expects_position(self, fix_time):
+        """Whether Odoo should have kept a position of this bus at that time: it was on a shift, or the bus
+        reports without one. Used to audit the synchronisation without counting what is dropped on purpose."""
+        self.ensure_one()
+        icp = self.env['ir.config_parameter'].sudo()
+        if icp.get_param('bus_tracking.accept_without_shift') in ('1', 'True', 'true'):
+            return True
+        return bool(self.env['bus.shift'].sudo().search_count([
+            ('vehicle_id', '=', self.id), ('start', '<=', fix_time),
+            '|', ('end', '=', False), ('end', '>=', fix_time)]))
+
     def _accepts_positions(self):
         """A bus only reports while a driver has it on a shift: a tablet left on after the shift
         closed must not keep drawing it on the map. A setting allows them for tests with curl."""
@@ -222,8 +233,9 @@ class BusVehicle(models.Model):
             if pos and bus._accepts_positions():
                 try:
                     bus._apply_position(pos)
-                except ValidationError:
+                except ValidationError as error:
                     _logger.warning("Ignoring invalid position from Traccar for bus %s", bus.name)
+                    self.env['bus.position.reject']._log(pos, error.args[0])
 
     @api.model
     def _cron_sync_positions(self):
