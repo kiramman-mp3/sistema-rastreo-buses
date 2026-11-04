@@ -1,31 +1,103 @@
-import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Fragment, useCallback, useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../src/api/client';
+import type { Route, Vehicle } from '../src/api/types';
 import { GpsPermissionError } from '../src/gps/types';
-import { t } from '../src/i18n';
+import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
-import { useSession } from '../src/state/SessionContext';
-import { Button } from '../src/ui/Button';
-import { colors, hit, type } from '../src/ui/theme';
+import { useSession, useSessionActions } from '../src/state/SessionContext';
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
+import { Notice } from '../src/ui/Notice';
+import { BusOption, RouteOption } from '../src/ui/OptionRows';
+import { useTheme } from '../src/ui/ThemeProvider';
+import { shape, space } from '../src/ui/theme';
+
+type OptionListProps<T> = {
+  items: T[];
+  flow: boolean;
+  extraData: unknown;
+  empty: ReactNode;
+  renderRow: (item: T) => ReactElement;
+};
+
+/**
+ * A virtualised list: only the rows on screen are mounted. With a large system font the whole page scrolls
+ * instead, so the rows are drawn in a plain view (the page's scroll view owns the gesture).
+ */
+function OptionList<T extends { id: number }>({ items, flow, extraData, empty, renderRow }: OptionListProps<T>) {
+  if (flow) {
+    return (
+      <View style={styles.list}>
+        {empty}
+        {items.map((item) => (
+          <Fragment key={item.id}>{renderRow(item)}</Fragment>
+        ))}
+      </View>
+    );
+  }
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => String(item.id)}
+      renderItem={({ item }) => renderRow(item)}
+      extraData={extraData}
+      ListHeaderComponent={<>{empty}</>}
+      contentContainerStyle={styles.list}
+    />
+  );
+}
 
 export default function Select() {
   useLang();
+  const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
+  const actions = useSessionActions();
   const { vehicles, routes, driver } = session.snapshot;
 
-  const [vehicleId, setVehicleId] = useState<number | null>(
-    vehicles.find((bus) => bus.available)?.id ?? null,
-  );
+  const usable = (bus: (typeof vehicles)[number]) => bus.available && bus.has_gps !== false;
+  const [pickedVehicle, setVehicleId] = useState<number | null>(null);
+  const [pickedRoute, setRouteId] = useState<number | null>(null);
+  // Derived, not stored: the list can arrive after the screen opened (started without signal).
+  const vehicleId = vehicles.some((bus) => bus.id === pickedVehicle) ? pickedVehicle : (vehicles.find(usable)?.id ?? null);
   const selectedBus = vehicles.find((bus) => bus.id === vehicleId);
-  const [routeId, setRouteId] = useState<number | null>(selectedBus?.route_id ?? routes[0]?.id ?? null);
+  const routeId = routes.some((route) => route.id === pickedRoute)
+    ? pickedRoute
+    : (selectedBus?.route_id ?? routes[0]?.id ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const offline = session.snapshot.offline;
 
-  const selectedRoute = routes.find((r) => r.id === routeId);
+  // Stable, so the memoised rows only redraw when their own mark changes.
+  const pickBus = useCallback((bus: Vehicle) => {
+    setVehicleId(bus.id);
+    if (bus.route_id) setRouteId(bus.route_id);
+  }, []);
+  const pickRoute = useCallback((route: Route) => setRouteId(route.id), []);
 
-  async function executeStart() {
+  // A driver who already has an open shift belongs on the shift screen.
+  useEffect(() => {
+    if (session.snapshot.shift) router.replace('/shift');
+  }, [session.snapshot.shift]);
+
+  // Opened without signal: keep asking until the server answers, then go to the shift if there is one.
+  useEffect(() => {
+    if (!offline) return undefined;
+    const id = setInterval(() => {
+      actions
+        .refreshMe()
+        .then(() => {
+          if (actions.snapshot.shift) router.replace('/shift');
+        })
+        .catch(() => undefined);
+    }, 10_000);
+    return () => clearInterval(id);
+  }, [offline, actions]);
+
+  async function start() {
     if (!vehicleId || !routeId) return;
     setBusy(true);
     setError('');
@@ -36,396 +108,181 @@ export default function Select() {
       if (err instanceof NetworkError) setError(t('network'));
       else if (err instanceof GpsPermissionError) setError(t('gpsPermission'));
       else if (err instanceof ApiError && err.code === 'no_gps') setError(t('noGps'));
-      else if (err instanceof ApiError && err.status === 409) setError(t('conflict'));
-      else setError(t('conflict'));
+      else if (err instanceof ApiError && err.code === 'no_gps_url') setError(t('noGpsUrl'));
+      else if (err instanceof ApiError && err.code === 'conflict') setError(t('conflict'));
+      else setError(t('serverError'));
     } finally {
       setBusy(false);
     }
   }
 
-  function handleStartShift() {
-    if (!vehicleId || !routeId) return;
-    Alert.alert(
-      t('confirmStartShift'),
-      `${t('bus')}: ${selectedBus?.name ?? vehicleId}${selectedBus?.plate ? ` (${selectedBus.plate})` : ''}\n${t('route')}: ${selectedRoute ? `${selectedRoute.code} · ${selectedRoute.name}` : routeId}\n\n${t('confirmStartBody')}`,
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('startShift'),
-          onPress: executeStart,
-        },
-      ],
-    );
-  }
-
-  function handleSignOut() {
+  function signOut() {
     Alert.alert(t('confirmSignOut'), t('confirmSignOutBody'), [
       { text: t('cancel'), style: 'cancel' },
       {
         text: t('signOut'),
         style: 'destructive',
-        onPress: async () => {
-          await session.logout();
-          router.replace('/');
+        onPress: () => {
+          session.logout().finally(() => router.replace('/'));
         },
       },
     ]);
   }
 
-  const driverInitial = (driver?.name || 'C').charAt(0).toUpperCase();
-
-  return (
-    <ScrollView contentContainerStyle={styles.page}>
-      {/* Driver Header Card */}
-      <View style={styles.headerCard}>
-        <View style={styles.driverInfo}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{driverInitial}</Text>
-          </View>
-          <View style={styles.driverMeta}>
-            <Text style={styles.driverName}>{driver?.name ?? t('driverLabel')}</Text>
-            <View style={styles.badgeRow}>
-              <View style={styles.driverBadge}>
-                <Text style={styles.driverBadgeText}>{t('driverLabel')}</Text>
-              </View>
-              {driver?.id ? <Text style={styles.driverLogin}>ID: #{driver.id}</Text> : null}
-            </View>
-          </View>
+  const content = (
+    <>
+      <View style={[styles.head, layout.largeText && styles.headStack]}>
+        <View style={styles.headText}>
+          <Txt size="body" dim>
+            {tf('selectHello', { name: driver?.name ?? '' })}
+          </Txt>
+          <Txt bold size="title">
+            {t('selectTitle')}
+          </Txt>
         </View>
-        <Button
-          label={t('signOut')}
-          variant="outline"
-          onPress={handleSignOut}
-          style={styles.signOutBtn}
-        />
+        <Action label={t('signOut')} onPress={signOut} kind="quiet" />
       </View>
 
-      {/* Choose Bus Section */}
-      <View style={styles.sectionCard}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('availableBuses')}</Text>
-          <Text style={styles.sectionSubtitle}>
-            {selectedBus ? `${selectedBus.name}${selectedBus.plate ? ` (${selectedBus.plate})` : ''}` : ''}
-          </Text>
-        </View>
-        <View style={styles.grid}>
-          {vehicles.map((bus) => {
-            const isSelected = vehicleId === bus.id;
-            const isAvailable = bus.available;
-            return (
-              <Pressable
-                key={bus.id}
-                disabled={!isAvailable}
-                onPress={() => {
-                  setVehicleId(bus.id);
-                  if (bus.route_id) setRouteId(bus.route_id);
-                }}
-                style={[
-                  styles.optionCard,
-                  isSelected && styles.optionCardSelected,
-                  !isAvailable && styles.optionCardDisabled,
-                ]}
-              >
-                <View style={styles.optionHeader}>
-                  <Text style={[styles.optionTitle, isSelected && styles.optionTitleSelected]}>
-                    🚌 {bus.name}
-                  </Text>
-                  {isSelected ? (
-                    <View style={styles.checkBadge}>
-                      <Text style={styles.checkText}>✓</Text>
-                    </View>
-                  ) : null}
-                </View>
-                <View style={styles.optionFooter}>
-                  {bus.plate ? (
-                    <View style={styles.plateBadge}>
-                      <Text style={styles.plateText}>{bus.plate}</Text>
-                    </View>
-                  ) : null}
-                  {!isAvailable ? (
-                    <View style={styles.takenBadge}>
-                      <Text style={styles.takenText}>{t('taken')}</Text>
-                    </View>
-                  ) : null}
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      {/* Choose Route Section */}
-      <View style={styles.sectionCard}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('availableRoutes')}</Text>
-          <Text style={styles.sectionSubtitle}>
-            {selectedRoute ? `${selectedRoute.code} · ${selectedRoute.name}` : ''}
-          </Text>
-        </View>
-        <View style={styles.grid}>
-          {routes.map((route) => {
-            const isSelected = routeId === route.id;
-            return (
-              <Pressable
-                key={route.id}
-                onPress={() => setRouteId(route.id)}
-                style={[styles.optionCard, isSelected && styles.optionCardSelected]}
-              >
-                <View style={styles.optionHeader}>
-                  <View style={[styles.routeCodeBadge, isSelected && styles.routeCodeBadgeSelected]}>
-                    <Text style={[styles.routeCodeText, isSelected && styles.routeCodeTextSelected]}>
-                      {route.code}
-                    </Text>
-                  </View>
-                  {isSelected ? (
-                    <View style={styles.checkBadge}>
-                      <Text style={styles.checkText}>✓</Text>
-                    </View>
-                  ) : null}
-                </View>
-                <Text style={[styles.routeName, isSelected && styles.routeNameSelected]} numberOfLines={2}>
-                  {route.name}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      {/* Error display */}
-      {error ? (
-        <View style={styles.errorBox}>
-          <Text style={styles.errorText}>{error}</Text>
+      {offline ? (
+        <View style={[styles.note, { backgroundColor: palette.signal }]} accessibilityLiveRegion="polite">
+          <Txt bold size="body" color={palette.onSignal}>
+            {t('offlineRetry')}
+          </Txt>
         </View>
       ) : null}
 
-      {/* Bottom Start Shift Button */}
-      <View style={styles.actionContainer}>
-        <Button
-          label={busy ? t('loading') : t('startShift')}
-          onPress={handleStartShift}
-          disabled={busy || !vehicleId || !routeId}
-          style={styles.startBtn}
-        />
+      <View
+        style={[
+          styles.columns,
+          (!layout.wide || layout.largeText) && styles.columnsStack,
+          layout.largeText && styles.unfilled,
+          { gap: layout.gap },
+        ]}
+      >
+        <View style={[styles.column, layout.largeText && styles.unfilled]}>
+          <Txt size="small" dim>
+            {t('chooseBus')}
+          </Txt>
+          <OptionList
+            items={vehicles}
+            flow={layout.largeText}
+            extraData={vehicleId}
+            empty={
+              vehicles.length === 0 ? (
+                <Notice item={{ key: 'no-buses', tone: 'warn', title: t('noBuses'), live: 'polite' }} />
+              ) : null
+            }
+            renderRow={(bus) => (
+              <BusOption bus={bus} selected={vehicleId === bus.id} usable={usable(bus)} hit={layout.hit} onPick={pickBus} />
+            )}
+          />
+        </View>
+
+        <View style={[styles.column, layout.largeText && styles.unfilled]}>
+          <Txt size="small" dim>
+            {t('chooseRoute')}
+          </Txt>
+          <OptionList
+            items={routes}
+            flow={layout.largeText}
+            extraData={routeId}
+            empty={
+              routes.length === 0 ? (
+                <Notice item={{ key: 'no-routes', tone: 'warn', title: t('noRoutes'), live: 'polite' }} />
+              ) : null
+            }
+            renderRow={(route) => (
+              <RouteOption route={route} selected={routeId === route.id} hit={layout.hit} onPick={pickRoute} />
+            )}
+          />
+        </View>
       </View>
-    </ScrollView>
+
+      {vehicles.length > 0 && !vehicles.some(usable) && !offline ? (
+        <Notice item={{ key: 'all-taken', tone: 'warn', title: t('allBusesTaken'), live: 'polite' }} />
+      ) : null}
+
+      {error ? (
+        <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
+      ) : null}
+    </>
+  );
+  // The main action stays at the bottom in either case; with a large font only the content above it scrolls.
+  const startButton = (
+    <Action
+      label={busy ? t('loading') : t('startShift')}
+      sub={selectedBus && routeId ? `${selectedBus.name} · ${routes.find((r) => r.id === routeId)?.code ?? ''}` : undefined}
+      onPress={start}
+      kind="accent"
+      disabled={busy || !vehicleId || !routeId}
+    />
+  );
+
+  return (
+    <Screen>
+      {layout.largeText ? (
+        <ScrollView
+          style={styles.flowScroll}
+          contentContainerStyle={{ gap: layout.gap }}
+          showsVerticalScrollIndicator={false}
+        >
+          {content}
+        </ScrollView>
+      ) : (
+        content
+      )}
+      <Txt size="small" dim>
+        {t('trackingNoticeStart')}
+      </Txt>
+      {startButton}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
-    padding: 24,
-    gap: 20,
-    backgroundColor: colors.paper,
+  headText: {
+    flexShrink: 1,
+  },
+  // With a large system font the title and its button no longer fit side by side: the button goes below.
+  // Large system font: the page scrolls as a whole, so nothing here may claim the leftover height.
+  flowScroll: {
     flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
   },
-  headerCard: {
+  unfilled: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+  },
+  headStack: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  head: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.card,
-    borderRadius: 14,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  driverInfo: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: space[4],
+  },
+  note: {
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
+  },
+  columns: {
     flex: 1,
-  },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.routeLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.route,
-  },
-  avatarText: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.route,
-  },
-  driverMeta: {
-    gap: 4,
-  },
-  driverName: {
-    fontSize: type.title - 4,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  badgeRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
-  driverBadge: {
-    backgroundColor: colors.routeLight,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+  columnsStack: {
+    flexDirection: 'column',
   },
-  driverBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.route,
-  },
-  driverLogin: {
-    fontSize: 13,
-    color: colors.muted,
-  },
-  signOutBtn: {
-    minHeight: hit - 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  sectionCard: {
-    backgroundColor: colors.card,
-    borderRadius: 14,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.line,
-    gap: 14,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-  },
-  sectionTitle: {
-    fontSize: type.title - 6,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  sectionSubtitle: {
-    fontSize: type.body - 3,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  optionCard: {
-    minWidth: 180,
+  column: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.line,
-    padding: 16,
-    gap: 10,
-    minHeight: 90,
+    gap: space[2],
   },
-  optionCardSelected: {
-    borderColor: colors.route,
-    backgroundColor: colors.routeLight,
-  },
-  optionCardDisabled: {
-    opacity: 0.45,
-    backgroundColor: '#F1F5F9',
-  },
-  optionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  optionTitle: {
-    fontSize: type.body,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  optionTitleSelected: {
-    color: colors.route,
-  },
-  optionFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  plateBadge: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  plateText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.ink,
-    letterSpacing: 0.5,
-  },
-  takenBadge: {
-    backgroundColor: colors.busLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  takenText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.bus,
-  },
-  checkBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.route,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkText: {
-    color: '#FFF',
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  routeCodeBadge: {
-    backgroundColor: '#E2E8F0',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  routeCodeBadgeSelected: {
-    backgroundColor: colors.route,
-  },
-  routeCodeText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  routeCodeTextSelected: {
-    color: '#FFF',
-  },
-  routeName: {
-    fontSize: type.body - 1,
-    color: colors.ink,
-    fontWeight: '600',
-  },
-  routeNameSelected: {
-    color: colors.route,
-    fontWeight: '700',
-  },
-  errorBox: {
-    backgroundColor: colors.busLight,
-    borderColor: colors.bus,
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 14,
-  },
-  errorText: {
-    color: colors.bus,
-    fontSize: type.body - 2,
-    fontWeight: '600',
-  },
-  actionContainer: {
-    paddingVertical: 8,
-  },
-  startBtn: {
-    minHeight: 56,
+  list: {
+    gap: space[2],
+    paddingBottom: space[2],
   },
 });

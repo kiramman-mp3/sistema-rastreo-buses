@@ -1,4 +1,7 @@
+import re
+
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResConfigSettings(models.TransientModel):
@@ -13,6 +16,13 @@ class ResConfigSettings(models.TransientModel):
     bus_gps_url = fields.Char(
         string="GPS address for the phones", config_parameter='bus_tracking.gps_url',
         help="Public HTTPS address the drivers' phones send their position to, e.g. https://gps.example.com.")
+    bus_tile_url = fields.Char(
+        string="Map tiles", config_parameter='bus_tracking.tile_url',
+        help="HTTPS address of the map tiles, with {z}/{x}/{y}. Empty uses CARTO Voyager.")
+    bus_accept_without_shift = fields.Boolean(
+        string="Accept positions without a shift", config_parameter='bus_tracking.accept_without_shift',
+        help="Only for tests with curl or a GPS without the app. Normally a bus only reports while a "
+             "driver has it on an open shift.")
     traccar_webhook_secret = fields.Char(string="Webhook secret", config_parameter='bus_tracking.webhook_secret')
     bus_position_retention_days = fields.Integer(
         string="Keep positions (days)", config_parameter='bus_tracking.retention_days', default=30,
@@ -47,8 +57,21 @@ class ResConfigSettings(models.TransientModel):
     bus_privacy_url = fields.Char(
         string="Privacy policy link", config_parameter='bus_tracking.privacy_url',
         help="Optional address of your institution's privacy policy, shown on the complaint form.")
+    bus_contact_phone = fields.Char(
+        string="Contact phone for passengers", config_parameter='bus_tracking.contact_phone',
+        help="Official phone of the transport service. Leave it empty to show no phone on the public pages.")
+    bus_contact_email = fields.Char(
+        string="Contact email for passengers", config_parameter='bus_tracking.contact_email',
+        help="Official email of the transport service. Leave it empty to show no email on the public pages.")
     tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_qr')
     tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_qr')
+
+    @api.constrains('bus_gps_url')
+    def _check_gps_url(self):
+        for settings in self:
+            value = (settings.bus_gps_url or '').strip()
+            if value and not re.match(r'^https?://[^\s/]+(:\d+)?(/\S*)?$', value):
+                raise ValidationError(_("The GPS address must look like https://gps.example.com."))
 
     @api.depends()
     def _compute_tablet_qr(self):

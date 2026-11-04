@@ -3,32 +3,58 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { loadCSS, loadJS } from "@web/core/assets";
+import { _t } from "@web/core/l10n/translation";
 import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
-
-// Carto Voyager: high-definition navigation basemap with official API key
-const CARTO_TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
+// Until the server says otherwise (Settings > Map tiles).
+const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 const TILE_OPTIONS = {
     maxZoom: 19,
     subdomains: "abcd",
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
-
 const REFRESH_MS = 10000;
-const DEFAULT_CENTER = [-1.2417, -78.6167]; // Ambato baseline
-const MOVEMENT_LABELS = { moving: "En movimiento", stopped: "Detenido" };
+const DEFAULT_CENTER = [-1.2417, -78.6167];
+const BUS_SVG = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">' +
+    '<rect x="3" y="2" width="14" height="14" rx="3" fill="currentColor"/>' +
+    '<rect x="5" y="4.5" width="10" height="5" rx="1" fill="#172025" opacity="0.55"/>' +
+    '<rect x="5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/>' +
+    '<rect x="12.5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/></svg>';
 
-/**
- * Calculates the shortest angular difference (-180 to 180 degrees)
- * to prevent unsightly 360-degree spins during heading adjustments.
- */
-function normalizeAngleDiff(target, current) {
+/** Shortest turn between two headings, so a bus crossing north never spins all the way round. */
+export function angleDelta(target, current) {
     let diff = (target - current) % 360;
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
     return diff;
+}
+
+/** "8 s ago", "4 min ago", "2 h ago" (translated). */
+export function ago(seconds) {
+    if (seconds === null || seconds === undefined) {
+        return "";
+    }
+    if (seconds < 60) {
+        return _t("%s s ago").replace("%s", Math.max(0, Math.round(seconds)));
+    }
+    if (seconds < 3600) {
+        return _t("%s min ago").replace("%s", Math.round(seconds / 60));
+    }
+    return _t("%s h ago").replace("%s", Math.round(seconds / 3600));
+}
+
+function escapeHtml(text) {
+    return String(text || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function utcSeconds(text) {
+    if (!text) {
+        return null;
+    }
+    const when = Date.parse(text.replace(" ", "T") + "Z");
+    return isNaN(when) ? null : (Date.now() - when) / 1000;
 }
 
 export class BusLiveMap extends Component {
@@ -43,52 +69,55 @@ export class BusLiveMap extends Component {
         this.state = useState({
             vehicles: [],
             routes: [],
+            incidents: [],
             alertLabels: {},
-            mapCenter: DEFAULT_CENTER,
+            newComplaints: 0,
             routeId: "",
-            statusFilter: "all", // "all" | "moving" | "stopped" | "delayed" | "offline"
-            searchQuery: "",
-            pathKey: "",
+            filter: "all",
+            search: "",
+            tab: "atencion",
             selectedId: this.props.action?.params?.vehicle_id || null,
-            sidebarOpen: true,
+            panelOpen: true,
             error: null,
-            lastSyncFormatted: "Sincronizando...",
-            secondsSinceSync: 0,
+            lastSync: null,
+            now: Date.now(),
         });
-
-        // Vehicle kinematics tracker: vehicleId -> state & marker record
-        this.trackedBuses = new Map();
+        this.tracked = new Map();
+        this.frame = null;
         this.fitted = false;
-        this.animationFrame = null;
-        this.routesRenderedKey = null;
+        this.knownSos = new Set();
+        this.labels = {
+            moving: _t("On route"),
+            stopped: _t("Stopped"),
+            offline: _t("No signal"),
+        };
 
         onMounted(async () => {
             await Promise.all([loadCSS(LEAFLET_CSS), loadJS(LEAFLET_JS)]);
             this.initMap();
             await this.refresh();
-
-            // Polling timer
-            this.pollTimer = setInterval(() => this.refresh(), REFRESH_MS);
-
-            // Sync counter timer (every second for humanized time display)
-            this.clockTimer = setInterval(() => {
-                this.state.secondsSinceSync += 1;
-                if (this.state.secondsSinceSync < 3) {
-                    this.state.lastSyncFormatted = "En vivo";
-                } else {
-                    this.state.lastSyncFormatted = `Hace ${this.state.secondsSinceSync}s`;
+            this.poll = setInterval(() => {
+                if (!document.hidden) {
+                    this.refresh();
                 }
+            }, REFRESH_MS);
+            this.clock = setInterval(() => {
+                this.state.now = Date.now();
             }, 1000);
-
-            // Start continuous kinematic render loop
-            this.startKinematics();
+            this.onVisible = () => {
+                if (!document.hidden) {
+                    this.refresh();
+                }
+            };
+            document.addEventListener("visibilitychange", this.onVisible);
         });
 
         onWillUnmount(() => {
-            clearInterval(this.pollTimer);
-            clearInterval(this.clockTimer);
-            if (this.animationFrame) {
-                cancelAnimationFrame(this.animationFrame);
+            clearInterval(this.poll);
+            clearInterval(this.clock);
+            document.removeEventListener("visibilitychange", this.onVisible);
+            if (this.frame) {
+                cancelAnimationFrame(this.frame);
             }
             if (this.map) {
                 this.map.remove();
@@ -96,424 +125,443 @@ export class BusLiveMap extends Component {
         });
     }
 
-    movementLabel(status) {
-        return MOVEMENT_LABELS[status] || status;
-    }
-
-    get filteredVehicles() {
-        let list = this.state.vehicles;
-        if (this.state.routeId) {
-            list = list.filter((v) => String(v.route_id) === String(this.state.routeId));
-        }
-        if (this.state.statusFilter === "moving") {
-            list = list.filter((v) => v.connected && v.status === "moving");
-        } else if (this.state.statusFilter === "stopped") {
-            list = list.filter((v) => v.connected && v.status === "stopped");
-        } else if (this.state.statusFilter === "delayed") {
-            list = list.filter((v) => (v.alerts && v.alerts.length > 0) || (v.connected && v.status === "stopped"));
-        } else if (this.state.statusFilter === "offline") {
-            list = list.filter((v) => !v.connected);
-        }
-
-        if (this.state.searchQuery.trim()) {
-            const q = this.state.searchQuery.toLowerCase().trim();
-            list = list.filter((v) =>
-                (v.name && v.name.toLowerCase().includes(q)) ||
-                (v.plate && v.plate.toLowerCase().includes(q)) ||
-                (v.driver && v.driver.toLowerCase().includes(q)) ||
-                (v.route_name && v.route_name.toLowerCase().includes(q))
-            );
-        }
-        return list;
-    }
-
-    get selectedVehicle() {
-        return this.state.vehicles.find((v) => v.id === this.state.selectedId) || null;
-    }
-
-    get onlineCount() {
-        return this.state.vehicles.filter((v) => v.connected).length;
-    }
-
-    get movingCount() {
-        return this.state.vehicles.filter((v) => v.connected && v.status === "moving").length;
-    }
-
-    get delayedCount() {
-        return this.state.vehicles.filter((v) => (v.alerts && v.alerts.length > 0)).length;
-    }
-
-    initMap() {
-        const L = window.L;
-        this.map = L.map(this.mapRef.el, {
-            zoomControl: false,
-            attributionControl: true,
-        }).setView(DEFAULT_CENTER, 13);
-
-        // Reposition zoom control to bottom right to avoid interfering with HUD
-        L.control.zoom({ position: "bottomright" }).addTo(this.map);
-
-        // Carto Positron Light Tiles
-        L.tileLayer(CARTO_TILES, TILE_OPTIONS).addTo(this.map);
-
-        this.routeLayer = L.layerGroup().addTo(this.map);
-        this.trackLayer = L.layerGroup().addTo(this.map);
-        this.busLayer = L.layerGroup().addTo(this.map);
-    }
-
-    startKinematics() {
-        const step = (now) => {
-            this.updateKinematics(now);
-            this.animationFrame = requestAnimationFrame(step);
-        };
-        this.animationFrame = requestAnimationFrame(step);
-    }
-
-    /**
-     * Kinematic interpolation engine:
-     * Evaluates LERP for lat/lon and shortest-angle wrap for heading course.
-     */
-    updateKinematics(now) {
-        for (const [id, bus] of this.trackedBuses) {
-            if (!bus.marker) continue;
-
-            const elapsed = now - bus.startTime;
-            const progress = Math.min(Math.max(elapsed / bus.duration, 0), 1);
-            // Ease-out quadratic curve for smooth natural deceleration
-            const ease = 1 - (1 - progress) * (1 - progress);
-
-            bus.currentLat = bus.startLat + (bus.targetLat - bus.startLat) * ease;
-            bus.currentLon = bus.startLon + (bus.targetLon - bus.startLon) * ease;
-            bus.currentCourse = bus.startCourse + (bus.targetCourse - bus.startCourse) * ease;
-
-            bus.marker.setLatLng([bus.currentLat, bus.currentLon]);
-
-            const el = bus.marker.getElement();
-            if (el) {
-                const arrowEl = el.querySelector(".o_bus_arrow");
-                if (arrowEl) {
-                    arrowEl.style.transform = `rotate(${bus.currentCourse}deg)`;
-                }
-            }
-        }
-    }
+    // ------------------------------------------------------------------ data
 
     async refresh() {
         try {
             const data = await this.rpc("/bus_tracking/live", {});
             this.state.vehicles = data.vehicles || [];
             this.state.routes = data.routes || [];
+            this.state.incidents = data.incidents || [];
             this.state.alertLabels = data.alert_labels || {};
-            this.state.mapCenter = data.map_center || DEFAULT_CENTER;
+            this.state.newComplaints = data.new_complaints || 0;
             this.state.error = null;
-            this.state.secondsSinceSync = 0;
-            this.state.lastSyncFormatted = "En vivo";
-
-            this.syncVehicles(this.state.vehicles);
-            this.drawRoutes();
-
-            if (!this.fitted) {
-                this.fitted = true;
-                const sel = this.state.vehicles.find((v) => v.id === this.state.selectedId);
-                if (sel) {
-                    this.selectVehicle(sel);
-                } else {
-                    this.fitAll();
-                }
+            this.state.lastSync = Date.now();
+            if (data.tile_url && data.tile_url !== this.tiles._url) {
+                this.tiles.setUrl(data.tile_url);
             }
-        } catch (e) {
-            this.state.error = "No se pudieron sincronizar las posiciones con el servidor.";
+            this.syncVehicles();
+            this.drawRoutes(data.map_center);
+            this.syncIncidents();
+            this.warnAboutNewSos();
+        } catch {
+            this.state.error = _t("Could not update. Retrying every 10 seconds.");
         }
     }
 
-    /**
-     * Reconciles incoming vehicle positions without destroying DOM elements.
-     */
-    syncVehicles(vehicles) {
-        const L = window.L;
-        const currentIds = new Set(vehicles.map((v) => v.id));
-        const now = performance.now();
+    statusOf(v) {
+        if (!v.connected) {
+            return "offline";
+        }
+        return v.status === "moving" ? "moving" : "stopped";
+    }
 
-        // 1. Remove vehicles that are no longer reported
-        for (const [id, bus] of this.trackedBuses) {
-            if (!currentIds.has(id)) {
-                this.busLayer.removeLayer(bus.marker);
-                this.trackedBuses.delete(id);
+    get counts() {
+        const counts = { all: 0, moving: 0, stopped: 0, offline: 0, alert: 0 };
+        for (const v of this.routeVehicles) {
+            counts.all += 1;
+            counts[this.statusOf(v)] += 1;
+            if (v.alerts.length) {
+                counts.alert += 1;
             }
         }
+        return counts;
+    }
 
-        // 2. Add or update vehicles
-        for (const v of vehicles) {
-            if (this.trackedBuses.has(v.id)) {
-                const bus = this.trackedBuses.get(v.id);
-                bus.startLat = bus.currentLat;
-                bus.startLon = bus.currentLon;
-                bus.targetLat = v.lat;
-                bus.targetLon = v.lon;
+    get routeVehicles() {
+        const id = this.state.routeId;
+        return id ? this.state.vehicles.filter((v) => String(v.route_id) === String(id)) : this.state.vehicles;
+    }
 
-                bus.startCourse = bus.currentCourse;
-                const angleDelta = normalizeAngleDiff(v.course || 0, bus.currentCourse);
-                bus.targetCourse = bus.currentCourse + angleDelta;
+    get filteredVehicles() {
+        let list = this.routeVehicles;
+        const f = this.state.filter;
+        if (f === "alert") {
+            list = list.filter((v) => v.alerts.length);
+        } else if (f !== "all") {
+            list = list.filter((v) => this.statusOf(v) === f);
+        }
+        const q = this.state.search.trim().toLowerCase();
+        if (q) {
+            list = list.filter((v) => [v.name, v.plate, v.driver, v.route_name].some((x) => (x || "").toLowerCase().includes(q)));
+        }
+        return list;
+    }
 
-                bus.startTime = now;
-                bus.duration = REFRESH_MS;
-                bus.data = v;
+    get selected() {
+        return this.state.vehicles.find((v) => v.id === this.state.selectedId) || null;
+    }
 
-                // Update visual badges on the existing marker
-                const el = bus.marker.getElement();
-                if (el) {
-                    const pulse = el.querySelector(".o_bus_pulse");
-                    if (pulse) {
-                        pulse.className = `o_bus_pulse ${v.status === 'moving' && v.connected ? 'is-moving' : ''}`;
-                    }
-                    const pin = el.querySelector(".o_bus_pin");
-                    if (pin) {
-                        pin.className = `o_bus_pin ${v.connected ? 'is-connected' : 'is-disconnected'}`;
-                    }
-                }
-            } else {
-                // Create new marker instance
-                const initialCourse = v.course || 0;
-                const icon = this.createBusIcon(v, initialCourse);
-                const marker = L.marker([v.lat, v.lon], { icon, zIndexOffset: 100 })
-                    .on("click", () => this.selectVehicle(v));
+    get selectedRoute() {
+        const v = this.selected;
+        return v ? this.state.routes.find((r) => r.id === v.route_id) || null : null;
+    }
 
-                this.busLayer.addLayer(marker);
+    get sosOpen() {
+        return this.state.incidents.filter((i) => i.kind === "sos");
+    }
 
-                this.trackedBuses.set(v.id, {
-                    id: v.id,
-                    marker,
-                    startLat: v.lat,
-                    startLon: v.lon,
-                    currentLat: v.lat,
-                    currentLon: v.lon,
-                    targetLat: v.lat,
-                    targetLon: v.lon,
-                    startCourse: initialCourse,
-                    currentCourse: initialCourse,
-                    targetCourse: initialCourse,
-                    startTime: now,
-                    duration: REFRESH_MS,
-                    data: v,
+    /** What needs a person now, most serious first: SOS, incidents, open alerts, new complaints. */
+    get attention() {
+        const items = [];
+        for (const i of this.state.incidents) {
+            items.push({
+                key: "i" + i.id,
+                level: i.kind === "sos" ? 0 : 1,
+                title: i.kind === "sos" ? _t("Emergency (SOS)") : i.label,
+                bus: i.vehicle_name,
+                vehicleId: i.vehicle_id,
+                route: i.route_name,
+                note: i.note,
+                age: utcSeconds(i.time),
+                incidentId: i.id,
+            });
+        }
+        for (const v of this.state.vehicles) {
+            for (const kind of v.alerts) {
+                items.push({
+                    key: "a" + v.id + kind,
+                    level: 2,
+                    title: this.state.alertLabels[kind] || kind,
+                    bus: v.name,
+                    vehicleId: v.id,
+                    route: v.route_name,
+                    note: "",
+                    age: null,
                 });
             }
         }
-
-        this.updateMarkerVisibility();
+        items.sort((a, b) => a.level - b.level || (a.age ?? 0) - (b.age ?? 0));
+        return items;
     }
 
-    createBusIcon(v, course) {
-        const L = window.L;
-        const color = v.color || "#8B1D24";
-        const movingClass = (v.status === 'moving' && v.connected) ? 'is-moving' : '';
-        const connClass = v.connected ? 'is-connected' : 'is-disconnected';
+    get attentionCount() {
+        return this.attention.length + (this.state.newComplaints ? 1 : 0);
+    }
 
+    get syncText() {
+        if (this.state.error) {
+            return this.state.error;
+        }
+        if (!this.state.lastSync) {
+            return _t("Loading…");
+        }
+        const s = (this.state.now - this.state.lastSync) / 1000;
+        return s < 3 ? _t("Live") : _t("Updated %s").replace("%s", ago(s));
+    }
+
+    sosAge(incident) {
+        // state.now changes every second, so this re-renders as the minutes pass
+        return this.state.now && ago(utcSeconds(incident.time));
+    }
+
+    /** Accessible names that say which bus: several buttons share the same visible words. */
+    showLabel(busName) {
+        return _t("Show %s on the map").replace("%s", busName || "");
+    }
+
+    seenLabel(title, busName) {
+        return `${_t("Mark as seen")}: ${title || ""} · ${busName || ""}`;
+    }
+
+    fixAge(v) {
+        return ago(utcSeconds(v.fix_time));
+    }
+
+    incidentAge(item) {
+        return ago(item.age === null ? null : item.age + (this.state.now - this.state.lastSync) / 1000);
+    }
+
+    stopsOf(route) {
+        return route ? route.stops : [];
+    }
+
+    // ------------------------------------------------------------------ map
+
+    initMap() {
+        const L = window.L;
+        this.map = L.map(this.mapRef.el, { zoomControl: false }).setView(DEFAULT_CENTER, 13);
+        L.control.zoom({ position: "bottomright" }).addTo(this.map);
+        this.tiles = L.tileLayer(TILES, TILE_OPTIONS).addTo(this.map);
+        this.routeLayer = L.layerGroup().addTo(this.map);
+        this.trackLayer = L.layerGroup().addTo(this.map);
+        this.incidentLayer = L.layerGroup().addTo(this.map);
+        this.busLayer = L.layerGroup().addTo(this.map);
+    }
+
+    drawRoutes(center) {
+        const L = window.L;
+        // Stops and recorded tracks change too, not only the list of routes.
+        const key = this.state.routeId + "|" + JSON.stringify(this.state.routes);
+        if (key === this.routesKey) {
+            return;
+        }
+        this.routesKey = key;
+        this.routeLayer.clearLayers();
+        const shown = this.state.routeId
+            ? this.state.routes.filter((r) => String(r.id) === String(this.state.routeId))
+            : this.state.routes;
+        for (const r of shown) {
+            for (const path of r.paths) {
+                // not interactive: an unnamed line would be an empty stop for keyboard users
+                L.polyline(path.points, { color: r.color, weight: 5, opacity: this.state.routeId ? 0.95 : 0.55, interactive: false })
+                    .addTo(this.routeLayer);
+            }
+            for (const s of r.stops) {
+                L.circleMarker([s.lat, s.lon], { radius: 5, color: r.color, weight: 3, fillColor: "#FFFFFF", fillOpacity: 1, interactive: false })
+                    .addTo(this.routeLayer);
+            }
+        }
+        if (!this.fitted) {
+            this.fitted = true;
+            const sel = this.selected;
+            if (sel) {
+                this.focus(sel);
+            } else if (!this.fitAll() && center) {
+                this.map.setView(center, 13);
+            }
+        }
+    }
+
+    busIcon(v) {
+        const L = window.L;
+        const status = this.statusOf(v);
+        const alert = v.alerts.length ? " con-alerta" : "";
+        const sos = this.state.incidents.some((i) => i.kind === "sos" && i.vehicle_id === v.id) ? " sos" : "";
         return L.divIcon({
-            className: "o_bus_marker_container",
-            iconSize: [42, 54],
-            iconAnchor: [21, 27],
-            html: `
-                <div class="o_bus_marker_wrap" style="--unit-color: ${color};">
-                    <div class="o_bus_pulse ${movingClass}"></div>
-                    <div class="o_bus_pin ${connClass}">
-                        <div class="o_bus_arrow" style="transform: rotate(${course}deg);">
-                            <svg viewBox="0 0 24 24" class="o_bus_arrow_svg">
-                                <polygon points="12,2 19,13 12,9 5,13"/>
-                            </svg>
-                        </div>
-                        <div class="o_bus_core">
-                            <i class="fa fa-bus"></i>
-                        </div>
-                    </div>
-                    <div class="o_bus_badge_label">${this.escape(v.name)}</div>
-                </div>
-            `,
+            className: "",
+            iconSize: [44, 44],
+            iconAnchor: [22, 22],
+            html: `<span class="o_bus_mk o_bus_mk_${status}${alert}${sos}" style="--c:${escapeHtml(v.color)}">` +
+                `<span class="o_bus_mk_rumbo"></span><span class="o_bus_mk_cuerpo">${BUS_SVG}</span>` +
+                `<span class="o_bus_mk_nombre">${escapeHtml(v.name)}</span></span>`,
         });
     }
 
-    updateMarkerVisibility() {
-        const visibleIds = new Set(this.filteredVehicles.map((v) => v.id));
-        for (const [id, bus] of this.trackedBuses) {
-            const isVisible = visibleIds.has(id);
-            const onMap = this.busLayer.hasLayer(bus.marker);
-            if (isVisible && !onMap) {
-                this.busLayer.addLayer(bus.marker);
-            } else if (!isVisible && onMap) {
-                this.busLayer.removeLayer(bus.marker);
+    iconKey(v) {
+        const sos = this.state.incidents.some((i) => i.kind === "sos" && i.vehicle_id === v.id);
+        return [this.statusOf(v), v.alerts.length > 0, sos, v.color].join("|");
+    }
+
+    syncVehicles() {
+        const L = window.L;
+        const now = performance.now();
+        const seen = new Set();
+        for (const v of this.state.vehicles) {
+            seen.add(v.id);
+            let b = this.tracked.get(v.id);
+            if (!b) {
+                const marker = L.marker([v.lat, v.lon], { icon: this.busIcon(v), title: v.name, zIndexOffset: 400 })
+                    .on("click", () => this.select(v.id));
+                marker.addTo(this.busLayer);
+                b = { marker, from: [v.lat, v.lon], to: [v.lat, v.lon], course: v.course || 0, start: now, key: this.iconKey(v) };
+                this.tracked.set(v.id, b);
+            } else {
+                const here = b.marker.getLatLng();
+                b.from = [here.lat, here.lng];
+                b.to = [v.lat, v.lon];
+                b.start = now;
+                b.course += angleDelta(v.course || 0, b.course);
+                const key = this.iconKey(v);
+                if (key !== b.key) {
+                    b.marker.setIcon(this.busIcon(v));
+                    b.key = key;
+                }
+            }
+            const el = b.marker.getElement();
+            const arrow = el && el.querySelector(".o_bus_mk_rumbo");
+            if (arrow) {
+                arrow.style.transform = `rotate(${b.course}deg)`;
+            }
+        }
+        for (const [id, b] of this.tracked) {
+            if (!seen.has(id)) {
+                this.busLayer.removeLayer(b.marker);
+                this.tracked.delete(id);
+            }
+        }
+        this.applyFilterToMarkers();
+        if (!this.frame && !document.hidden) {
+            this.frame = requestAnimationFrame((t) => this.glide(t));
+        }
+    }
+
+    /** Linear motion over the refresh interval; the loop ends as soon as nothing moves. */
+    glide(now) {
+        let moving = false;
+        for (const b of this.tracked.values()) {
+            const p = Math.min((now - b.start) / REFRESH_MS, 1);
+            if (b.from[0] !== b.to[0] || b.from[1] !== b.to[1]) {
+                b.marker.setLatLng([b.from[0] + (b.to[0] - b.from[0]) * p, b.from[1] + (b.to[1] - b.from[1]) * p]);
+                if (p < 1) {
+                    moving = true;
+                }
+            }
+        }
+        this.frame = moving ? requestAnimationFrame((t) => this.glide(t)) : null;
+    }
+
+    applyFilterToMarkers() {
+        const visible = new Set(this.filteredVehicles.map((v) => v.id));
+        for (const [id, b] of this.tracked) {
+            const el = b.marker.getElement();
+            if (el) {
+                const shown = visible.has(id);
+                el.style.opacity = shown ? "1" : "0.18";
+                // A faded bus is out of the filter: no clicks and no keyboard stop on it.
+                el.style.pointerEvents = shown ? "" : "none";
+                el.setAttribute("tabindex", shown ? "0" : "-1");
+                el.setAttribute("aria-hidden", shown ? "false" : "true");
             }
         }
     }
 
-    drawRoutes() {
+    syncIncidents() {
         const L = window.L;
-        const currentKey = `${this.state.routeId}:${this.state.pathKey}:${this.state.routes.length}`;
-        if (this.routesRenderedKey === currentKey) {
-            return;
-        }
-        this.routesRenderedKey = currentKey;
-
-        this.routeLayer.clearLayers();
-        const rid = this.state.routeId;
-
-        for (const route of this.state.routes) {
-            if (rid && String(route.id) !== rid) {
+        this.incidentLayer.clearLayers();
+        for (const i of this.state.incidents) {
+            if (i.lat === null || i.lon === null) {
                 continue;
             }
-            const color = route.color || "#8B1D24";
-            const pts = (route.stops || []).map((s) => [s.lat, s.lon]);
-
-            if (route.paths && route.paths.length) {
-                route.paths.forEach((path, index) => {
-                    const hidden = this.state.pathKey && this.state.pathKey !== `${route.id}:${index}`;
-                    if (hidden) return;
-                    const isSelected = this.state.pathKey === `${route.id}:${index}`;
-
-                    L.polyline(path.points, {
-                        color: color,
-                        weight: isSelected ? 6 : 4,
-                        opacity: isSelected ? 0.95 : 0.65,
-                        lineJoin: "round",
-                        lineCap: "round",
-                    })
-                    .bindTooltip(`<div class="o_bus_tip"><strong>${this.escape(path.name)}</strong> · ${path.km} km</div>`)
-                    .on("click", () => this.selectPath(route.id, index))
-                    .addTo(this.routeLayer);
-                });
-            } else if (pts.length > 1) {
-                L.polyline(pts, {
-                    color: color,
-                    weight: 3,
-                    opacity: 0.55,
-                    dashArray: "6 6",
-                }).addTo(this.routeLayer);
-            }
-
-            for (const s of (route.stops || [])) {
-                if (s.radius && s.radius > 0) {
-                    L.circle([s.lat, s.lon], {
-                        radius: s.radius,
-                        color: color,
-                        weight: 1,
-                        fillColor: color,
-                        fillOpacity: 0.08,
-                    }).addTo(this.routeLayer);
-                }
-                L.circleMarker([s.lat, s.lon], {
-                    radius: 5,
-                    color: "#ffffff",
-                    weight: 2,
-                    fillColor: color,
-                    fillOpacity: 1,
-                })
-                .bindTooltip(`<div class="o_bus_tip"><strong>${this.escape(route.code)}</strong> · ${this.escape(s.name)}</div>`)
-                .addTo(this.routeLayer);
-            }
+            L.marker([i.lat, i.lon], {
+                icon: L.divIcon({
+                    className: "",
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14],
+                    html: `<span class="o_bus_inc ${i.kind === "sos" ? "sos" : ""}" aria-hidden="true">!</span>`,
+                }),
+                // the "!" is decoration: the marker is announced by its title
+                title: `${i.label} · ${i.vehicle_name}`,
+                zIndexOffset: 300,
+            }).bindTooltip(`${escapeHtml(i.label)} · ${escapeHtml(i.vehicle_name)}`).addTo(this.incidentLayer);
         }
     }
 
-    escape(text) {
-        const el = document.createElement("div");
-        el.textContent = text || "";
-        return el.innerHTML;
+    warnAboutNewSos() {
+        for (const i of this.sosOpen) {
+            if (this.knownSos.has(i.id)) {
+                continue;
+            }
+            this.knownSos.add(i.id);
+            if (!this.firstSosCheckDone) {
+                continue;
+            }
+            this.notification.add(`${i.vehicle_name} · ${i.route_name || ""}`, {
+                title: _t("Emergency (SOS)"),
+                type: "danger",
+                sticky: true,
+            });
+            if (window.Notification && Notification.permission === "granted" && document.hidden) {
+                new Notification(_t("Emergency (SOS)"), { body: i.vehicle_name, tag: "sos-" + i.id });
+            }
+        }
+        this.firstSosCheckDone = true;
     }
 
     fitAll() {
-        const L = window.L;
         const pts = this.filteredVehicles.map((v) => [v.lat, v.lon]);
-        for (const route of this.state.routes) {
-            if (!this.state.routeId || String(route.id) === this.state.routeId) {
-                (route.stops || []).forEach((s) => pts.push([s.lat, s.lon]));
-                (route.paths || []).forEach((path) => path.points.forEach((p) => pts.push(p)));
-            }
+        if (!pts.length) {
+            return false;
         }
-        if (pts.length) {
-            this.map.fitBounds(L.latLngBounds(pts), { padding: [60, 60], maxZoom: 16 });
-        } else {
-            this.map.setView(this.state.mapCenter, 13);
-        }
+        this.map.fitBounds(window.L.latLngBounds(pts), { padding: [80, 80], maxZoom: 15 });
+        return true;
     }
 
-    selectPath(routeId, index) {
-        this.state.pathKey = `${routeId}:${index}`;
-        this.routesRenderedKey = null;
-        this.drawRoutes();
-        const route = this.state.routes.find((r) => r.id === routeId);
-        if (route && route.paths[index]) {
-            this.map.fitBounds(window.L.latLngBounds(route.paths[index].points), { padding: [50, 50] });
-        }
+    focus(v) {
+        this.map.setView([v.lat, v.lon], Math.max(this.map.getZoom(), 15));
     }
 
-    resetPaths() {
-        this.state.pathKey = "";
-        this.routesRenderedKey = null;
-        this.drawRoutes();
-        this.fitAll();
+    // ------------------------------------------------------------------ actions
+
+    setFilter(filter) {
+        this.state.filter = filter;
+        this.applyFilterToMarkers();
     }
 
     onRouteChange(ev) {
-        this.state.pathKey = "";
         this.state.routeId = ev.target.value;
-        this.trackLayer.clearLayers();
-        this.state.selectedId = null;
-        this.routesRenderedKey = null;
         this.drawRoutes();
-        this.updateMarkerVisibility();
+        this.applyFilterToMarkers();
         this.fitAll();
     }
 
-    setStatusFilter(filter) {
-        this.state.statusFilter = filter;
-        this.updateMarkerVisibility();
+    onSearch() {
+        this.applyFilterToMarkers();
     }
 
-    toggleSidebar() {
-        this.state.sidebarOpen = !this.state.sidebarOpen;
-        setTimeout(() => {
-            if (this.map) {
-                this.map.invalidateSize();
-            }
-        }, 300);
-    }
-
-    async selectVehicle(v) {
-        const L = window.L;
-        this.state.selectedId = v.id;
-
-        // Smooth pan with animation
-        this.map.panTo([v.lat, v.lon], {
-            animate: true,
-            duration: 0.8,
-        });
-
-        this.trackLayer.clearLayers();
-        try {
-            const pts = await this.rpc("/bus_tracking/track", { vehicle_id: v.id, hours: 4 });
-            if (pts.length > 1) {
-                L.polyline(pts, {
-                    color: v.color || "#8B1D24",
-                    weight: 4,
-                    opacity: 0.85,
-                    dashArray: "4 4",
-                }).addTo(this.trackLayer);
-            }
-        } catch (e) {
-            // Track playback is optional
+    select(id) {
+        this.state.selectedId = id;
+        const v = this.selected;
+        if (v) {
+            this.focus(v);
         }
     }
 
-    openVehicleForm(vehicleId) {
-        this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: "bus.vehicle",
-            res_id: vehicleId,
-            views: [[false, "form"]],
-            target: "current",
-        });
-    }
-
-    closeSelectedCard() {
+    closeCard() {
         this.state.selectedId = null;
         this.trackLayer.clearLayers();
+    }
+
+    async showTrack() {
+        const v = this.selected;
+        if (!v) {
+            return;
+        }
+        this.trackLayer.clearLayers();
+        let pts;
+        try {
+            pts = await this.rpc("/bus_tracking/track", { vehicle_id: v.id, hours: 4 });
+        } catch {
+            this.notification.add(_t("Could not load the track. Try again."), { type: "danger" });
+            return;
+        }
+        if (pts && pts.length > 1) {
+            const line = window.L.polyline(pts, { color: "#172025", weight: 3, dashArray: "6 6" }).addTo(this.trackLayer);
+            this.map.fitBounds(line.getBounds(), { padding: [60, 60] });
+        }
+    }
+
+    openVehicle(id) {
+        this.action.doAction({ type: "ir.actions.act_window", res_model: "bus.vehicle", res_id: id, views: [[false, "form"]] });
+    }
+
+    openComplaints() {
+        this.action.doAction("bus_tracking.action_bus_complaint");
+    }
+
+    async acknowledge(incidentId) {
+        try {
+            await this.rpc("/bus_tracking/incident/ack", { incident_id: incidentId });
+        } catch {
+            this.notification.add(_t("Could not mark it as seen. Try again."), { type: "danger" });
+            return;
+        }
+        this.state.incidents = this.state.incidents.filter((i) => i.id !== incidentId);
+        this.syncIncidents();
+        this.syncVehicles();
+    }
+
+    goTo(item) {
+        const v = this.state.vehicles.find((x) => x.id === item.vehicleId);
+        if (v) {
+            this.select(v.id);
+        }
+    }
+
+    async askNotifications() {
+        if (window.Notification && Notification.permission === "default") {
+            await Notification.requestPermission();
+        }
+    }
+
+    lineStatus(v, index) {
+        if (v.at === index) {
+            return "aqui";
+        }
+        if (v.after !== null && v.after !== undefined && index <= v.after) {
+            return "pasada";
+        }
+        return "";
     }
 }
 

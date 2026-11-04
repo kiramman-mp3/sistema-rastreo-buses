@@ -7,7 +7,6 @@ from odoo.http import request
 from odoo.tools import misc
 
 from ..models.bus_complaint import KINDS, MAX_DESCRIPTION
-from ..models.utils import safe_http_url
 from .portal import RateLimiter, portal_context, public_routes, render_portal
 
 MIN_DESCRIPTION = 10
@@ -62,7 +61,7 @@ class BusComplaints(http.Controller):
         value = request.env(su=True)['ir.config_parameter'].get_param('bus_tracking.complaint_retention_days')
         return int(value) if value not in (False, None, '') else 90
 
-    def _form_values(self, post=None, errors=None, selected_route=None):
+    def _form_values(self, post=None, errors=None, selected_route=None, text=None):
         routes = public_routes()
         post = post or {}
         values = portal_context(
@@ -76,15 +75,14 @@ class BusComplaints(http.Controller):
                 'route': post.get('route') or selected_route or '',
                 'bus': post.get('bus') or '',
                 'kind': post.get('kind') or 'other',
-                'description': post.get('description') or '',
+                'description': post.get('description') or _clean(text, MAX_DESCRIPTION),
                 'email': post.get('email') or '',
                 'phone': post.get('phone') or '',
             },
         )
         values['privacy_text'] = values['s']['privacy'].format(days=self._retention_days())
         values['max_description'] = MAX_DESCRIPTION
-        values['privacy_url'] = safe_http_url(
-            request.env(su=True)['ir.config_parameter'].get_param('bus_tracking.privacy_url'))
+        values['privacy_url'] = values['privacy_link']
         return values
 
     def _thanks(self, folio=None, has_contact=True):
@@ -95,18 +93,25 @@ class BusComplaints(http.Controller):
 
     # ------------------------------------------------------------------
     @http.route(['/quejas', '/transporte/quejas'], type='http', auth='public', methods=['GET'])
-    def form(self, ruta=None, **kwargs):
-        return render_portal('bus_tracking.complaint_form', self._form_values(selected_route=ruta))
+    def form(self, ruta=None, texto=None, **kwargs):
+        # `texto` comes from the one-field box on the home page.
+        return render_portal('bus_tracking.complaint_form', self._form_values(selected_route=ruta, text=texto))
 
     @http.route(['/quejas', '/transporte/quejas'], type='http', auth='public', methods=['POST'])
     def submit(self, **post):
         if (request.httprequest.content_length or 0) > MAX_BODY_BYTES:
             return request.make_response('', status=413)
 
-        # Bots fill the hidden field, post instantly or forge the token: pretend it worked and store nothing.
+        # Bots fill the hidden field or forge the token: pretend it worked and store nothing.
         status = token_status(post.get('t'))
-        if post.get('website') or status in ('fast', 'invalid'):
+        if post.get('website') or status == 'invalid':
             return self._thanks()
+        if status == 'fast':
+            # Too fast for a person typing, but a text brought from the home page can be sent
+            # this quickly: ask to send again instead of dropping it while saying "thanks".
+            strings = portal_context()['s']
+            return render_portal('bus_tracking.complaint_form', self._form_values(
+                post, {'form': strings['err_fast']}), status=400)
         if status == 'expired':
             return self._reject_expired(post)
 

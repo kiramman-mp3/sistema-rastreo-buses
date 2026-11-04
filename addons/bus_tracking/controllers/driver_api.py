@@ -10,12 +10,16 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
+from ..models.utils import parse_traccar_dt, pick_odoo_lang, tile_url
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
 
 LOGIN_LIMIT = 10          # attempts per IP and per login, per minute and worker process
 login_limiter = RateLimiter(LOGIN_LIMIT, 60.0)
+CLIENT_ERROR_LIMIT = 20   # reports per driver and minute and worker process: a crash loop must not flood the log
+error_limiter = RateLimiter(CLIENT_ERROR_LIMIT, 60.0)
+MESSAGE_MAX, STACK_MAX, SHORT_MAX = 500, 3000, 60
 INCIDENT_KIND = {key for key, _label in INCIDENT_KINDS}
 
 
@@ -107,9 +111,9 @@ class BusDriverApi(http.Controller):
         ip = request.httprequest.remote_addr
         if not login_limiter.allow('ip:%s' % ip):
             return Response(status=429, headers=[('Retry-After', '60')])
+        # Only a badge buys a session here: accepting a session token too would let a stolen one
+        # be renewed for ever.
         user = request.env['bus.driver.token']._user_for_badge(raw_token)
-        if not user:
-            user = request.env['bus.driver.token']._user_for(raw_token)
         if not user:
             return json_response({'error': 'invalid_badge'}, 401)
         label = body.get('device') if isinstance(body.get('device'), str) else 'tablet_badge'
@@ -139,6 +143,8 @@ class BusDriverApi(http.Controller):
                 'plate': bus.plate or '',
                 'route_id': bus.route_id.id or None,
                 'available': busy.get(bus.id, user.id) == user.id,
+                # A bus without a GPS device in Traccar cannot start a shift (no_gps).
+                'has_gps': bool(bus.sudo().traccar_unique_id),
             } for bus in env['bus.vehicle'].search([])],
             'routes': [{
                 'id': route.id,
@@ -163,11 +169,16 @@ class BusDriverApi(http.Controller):
         env = request.env(user=user.id)
         bus = env['bus.vehicle'].browse(vehicle_id)
         route = env['bus.route'].browse(route_id)
-        if not bus.exists() or not route.exists():
+        # Archived buses and routes are kept for history only.
+        if not bus.exists() or not route.exists() or not bus.active or not route.active:
             return json_response({'error': 'bad_request'}, 400)
         unique_id = bus.sudo().traccar_unique_id
         if not unique_id:
             return json_response({'error': 'no_gps'}, 409)
+        # Without it the tablet has nowhere to send positions: better refuse than a silent shift.
+        gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').strip().rstrip('/')
+        if not gps_url:
+            return json_response({'error': 'no_gps_url'}, 409)
         Shift = env['bus.shift'].sudo()
         with mute_logger('odoo.sql_db'):
             try:
@@ -177,7 +188,6 @@ class BusDriverApi(http.Controller):
             except IntegrityError:
                 return json_response({'error': 'conflict'}, 409)
         shift._assign_vehicle()
-        gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').rstrip('/')
         return json_response({
             'shift': self._shift_payload(shift),
             'traccar_unique_id': unique_id,
@@ -204,36 +214,42 @@ class BusDriverApi(http.Controller):
         if not shift:
             return json_response({'error': 'no_shift'}, 409)
         bus = shift.vehicle_id.sudo()
-        stops = shift.route_id.stop_ids
-        arrivals = request.env['bus.stop.arrival'].sudo().search([
-            ('vehicle_id', '=', bus.id),
-            ('stop_id', 'in', stops.ids),
-            ('arrival_time', '>=', shift.start),
-        ], order='arrival_time desc')
-        arrived = {}
-        for arrival in arrivals:
-            arrived.setdefault(arrival.stop_id.id, utc_z(arrival.arrival_time))
-        next_stop_id = next((stop.id for stop in stops if stop.id not in arrived), None)
+        trip = shift._trip_progress()
+        arrived = trip['arrived']
         since = fields.Datetime.now() - timedelta(hours=2)
         alerts = request.env['bus.alert'].sudo().search([
             ('vehicle_id', '=', bus.id),
             '|', ('state', '=', 'open'), ('start_time', '>=', since),
         ])
+        sos = request.env['bus.incident'].sudo().search(
+            [('shift_id', '=', shift.id), ('kind', '=', 'sos')], order='create_date desc', limit=1)
+        # The alert details read in the language of the app, not in the one of the Odoo user.
+        installed = request.env['res.lang'].sudo().search([('active', '=', True)]).mapped('code')
+        lang = pick_odoo_lang((read_body() or {}).get('lang'), installed, fallback=user.lang)
         return json_response({
             'shift': self._shift_payload(shift),
+            # The last SOS of this shift and whether someone in the office saw it.
+            'sos': {
+                'id': sos.id,
+                'sent_at': utc_z(sos.reported_at or sos.create_date),
+                'seen_at': utc_z(sos.acknowledged_at),
+                'seen_by': sos.acknowledged_by.name or None,
+            } if sos else None,
             'current_stop_id': bus.current_stop_id.id or None,
-            'next_stop_id': next_stop_id,
+            'next_stop_id': trip['next_stop'].id or None,
+            # 'back' once the bus reached the last stop: the stops come in the order it travels them.
+            'direction': trip['direction'],
             'stops': [{
                 'id': stop.id,
                 'name': stop.name,
                 'sequence': stop.sequence,
-                'arrived_at': arrived.get(stop.id),
-            } for stop in stops],
+                'arrived_at': utc_z(arrived.get(stop.id)),
+            } for stop in trip['stops']],
             'alerts': [{
                 'id': alert.id,
                 'kind': alert.kind,
                 'state': alert.state,
-                'detail': alert.with_context(lang=user.lang).detail or '',
+                'detail': alert.with_context(lang=lang).detail or '',
                 'start': utc_z(alert.start_time),
             } for alert in alerts],
         })
@@ -261,7 +277,43 @@ class BusDriverApi(http.Controller):
                 'radius': stop.radius,
             } for stop in route.stop_ids],
             'lines': route._map_lines(),
+            'tile_url': tile_url(request.env),
         })
+
+    @http.route('/bus_tracking/driver/client_error', type='http', auth='public', methods=['POST'], csrf=False)
+    def client_error(self, **kwargs):
+        """A crash or failure inside the tablet app, for the operators: it goes to the Odoo log.
+
+        It does not need an open shift (an app that crashes at login must be able to say so) and it never
+        stores anything: the log line is what support reads (`grep "Tablet error"`).
+        """
+        user, err = self._auth()
+        if err:
+            return err
+        if not error_limiter.allow(user.id):
+            return json_response({'error': 'too_many_requests'}, 429)
+        body = read_body()
+        if body is None:
+            return json_response({'error': 'bad_request'}, 400)
+        message, stack = body.get('message'), body.get('stack') or ''
+        app, screen = body.get('app') or '', body.get('screen') or ''
+        if not isinstance(message, str) or not message.strip() or len(message) > MESSAGE_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+        if not isinstance(stack, str) or len(stack) > STACK_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+        if not isinstance(app, str) or len(app) > SHORT_MAX or not isinstance(screen, str) or len(screen) > SHORT_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+
+        def one_line(text):
+            # Text from a phone cannot start a fake log line.
+            return ' '.join(text.split())
+
+        shift = self._active_shift(user)
+        _logger.warning(
+            'Tablet error: driver=%s bus=%s app=%s screen=%s message=%s stack=%s',
+            user.login, shift.vehicle_id.name if shift else '-', one_line(app) or '-', one_line(screen) or '-',
+            one_line(message), one_line(stack) or '-')
+        return json_response({'ok': True})
 
     @http.route('/bus_tracking/driver/incident', type='http', auth='public', methods=['POST'], csrf=False)
     def incident(self, **kwargs):
@@ -292,7 +344,14 @@ class BusDriverApi(http.Controller):
                 return json_response({'error': 'bad_request'}, 400)
         else:
             lat = lon = False
+        # The tablet sends when the driver pressed the button; it is kept only when it falls
+        # inside this shift and not in the future, so a wrong tablet clock cannot reorder things.
+        now = fields.Datetime.now()
+        reported_at = parse_traccar_dt(body.get('reported_at'))
+        if not reported_at or not (shift.start - timedelta(minutes=1) <= reported_at <= now + timedelta(minutes=1)):
+            reported_at = now
         incident = request.env['bus.incident'].sudo().create({
+            'reported_at': min(reported_at, now),
             'shift_id': shift.id,
             'vehicle_id': shift.vehicle_id.id,
             'kind': kind,

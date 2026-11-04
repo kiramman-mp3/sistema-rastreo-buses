@@ -74,7 +74,8 @@ class TestComplaintModel(TransactionCase):
         self.assertEqual(complaint.contact_email, 'a@example.org')
 
     def test_contact_data_is_only_readable_by_managers(self):
-        group = lambda xmlid: self.env.ref(xmlid).id
+        def group(xmlid):
+            return self.env.ref(xmlid).id
         viewer = self.env['res.users'].create({
             'name': 'Viewer', 'login': 'viewer2',
             'groups_id': [(6, 0, [group('base.group_user'), group('bus_tracking.group_bus_user')])]})
@@ -163,6 +164,13 @@ class TestComplaintForm(HttpCase):
         self.assertFalse(self.env['bus.complaint'].search([]).has_contact)
         self.assertIn('no podremos responderte', self.url_open(resp.headers['Location']).text)
 
+    def test_every_kind_on_the_form_is_stored_as_chosen(self):
+        html = self.url_open('/quejas').text
+        for kind in ('delay', 'behavior', 'safety', 'cleanliness', 'other'):
+            self.assertIn('value="%s"' % kind, html)
+        for fake in ('lost_item', 'conduct'):
+            self.assertNotIn('value="%s"' % fake, html)
+
     def test_report_without_route_or_bus_is_fine(self):
         self.submit(route='', bus='')
         complaint = self.env['bus.complaint'].search([])
@@ -218,10 +226,13 @@ class TestComplaintForm(HttpCase):
         self.assertTrue(resp.headers['Location'].endswith('/quejas/gracias'))
         self.assertEqual(self.count(), 0)
 
-    def test_posting_too_fast_stores_nothing(self):
+    def test_posting_too_fast_asks_to_send_again_and_keeps_the_text(self):
         with patch(MIN_FILL, 3):
             resp = self.submit()
-        self.assertTrue(resp.headers['Location'].endswith('/quejas/gracias'))
+        # Not a silent "thanks": a person who pasted the text from the home page would lose it.
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('pulsa Enviar otra vez', resp.text)
+        self.assertIn(LONG_TEXT, resp.text)
         self.assertEqual(self.count(), 0)
 
     def test_missing_or_forged_token_stores_nothing(self):

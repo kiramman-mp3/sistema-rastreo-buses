@@ -3,11 +3,11 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { loadCSS, loadJS } from "@web/core/assets";
+import { _t } from "@web/core/l10n/translation";
 import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
-const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 
 export class BusStopPicker extends Component {
     static template = "bus_tracking.StopPicker";
@@ -37,7 +37,7 @@ export class BusStopPicker extends Component {
     initMap(data) {
         const L = window.L;
         this.map = L.map(this.mapRef.el).setView(data.center, 14);
-        L.tileLayer(TILES, {
+        L.tileLayer(data.tile_url, {
             maxZoom: 19,
             subdomains: "abcd",
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
@@ -96,7 +96,7 @@ export class BusStopPicker extends Component {
     async save() {
         this.state.error = null;
         if (this.state.lat === null) {
-            this.state.error = "Haz clic en el mapa para elegir el punto de la parada.";
+            this.state.error = _t("Click on the map to place the stop.");
             return;
         }
         this.state.saving = true;
@@ -111,7 +111,7 @@ export class BusStopPicker extends Component {
             });
             this.env.services.action.doAction({ type: "ir.actions.act_window_close" });
         } catch (error) {
-            this.state.error = error?.data?.message || "No se pudo guardar la parada.";
+            this.state.error = error?.data?.message || _t("The stop could not be saved.");
             this.state.saving = false;
         }
     }

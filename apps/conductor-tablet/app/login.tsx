@@ -1,24 +1,31 @@
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Button } from '../src/ui/Button';
+import { Action, Field, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
-import { colors, hit, type } from '../src/ui/theme';
+import { LineMark } from '../src/ui/LineMark';
+import { Notice } from '../src/ui/Notice';
+import { shape, space } from '../src/ui/theme';
+import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Login() {
   useLang();
+  const { palette } = useTheme();
+  const layout = useLayout();
   const session = useSession();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [odooUrl, setOdooUrl] = useState(session.snapshot.odooUrl);
-  const [showServerConfig, setShowServerConfig] = useState(false);
+  // The server address is for technical support only: it opens with a long press on the mark.
+  const [showServer, setShowServer] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -32,214 +39,142 @@ export default function Login() {
     try {
       await session.setOdooUrl(odooUrl);
       await session.login(login.trim(), password);
-      router.replace(session.snapshot.shift ? '/shift' : '/select');
+      // `session.snapshot` here is the one of the last render: let the index route decide with the new one.
+      router.replace('/');
     } catch (err) {
       if (err instanceof Error && err.message === 'bad_odoo_url') setError(t('qrBad'));
-      else if (err instanceof AuthError || (err instanceof ApiError && err.status === 401)) {
-        setError(t('badCredentials'));
-      } else if (err instanceof NetworkError) {
-        setError(t('network'));
-      } else {
-        setError(t('badCredentials'));
-      }
+      else if (err instanceof NetworkError) setError(t('network'));
+      else if (err instanceof AuthError || (err instanceof ApiError && err.status === 401)) setError(t('badCredentials'));
+      else if (err instanceof ApiError && err.status === 429) setError(t('tooMany'));
+      else setError(t('serverError'));
     } finally {
       setBusy(false);
     }
   }
 
+  // Side by side when there is width; stacked (and centred) on a phone in portrait.
+  const side = layout.wide;
+
   return (
-    <View style={styles.page}>
-      {/* Header Emblem */}
-      <View style={styles.brandHeader}>
-        <View style={styles.brandIcon}>
-          <Text style={styles.brandIconText}>🚌</Text>
+    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[12] : layout.gap * 2 }]}>
+      <View style={[styles.intro, !side && styles.introStack]}>
+        <Pressable onLongPress={() => setShowServer((v) => !v)} accessibilityLabel="Buses UTA" style={styles.brand}>
+          <LineMark />
+          <Txt bold size="data">
+            Buses UTA
+          </Txt>
+        </Pressable>
+        <Txt bold size="title">
+          {t('loginTitle')}
+        </Txt>
+        <Txt size="body" dim>
+          {t('loginHelp')}
+        </Txt>
+        <Txt size="small" dim>
+          {t('trackingNoticeLogin')}
+        </Txt>
+        <View style={styles.langs}>
+          <LangSwitch />
         </View>
-        <Text style={styles.brandTitle}>Buses UTA</Text>
-        <Text style={styles.brandSub}>Universidad Técnica de Ambato · Terminal Chofer</Text>
       </View>
 
-      {/* Main Login Card */}
-      <View style={styles.card}>
-        <Button
-          label={t('scanDriverBadge')}
-          onPress={() => router.push('/scan')}
-          style={styles.scanBtn}
-        />
-
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t('orManualLogin')}</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <TextInput
+      <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? space[4] : space[6] }]}>
+        <Action label={t('scanDriverBadge')} onPress={() => router.push('/scan')} kind="accent" />
+        <Txt size="small" dim style={styles.or}>
+          {t('orManualLogin')}
+        </Txt>
+        <Field
           value={login}
           onChangeText={setLogin}
           autoCapitalize="none"
           autoCorrect={false}
           placeholder={t('user')}
-          placeholderTextColor={colors.muted}
-          style={styles.input}
+          accessibilityLabel={t('user')}
         />
-        <TextInput
+        <Field
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           placeholder={t('password')}
-          placeholderTextColor={colors.muted}
-          style={styles.input}
+          accessibilityLabel={t('password')}
         />
-
-        {/* Expandable Server Config for Technical Setup */}
-        <Pressable
-          onPress={() => setShowServerConfig(!showServerConfig)}
-          style={styles.serverToggle}
-        >
-          <Text style={styles.serverToggleText}>
-            {showServerConfig ? '▼ Ocultar servidor' : '⚙️ Servidor: ' + (odooUrl || 'Por defecto')}
-          </Text>
-        </Pressable>
-
-        {showServerConfig ? (
-          <TextInput
-            value={odooUrl}
-            onChangeText={setOdooUrl}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholder={t('odooUrl')}
-            placeholderTextColor={colors.muted}
-            style={[styles.input, styles.inputSecondary]}
-          />
-        ) : null}
-
-        {error ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{error}</Text>
+        {showServer ? (
+          <View style={styles.server}>
+            <Txt size="small" dim>
+              {t('serverHint')}
+            </Txt>
+            <Field
+              value={odooUrl}
+              onChangeText={setOdooUrl}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder={t('odooUrl')}
+                  accessibilityLabel={t('odooUrl')}
+                />
           </View>
         ) : null}
-
-        <Button
+        {error ? (
+          <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} />
+        ) : null}
+        <Action
           label={busy ? t('loading') : t('login')}
           onPress={submit}
+          kind="quiet"
           disabled={busy || !login || !password}
-          style={styles.loginBtn}
         />
       </View>
-
-      <LangSwitch />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   page: {
-    flex: 1,
-    backgroundColor: colors.paper,
-    padding: 24,
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
   },
-  brandHeader: {
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 8,
-  },
-  brandIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: colors.route,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  brandIconText: {
-    fontSize: 28,
-  },
-  brandTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.ink,
-    letterSpacing: -0.5,
-  },
-  brandSub: {
-    fontSize: 13,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  card: {
-    width: '100%',
-    maxWidth: 480,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: colors.line,
-    gap: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  scanBtn: {
-    minHeight: hit + 4,
-  },
-  divider: {
+  pageSide: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 4,
-    gap: 12,
   },
-  dividerLine: {
+  pageStack: {
+    flexDirection: 'column',
+  },
+  intro: {
     flex: 1,
-    height: 1,
-    backgroundColor: colors.line,
+    gap: space[3],
   },
-  dividerText: {
-    fontSize: 12,
-    color: colors.muted,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  introStack: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
   },
-  input: {
-    minHeight: hit,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    fontSize: type.body - 1,
-    backgroundColor: '#F8FAFC',
-    color: colors.ink,
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    marginBottom: space[6],
+    alignSelf: 'flex-start',
   },
-  inputSecondary: {
-    fontSize: 13,
-    color: colors.muted,
-    backgroundColor: '#F1F5F9',
+  langs: {
+    marginTop: space[5],
   },
-  serverToggle: {
-    paddingVertical: 4,
+  card: {
+    ...shape.control,
+    gap: space[3],
   },
-  serverToggleText: {
-    fontSize: 12,
-    color: colors.muted,
-    fontWeight: '600',
+  cardSide: {
+    flex: 1,
+    maxWidth: 560,
   },
-  errorBox: {
-    backgroundColor: colors.busLight,
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.bus,
+  cardStack: {
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
   },
-  errorText: {
-    color: colors.bus,
-    fontSize: 13,
-    fontWeight: '600',
+  or: {
+    textAlign: 'center',
+    marginVertical: space[1],
   },
-  loginBtn: {
-    minHeight: hit,
+  server: {
+    gap: space[2],
   },
 });

@@ -1,18 +1,33 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
-import { parseDriverBadge } from '../src/config/odooUrl';
-import { t } from '../src/i18n';
+import { normalizeOdooUrl, parseDriverBadge } from '../src/config/odooUrl';
+import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
-import { Button } from '../src/ui/Button';
-import { colors, type } from '../src/ui/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Action, Screen, Txt } from '../src/ui/cabin';
+import { useLayout } from '../src/ui/layout';
+import { space } from '../src/ui/theme';
+
+/** A QR can point the tablet at another server: the driver's password and the GPS would go there. */
+function confirmServer(url: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    Alert.alert(tf('serverChange', { url }), undefined, [
+      { text: t('cancel'), style: 'cancel', onPress: () => resolve(false) },
+      { text: t('continue'), onPress: () => resolve(true) },
+    ]);
+  });
+}
 
 export default function ScanScreen() {
   useLang();
   const session = useSession();
+  const insets = useSafeAreaInsets();
+  const { gutter, phone } = useLayout();
   const [permission, requestPermission] = useCameraPermissions();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -24,9 +39,13 @@ export default function ScanScreen() {
 
     const badge = parseDriverBadge(data);
     if (badge) {
+      if (badge.odooUrl && badge.odooUrl !== session.snapshot.odooUrl && !(await confirmServer(badge.odooUrl))) {
+        setBusy(false);
+        return;
+      }
       try {
         await session.loginWithBadge(badge.token, badge.odooUrl);
-        router.replace(session.snapshot.shift ? '/shift' : '/select');
+        router.replace('/');
         return;
       } catch {
         setError(t('badgeError'));
@@ -35,8 +54,18 @@ export default function ScanScreen() {
       }
     }
 
+    const url = normalizeOdooUrl(data);
+    if (!url) {
+      setError(data.trim().startsWith('http://') ? t('serverHttps') : t('qrBad'));
+      setBusy(false);
+      return;
+    }
+    if (url !== session.snapshot.odooUrl && !(await confirmServer(url))) {
+      setBusy(false);
+      return;
+    }
     try {
-      await session.setOdooUrl(data);
+      await session.setOdooUrl(url);
       router.back();
     } catch {
       setError(t('qrBad'));
@@ -46,11 +75,11 @@ export default function ScanScreen() {
 
   if (!permission?.granted) {
     return (
-      <View style={styles.page}>
-        <Text style={styles.body}>{t('cameraNeed')}</Text>
-        <Button label={t('scanQr')} onPress={() => requestPermission()} />
-        <Button label={t('cancel')} onPress={() => router.back()} />
-      </View>
+      <Screen scroll style={styles.page}>
+        <Txt size="body">{t('cameraNeed')}</Txt>
+        <Action label={t('scanQr')} onPress={() => requestPermission()} kind="accent" />
+        <Action label={t('cancel')} onPress={() => router.back()} kind="quiet" />
+      </Screen>
     );
   }
 
@@ -61,20 +90,38 @@ export default function ScanScreen() {
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
         onBarcodeScanned={busy ? undefined : onScan}
       />
-      {busy ? <Text style={styles.info}>{t('badgeLoggingIn')}</Text> : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <View style={styles.bar}>
-        <Button label={t('cancel')} onPress={() => router.back()} />
+      {busy ? (
+        <Txt bold size="body" color="#FFFFFF" style={styles.info}>
+          {t('badgeLoggingIn')}
+        </Txt>
+      ) : null}
+      {error ? (
+        <Txt bold size="body" color="#FFFFFF" style={styles.info}>
+          {error}
+        </Txt>
+      ) : null}
+      <View
+        style={[
+          styles.bar,
+          {
+            bottom: insets.bottom + gutter,
+            left: insets.left + gutter,
+            right: insets.right + gutter,
+            // On a phone on its side the bar would cover the camera: keep it small and to one side.
+            ...(phone ? { alignItems: 'flex-start' as const } : null),
+          },
+        ]}
+      >
+        <Action label={t('cancel')} onPress={() => router.back()} style={phone ? undefined : styles.fullBar} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: colors.paper, padding: 32, justifyContent: 'center', gap: 16 },
+  page: { justifyContent: 'center' },
   camera: { flex: 1, backgroundColor: '#000' },
-  body: { fontSize: type.body, color: colors.ink },
-  error: { color: '#fff', fontSize: type.body, textAlign: 'center', marginTop: 24 },
-  info: { color: '#fff', fontSize: type.body + 2, textAlign: 'center', marginTop: 24, fontWeight: '600' },
-  bar: { position: 'absolute', bottom: 24, left: 24, right: 24 },
+  info: { textAlign: 'center', marginTop: space[6], backgroundColor: 'rgba(0,0,0,0.6)', padding: space[3] },
+  bar: { position: 'absolute' },
+  fullBar: { alignSelf: 'stretch' },
 });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 function toRad(degrees: number): number {
   return (degrees * Math.PI) / 180;
@@ -30,41 +30,31 @@ export function formatDistance(meters: number | null): string {
   return `En ${(meters / 1000).toFixed(1)} km`;
 }
 
+function clock(): string {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
 export function useCockpitTelemetry(
   busFix: { lat: number; lon: number } | null,
   nextStopCoords: { lat: number; lon: number } | null,
 ) {
-  const [currentTime, setCurrentTime] = useState<string>('');
-  const [distanceMeters, setDistanceMeters] = useState<number | null>(null);
+  // Hours and minutes only: seconds ticking in the corner of the eye are a distraction while driving.
+  const [currentTime, setCurrentTime] = useState<string>(clock);
 
-  // 1-second system clock for cockpit display
   useEffect(() => {
-    function updateClock() {
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const mins = String(now.getMinutes()).padStart(2, '0');
-      const secs = String(now.getSeconds()).padStart(2, '0');
-      setCurrentTime(`${hours}:${mins}:${secs}`);
-    }
-    updateClock();
-    const interval = setInterval(updateClock, 1000);
+    const interval = setInterval(() => setCurrentTime(clock()), 15_000);
     return () => clearInterval(interval);
   }, []);
 
-  // Compute distance to next stop
-  useEffect(() => {
-    if (busFix && nextStopCoords) {
-      const dist = calculateDistanceMeters(
-        busFix.lat,
-        busFix.lon,
-        nextStopCoords.lat,
-        nextStopCoords.lon,
-      );
-      setDistanceMeters(dist);
-    } else {
-      setDistanceMeters(null);
-    }
-  }, [busFix?.lat, busFix?.lon, nextStopCoords?.lat, nextStopCoords?.lon]);
+  const busLat = busFix?.lat;
+  const busLon = busFix?.lon;
+  const stopLat = nextStopCoords?.lat;
+  const stopLon = nextStopCoords?.lon;
+  const distanceMeters = useMemo(() => {
+    if (busLat === undefined || busLon === undefined || stopLat === undefined || stopLon === undefined) return null;
+    return calculateDistanceMeters(busLat, busLon, stopLat, stopLon);
+  }, [busLat, busLon, stopLat, stopLon]);
 
   return {
     currentTime,

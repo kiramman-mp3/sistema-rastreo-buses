@@ -6,6 +6,8 @@ export type Vehicle = {
   plate: string;
   route_id: number | null;
   available: boolean;
+  /** False when the bus has no GPS device in Traccar yet: it cannot start a shift. */
+  has_gps?: boolean;
 };
 
 export type Route = { id: number; code: string; name: string; color: string };
@@ -45,10 +47,21 @@ export type Alert = {
   start: string;
 };
 
+export type SosState = {
+  id: number;
+  sent_at: string | null;
+  seen_at: string | null;
+  seen_by: string | null;
+};
+
 export type StateResponse = {
   shift: Shift;
+  /** The last SOS of this shift and whether the office saw it (null when there was none). */
+  sos?: SosState | null;
   current_stop_id: number | null;
   next_stop_id: number | null;
+  /** 'back' once the bus reached the last stop; the stops then come in reverse order. */
+  direction?: 'forward' | 'back';
   stops: StopState[];
   alerts: Alert[];
 };
@@ -69,13 +82,17 @@ export type RouteMap = {
   color: string;
   stops: RouteStop[];
   lines: { name: string; km: number; points: number[][] }[];
+  /** Map tiles chosen in Odoo (Settings > Map tiles); older servers do not send it. */
+  tile_url?: string;
 };
 
-export type IncidentKind = 'breakdown' | 'traffic' | 'accident' | 'other';
+export type IncidentKind = 'breakdown' | 'traffic' | 'accident' | 'other' | 'sos';
 
 export type IncidentDraft = {
   kind: IncidentKind;
   note: string;
   lat: number | null;
   lon: number | null;
+  /** When the driver pressed the button (ISO, UTC). Odoo keeps it for incidents sent later. */
+  reported_at?: string;
 };

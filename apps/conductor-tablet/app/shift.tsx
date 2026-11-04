@@ -1,52 +1,104 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Alert,
-  AppState,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Animated, AppState, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { ApiError, NetworkError } from '../src/api/client';
-import { readLastSent } from '../src/gps/store';
-import { useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
-import { alertLabel, t } from '../src/i18n';
+import { calculateDistanceMeters, useCockpitTelemetry } from '../src/gps/useCockpitTelemetry';
+import { useGpsHealth } from '../src/gps/useGpsHealth';
+import { alertLabel, t, tf, tp, type Message } from '../src/i18n';
+import { formatDistance } from '../src/i18n/format';
 import { useLang } from '../src/i18n/LangProvider';
 import { RouteMapView } from '../src/map/RouteMapView';
-import { classifyStops } from '../src/shift/progress';
-import { useSession } from '../src/state/SessionContext';
-import { HeadwayBar, type HeadwayStatus } from '../src/ui/HeadwayBar';
-import { IncidentActions } from '../src/ui/IncidentActions';
-import { StopAlertCard } from '../src/ui/StopAlertCard';
-import { cockpitColors, cockpitHit } from '../src/ui/theme';
+import { createMotionLock } from '../src/shift/motion';
+import { buildNotices } from '../src/shift/notices';
+import { classifyStops, sosPhase, type SosLocal } from '../src/shift/progress';
+import { useSession, useSessionActions } from '../src/state/SessionContext';
+import { Action, GpsBadge, Press, Screen, SosButton, Txt } from '../src/ui/cabin';
+import { hapticCommit } from '../src/ui/haptics';
+import { readableOn } from '../src/ui/contrast';
+import { noticeCapacity, useLayout } from '../src/ui/layout';
+import { NoticeList } from '../src/ui/Notice';
+import { StopStrip } from '../src/ui/StopStrip';
+import { useTheme } from '../src/ui/ThemeProvider';
+import { useStopCue } from '../src/ui/useStopCue';
+import { border, shape, space } from '../src/ui/theme';
+
+const GPS_LABEL: Record<string, Message> = {
+  sending: 'gpsSending',
+  waiting: 'gpsWaiting',
+  off: 'gpsOff',
+};
+
+/** What the GPS badge says; with points waiting to be sent it counts them in the right plural. */
+function gpsLabel(health: string, queued: number): string {
+  return health === 'saving' ? tp('gpsSaving', queued) : tf(GPS_LABEL[health], { n: queued });
+}
+
+function localTime(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const when = new Date(iso);
+  return isNaN(when.getTime()) ? '' : `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+}
+
+function distance(meters: number | null): string | null {
+  return meters === null ? null : formatDistance(meters);
+}
 
 export default function ShiftScreen() {
   useLang();
+  const { palette, choice, setChoice } = useTheme();
+  const layout = useLayout();
   const session = useSession();
-  const { shift, vehicles, routes, driver, shiftState, routeMap } = session.snapshot;
+  const actions = useSessionActions();
+  const { shift, vehicles, routes, shiftState, routeMap } = session.snapshot;
   const bus = vehicles.find((item) => item.id === shift?.vehicle_id);
   const route = routes.find((item) => item.id === shift?.route_id);
-
+  const gps = useGpsHealth();
   const [stale, setStale] = useState(false);
-  const [busFix, setBusFix] = useState<{ lat: number; lon: number } | null>(null);
-  const [trafficLoading, setTrafficLoading] = useState(false);
-  const [manualArrived, setManualArrived] = useState(false);
+  const [sosLocal, setSosLocal] = useState<SosLocal>(null);
+
+  // A small state machine kept across renders; it only reads the last GPS sample.
+  const [lock] = useState(() => createMotionLock());
+  const locked = useMemo(() => lock(gps.speedKmh, gps.sampleAt, gps.readAt), [lock, gps.speedKmh, gps.sampleAt, gps.readAt]);
 
   const stops = useMemo(
-    () => classifyStops(shiftState?.stops ?? [], shiftState?.next_stop_id ?? null),
-    [shiftState?.stops, shiftState?.next_stop_id],
+    () => classifyStops(shiftState?.stops ?? [], shiftState?.next_stop_id ?? null, shiftState?.direction),
+    [shiftState?.stops, shiftState?.next_stop_id, shiftState?.direction],
   );
+  const nextIndex = stops.findIndex((s) => s.status === 'next');
+  const nextStop = nextIndex >= 0 ? stops[nextIndex] : null;
+  const afterStop = nextIndex >= 0 ? stops[nextIndex + 1] ?? null : null;
+  const left = nextIndex >= 0 ? stops.length - nextIndex : 0;
+  const stopCue = useStopCue(nextStop?.id ?? null);
 
-  const nextStop = useMemo(() => stops.find((s) => s.status === 'next') || null, [stops]);
-  const subsequentStops = useMemo(
-    () => stops.filter((s) => s.status === 'later'),
-    [stops],
+  const busFix = useMemo(
+    () => (gps.lat !== null && gps.lon !== null ? { lat: gps.lat, lon: gps.lon } : null),
+    [gps.lat, gps.lon],
   );
-  const alerts = shiftState?.alerts ?? [];
+  const { currentTime } = useCockpitTelemetry(busFix, null);
+  const nextCoords = routeMap?.stops.find((s) => s.id === nextStop?.id);
+  const meters = busFix && nextCoords ? calculateDistanceMeters(busFix.lat, busFix.lon, nextCoords.lat, nextCoords.lon) : null;
+
+  const serverSos = shiftState?.sos ?? null;
+  const phase = sosPhase(serverSos, sosLocal);
+  let sosStatus: string | null = null;
+  if (phase === 'seen') {
+    sosStatus = tf('sosSeen', { by: serverSos?.seen_by ?? '', time: localTime(serverSos?.seen_at) });
+  } else if (phase === 'sending') {
+    sosStatus = t('sosSending');
+  } else if (phase === 'queued') {
+    sosStatus = t('sosQueued');
+  } else if (phase === 'sent') {
+    sosStatus = t('sosSent');
+  }
+
+  const notices = buildNotices({
+    sos: sosStatus ? { text: sosStatus, seen: Boolean(serverSos?.seen_at) } : null,
+    alerts: (shiftState?.alerts ?? [])
+      .filter((a) => a.state === 'open')
+      .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
+  });
 
   // Coords for next stop to calculate live distance
   const nextStopCoords = useMemo(() => {
@@ -74,18 +126,16 @@ export default function ShiftScreen() {
   useFocusEffect(
     useCallback(() => {
       let live = true;
-      activateKeepAwakeAsync();
-
+      activateKeepAwakeAsync().catch(() => undefined);
       async function tick() {
         if (!live || AppState.currentState !== 'active') return;
         try {
-          await session.pullState();
-          if (!session.snapshot.routeMap) await session.loadRouteMap();
-          const last = await readLastSent();
-          if (live && last) setBusFix({ lat: last.lat, lon: last.lon });
+          await actions.pullState();
+          if (!actions.snapshot.routeMap) await actions.loadRouteMap();
           if (live) setStale(false);
         } catch (error) {
           if (error instanceof ApiError && error.code === 'no_shift') {
+            // The session already stopped the GPS.
             router.replace('/select');
             return;
           }
@@ -98,9 +148,14 @@ export default function ShiftScreen() {
       return () => {
         live = false;
         clearInterval(id);
-        deactivateKeepAwake();
+        // on the web (previews) the lock may never have been granted, and it throws
+        try {
+          deactivateKeepAwake().catch(() => undefined);
+        } catch {
+          // nothing to release
+        }
       };
-    }, [session]),
+    }, [actions]),
   );
 
   function confirmEnd() {
@@ -110,357 +165,353 @@ export default function ShiftScreen() {
         text: t('endShift'),
         style: 'destructive',
         onPress: () => {
+          hapticCommit();
           session
             .endShift()
-            .then(() => router.replace('/select'))
-            .catch(() => Alert.alert(t('network')));
+            .then((result) => {
+              if (result === 'queued') Alert.alert(t('endQueued'));
+              router.replace('/select');
+            })
+            .catch(() => Alert.alert(t('serverError')));
         },
       },
     ]);
   }
 
-  async function handleReportTraffic() {
-    setTrafficLoading(true);
+  async function fireSos() {
+    const at = new Date().toISOString();
+    setSosLocal({ status: 'sending', at });
     try {
-      await session.reportIncident({
-        kind: 'traffic',
-        note: 'Congestión vial y demora reportada desde tableta de cabina',
-        lat: busFix?.lat ?? null,
-        lon: busFix?.lon ?? null,
-      });
-      Alert.alert('⚠️ Tráfico Reportado', 'La central de monitoreo ha sido notificada.');
+      const result = await session.reportIncident({ kind: 'sos', note: '', lat: gps.lat, lon: gps.lon, reported_at: at });
+      setSosLocal({ status: result === 'queued' ? 'queued' : 'sent', at });
+      session.pullState().catch(() => undefined);
     } catch {
-      Alert.alert('Demora Registrada', 'La incidencia se transmitirá al recuperar señal.');
-    } finally {
-      setTrafficLoading(false);
+      // The server refused it (for example the shift was closed): say so, never "saved".
+      setSosLocal(null);
+      Alert.alert(t('serverError'));
     }
   }
 
-  async function handleTriggerSOS() {
-    try {
-      await session.reportIncident({
-        kind: 'accident',
-        note: '🚨 ALERTA SOS DE EMERGENCIA DISPARADA DESDE CABINA',
-        lat: busFix?.lat ?? null,
-        lon: busFix?.lon ?? null,
-      });
-      Alert.alert('🚨 ALERTA SOS DISPARADA', 'Central de seguridad y operaciones notificada de emergencia.');
-    } catch {
-      Alert.alert('Alerta SOS', 'Emergencia registrada localmente para retransmisión prioritaria.');
-    }
-  }
+  const color = route?.color || palette.line;
+  const health = stale && gps.health === 'sending' ? 'saving' : gps.health;
 
-  function handleConfirmArrival() {
-    setManualArrived(true);
-    session.pullState().catch(() => {});
-    setTimeout(() => setManualArrived(false), 5000);
-  }
+  // Landscape puts the next stop beside the map; portrait stacks them (the map takes what is left).
+  // With the system font at 130 % or more nothing fits one view: the whole page scrolls (header, notices,
+  // next stop, a map of fixed height, then the buttons), stacked in either orientation.
+  const pageScroll = layout.largeText;
+  const side = layout.landscape && !pageScroll;
+  // A phone in portrait has no width for three buttons in a row: SOS on top, the other two below.
+  const stackedActions = layout.phone && !layout.landscape;
+  // A phone on its side has no height to spare: the map already shows the stops, so drop the strip.
+  const showStrip = !layout.short || pageScroll;
+  // The SOS answer and the alerts never scroll away: they sit above what scrolls. A phone on its side
+  // has room for one, and a shorter detail; the rest is counted.
+  const noticeBlock = <NoticeList items={notices} max={noticeCapacity(layout)} detailLines={layout.short && !pageScroll ? 1 : 2} />;
+
+  const problem = (
+    <Action
+      label={t('actionProblem')}
+      sub={stackedActions ? undefined : t('actionProblemSub')}
+      onPress={() => router.push('/incident')}
+      disabled={locked}
+      style={stackedActions ? undefined : styles.actionWide}
+    />
+  );
+  const sos = <SosButton onFire={fireSos} title={t('actionSos')} hint={t('actionSosSub')} holding={t('sosHolding')} />;
+  const end = (
+    <Action
+      label={t('endShift')}
+      onPress={confirmEnd}
+      kind="quiet"
+      disabled={locked}
+      style={stackedActions ? undefined : styles.actionNarrow}
+    />
+  );
+
+  const nextContent = (
+    <>
+      <Txt size="small" dim>
+        {t('cabinNext')}
+      </Txt>
+      <Animated.View style={stopCue}>
+        <Txt bold size="stop" lines={2} fit>
+          {nextStop ? nextStop.name : t('noNextStop')}
+        </Txt>
+      </Animated.View>
+      {nextStop ? (
+        <Txt size="body" dim>
+          {[distance(meters), left > 1 ? tf('cabinStopsLeft', { n: left }) : t('cabinLastStop')]
+            .filter(Boolean)
+            .join(' · ')}
+        </Txt>
+      ) : null}
+      {afterStop && !(layout.phone && showStrip) ? (
+        <Txt size="body">
+          {t('cabinAfter')}: {afterStop.name}
+        </Txt>
+      ) : null}
+
+      {showStrip ? (
+        <View style={styles.strip}>
+          <StopStrip stops={stops} color={color} ahead={layout.largeText ? 1 : 3} />
+        </View>
+      ) : null}
+    </>
+  );
+  const nextBlock = pageScroll ? (
+    <View style={styles.leftContent}>{nextContent}</View>
+  ) : (
+    <ScrollView
+      style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
+      contentContainerStyle={styles.leftContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {nextContent}
+    </ScrollView>
+  );
+
+  const modeButton = (
+    <Press
+      onPress={() => setChoice(palette.mode === 'day' ? 'night' : 'day')}
+      onLongPress={() => setChoice('auto')}
+      accessibilityRole="button"
+      accessibilityLabel={palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+      style={[styles.mode, { borderColor: palette.ink2 }]}
+    >
+      <Txt bold size="small">
+        {palette.mode === 'day' ? t('modeNight') : t('modeDay')}
+      </Txt>
+      {choice === 'auto' ? null : <View style={[styles.modeDot, { backgroundColor: palette.signal }]} />}
+    </Press>
+  );
+  // On a phone in portrait the header has two rows: bus and day/night on top, GPS and time below.
+  const tallHeader = layout.phone && !layout.landscape;
 
   return (
-    <View style={styles.cockpitPage}>
-      {/* Left Control & Telemetry Panel (Cockpit Rail) */}
-      <View style={styles.cockpitPanel}>
-        {/* Cockpit Top Header: Unit & System Time */}
-        <View style={styles.topHeader}>
-          <View style={styles.unitIdentityRow}>
-            <View style={styles.busBadge}>
-              <Text style={styles.busBadgeText}>
-                {bus?.name ? `BUS ${bus.name}` : `BUS #${shift?.vehicle_id ?? '01'}`}
-              </Text>
-            </View>
-            <View style={styles.routePill}>
-              <Text style={styles.routePillText} numberOfLines={1}>
-                {route?.code ?? 'L-01'} · {route?.name ?? 'UTA TRANSIT'}
-              </Text>
-            </View>
+    <Screen scroll={pageScroll}>
+      {/* Header: bus and line, real GPS state, time, day or night */}
+      <View style={[styles.header, { backgroundColor: palette.panel }]}>
+        <View style={[styles.identity, tallHeader && styles.identityTall]}>
+          <View style={[styles.chip, { backgroundColor: color }]}>
+            <Txt bold size="body" color={readableOn(color)}>
+              {route?.code ?? ''}
+            </Txt>
           </View>
-
-          <View style={styles.clockTelemetryWrap}>
-            <Text style={styles.digitalClock} accessibilityLabel={`Hora actual: ${currentTime}`}>
-              {currentTime || '--:--:--'}
-            </Text>
-            <View style={styles.gpsIndicatorRow}>
-              <View style={[styles.gpsDot, stale ? styles.gpsDotStale : styles.gpsDotLive]} />
-              <Text style={[styles.gpsText, stale && styles.gpsTextStale]}>
-                {stale ? 'GPS RECONECTANDO' : 'GPS ACTIVO'}
-              </Text>
-            </View>
+          <View style={styles.identityText}>
+            <Txt bold size="body" lines={1}>
+              {bus?.name ?? ''}
+            </Txt>
+            <Txt size="small" dim lines={1}>
+              {route?.name ?? ''}
+            </Txt>
           </View>
         </View>
+        {tallHeader ? modeButton : null}
+        <View style={[styles.headerRight, tallHeader && styles.headerRightFull, { columnGap: layout.phone ? 12 : 24 }]}>
+          <Press
+            onPress={() => router.push('/gps')}
+            disabled={locked}
+            accessibilityRole="button"
+            accessibilityHint={t('gpsOpen')}
+            style={styles.gpsTap}
+          >
+            <GpsBadge health={health} label={gpsLabel(health, gps.queued)} />
+          </Press>
+          <Txt bold size="data">
+            {currentTime}
+          </Txt>
+          {tallHeader ? null : modeButton}
+        </View>
+      </View>
 
-        {/* Scrollable Ergonomic Cockpit Body */}
-        <ScrollView
-          style={styles.panelScroll}
-          contentContainerStyle={styles.panelScrollContent}
-          showsVerticalScrollIndicator={false}
+      {side ? null : noticeBlock}
+
+      <View
+        style={[pageScroll ? null : styles.body, side ? styles.bodySide : styles.bodyStack, { gap: layout.gap + 4 }]}
+      >
+        {/* Where the bus goes next. Beside the map the notices are pinned above it; the rest scrolls. */}
+        {side ? (
+          <View style={styles.left}>
+            {noticeBlock}
+            {nextBlock}
+          </View>
+        ) : (
+          nextBlock
+        )}
+
+        {/* The map */}
+        <View
+          style={[
+            styles.map,
+            pageScroll ? styles.mapFixed : side ? styles.mapSide : styles.mapStack,
+            { backgroundColor: palette.panel },
+          ]}
         >
-          {/* 1. Headway / Cadence Bar */}
-          <HeadwayBar
-            status={headwayStatus}
-            diffMinutes={diffMinutes}
-            leadBusName="Bus #02"
-            targetIntervalMins={8}
-          />
+          <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
+        </View>
+      </View>
 
-          {/* 2. Immediate Stop Alert Card */}
-          <StopAlertCard
-            immediateStop={nextStop}
-            subsequentStops={subsequentStops}
-            distanceFormatted={distanceFormatted}
-            onConfirmArrival={handleConfirmArrival}
-            arrived={manualArrived}
-          />
-
-          {/* Active Operational Alerts Banner */}
-          {alerts.length > 0 ? (
-            <View style={styles.alertsBox}>
-              <Text style={styles.alertsTitle}>ALERTAS OPERATIVAS ACTIVAS:</Text>
-              {alerts.map((alert) => (
-                <View key={alert.id} style={styles.alertRow}>
-                  <Text style={styles.alertIcon}>⚠️</Text>
-                  <Text style={styles.alertDetail}>
-                    {alertLabel(alert.kind)}
-                    {alert.detail ? ` · ${alert.detail}` : ''}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
-        </ScrollView>
-
-        {/* Quick Emergency / Incident Bar (Bottom Fixed Rail) */}
-        <View style={styles.bottomActionsRail}>
-          <IncidentActions
-            onReportTraffic={handleReportTraffic}
-            onTriggerSOS={handleTriggerSOS}
-            trafficLoading={trafficLoading}
-          />
-
-          <View style={styles.auxiliaryRow}>
-            <Pressable
-              onPress={() => router.push('/gps')}
-              style={styles.auxBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Ver diagnóstico de telemetría GPS"
-            >
-              <Text style={styles.auxBtnText}>🛰️ DIAGNÓSTICO GPS</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={confirmEnd}
-              style={[styles.auxBtn, styles.endShiftBtn]}
-              accessibilityRole="button"
-              accessibilityLabel="Finalizar turno de conducción"
-            >
-              <Text style={styles.endShiftText}>🛑 FINALIZAR TURNO</Text>
-            </Pressable>
+      {/* Bottom: three actions; only SOS works while the bus moves */}
+      {locked ? (
+        <View style={[styles.lockNote, { backgroundColor: palette.signal }]} accessibilityLiveRegion="polite">
+          <Txt bold size="body" color={palette.onSignal}>
+            {t('lockedMoving')}
+          </Txt>
+        </View>
+      ) : null}
+      {stackedActions ? (
+        <View style={[styles.actionsStack, { gap: layout.gap }]}>
+          {sos}
+          <View style={[styles.actionsPair, { gap: layout.gap }]}>
+            <View style={styles.pairItem}>{problem}</View>
+            <View style={styles.pairItem}>{end}</View>
           </View>
         </View>
-      </View>
-
-      {/* Right Map Viewport */}
-      <View style={styles.mapViewport}>
-        <RouteMapView
-          route={routeMap}
-          bus={busFix}
-          nextStopId={shiftState?.next_stop_id ?? null}
-        />
-        <View style={styles.mapDriverWatermark}>
-          <Text style={styles.watermarkText}>
-            CONDUCTOR: {driver?.name?.toUpperCase() ?? 'CONDUCTOR AUTORIZADO'} · UTA TRANSIT
-          </Text>
+      ) : (
+        <View style={[styles.actions, { gap: layout.gap }]}>
+          {problem}
+          <View style={styles.actionWide}>{sos}</View>
+          {end}
         </View>
-      </View>
-    </View>
+      )}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  cockpitPage: {
-    flex: 1,
+  header: {
     flexDirection: 'row',
-    backgroundColor: cockpitColors.bg,
-  },
-  cockpitPanel: {
-    width: 460,
-    backgroundColor: cockpitColors.surface,
-    borderRightWidth: 2,
-    borderRightColor: cockpitColors.surfaceBorder,
-    display: 'flex',
-    flexDirection: 'column',
+    flexWrap: 'wrap',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    columnGap: space[4],
+    rowGap: space[2],
+    ...shape.control,
   },
-  topHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 14,
-    borderBottomWidth: 1.5,
-    borderBottomColor: cockpitColors.surfaceBorder,
-    backgroundColor: cockpitColors.surfaceElevated,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-  },
-  unitIdentityRow: {
-    flex: 1,
-    gap: 6,
-  },
-  busBadge: {
-    backgroundColor: cockpitColors.brandUTA,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: '#B91C1C',
-  },
-  busBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  routePill: {
-    marginTop: 2,
-  },
-  routePillText: {
-    color: cockpitColors.textMuted,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  clockTelemetryWrap: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  digitalClock: {
-    fontFamily: 'monospace',
-    color: cockpitColors.textBright,
-    fontSize: 26,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  gpsIndicatorRow: {
+  identity: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    gap: space[3],
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 220,
   },
-  gpsDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  identityTall: {
+    flexBasis: 140,
   },
-  gpsDotLive: {
-    backgroundColor: cockpitColors.onTime,
+  identityText: {
+    flexShrink: 1,
   },
-  gpsDotStale: {
-    backgroundColor: cockpitColors.delayed,
-  },
-  gpsText: {
-    color: cockpitColors.onTime,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  gpsTextStale: {
-    color: cockpitColors.delayed,
-  },
-  panelScroll: {
-    flex: 1,
-  },
-  panelScrollContent: {
-    padding: 16,
-    gap: 16,
-  },
-  alertsBox: {
-    backgroundColor: '#2A1215',
-    borderWidth: 1.5,
-    borderColor: '#DC2626',
-    borderRadius: 14,
-    padding: 14,
-    gap: 8,
-  },
-  alertsTitle: {
-    color: '#F87171',
-    fontSize: 12,
-    fontWeight: '900',
-    letterSpacing: 0.6,
-  },
-  alertRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  alertIcon: {
-    fontSize: 16,
-  },
-  alertDetail: {
-    flex: 1,
-    color: '#FECACA',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  bottomActionsRail: {
-    padding: 16,
-    borderTopWidth: 1.5,
-    borderTopColor: cockpitColors.surfaceBorder,
-    backgroundColor: cockpitColors.surfaceElevated,
-    gap: 12,
-  },
-  auxiliaryRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  auxBtn: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: cockpitColors.surfaceBorder,
-    minHeight: 46,
-    borderRadius: 10,
+  chip: {
+    minWidth: 52,
+    minHeight: 44,
+    paddingHorizontal: space[3],
+    ...shape.control,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  auxBtnText: {
-    color: cockpitColors.textMuted,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  headerRight: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexShrink: 1,
+    rowGap: space[1],
   },
-  endShiftBtn: {
-    backgroundColor: 'rgba(220, 38, 38, 0.1)',
-    borderColor: 'rgba(220, 38, 38, 0.4)',
+  headerRightFull: {
+    flexBasis: '100%',
   },
-  endShiftText: {
-    color: '#F87171',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  gpsTap: {
+    minHeight: 48,
+    justifyContent: 'center',
   },
-  mapViewport: {
+  mode: {
+    minHeight: 48,
+    paddingHorizontal: space[4],
+    ...shape.control,
+    borderWidth: border.thin,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[2],
+  },
+  modeDot: {
+    width: 10,
+    height: 10,
+    borderRadius: border.round,
+  },
+  body: {
     flex: 1,
-    position: 'relative',
-    backgroundColor: '#0A0E14',
+    minHeight: 0,
   },
-  mapDriverWatermark: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    backgroundColor: 'rgba(11, 15, 23, 0.85)',
-    borderWidth: 1,
-    borderColor: cockpitColors.surfaceBorder,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+  bodySide: {
+    flexDirection: 'row',
   },
-  watermarkText: {
-    color: cockpitColors.textMuted,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  bodyStack: {
+    flexDirection: 'column',
+  },
+  left: {
+    flexGrow: 4,
+    flexShrink: 1,
+    flexBasis: 0,
+    gap: space[2],
+  },
+  leftScroll: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
+  },
+  top: {
+    // Content height, but it gives way (and scrolls) before the map is squeezed out.
+    flexGrow: 0,
+    flexShrink: 1,
+    flexBasis: 'auto',
+  },
+  leftContent: {
+    gap: space[2],
+  },
+  strip: {
+    marginTop: space[3],
+    marginBottom: space[2],
+  },
+  map: {
+    ...shape.control,
+    overflow: 'hidden',
+  },
+  mapSide: {
+    flex: 6,
+  },
+  mapFixed: {
+    height: 260,
+  },
+  mapStack: {
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 0,
+    minHeight: 96,
+  },
+  lockNote: {
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    ...shape.control,
+  },
+  actions: {
+    flexDirection: 'row',
+  },
+  actionsStack: {
+    flexDirection: 'column',
+  },
+  actionsPair: {
+    flexDirection: 'row',
+  },
+  pairItem: {
+    flex: 1,
+  },
+  actionWide: {
+    flex: 3,
+  },
+  actionNarrow: {
+    flex: 2,
   },
 });

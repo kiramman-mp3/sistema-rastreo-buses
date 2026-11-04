@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+    <!-- Side mirrors -->
+    <rect x="2" y="11" width="1.5" height="4.5" rx="0.75" fill="#7A1A22"/>
+    <rect x="28.5" y="11" width="1.5" height="4.5" rx="0.75" fill="#7A1A22"/>
+    <!-- Wheels -->
+    <rect x="5.5" y="25" width="4.5" height="4" rx="1.5" fill="#172025"/>
+    <rect x="22" y="25" width="4.5" height="4" rx="1.5" fill="#172025"/>
+    <!-- Main Bus Body -->
+    <rect x="4" y="4" width="24" height="23" rx="5" fill="#7A1A22"/>
+    <!-- Route Display Banner -->
+    <rect x="9.5" y="6.5" width="13" height="3" rx="1.2" fill="#172025"/>
+    <line x1="12" y1="8" x2="20" y2="8" stroke="#FFC62B" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Windshield -->
+    <rect x="6.5" y="11" width="19" height="8.5" rx="2" fill="#172025"/>
+    <line x1="16" y1="11" x2="16" y2="19.5" stroke="#7A1A22" stroke-width="1.2"/>
+    <line x1="9" y1="13" x2="13.5" y2="13" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round"/>
+    <!-- Headlights -->
+    <circle cx="8.5" cy="23.5" r="1.75" fill="#FFC62B"/>
+    <circle cx="23.5" cy="23.5" r="1.75" fill="#FFC62B"/>
+    <!-- Grille / Bumper -->
+    <rect x="12.5" y="22.5" width="7" height="2" rx="0.75" fill="#172025"/>
+</svg>

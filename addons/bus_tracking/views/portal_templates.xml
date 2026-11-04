@@ -1,537 +1,265 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Kept for templates that still call it: the shared head of the public site. -->
     <template id="portal_head" name="Passenger portal head">
-        <meta name="description" content="Portal oficial de rastreo y atención de transporte de la Universidad Técnica de Ambato."/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
-        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
-        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/portal.css?v=#{asset_v}"/>
+        <t t-call="bus_tracking.site_head"/>
     </template>
 
-    <!-- ====================================================================
-         1. Directorio Visual de Rutas (/rutas)
-         ==================================================================== -->
+    <!-- Lines, with the stop search (/rutas) -->
     <template id="portal_routes" name="Passenger portal: routes">
         <t t-call="web.layout">
-            <t t-set="title"><t t-esc="s['title_routes']"/> | <t t-esc="brand"/></t>
-            <t t-set="body_classname" t-value="'o_bus_landing'"/>
-            <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
-            <t t-set="active_nav" t-value="'rutas'"/>
+            <t t-set="title"><t t-esc="s['title_routes']"/> · <t t-esc="brand"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-call="bus_tracking.portal_header"/>
 
-            <main class="portal-main-wrapper">
-                <!-- Page Hero Header -->
-                <section class="portal-hero-strip">
-                    <div class="wrap">
-                        <div class="section-badge-header align-left">
-                            <span class="section-wings">人</span>
-                            <span class="section-badge-text">RED DE TRANSPORTE INSTITUCIONAL UTA</span>
-                            <span class="section-wings">人</span>
-                        </div>
-                        <h1 class="portal-hero-title"><t t-esc="s['pick_route']"/></h1>
-                        <p class="portal-hero-subtitle"><t t-esc="s['pick_route_help']"/></p>
-
-                        <!-- Live Network Status Pill -->
-                        <div class="portal-network-status-pill">
-                            <span class="network-pulse"></span>
-                            <span><strong>Red Operativa:</strong> <t t-esc="total_active_buses or 8"/> buses en servicio activo · Frecuencia promedio en hora pico: 8-12 min</span>
-                        </div>
-                    </div>
-                </section>
-
-                <div class="wrap portal-content-body">
-                    <!-- Campus Quick Filter Tabs -->
-                    <div class="portal-campus-filters">
-                        <span class="filters-label">Filtrar por campus:</span>
-                        <div class="campus-tabs-row" id="campus-filter-tabs">
-                            <button class="campus-tab active" data-campus="all">Todas las líneas</button>
-                            <button class="campus-tab" data-campus="huachi">Campus Huachi</button>
-                            <button class="campus-tab" data-campus="ingahurco">Campus Ingahurco</button>
-                            <button class="campus-tab" data-campus="querochaca">Campus Querochaca</button>
-                        </div>
-                    </div>
-
-                    <p t-if="not routes" class="vacio" t-esc="s['no_routes']"/>
-
-                    <!-- Visual Grid of Spacious Route Cards -->
-                    <div class="routes-visual-grid" t-if="routes" id="routes-grid">
-                        <article t-foreach="routes" t-as="r" class="route-premium-card"
-                                 t-att-data-title="r['name'].lower()"
-                                 t-att-data-code="r['code'].lower()">
-                            <div class="card-color-stripe" t-attf-style="background-color: #{r['color'] or '#8B1D24'};"/>
-                            <div class="card-inner-pad">
-                                <div class="card-top-row">
-                                    <span class="chip" t-attf-style="background: #{r['color']}" t-esc="r['code']"/>
-                                    <span t-attf-class="estado #{'activa' if r['buses'] else ''}">
-                                        <span class="status-pulse-dot"></span>
-                                        <t t-esc="s['buses_in_service'].format(n=r['buses']) if r['buses'] else s['no_service']"/>
-                                    </span>
-                                </div>
-                                <div class="card-middle-content">
-                                    <strong class="route-title" t-esc="r['name']"/>
-                                    <div class="route-terminals-row">
-                                        <span class="terminal-badge">🚏 <t t-esc="r.get('first_stop', 'Terminal')"/></span>
-                                        <span class="terminal-sep">⇄</span>
-                                        <span class="terminal-badge"><t t-esc="r.get('last_stop', 'Destino')"/></span>
-                                    </div>
-                                    <div class="route-meta-pills">
-                                        <span class="meta-pill">⏱️ Frecuencia: ~10 min</span>
-                                        <span class="meta-pill" t-if="r.get('stops_count')">📍 <t t-esc="r['stops_count']"/> paradas</span>
-                                        <span class="meta-pill">♿ Accesible</span>
-                                    </div>
-                                </div>
-                                <div class="card-bottom-action">
-                                    <a t-attf-href="/rutas/#{r['code']}" class="btn-card-action">
-                                        <span>Ver trazado interactivo y paradas</span>
-                                        <span class="action-arrow">→</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-
-                    <!-- Help / Incident Callout Card -->
-                    <div class="portal-help-callout">
-                        <div class="callout-icon-box">💬</div>
-                        <div class="callout-body">
-                            <h3>¿Detectaste retrasos o tienes una sugerencia sobre las rutas?</h3>
-                            <p>El canal oficial de la Dirección de Bienestar Universitario te permite reportar novedades de servicio y recuperar objetos olvidados sin burocracia.</p>
-                        </div>
-                        <div class="callout-action reportar-enlace">
-                            <a href="/quejas" class="btn btn-hero-primary"><t t-esc="s['report']"/></a>
-                        </div>
-                    </div>
+            <main id="contenido" class="marco pagina-lineas">
+                <div class="encabezado-pagina">
+                    <h1 class="entra" t-esc="s['pick_route']"/>
+                    <p class="lead entra" style="--i: 1" t-esc="s['pick_route_help']"/>
+                    <form action="/rutas" method="get" role="search" class="buscador entra" style="--i: 2">
+                        <label class="sr-only" for="buscar-parada" t-esc="s['search_label']"/>
+                        <input type="search" id="buscar-parada" name="q" t-att-value="query"
+                               t-att-placeholder="s['search_placeholder']" autocomplete="off"/>
+                        <button class="boton" type="submit" t-esc="s['search_go']"/>
+                    </form>
                 </div>
+
+                <div t-if="query" class="resultado-busqueda" role="status">
+                    <h2 t-esc="s['search_results'].format(q=query) if routes else s['search_none'].format(q=query)"/>
+                    <a href="/rutas" t-esc="s['search_all']"/>
+                </div>
+
+                <div t-if="not routes and not query" class="aviso"><strong t-esc="s['no_routes']"/></div>
+
+                <ul t-if="routes" class="filas">
+                    <li t-foreach="routes" t-as="r" class="entra" t-attf-style="--i: #{r_index}">
+                        <a class="fila" t-attf-href="/rutas/#{r['code']}">
+                            <span class="chip-linea" t-attf-style="background: #{r['color']}" t-esc="r['code']"/>
+                            <span class="fila-nombre">
+                                <strong t-esc="r['name']"/>
+                                <span t-if="r['matching_stops']" class="fila-sub coincide"
+                                      t-esc="s['passes_by'].format(stops=', '.join(r['matching_stops']))"/>
+                                <span t-elif="r['first_stop']" class="fila-sub">
+                                    <t t-esc="s['line_from_to'].format(a=r['first_stop'], b=r['last_stop'])"/> ·
+                                    <t t-esc="s['line_stops_n'].format(n=r['stops_count'])"/>
+                                </span>
+                            </span>
+                            <span t-attf-class="fila-valor #{'con-buses' if r['buses'] else ''}"
+                                  t-esc="s['buses_in_service'].format(n=r['buses']) if r['buses'] else s['no_service']"/>
+                        </a>
+                    </li>
+                </ul>
             </main>
 
             <t t-call="bus_tracking.portal_footer"/>
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    var tabs = document.querySelectorAll("#campus-filter-tabs .campus-tab");
-                    var cards = document.querySelectorAll("#routes-grid .route-premium-card");
-                    tabs.forEach(function (tab) {
-                        tab.addEventListener("click", function () {
-                            tabs.forEach(function (t) { t.classList.remove("active"); });
-                            tab.classList.add("active");
-                            var filter = tab.dataset.campus;
-                            cards.forEach(function (card) {
-                                if (filter === "all") {
-                                    card.style.display = "";
-                                } else {
-                                    var text = card.dataset.title + " " + card.dataset.code;
-                                    card.style.display = text.indexOf(filter) !== -1 ? "" : "none";
-                                }
-                            });
-                        });
-                    });
-                });
-            </script>
+            <script t-attf-src="/bus_tracking/static/src/portal/site.js?v=#{asset_v}" defer="defer"></script>
         </t>
     </template>
 
-    <!-- ====================================================================
-         2. Ruta Detalle con Diagrama Metro Lineal Vertical (/rutas/<code/id>)
-         ==================================================================== -->
+    <!-- One line: its stops, where the buses are on it, and the map (/rutas/<code>) -->
     <template id="portal_route" name="Passenger portal: one route">
         <t t-call="web.layout">
-            <t t-set="title"><t t-esc="route['name']"/> | <t t-esc="brand"/></t>
-            <t t-set="body_classname" t-value="'o_bus_landing'"/>
+            <t t-set="title"><t t-esc="route['code']"/> <t t-esc="route['name']"/> · <t t-esc="brand"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site'"/>
             <t t-set="head">
-                <t t-call="bus_tracking.portal_head"/>
+                <t t-call="bus_tracking.site_head"/>
                 <link rel="stylesheet" href="/bus_tracking/static/lib/leaflet/leaflet.css"/>
             </t>
-            <t t-set="active_nav" t-value="'rutas'"/>
             <t t-call="bus_tracking.portal_header"/>
 
-            <main class="portal-main-wrapper">
-                <!-- Route Header Banner -->
-                <section class="portal-hero-strip compact-hero">
-                    <div class="wrap">
-                        <div class="portal-breadcrumb-row">
-                            <a class="volver btn-back-link" href="/rutas">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                                </svg>
-                                <span t-esc="s['all_routes']"/>
-                            </a>
-                        </div>
-                        <div class="route-header-main">
-                            <div class="route-title-cluster">
-                                <span class="chip route-large-chip" t-attf-style="background: #{route['color']}" t-esc="route['code']"/>
-                                <h1 class="route-hero-title"><t t-esc="route['name']"/></h1>
-                            </div>
-                            <div class="route-live-badge-top">
-                                <span class="live-dot-pulse"></span>
-                                <span>Rastreo Satelital Activo</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <main id="contenido" class="pagina-ruta">
+                <div class="marco ruta-cabeza">
+                    <a class="volver" href="/rutas" t-esc="s['search_all']"/>
+                    <h1>
+                        <span class="chip-linea" t-attf-style="background: #{route['color']}" t-esc="route['code']"/>
+                        <t t-esc="route['name']"/>
+                    </h1>
+                    <span class="vivo" data-vivo="" id="bus-status" aria-live="polite" t-esc="s['searching']"/>
+                </div>
 
-                <div class="wrap portal-content-body">
-                    <!-- Route Notice / Desvío Banner en Lenguaje Humano -->
-                    <div class="route-notice-banner">
-                        <span class="notice-icon">🚧</span>
-                        <div class="notice-content">
-                            <strong>Aviso de Operación:</strong>
-                            <span>Los tiempos de arribo mostrados corresponden a estimaciones probabilísticas sujetas al tráfico habitual. Todas las unidades cuentan con monitoreo de velocidad.</span>
-                        </div>
+                <div class="marco ruta">
+                    <div class="ruta-mapa">
+                        <div id="bus-map" role="region" t-att-aria-label="s['map_label']"
+                             t-att-data-code="route['code']" t-att-data-color="route['color']"
+                             t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json" t-att-data-tiles="tile_url"
+                             t-att-data-i18n="json_i18n"/>
                     </div>
 
-                    <!-- Split Layout: Itinerario Lineal + Viewport Mapa -->
-                    <div class="route-split-layout">
-                        <!-- Left Panel: Diagrama Metro Lineal Vertical -->
-                        <aside class="route-itinerary-panel">
-                            <div class="itinerary-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h2 class="itinerary-title">Trazado de Paradas</h2>
-                                    <span class="badge text-bg-light border" t-if="stops">
-                                        <t t-esc="len(stops)"/> Paradas
-                                    </span>
-                                </div>
-                                <p class="itinerary-subtitle">Estimaciones de arribo parada por parada</p>
-                            </div>
-
-                            <!-- Metro Vertical Rail -->
-                            <div class="metro-rail-container" t-if="stops">
-                                <div t-foreach="stops" t-as="st" class="metro-stop-item" t-att-data-index="st_index">
-                                    <div class="metro-rail-track">
-                                        <div class="metro-stop-dot" t-attf-style="border-color: #{route['color'] or '#8B1D24'};">
-                                            <span class="dot-inner-number"><t t-esc="st_index + 1"/></span>
-                                        </div>
-                                        <div class="metro-rail-line" t-if="st_index &lt; len(stops) - 1"
-                                             t-attf-style="background-color: #{route['color'] or '#8B1D24'};"/>
-                                    </div>
-                                    <div class="metro-stop-info">
-                                        <strong class="stop-name"><t t-esc="st['name']"/></strong>
-                                        <div class="stop-meta-eta">
-                                            <t t-if="st_index == 0">
-                                                <span class="eta-tag origin">Punto de Partida / Terminal</span>
-                                            </t>
-                                            <t t-elif="st_index == len(stops) - 1">
-                                                <span class="eta-tag dest">Destino Final</span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="eta-tag in-route">Llega en <t t-esc="(st_index * 3) + 2"/>–<t t-esc="(st_index * 3) + 5"/> min</span>
-                                            </t>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="itinerary-footer-action">
-                                <a class="btn btn-sm btn-reportar-route w-100" t-attf-href="/quejas?ruta=#{route['code']}">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="me-1">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <line x1="12" y1="8" x2="12" y2="12"/>
-                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                                    </svg>
-                                    Reportar novedad en esta línea
-                                </a>
-                            </div>
-                        </aside>
-
-                        <!-- Right Panel: Mapa Interactivo Satelital -->
-                        <div class="route-map-viewport">
-                            <div class="map-viewport-container">
-                                <div id="bus-map" role="img" t-att-aria-label="s['map_label']"
-                                     t-att-data-code="route['code']" t-att-data-color="route['color']"
-                                     t-att-data-stops="stops_json" t-att-data-paths="paths_json" t-att-data-center="center_json"
-                                     t-att-data-i18n="json_i18n"/>
-
-                                <!-- Floating Live HUD Overlay on Map -->
-                                <div class="map-floating-hud">
-                                    <div class="hud-status-badge">
-                                        <span class="live-dot-pulse"></span>
-                                        <span id="bus-status" aria-live="polite">Sincronizando satélite...</span>
-                                    </div>
-                                    <div id="path-picker" class="hud-path-picker" hidden="hidden">
-                                        <select id="path-select" class="form-select form-select-sm"/>
-                                        <button type="button" id="path-reset" class="btn btn-sm btn-outline-secondary" title="Ver todo">
-                                            <i class="fa fa-undo"/>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Mobile Quick Bus List beneath map -->
-                            <div class="telemetry-list-wrap-bottom">
-                                <ul id="bus-list" class="buses"/>
-                                <div id="bus-empty" class="vacio" hidden="hidden">
-                                    <span class="empty-icon">🚌</span>
-                                    <p t-esc="s['no_buses']"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <section class="ruta-linea" t-att-aria-label="s['stops']">
+                        <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['pick_stop_hint']"/>
+                        <t t-set="line" t-value="route"/>
+                        <t t-call="bus_tracking.stop_line"/>
+                        <div id="bus-empty" class="aviso" hidden="hidden"><strong t-esc="s['no_buses']"/></div>
+                        <a class="boton secundario reportar" t-attf-href="/quejas?ruta=#{route['code']}" t-esc="s['report_line']"/>
+                    </section>
                 </div>
             </main>
 
             <t t-call="bus_tracking.portal_footer"/>
-            <script src="/bus_tracking/static/lib/leaflet/leaflet.js"></script>
-            <script t-attf-src="/bus_tracking/static/src/portal/portal_map.js?v=#{asset_v}"></script>
+            <script src="/bus_tracking/static/lib/leaflet/leaflet.js" defer="defer"></script>
+            <script t-attf-src="/bus_tracking/static/src/portal/site.js?v=#{asset_v}" defer="defer"></script>
+            <script t-attf-src="/bus_tracking/static/src/portal/portal_map.js?v=#{asset_v}" defer="defer"></script>
         </t>
     </template>
 
-    <!-- ====================================================================
-         3. Canal Empático de Quejas y Sugerencias en 3 Pasos (/quejas)
-         ==================================================================== -->
+    <!-- Write to the transport team (/quejas) -->
     <template id="complaint_form" name="Passenger portal: complaint form">
         <t t-call="web.layout">
-            <t t-set="title"><t t-esc="s['report_title']"/> | <t t-esc="brand"/></t>
-            <t t-set="body_classname" t-value="'o_bus_landing'"/>
-            <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-set="title"><t t-esc="s['write_title']"/> · <t t-esc="brand"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-set="active_nav" t-value="'quejas'"/>
             <t t-call="bus_tracking.portal_header"/>
 
-            <main class="portal-main-wrapper">
-                <section class="portal-hero-strip">
-                    <div class="wrap">
-                        <div class="portal-breadcrumb-row">
-                            <a class="volver btn-back-link" href="/rutas">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                                </svg>
-                                <span t-esc="s['back_to_routes']"/>
-                            </a>
-                        </div>
-                        <div class="section-badge-header align-left">
-                            <span class="section-wings">人</span>
-                            <span class="section-badge-text">ATENCIÓN INSTITUCIONAL Y MEJORA CONTINUA</span>
-                            <span class="section-wings">人</span>
-                        </div>
-                        <h1 class="portal-hero-title"><t t-esc="s['report_title']"/></h1>
-                        <p class="portal-hero-subtitle">Tu opinión nos ayuda a optimizar los tiempos y la seguridad de cada recorrido. Selecciona el motivo y cuéntanos lo sucedido en 3 simples pasos.</p>
-                    </div>
-                </section>
-
-                <div class="wrap portal-content-body">
-                    <div class="complaint-layout-grid">
-                        <!-- Left Institutional Support Sidebar -->
-                        <div class="complaint-sidebar">
-                            <div class="complaint-info-card">
-                                <div class="info-card-header">
-                                    <t t-call="bus_tracking.brand_mark"/>
-                                    <div>
-                                        <strong class="info-card-title">Bienestar Universitario</strong>
-                                        <span class="info-card-sub">Gestión de Transporte UTA</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-card-section">
-                                    <h4>Compromiso de Respuesta</h4>
-                                    <p>Cada reporte es derivado de inmediato a la supervisión operativa. Te garantizamos revisión y seguimiento en un lapso de <strong>24 a 48 horas laborables</strong>.</p>
-                                </div>
-
-                                <div class="info-card-section">
-                                    <h4>Canales de Atención Directa</h4>
-                                    <ul class="contact-bullets">
-                                        <li>
-                                            <span class="bullet-icon">📞</span>
-                                            <span><strong>PBX Central:</strong> +593 (3) 284-8487 (Ext. 124)</span>
-                                        </li>
-                                        <li>
-                                            <span class="bullet-icon">✉️</span>
-                                            <span><strong>Email:</strong> transporte@uta.edu.ec</span>
-                                        </li>
-                                        <li>
-                                            <span class="bullet-icon">🏢</span>
-                                            <span><strong>Atención Presencial:</strong> Campus Huachi, Edificio Administrativo</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <div class="info-card-section privacy-box">
-                                    <span class="shield-icon">🛡️</span>
-                                    <p class="ayuda">
-                                        <t t-esc="privacy_text"/>
-                                        <a t-if="privacy_url" t-att-href="privacy_url" target="_blank" rel="noopener noreferrer"
-                                           t-esc="s['privacy_more']"/>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Form Card: Flujo Empático en 3 Pasos -->
-                        <div class="complaint-form-wrapper">
-                            <div t-if="errors" class="errores" role="alert">
-                                <strong t-esc="s['err_title']"/>
-                                <ul><li t-foreach="errors.values()" t-as="message" t-esc="message"/></ul>
-                            </div>
-
-                            <form class="formulario-empatico" method="post" action="/quejas" id="complaint-wizard">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <input type="hidden" name="t" t-att-value="token"/>
-                                <input type="hidden" name="kind" id="complaint-kind-input" t-att-value="form['kind'] or 'other'"/>
-
-                                <div class="trampa" aria-hidden="true">
-                                    <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
-                                </div>
-
-                                <!-- PASO 1: Selección Visual de Motivo -->
-                                <div class="wizard-step-section">
-                                    <div class="step-badge-row">
-                                        <span class="step-number">PASO 1</span>
-                                        <span class="step-title">¿Qué tipo de situación deseas reportar?</span>
-                                    </div>
-
-                                    <div class="reason-cards-grid">
-                                        <div class="reason-card" data-kind="delay">
-                                            <span class="reason-icon">⏱️</span>
-                                            <strong class="reason-name">Demora en Servicio</strong>
-                                            <p class="reason-desc">El bus no pasó o tardó más de lo programado</p>
-                                        </div>
-                                        <div class="reason-card" data-kind="lost_item">
-                                            <span class="reason-icon">🧳</span>
-                                            <strong class="reason-name">Objeto Extraviado</strong>
-                                            <p class="reason-desc">Olvidé una pertenencia a bordo de la unidad</p>
-                                        </div>
-                                        <div class="reason-card" data-kind="conduct">
-                                            <span class="reason-icon">🛡️</span>
-                                            <strong class="reason-name">Atención o Conducción</strong>
-                                            <p class="reason-desc">Comentarios sobre el trato o la velocidad del bus</p>
-                                        </div>
-                                        <div class="reason-card" data-kind="other">
-                                            <span class="reason-icon">💡</span>
-                                            <strong class="reason-name">Sugerencia de Mejora</strong>
-                                            <p class="reason-desc">Propuesta de paradas, horarios o rutas</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- PASO 2: Contexto y Detalles -->
-                                <div class="wizard-step-section mt-4">
-                                    <div class="step-badge-row">
-                                        <span class="step-number">PASO 2</span>
-                                        <span class="step-title">Cuéntanos un poco más sobre lo sucedido</span>
-                                    </div>
-
-                                    <div class="form-row-2col">
-                                        <div class="campo">
-                                            <label for="complaint-route">Línea o Recorrido (Opcional):</label>
-                                            <select id="complaint-route" name="route" class="form-select">
-                                                <option value="" t-esc="s['field_route_none']"/>
-                                                <option t-foreach="routes" t-as="r" t-att-value="r['code']"
-                                                        t-att-selected="'selected' if r['code'] == form['route'] else None">
-                                                    <t t-esc="r['code']"/> <t t-esc="r['name']"/>
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="campo">
-                                            <label for="complaint-bus">Número de Bus / Disco (Opcional):</label>
-                                            <select id="complaint-bus" name="bus" class="form-select">
-                                                <option value="" t-esc="s['field_bus_none']"/>
-                                                <option t-foreach="buses" t-as="b" t-att-value="b['id']"
-                                                        t-att-data-route="b['route']" t-att-data-name="b['name']"
-                                                        t-att-selected="'selected' if str(b['id']) == form['bus'] else None">
-                                                    <t t-esc="b['route']"/> <t t-esc="b['name']"/>
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="campo mt-3">
-                                        <label for="complaint-description">Detalle de la situación (Requerido):</label>
-                                        <textarea id="complaint-description" name="description" rows="4" required="required"
-                                                  minlength="10" t-att-maxlength="max_description"
-                                                  aria-describedby="complaint-description-help"
-                                                  t-att-aria-invalid="'true' if errors.get('description') else None"
-                                                  placeholder="Cuéntanos con confianza qué ocurrió, en qué parada o sector fue y a qué hora aproximada..."
-                                                  t-esc="form['description']"/>
-                                        <p id="complaint-description-help" class="ayuda">Mínimo 10 caracteres. Entre más detalles nos brindes, más rápido podremos resolverlo.</p>
-                                        <p t-if="errors.get('description')" class="campo-error" t-esc="errors['description']"/>
-                                    </div>
-                                </div>
-
-                                <!-- PASO 3: Seguimiento y Contacto Opcional -->
-                                <div class="wizard-step-section mt-4">
-                                    <div class="step-badge-row">
-                                        <span class="step-number">PASO 3</span>
-                                        <span class="step-title">¿Deseas recibir respuesta sobre este caso? (Opcional)</span>
-                                    </div>
-                                    <p class="step-hint">Puedes ingresar tus datos institucionales o enviar el reporte de forma totalmente anónima.</p>
-
-                                    <div class="form-row-2col">
-                                        <div class="campo">
-                                            <label for="complaint-email">Correo Institucional:</label>
-                                            <input id="complaint-email" type="email" name="email" maxlength="255" autocomplete="email"
-                                                   placeholder="usuario@uta.edu.ec"
-                                                   t-att-value="form['email']"
-                                                   t-att-aria-invalid="'true' if errors.get('email') else None"/>
-                                            <p t-if="errors.get('email')" class="campo-error" t-esc="errors['email']"/>
-                                        </div>
-                                        <div class="campo">
-                                            <label for="complaint-phone">Teléfono Móvil o WhatsApp:</label>
-                                            <input id="complaint-phone" type="tel" name="phone" maxlength="40" autocomplete="tel"
-                                                   placeholder="+593 9..."
-                                                   t-att-value="form['phone']"
-                                                   t-att-aria-invalid="'true' if errors.get('phone') else None"/>
-                                            <p t-if="errors.get('phone')" class="campo-error" t-esc="errors['phone']"/>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-submit-row mt-4">
-                                    <button class="btn btn-hero-primary btn-submit-complaint" type="submit">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="me-2">
-                                            <line x1="22" y1="2" x2="11" y2="13"/>
-                                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                                        </svg>
-                                        <span>Enviar Reporte a Bienestar Universitario</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+            <main id="contenido" class="marco pagina-escribir">
+                <div class="encabezado-pagina">
+                    <h1 t-esc="s['write_title']"/>
+                    <p class="lead" t-esc="s['report_intro']"/>
                 </div>
+
+                <div t-if="errors" class="aviso error" role="alert" tabindex="-1" id="errores">
+                    <strong t-esc="s['err_title']"/>
+                    <ul><li t-foreach="errors.values()" t-as="message" t-esc="message"/></ul>
+                </div>
+
+                <form class="formulario" method="post" action="/quejas">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="t" t-att-value="token"/>
+                    <div class="trampa" aria-hidden="true">
+                        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
+                    </div>
+
+                    <fieldset class="motivos">
+                        <legend t-esc="s['kind_title']"/>
+                        <label t-foreach="kinds" t-as="k" class="motivo">
+                            <input type="radio" name="kind" t-att-value="k[0]"
+                                   t-att-checked="'checked' if form['kind'] == k[0] else None"/>
+                            <span t-esc="s[k[1]]"/>
+                        </label>
+                    </fieldset>
+
+                    <div class="dos-columnas">
+                        <div class="campo">
+                            <label for="complaint-route" t-esc="s['field_route']"/>
+                            <select id="complaint-route" name="route">
+                                <option value="" t-esc="s['field_route_none']"/>
+                                <option t-foreach="routes" t-as="r" t-att-value="r['code']"
+                                        t-att-selected="'selected' if r['code'] == form['route'] else None">
+                                    <t t-esc="r['code']"/> <t t-esc="r['name']"/>
+                                </option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label for="complaint-bus" t-esc="s['field_bus']"/>
+                            <select id="complaint-bus" name="bus">
+                                <option value="" t-esc="s['field_bus_none']"/>
+                                <option t-foreach="buses" t-as="b" t-att-value="b['id']"
+                                        t-att-data-route="b['route']" t-att-data-name="b['name']"
+                                        t-att-selected="'selected' if str(b['id']) == form['bus'] else None">
+                                    <t t-esc="b['route']"/> <t t-esc="b['name']"/>
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <label for="complaint-description" t-esc="s['field_description']"/>
+                        <textarea id="complaint-description" name="description" rows="5" required="required"
+                                  minlength="10" t-att-maxlength="max_description"
+                                  aria-describedby="complaint-description-help"
+                                  t-att-aria-invalid="'true' if errors.get('description') else None"
+                                  t-esc="form['description']"/>
+                        <p id="complaint-description-help" class="ayuda" t-esc="s['field_description_help']"/>
+                        <p t-if="errors.get('description')" class="campo-error" t-esc="errors['description']"/>
+                    </div>
+
+                    <fieldset class="contacto">
+                        <legend t-esc="s['contact_title']"/>
+                        <p class="ayuda" t-esc="s['contact_help']"/>
+                        <div class="dos-columnas">
+                            <div class="campo">
+                                <label for="complaint-email" t-esc="s['field_email']"/>
+                                <input id="complaint-email" type="email" name="email" maxlength="255" autocomplete="email"
+                                       t-att-value="form['email']"
+                                       t-att-aria-invalid="'true' if errors.get('email') else None"/>
+                                <p t-if="errors.get('email')" class="campo-error" t-esc="errors['email']"/>
+                            </div>
+                            <div class="campo">
+                                <label for="complaint-phone" t-esc="s['field_phone']"/>
+                                <input id="complaint-phone" type="tel" name="phone" maxlength="40" autocomplete="tel"
+                                       t-att-value="form['phone']"
+                                       t-att-aria-invalid="'true' if errors.get('phone') else None"/>
+                                <p t-if="errors.get('phone')" class="campo-error" t-esc="errors['phone']"/>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <p class="privacidad">
+                        <t t-esc="privacy_text"/>
+                        <a t-if="privacy_url" t-att-href="privacy_url" target="_blank" rel="noopener noreferrer"
+                           t-esc="s['privacy_more']"/>
+                    </p>
+
+                    <button class="boton enviar" type="submit" t-esc="s['submit']"/>
+                </form>
             </main>
 
             <t t-call="bus_tracking.portal_footer"/>
-            <script t-attf-src="/bus_tracking/static/src/portal/complaint.js?v=#{asset_v}"></script>
+            <script t-attf-src="/bus_tracking/static/src/portal/complaint.js?v=#{asset_v}" defer="defer"></script>
         </t>
     </template>
 
-    <!-- ====================================================================
-         4. Pantalla de Agradecimiento y Comprobante (/quejas/gracias)
-         ==================================================================== -->
+    <!-- Privacy (/privacidad): the text comes from models/privacy_text.py, with the retention periods of Settings. -->
+    <template id="privacy_page" name="Passenger portal: privacy">
+        <t t-call="web.layout">
+            <t t-set="title"><t t-esc="s['privacy_more']"/> · <t t-esc="brand"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
+            <t t-call="bus_tracking.portal_header"/>
+
+            <main id="contenido" class="marco pagina-privacidad">
+                <div class="encabezado-pagina">
+                    <h1 t-esc="s['privacy_more']"/>
+                </div>
+                <section t-foreach="sections" t-as="section" class="bloque-privacidad">
+                    <h2 t-esc="section['title']"/>
+                    <p t-foreach="section['paragraphs']" t-as="text" t-esc="text"/>
+                    <ul t-if="section['bullets']">
+                        <li t-foreach="section['bullets']" t-as="item" t-esc="item"/>
+                    </ul>
+                </section>
+            </main>
+
+            <t t-call="bus_tracking.portal_footer"/>
+        </t>
+    </template>
+
+    <!-- Received (/quejas/gracias): the reference number is the one thing to keep. -->
     <template id="complaint_thanks" name="Passenger portal: complaint received">
         <t t-call="web.layout">
-            <t t-set="title"><t t-esc="s['thanks_title']"/> | <t t-esc="brand"/></t>
-            <t t-set="body_classname" t-value="'o_bus_landing'"/>
-            <t t-set="head"><t t-call="bus_tracking.portal_head"/></t>
+            <t t-set="title"><t t-esc="s['thanks_title']"/> · <t t-esc="brand"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-set="active_nav" t-value="'quejas'"/>
             <t t-call="bus_tracking.portal_header"/>
 
-            <main class="portal-main-wrapper">
-                <div class="wrap thanks-outer-container">
-                    <div class="thanks-card">
-                        <div class="thanks-icon-halo">
-                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#8B1D24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                <polyline points="22 4 12 14.01 9 11.01"/>
-                            </svg>
-                        </div>
-                        <h1 class="thanks-title">¡Reporte Registrado Exitosamente!</h1>
-                        <p class="thanks-lead">Gracias por ayudarnos a cuidar y mejorar el servicio de transporte universitario. Tu mensaje ha sido canalizado a la Dirección de Bienestar Universitario.</p>
-
-                        <div t-if="folio" class="thanks-ticket-box">
-                            <span class="ticket-header-label">COMPROBANTE OFICIAL DE ATENCIÓN</span>
-                            <div class="folio-highlight">
-                                <span class="folio-label">Número de Caso:</span>
-                                <strong class="folio-code" t-esc="folio"/>
-                            </div>
-                            <p class="ticket-eta-note">Tiempo estimado de revisión operativa: <strong>24 a 48 horas</strong>.</p>
-                            <p t-if="not has_contact" class="ayuda thanks-no-contact">Enviaste este reporte de forma anónima. Puedes conservar este número de caso para cualquier consulta en Bienestar Universitario.</p>
-                        </div>
-
-                        <div class="thanks-actions-row">
-                            <a class="btn btn-hero-primary" href="/rutas">
-                                <span>Ver Rutas en Tiempo Real</span>
-                                <span class="ms-1">→</span>
-                            </a>
-                            <a class="btn btn-hero-secondary-dark" href="/">Ir a la Página Principal</a>
-                        </div>
-                    </div>
+            <main id="contenido" class="marco pagina-gracias">
+                <h1 t-esc="s['thanks_title']"/>
+                <p class="lead" t-esc="s['thanks_text']"/>
+                <div t-if="folio" class="boleto">
+                    <span t-esc="s['thanks_folio']"/>
+                    <strong class="folio" t-esc="folio"/>
+                    <span t-esc="s['thanks_keep']"/>
+                </div>
+                <p t-if="not has_contact" class="nota" t-esc="s['thanks_no_contact']"/>
+                <div class="acciones">
+                    <a class="boton" href="/rutas" t-esc="s['back_to_lines']"/>
                 </div>
             </main>
 

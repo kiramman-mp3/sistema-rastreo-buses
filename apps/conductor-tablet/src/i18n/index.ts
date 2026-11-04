@@ -2,6 +2,7 @@
 export type Lang = 'es' | 'en' | 'qu';
 
 const es = {
+  offlineRetry: 'Sin señal. Tu sesión sigue abierta y el GPS sigue guardando; reintentamos solos.',
   login: 'Entrar',
   user: 'Usuario',
   password: 'Contraseña',
@@ -37,6 +38,7 @@ const es = {
   confirmEnd: '¿Terminar el turno?',
   confirmEndBody: 'Se deja de enviar el GPS de este bus.',
   cancel: 'Cancelar',
+  continue: 'Continuar',
   note: 'Nota (opcional)',
   queued: 'Sin red. El incidente se enviará al volver.',
   sent: 'Incidente enviado.',
@@ -74,9 +76,63 @@ const es = {
   availableRoutes: '2. Elige la ruta',
   noStopsAvailable: 'No hay paradas registradas para esta ruta.',
   backToShift: 'Volver al turno',
+  cabinNext: 'Próxima parada',
+  cabinAfter: 'Después',
+  cabinStopsLeft: 'Quedan {n} paradas',
+  cabinLastStop: 'Última parada',
+  moreNotice_one: '1 aviso más',
+  moreNotice_other: '{n} avisos más',
+  gpsSending: 'GPS enviando',
+  gpsSaving_one: 'Sin red: 1 punto guardado',
+  gpsSaving_other: 'Sin red: {n} puntos guardados',
+  noBuses: 'No hay buses para elegir. Avisa a la central.',
+  noRoutes: 'No hay líneas para elegir. Avisa a la central.',
+  allBusesTaken: 'Todos los buses están en uso ahora.',
+  gpsWaiting: 'Esperando señal del GPS',
+  gpsOff: 'GPS sin permiso',
+  lockedMoving: 'En marcha. Detén el bus para usar la pantalla.',
+  actionProblem: 'Avisar un problema',
+  actionProblemSub: 'Tráfico, avería, accidente',
+  actionSos: 'SOS',
+  actionSosSub: 'Mantén presionado',
+  sosHolding: 'Sigue presionando…',
+  sosSending: 'Enviando SOS…',
+  sosSent: 'SOS enviado. Esperando a la central.',
+  sosSeen: 'La central vio tu SOS · {by} · {time}',
+  sosQueued: 'SOS guardado. Sale apenas haya señal.',
+  modeDay: 'Día',
+  modeNight: 'Noche',
+  incidentWhat: '¿Qué pasa?',
+  incidentNote: 'Nota (opcional)',
+  incidentNoteHint: 'Por ejemplo: dónde está el trancón',
+  incidentSend: 'Enviar aviso',
+  loginTitle: 'Ingreso del chofer',
+  loginHelp: 'Escanea tu credencial o escribe tu usuario y tu clave.',
+  trackingNoticeLogin: 'La posición del bus se envía a la oficina solo mientras tu turno está abierto.',
+  trackingNoticeStart: 'Al iniciar el turno, la oficina ve la posición del bus hasta que lo termines.',
+  serverHint: 'Servidor (solo soporte técnico)',
+  selectTitle: 'Elige tu bus y tu línea',
+  selectHello: 'Hola, {name}',
+  busTaken: 'En uso',
+  clockLabel: 'Hora',
+  gpsDevice: 'Dispositivo en Traccar',
+  gpsRefresh: 'Actualizar',
+  gpsOpen: 'Ver el estado del GPS',
+  endQueued: 'Turno terminado y GPS apagado. Avisamos a la central apenas haya señal.',
+  serverError: 'El servidor tuvo un problema. Inténtalo de nuevo en un momento.',
+  tooMany: 'Demasiados intentos. Espera un minuto y vuelve a probar.',
+  noGpsUrl: 'Falta la dirección del GPS en Odoo. Avisa al administrador.',
+  busNoGps: 'Sin GPS',
+  serverChange: 'Este código cambia el servidor a {url}. ¿Continuar?',
+  serverHttps: 'El servidor debe empezar con https://',
+  gpsLastAppError: 'Última falla de la app',
+  gpsLastError: 'Último error',
+  gpsServiceTitle: 'Buses UTA: GPS activo',
+  gpsServiceBody: 'Enviando la posición del bus',
 };
 
 const en: typeof es = {
+  offlineRetry: 'No signal. You are still signed in and the GPS keeps saving; we retry on our own.',
   login: 'Sign in',
   user: 'User',
   password: 'Password',
@@ -112,6 +168,7 @@ const en: typeof es = {
   confirmEnd: 'End the shift?',
   confirmEndBody: 'This bus will stop sending GPS.',
   cancel: 'Cancel',
+  continue: 'Continue',
   note: 'Note (optional)',
   queued: 'Offline. The incident will send when the network returns.',
   sent: 'Incident sent.',
@@ -149,6 +206,59 @@ const en: typeof es = {
   availableRoutes: '2. Choose route',
   noStopsAvailable: 'No stops registered for this route.',
   backToShift: 'Back to shift',
+  cabinNext: 'Next stop',
+  cabinAfter: 'Then',
+  cabinStopsLeft: '{n} stops left',
+  cabinLastStop: 'Last stop',
+  moreNotice_one: '1 more notice',
+  moreNotice_other: '{n} more notices',
+  gpsSending: 'GPS sending',
+  gpsSaving_one: 'No network: 1 point saved',
+  gpsSaving_other: 'No network: {n} points saved',
+  noBuses: 'No buses to choose from. Tell the dispatcher.',
+  noRoutes: 'No lines to choose from. Tell the dispatcher.',
+  allBusesTaken: 'Every bus is in use right now.',
+  gpsWaiting: 'Waiting for the GPS',
+  gpsOff: 'GPS not allowed',
+  lockedMoving: 'Moving. Stop the bus to use the screen.',
+  actionProblem: 'Report a problem',
+  actionProblemSub: 'Traffic, breakdown, accident',
+  actionSos: 'SOS',
+  actionSosSub: 'Press and hold',
+  sosHolding: 'Keep pressing…',
+  sosSending: 'Sending SOS…',
+  sosSent: 'SOS sent. Waiting for the office.',
+  sosSeen: 'The office saw your SOS · {by} · {time}',
+  sosQueued: 'SOS saved. It goes out as soon as there is signal.',
+  modeDay: 'Day',
+  modeNight: 'Night',
+  incidentWhat: 'What is happening?',
+  incidentNote: 'Note (optional)',
+  incidentNoteHint: 'For example: where the traffic jam is',
+  incidentSend: 'Send',
+  loginTitle: 'Driver sign-in',
+  loginHelp: 'Scan your badge or type your user and password.',
+  trackingNoticeLogin: 'The bus position is sent to the office only while your shift is open.',
+  trackingNoticeStart: 'When you start the shift, the office sees the bus position until you end it.',
+  serverHint: 'Server (technical support only)',
+  selectTitle: 'Pick your bus and your line',
+  selectHello: 'Hello, {name}',
+  busTaken: 'In use',
+  clockLabel: 'Time',
+  gpsDevice: 'Traccar device',
+  gpsRefresh: 'Refresh',
+  gpsOpen: 'Show the GPS state',
+  endQueued: 'Shift ended and GPS off. We tell the office as soon as there is signal.',
+  serverError: 'The server had a problem. Try again in a moment.',
+  tooMany: 'Too many attempts. Wait a minute and try again.',
+  noGpsUrl: 'The GPS address is missing in Odoo. Tell the administrator.',
+  busNoGps: 'No GPS',
+  serverChange: 'This code changes the server to {url}. Continue?',
+  serverHttps: 'The server must start with https://',
+  gpsLastAppError: 'Last app failure',
+  gpsLastError: 'Last error',
+  gpsServiceTitle: 'Buses UTA: GPS on',
+  gpsServiceBody: 'Sending the bus position',
 };
 
 const qu: typeof es = {
@@ -187,11 +297,36 @@ export function t(key: Message): string {
   return messages[lang][key] ?? messages.es[key];
 }
 
+/** A message with values: tf('cabinStopsLeft', { n: 3 }). */
+export function tf(key: Message, values: Record<string, string | number>): string {
+  return t(key).replace(/\{(\w+)\}/g, (all, name: string) => (name in values ? String(values[name]) : all));
+}
+
+/** The keys that come in a singular and a plural form: `moreNotice_one` and `moreNotice_other`. */
+export type PluralKey = Message extends infer K ? (K extends `${infer Base}_one` ? Base : never) : never;
+
+/**
+ * A message that depends on a count, with {n} filled in: tp('moreNotice', 1) is "1 aviso más".
+ * Kichwa has no plural marking in the draft, so it follows the Spanish rule.
+ */
+export function tp(key: PluralKey, n: number, values: Record<string, string | number> = {}): string {
+  let one = n === 1;
+  if (typeof Intl !== 'undefined' && typeof Intl.PluralRules === 'function') {
+    one = new Intl.PluralRules(lang === 'en' ? 'en' : 'es').select(n) === 'one';
+  }
+  return tf(`${key}_${one ? 'one' : 'other'}` as Message, { ...values, n });
+}
+
+function capitalize(text: string): string {
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+}
+
+/** As a title: some labels are shared with the portal, where they read in the middle of a sentence. */
 export function alertLabel(kind: string): string {
-  if (kind === 'speeding') return t('alert_speeding');
-  if (kind === 'offline') return t('alert_offline');
-  if (kind === 'long_stop') return t('alert_long_stop');
-  if (kind === 'off_route') return t('alert_off_route');
+  if (kind === 'speeding') return capitalize(t('alert_speeding'));
+  if (kind === 'offline') return capitalize(t('alert_offline'));
+  if (kind === 'long_stop') return capitalize(t('alert_long_stop'));
+  if (kind === 'off_route') return capitalize(t('alert_off_route'));
   return kind;
 }
 
