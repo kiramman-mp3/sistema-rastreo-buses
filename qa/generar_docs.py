@@ -102,7 +102,7 @@ Documento de pruebas en el sentido de ISO/IEC/IEEE 29119-3: estrategia, diseño 
 | Suite en vivo | El sistema como lo usan un celular, un pasajero y un administrador, por HTTP y XML-RPC | `qa/qa_suite.py` | %(suite)d casos |
 | Auditoría aleatoria | Robustez ante entradas normales y límite, con semilla fija, sobre 15 áreas | `qa/auditoria.py` | %(aud)s peticiones |
 | Datos | Estado real de la base tras las pruebas (rangos, duplicados, coherencia) | Consultas SQL en `qa/metricas.py` | 11 consultas |
-| Mutación (manual) | Que las pruebas fallen si se rompe una regla | Registradas en `docs/BITACORA.md` | 16 mutaciones, todas detectadas |
+| Mutación (manual) | Que las pruebas fallen si se rompe una regla | Registradas en `docs/academico/BITACORA.md` | 16 mutaciones, todas detectadas |
 | Exploratoria (manual) | Interfaz, móvil de 390 px, idiomas | Chrome (ver bitácora) | Por sesión |
 
 ## 2. Criterios de aceptación
@@ -236,7 +236,7 @@ causa_txt = '\n\n'.join('### %s: %s\n\n- **Causa raíz:** %s\n- **Categoría:** 
 write('05-registro-de-defectos.md', '''
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/PLAN-UI-MOVIL.md`). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 

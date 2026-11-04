@@ -17,7 +17,7 @@ Ocho características y sus subcaracterísticas.
 | Compatibilidad | Coexistencia | Parcial | Convive con otros contenedores (`ODOO_PORT` resolvió el conflicto del puerto 8069) |
 | | Interoperabilidad | Parcial | Traccar 6 por webhook y REST verificado con GPS simulado; sin celular real |
 | Usabilidad | Reconocimiento de la adecuación | Parcial | Landing y portal con textos claros; sin prueba con personas |
-| | Capacidad de aprendizaje | Parcial | `docs/GUIA-CHOFER.md`; sin medir |
+| | Capacidad de aprendizaje | Parcial | `docs/guias/GUIA-CHOFER.md`; sin medir |
 | | Operabilidad | Parcial | Panel de Odoo y mapa; portal revisado a 390 px |
 | | Protección ante errores del usuario | Cumple | U1: 7 de 7 mensajes de rechazo claros, sin SQL ni trazas; el formulario conserva lo escrito |
 | | Estética de la interfaz | Parcial | Diseño pulido el 28-oct; fotos provisionales |
@@ -50,13 +50,13 @@ Los 30 procesos de la norma (2017), agrupados como en ella.
 |---|---|---|---|
 | Acuerdo | Adquisición | No aplica | Proyecto propio; el cliente pide, no hay proveedor |
 | | Suministro | Parcial | Se entrega a la UTA sin acuerdo formal escrito |
-| Habilitación del proyecto | Gestión del modelo de ciclo de vida | Parcial | Fases en `docs/PLAN.md` |
+| Habilitación del proyecto | Gestión del modelo de ciclo de vida | Parcial | Fases en `docs/arquitectura/PLAN.md` |
 | | Gestión de la infraestructura | Cumple | Docker Compose, proxy Caddy, scripts |
 | | Gestión del portafolio | No aplica | Un solo proyecto |
 | | Gestión de recursos humanos | Parcial | RACI propuesto en `01-politica-y-alcance.md` |
 | | Gestión de la calidad | Parcial | Esta carpeta; sin auditor externo |
 | | Gestión del conocimiento | Cumple | `docs/` y bitácora al día |
-| Gestión técnica | Planificación del proyecto | Cumple | `docs/PLAN.md` |
+| Gestión técnica | Planificación del proyecto | Cumple | `docs/arquitectura/PLAN.md` |
 | | Evaluación y control del proyecto | Cumple | Bitácora con pendientes y estados |
 | | Gestión de decisiones | Cumple | Fase 0 y simplificación documentadas |
 | | Gestión de riesgos | Parcial | Riesgos listados; sin plan formal de mitigación |
@@ -66,16 +66,16 @@ Los 30 procesos de la norma (2017), agrupados como en ella.
 | | Aseguramiento de la calidad | Parcial | Política y pruebas; sin evaluación independiente |
 | Técnicos | Análisis del negocio o la misión | Parcial | Fase 0; sin estudio de uso de pasajeros |
 | | Definición de necesidades de los interesados | Parcial | Respuestas del cliente; sin entrevistas a pasajeros ni choferes |
-| | Definición de requisitos | Parcial | `docs/PLAN.md`; sin especificación formal ni trazabilidad a pruebas |
+| | Definición de requisitos | Parcial | `docs/arquitectura/PLAN.md`; sin especificación formal ni trazabilidad a pruebas |
 | | Definición de la arquitectura | Cumple | Esquema del README y decisiones del plan |
-| | Definición del diseño | Cumple | `docs/DISENO.md`, modelos y vistas |
+| | Definición del diseño | Cumple | `docs/diseno/DISENO.md`, modelos y vistas |
 | | Análisis del sistema | Parcial | Volumen estimado de posiciones; capacidad medida solo en un proceso |
 | | Implementación | Cumple | Módulo `bus_tracking` |
 | | Integración | Cumple | Celular simulado, Traccar, webhook y Odoo probados de punta a punta |
 | | Verificación | Cumple | 150 pruebas, 42 casos en vivo, auditoría y cobertura |
 | | Transición | Parcial | Producción probada en local; Azure pendiente |
 | | Validación | Parcial | Sin celular real ni usuarios reales |
-| | Operación | Parcial | `docs/PRODUCCION.md` y `docs/GUIA-CHOFER.md`; sin operación real |
+| | Operación | Parcial | `docs/guias/PRODUCCION.md` y `docs/guias/GUIA-CHOFER.md`; sin operación real |
 | | Mantenimiento | Parcial | Actualización documentada; sin versionado semántico |
 | | Disposición | No aplica | |
 
@@ -88,7 +88,7 @@ Autoevaluación contra las 22 áreas de proceso. **No es una evaluación SCAMPI.
 | Nivel | Área de proceso | Valoración | Evidencia |
 |---|---|---|---|
 | 2 | REQM, gestión de requisitos | Parcial | Decisiones del cliente en el plan; sin matriz requisito-prueba |
-| 2 | PP, planificación del proyecto | Cumple | `docs/PLAN.md` por fases |
+| 2 | PP, planificación del proyecto | Cumple | `docs/arquitectura/PLAN.md` por fases |
 | 2 | PMC, seguimiento y control | Cumple | Bitácora con estado y pendientes |
 | 2 | MA, medición y análisis | Cumple | `qa/metricas.py` y cuadro de mando |
 | 2 | PPQA, aseguramiento de la calidad del proceso y del producto | Parcial | Política y pruebas; sin evaluación objetiva independiente |

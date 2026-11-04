@@ -1,6 +1,6 @@
 # Plan de implementación: app de tableta para choferes
 
-Continúa la numeración de `docs/PLAN.md` (fases 0 a 15). Aquí van las fases 16 a 22.
+Continúa la numeración de `docs/arquitectura/PLAN.md` (fases 0 a 15). Aquí van las fases 16 a 22.
 
 ## Objetivo
 
@@ -39,7 +39,7 @@ Hecho en la rama `feature/driver-backend` y merge `--no-ff` a `develop`.
 - Endpoints `POST /bus_tracking/driver/login`, `/logout`, `/me`, con límite de intentos y misma respuesta para clave mala y usuario sin rol.
 - Tests en `tests/test_driver_auth.py`.
 - El chofer se crea como usuario interno (`base.group_user`) más el grupo Driver. El grupo Driver no abre el panel por sí solo.
-- Suite del módulo (2026-10-30): 216 tests, 0 fallos. Cifra de esa fecha; la actual está en `docs/PLAN-AUDITORIA.md` (248 tests el 2026-11-02).
+- Suite del módulo (2026-10-30): 216 tests, 0 fallos. Cifra de esa fecha; la actual está en `docs/arquitectura/PLAN-AUDITORIA.md` (248 tests el 2026-11-02).
 
 Criterio de aceptación: cumplido.
 
@@ -134,14 +134,14 @@ Criterio de aceptación: `classifyStops`, cola de incidentes e i18n es/en/qu cub
 - **Prueba con la tableta real**, antes de dar nada por cerrado. Confirmar que el modelo tiene GPS (muchas tabletas solo Wi-Fi no lo tienen). Si no, probar con SIM/GNSS o con el celular del chofer.
 - Extender `qa/` con casos del API de chofer (login, turno, estado, incidente) y repetir `python -X utf8 qa/ejecutar_todo.py`. Regenerar el informe con `qa/generar_informe.py`.
 - Distribución: `eas build --profile production --platform android` y APK firmado instalado en cada tableta (instalación directa, sin Play Store en esta etapa). Documentar cómo actualizar.
-- Documentación: reemplazar el uso de Traccar Client en `docs/GUIA-CHOFER.md`, nueva sección en `docs/PRODUCCION.md` (usuarios de chofer, tokens, revocación), entrada en `docs/BITACORA.md`, `docs/PLAN.md` y `README.md`, y actualizar la memoria del proyecto.
+- Documentación: reemplazar el uso de Traccar Client en `docs/guias/GUIA-CHOFER.md`, nueva sección en `docs/guias/PRODUCCION.md` (usuarios de chofer, tokens, revocación), entrada en `docs/academico/BITACORA.md`, `docs/arquitectura/PLAN.md` y `README.md`, y actualizar la memoria del proyecto.
 - Configuración de la tableta: pantalla siempre encendida, sin ahorro de batería para la app, cargador en el bus, modo de aplicación fija si el modelo lo permite.
 
 Criterio de aceptación (código): guía del chofer, sección de producción, README/PLAN, perfil EAS `production`, casos F13–F14 y E23–E25 en `qa/qa_suite.py`. Criterio de campo **abierto**: jornada completa con chofer real y APK firmado en tableta con GPS.
 
 ## Fase 25. App: ergonomía de cabina, cadencia headway y SOS anti-vibración
 
-> **Corrección (2026-11-02).** La barra de cadencia de esta fase usaba datos fijos y podía pedir a un bus fuera de ruta que acelerara; se eliminó en la fase 26. La confirmación de llegada no registraba nada y también se quitó. Los "72 px mínimos" no se cumplían en todos los botones. La cabina se rehízo en la fase 30 (`docs/PLAN-UX.md`); lo que sigue describe la versión anterior.
+> **Corrección (2026-11-02).** La barra de cadencia de esta fase usaba datos fijos y podía pedir a un bus fuera de ruta que acelerara; se eliminó en la fase 26. La confirmación de llegada no registraba nada y también se quitó. Los "72 px mínimos" no se cumplían en todos los botones. La cabina se rehízo en la fase 30 (`docs/arquitectura/PLAN-UX.md`); lo que sigue describe la versión anterior.
 
 Hecho en la rama `feature/driver-tablet-shift` y merge `--no-ff` a `develop`.
 
