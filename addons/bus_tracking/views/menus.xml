@@ -20,6 +20,10 @@
               action="action_bus_shift" sequence="30"/>
     <menuitem id="menu_bus_driver" name="Drivers" parent="menu_bus_fleet"
               action="action_bus_driver" sequence="45"/>
+    <menuitem id="menu_bus_trip_planned" name="Scheduled trips" parent="menu_bus_operation"
+              action="action_bus_trip" sequence="5"/>
+    <menuitem id="menu_bus_schedule" name="Schedules" parent="menu_bus_fleet"
+              action="action_bus_route_schedule" sequence="35"/>
     <menuitem id="menu_bus_incident" name="Incidents" parent="menu_bus_operation"
               action="action_bus_incident" sequence="10"/>
 
