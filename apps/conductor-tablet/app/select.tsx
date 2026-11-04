@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useState, type ReactElement, type ReactNode } from 'react';
-import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../src/api/client';
@@ -9,6 +9,7 @@ import { t, tf } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession, useSessionActions } from '../src/state/SessionContext';
 import { Action, Screen, Txt } from '../src/ui/cabin';
+import { showDialog } from '../src/ui/dialog';
 import { useLayout } from '../src/ui/layout';
 import { Notice } from '../src/ui/Notice';
 import { BusOption, RouteOption } from '../src/ui/OptionRows';
@@ -117,7 +118,7 @@ export default function Select() {
   }
 
   function signOut() {
-    Alert.alert(t('confirmSignOut'), t('confirmSignOutBody'), [
+    showDialog(t('confirmSignOut'), t('confirmSignOutBody'), [
       { text: t('cancel'), style: 'cancel' },
       {
         text: t('signOut'),
