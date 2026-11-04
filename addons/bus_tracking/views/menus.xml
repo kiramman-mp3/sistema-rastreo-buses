@@ -39,6 +39,14 @@
               action="action_bus_report_long_stop" sequence="30"/>
     <menuitem id="menu_bus_report_off_route" name="Route deviations" parent="menu_bus_reports"
               action="action_bus_report_off_route" sequence="40"/>
+    <menuitem id="menu_bus_report_late_arrival" name="Late arrivals" parent="menu_bus_reports"
+              action="action_bus_report_late_arrival" sequence="42"/>
+    <menuitem id="menu_bus_report_skipped_stop" name="Skipped stops" parent="menu_bus_reports"
+              action="action_bus_report_skipped_stop" sequence="44"/>
+    <menuitem id="menu_bus_report_incomplete_trip" name="Incomplete trips" parent="menu_bus_reports"
+              action="action_bus_report_incomplete_trip" sequence="46"/>
+    <menuitem id="menu_bus_report_late_start" name="Late starts" parent="menu_bus_reports"
+              action="action_bus_report_late_start" sequence="48"/>
     <menuitem id="menu_bus_stop_arrival" name="Stop arrivals" parent="menu_bus_reports"
               action="action_bus_stop_arrival" sequence="50"/>
 
