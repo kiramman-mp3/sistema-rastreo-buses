@@ -80,6 +80,17 @@ class ResConfigSettings(models.TransientModel):
     bus_contact_email = fields.Char(
         string="Contact email for passengers", config_parameter='bus_tracking.contact_email',
         help="Official email of the transport service. Leave it empty to show no email on the public pages.")
+    bus_grafana_url = fields.Char(
+        string="Grafana address", config_parameter='bus_tracking.grafana_url',
+        help="Address of Grafana as the browser reaches it, e.g. https://grafana.example.com. Empty hides the "
+             "Grafana dashboards. It must be a subdomain of the address of Odoo.")
+    bus_grafana_secret = fields.Char(
+        string="Grafana shared secret", config_parameter='bus_tracking.grafana_jwt_secret',
+        help="The secret Odoo signs the access tokens with; Grafana has the same one (GRAFANA_JWT_SECRET). "
+             "At least 16 characters.")
+    bus_grafana_minutes = fields.Integer(
+        string="Grafana access lasts (minutes)", config_parameter='bus_tracking.grafana_token_minutes', default=480,
+        help="How long a person can keep a Grafana dashboard open before Odoo gives it a new token (5 to 1440).")
     tablet_setup_link = fields.Char(string="Tablet setup link", compute='_compute_tablet_qr')
     tablet_qr = fields.Binary(string="Tablet QR", compute='_compute_tablet_qr')
 
@@ -89,6 +100,18 @@ class ResConfigSettings(models.TransientModel):
             value = (settings.bus_gps_url or '').strip()
             if value and not re.match(r'^https?://[^\s/]+(:\d+)?(/\S*)?$', value):
                 raise ValidationError(_("The GPS address must look like https://gps.example.com."))
+
+    @api.constrains('bus_grafana_url', 'bus_grafana_secret', 'bus_grafana_minutes')
+    def _check_grafana(self):
+        for settings in self:
+            value = (settings.bus_grafana_url or '').strip()
+            if value and not re.match(r'^https?://[^\s/]+(:\d+)?$', value.rstrip('/')):
+                raise ValidationError(_("The Grafana address must look like https://grafana.example.com."))
+            secret = settings.bus_grafana_secret or ''
+            if secret and len(secret) < 16:
+                raise ValidationError(_("The Grafana secret needs at least 16 characters."))
+            if settings.bus_grafana_minutes and not 5 <= settings.bus_grafana_minutes <= 1440:
+                raise ValidationError(_("Grafana access must last between 5 and 1440 minutes."))
 
     @api.depends()
     def _compute_tablet_qr(self):
