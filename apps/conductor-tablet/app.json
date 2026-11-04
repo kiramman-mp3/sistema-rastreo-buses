@@ -11,7 +11,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "ec.edu.uta.buses.conductor",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
       }
     },
     "android": {
@@ -61,6 +65,7 @@
         {
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true,
+          "isIosBackgroundLocationEnabled": true,
           "locationAlwaysAndWhenInUsePermission": "Buses UTA envía la posición del bus mientras el turno está activo."
         }
       ]

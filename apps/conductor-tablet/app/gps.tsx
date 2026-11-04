@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { errorQueue } from '../src/diagnostics';
 import { gpsPermissionSnapshot } from '../src/gps/permissions';
-import { locationQueue, readLastError, readLastSent } from '../src/gps/store';
+import { gpsStore, locationQueue, readLastError, readLastSent } from '../src/gps/store';
 import { t } from '../src/i18n';
 import { useLang } from '../src/i18n/LangProvider';
 import { useSession } from '../src/state/SessionContext';
@@ -18,6 +18,7 @@ type Facts = {
   background: boolean;
   queue: number;
   last: string;
+  uniqueId: string | null;
   error: string | null;
   appError: string | null;
 };
@@ -30,12 +31,13 @@ function stamp(at: number, lat: number, lon: number) {
 }
 
 async function loadFacts(): Promise<Facts> {
-  const [permissions, queue, sent, failed, appFailure] = await Promise.all([
+  const [permissions, queue, sent, failed, appFailure, creds] = await Promise.all([
     gpsPermissionSnapshot(),
     locationQueue.size(),
     readLastSent(),
     readLastError(),
     errorQueue.last(),
+    gpsStore.get(),
   ]);
   const at = appFailure ? Date.parse(appFailure.at) : NaN;
   const recent = appFailure !== null && Number.isFinite(at) && Date.now() - at < APP_ERROR_RECENT_MS;
@@ -47,6 +49,7 @@ async function loadFacts(): Promise<Facts> {
     background: permissions.background === 'granted',
     queue,
     last: sent ? stamp(sent.at, sent.lat, sent.lon) : t('gpsNone'),
+    uniqueId: creds?.uniqueId ?? null,
     error,
     appError: recent && appFailure ? `${new Date(at).toLocaleString()} · ${appFailure.message}` : null,
   };
@@ -79,7 +82,7 @@ export default function GpsScreen() {
         [t('gpsBackground'), facts.background ? t('granted') : t('denied'), facts.background],
         [t('gpsQueue'), String(facts.queue), facts.queue === 0],
         [t('gpsLast'), facts.last, null],
-        [t('gpsDevice'), session.snapshot.gps?.uniqueId ?? '-', null],
+        [t('gpsDevice'), facts.uniqueId ?? session.snapshot.gps?.uniqueId ?? '-', null],
         ...(facts.error ? [[t('gpsLastError'), facts.error, false] as [string, string, boolean]] : []),
         ...(facts.appError ? [[t('gpsLastAppError'), facts.appError, false] as [string, string, boolean]] : []),
       ]
