@@ -9,23 +9,32 @@ from datetime import timedelta
 from odoo import fields, http
 from odoo.http import Response, request
 
-from ..models.utils import brand_name, map_center
+from ..models.privacy_text import privacy_sections
+from ..models.utils import brand_name, fold, int_param, map_center, public_contact, safe_http_url, tile_url
 from ..models.portal_i18n import STRINGS, pick_lang
 
 # A bus that has not reported for this long is not shown to passengers.
 SHOW_BUSES_FOR = timedelta(minutes=15)
 CACHE_SECONDS = 5
-RATE_LIMIT = 60          # requests per IP and window, per worker process
+RATE_LIMIT = 60          # uncached requests per IP and window, per worker process
 RATE_WINDOW = 60.0
 LANG_COOKIE = 'bus_lang'
 # The only strings the page's script needs.
-JS_STRINGS = ('status_moving', 'status_stopped', 'status_offline', 'updated', 'update_error', 'stops', 'path_all')
+JS_STRINGS = ('status_moving', 'status_stopped', 'status_offline', 'updated', 'update_error', 'stops', 'path_all',
+              'live', 'searching', 'updated_min', 'stale', 'rate', 'mine_tag', 'bus_at_mine', 'bus_one_stop',
+              'bus_n_stops', 'none_coming', 'position_unknown', 'bus_between', 'bus_at', 'no_buses',
+              'featured_hint', 'pick_stop_hint')
+
+
+def js_strings(strings):
+    return json.dumps({key: strings[key] for key in JS_STRINGS})
+
 
 _HEX_COLOR = re.compile(r'^#[0-9a-fA-F]{6}$')
 
 
 _STATIC = os.path.join(os.path.dirname(__file__), os.pardir, 'static', 'src')
-_VERSIONED = ('css/brand.css', 'landing/landing.css', 'portal/portal.css', 'portal/portal_map.js',
+_VERSIONED = ('css/brand.css', 'portal/site.css', 'portal/pages.css', 'portal/site.js', 'portal/portal_map.js',
               'portal/complaint.js')
 
 
@@ -45,10 +54,25 @@ class RateLimiter:
         self.limit, self.window = limit, window
         self._hits = defaultdict(deque)
         self._lock = threading.Lock()
+        self._swept = None
+
+    def _sweep(self, now):
+        """Forget keys that have been quiet for a whole window, so many different addresses
+        cannot make the worker's memory grow for ever."""
+        for key in [k for k, hits in self._hits.items() if not hits or now - hits[-1] > self.window]:
+            del self._hits[key]
+        self._swept = now
+
+    def __len__(self):
+        return len(self._hits)
 
     def allow(self, key, now=None):
         now = time.monotonic() if now is None else now
         with self._lock:
+            if self._swept is None:
+                self._swept = now
+            elif now - self._swept > self.window:
+                self._sweep(now)
             hits = self._hits[key]
             while hits and now - hits[0] > self.window:
                 hits.popleft()
@@ -92,8 +116,14 @@ def portal_context(**values):
         request.httprequest.accept_languages,
         requested=request.params.get('lang'),
         remembered=request.httprequest.cookies.get(LANG_COOKIE))
-    values.update(lang=lang, s=STRINGS[lang], asset_v=asset_version(),
+    values.update(lang=lang, site_lang=lang, s=STRINGS[lang], asset_v=asset_version(),
+                  line_i18n=js_strings(STRINGS[lang]),
                   brand=brand_name(request.env(su=True)),
+                  contact=public_contact(request.env(su=True)),
+                  # The university's own policy when one is set in Settings, otherwise the page of this site.
+                  privacy_link=safe_http_url(
+                      request.env(su=True)['ir.config_parameter'].get_param('bus_tracking.privacy_url'))
+                  or '/privacidad',
                   languages={c: s['lang_name'] for c, s in STRINGS.items()})
     return values
 
@@ -104,6 +134,58 @@ def render_portal(template, values, status=200):
     if request.params.get('lang') in STRINGS:
         response.set_cookie(LANG_COOKIE, values['lang'], max_age=365 * 24 * 3600, samesite='Lax')
     return response
+
+
+# An arrival older than this does not say where the bus is now on the line.
+ARRIVAL_MEMORY = timedelta(hours=3)
+
+
+def line_positions(route, buses):
+    """Where each bus is on the drawn line, as stop indexes: `at` when it is inside a stop's radius,
+    `after` for the last stop it reached (it is between that stop and the next). Only indexes leave
+    the server: no times, no ids."""
+    index = {stop.id: i for i, stop in enumerate(route.stop_ids)}
+    since = fields.Datetime.now() - ARRIVAL_MEMORY
+    arrivals = route.env['bus.stop.arrival'].sudo().search(
+        [('vehicle_id', 'in', buses.ids), ('stop_id', 'in', route.stop_ids.ids), ('arrival_time', '>=', since)],
+        order='arrival_time desc')
+    last = {}
+    for arrival in arrivals:
+        last.setdefault(arrival.vehicle_id.id, index.get(arrival.stop_id.id))
+    positions = {}
+    for bus in buses:
+        at = index.get(bus.current_stop_id.id) if bus.current_stop_id else None
+        positions[bus.id] = (at, at if at is not None else last.get(bus.id))
+    return positions
+
+
+def line_directions(route, buses):
+    """Which way each bus travels the line: 1 towards the last stop, -1 back to the first. Read
+    from its last two different stops; reaching an end turns it around."""
+    index = {stop.id: i for i, stop in enumerate(route.stop_ids)}
+    last_index = len(route.stop_ids) - 1
+    since = fields.Datetime.now() - ARRIVAL_MEMORY
+    arrivals = route.env['bus.stop.arrival'].sudo().search(
+        [('vehicle_id', 'in', buses.ids), ('stop_id', 'in', route.stop_ids.ids), ('arrival_time', '>=', since)],
+        order='arrival_time desc, id desc')
+    seen = {}
+    for arrival in arrivals:
+        stops = seen.setdefault(arrival.vehicle_id.id, [])
+        i = index.get(arrival.stop_id.id)
+        if len(stops) < 2 and (not stops or stops[-1] != i):
+            stops.append(i)
+    directions = {}
+    for bus in buses:
+        stops = seen.get(bus.id, [])
+        if not stops:
+            directions[bus.id] = 1
+        elif stops[0] == last_index and last_index > 0:
+            directions[bus.id] = -1
+        elif stops[0] == 0 or len(stops) == 1:
+            directions[bus.id] = 1
+        else:
+            directions[bus.id] = 1 if stops[0] > stops[1] else -1
+    return directions
 
 
 def public_routes():
@@ -125,9 +207,27 @@ class BusPortal(http.Controller):
         return route.vehicle_ids.filtered(lambda b: b.last_fix_time and b.last_fix_time >= limit)
 
     # ------------------------------------------------------------------
+    @http.route(['/privacidad', '/transporte/privacidad'], type='http', auth='public', methods=['GET'])
+    def privacy(self, **kwargs):
+        """What data the system handles, for what, for how long: with the periods set in Settings."""
+        env = request.env(su=True)
+        values = portal_context()
+        values['sections'] = privacy_sections(
+            values['lang'], values['brand'], values['contact'],
+            position_days=int_param(env, 'bus_tracking.retention_days', 0),
+            complaint_days=int_param(env, 'bus_tracking.complaint_retention_days', 90))
+        return render_portal('bus_tracking.privacy_page', values)
+
+    # ------------------------------------------------------------------
     @http.route(['/rutas', '/transporte/rutas'], type='http', auth='public', methods=['GET'])
-    def routes(self, **kwargs):
+    def routes(self, q=None, **kwargs):
         routes = public_routes()
+        query = (q or '').strip()[:80]
+        if query:
+            needle = fold(query)
+            routes = routes.filtered(
+                lambda r: needle in fold(r.name) or needle in fold(r.code)
+                or any(needle in fold(stop.name) for stop in r.stop_ids))
         total_active_buses = 0
         items = []
         for r in routes:
@@ -139,10 +239,12 @@ class BusPortal(http.Controller):
                 'color': safe_color(r.color),
                 'buses': fresh_count,
                 'stops_count': len(r.stop_ids),
-                'first_stop': r.stop_ids[:1].name if r.stop_ids else 'Terminal',
-                'last_stop': r.stop_ids[-1:].name if r.stop_ids else 'Destino',
+                'first_stop': r.stop_ids[:1].name or '',
+                'last_stop': r.stop_ids[-1:].name or '',
+                'matching_stops': [s.name for s in r.stop_ids if query and fold(query) in fold(s.name)][:3],
             })
-        return render_portal('bus_tracking.portal_routes', portal_context(routes=items, total_active_buses=total_active_buses))
+        return render_portal('bus_tracking.portal_routes', portal_context(
+            routes=items, total_active_buses=total_active_buses, query=query, active_nav='rutas'))
 
     @http.route(['/rutas/detalle', '/transporte/rutas/detalle'], type='http', auth='public', methods=['GET'])
     def route_detail_alias(self, **kwargs):
@@ -151,7 +253,8 @@ class BusPortal(http.Controller):
             return request.redirect('/rutas/%s' % first.code)
         return request.redirect('/rutas')
 
-    @http.route(['/rutas/<string:code>', '/transporte/rutas/<string:code>'], type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/<string:code>', '/transporte/rutas/<string:code>'],
+                type='http', auth='public', methods=['GET'])
     def route_map(self, code, **kwargs):
         route = self._public_route(code)
         if not route:
@@ -164,24 +267,34 @@ class BusPortal(http.Controller):
                 'name': route.name,
                 'color': safe_color(route.color),
                 'buses_count': len(buses),
+                'stops': [s['name'] for s in stops],
+                'stops_json': json.dumps([s['name'] for s in stops]),
             },
+            active_nav='rutas',
             stops=stops,
             stops_json=json.dumps(stops),
             paths_json=json.dumps(route._map_lines(), separators=(',', ':'))
         )
-        values['json_i18n'] = json.dumps({key: values['s'][key] for key in JS_STRINGS})
+        values['json_i18n'] = values['line_i18n']
         values['center_json'] = json.dumps(list(map_center(request.env(su=True))))
+        values['tile_url'] = tile_url(request.env(su=True))
         return render_portal('bus_tracking.portal_route', values)
 
-    @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'], type='http', auth='public', methods=['GET'])
+    @http.route(['/rutas/<string:code>/buses.json', '/transporte/rutas/<string:code>/buses.json'],
+                type='http', auth='public', methods=['GET'])
     def route_buses(self, code, **kwargs):
-        if not limiter.allow(request.httprequest.remote_addr):
-            return Response(status=429, headers=[('Retry-After', '30')])
+        # A whole campus behind one address (Wi-Fi, carrier NAT) polls the same line every ten
+        # seconds: a cached answer costs nothing, so only the requests that reach the database count.
         body = cache.get(code)
         if body is None:
+            if not limiter.allow(request.httprequest.remote_addr):
+                return Response(status=429, headers=[('Retry-After', '30')])
             route = self._public_route(code)
             if not route:
                 return request.not_found()
+            buses = self._fresh_buses(route)
+            where = line_positions(route, buses)
+            heading = line_directions(route, buses)
             body = json.dumps({
                 'generated_at': fields.Datetime.to_string(fields.Datetime.now()),
                 'buses': [{
@@ -190,7 +303,11 @@ class BusPortal(http.Controller):
                     'lon': bus.last_longitude,
                     'course': round(bus.last_course),
                     'status': bus.status if bus.connected else 'offline',
-                } for bus in self._fresh_buses(route)],
+                    'at': where[bus.id][0],
+                    'after': where[bus.id][1],
+                    # 1 towards the last stop, -1 on the way back: the page counts stops that way.
+                    'dir': heading[bus.id],
+                } for bus in buses],
             })
             cache.put(code, body)
         return Response(body, content_type='application/json',

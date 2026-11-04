@@ -202,16 +202,18 @@ def main():
         began = time.perf_counter()
         try:
             response = requests.request(probe.method, probe.url, timeout=60, allow_redirects=False, **probe.kwargs)
-            status, text = response.status_code, response.text[:300]
-        except requests.RequestException as exc:
-            status, text = 0, repr(exc)
+            status = response.status_code
+        except requests.RequestException:
+            status = 0
         elapsed = time.perf_counter() - began
         rows.append({'area': probe.area, 'status': status, 'esperado': sorted(probe.expected), 'ok': status in probe.expected,
                      'tiempo': elapsed, 'nota': getattr(probe, 'note', '')})
 
     # Does a forged X-Forwarded-For defeat the per-address limit when Odoo is reached without a proxy?
+    # A line that does not exist: cached answers of a real line never count towards the limit.
     time.sleep(62)
-    spoof_codes = [requests.get(BASE + '/rutas/QA1/buses.json', headers=spoofed(), timeout=30).status_code for _ in range(70)]
+    spoof_codes = [requests.get(BASE + '/rutas/QA-NOPE/buses.json', headers=spoofed(), timeout=30).status_code
+                   for _ in range(70)]
 
     # A position with impossible coordinates answers 200 (that status is allowed), so the damage is counted in the data.
     stored_invalid = int(psql(OUT_OF_RANGE)) - invalid_before
@@ -244,6 +246,8 @@ def main():
         'posiciones_nuevas': odoo.search_count('bus.position', []) - before,
         'quejas_nuevas': odoo.search_count('bus.complaint', []) - complaints_before,
         'estados_5xx': sum(1 for r in rows if r['status'] >= 500),
+        # A 503 from /health when no bus reported recently is an expected answer, not an error.
+        'estados_5xx_inesperados': sum(1 for r in rows if r['status'] >= 500 and not r['ok']),
         'areas': areas, 'fallos_por_causa': by_note,
         'muestra_fallos': failures[:15],
         'tiempos': [round(r['tiempo'], 5) for r in rows],

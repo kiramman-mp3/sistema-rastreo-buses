@@ -1,4 +1,3 @@
-import json
 from datetime import timedelta
 
 from odoo import fields
@@ -61,7 +60,11 @@ class TestPassengerPortal(HttpCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', html)
 
     def test_a_bad_color_cannot_inject_css(self):
-        self.route.color = 'red; background:url(//evil)'
+        # The model refuses it now; data saved before that check still reaches the page safely.
+        self.env.flush_all()
+        self.env.cr.execute("UPDATE bus_route SET color = %s WHERE id = %s",
+                            ['red; background:url(//evil)', self.route.id])
+        self.route.invalidate_recordset(['color'])
         html = self.url_open('/rutas').text
         self.assertIn('#1e5560', html)
         self.assertNotIn('evil', html)
@@ -72,11 +75,22 @@ class TestPassengerPortal(HttpCase):
         resp, data = self.buses()
         self.assertEqual(resp.headers['Content-Type'], 'application/json')
         self.assertEqual(len(data['buses']), 1)
-        self.assertEqual(sorted(data['buses'][0]), ['course', 'lat', 'lon', 'name', 'status'])
+        self.assertEqual(sorted(data['buses'][0]), ['after', 'at', 'course', 'dir', 'lat', 'lon', 'name', 'status'])
         self.assertEqual(data['buses'][0]['name'], 'Bus 12')
         self.assertEqual(data['buses'][0]['status'], 'moving')
         for secret in ('ZZZZ-99', 'Pedro Secreto', 'b-supersecretid00', 'speed', 'plate', 'driver'):
             self.assertNotIn(secret, resp.text)
+
+    def test_feed_places_each_bus_on_the_line(self):
+        terminal, plaza = self.route.stop_ids
+        self.bus._apply_position(traccar_position(
+            5, (self.now - timedelta(minutes=3)).strftime('%Y-%m-%dT%H:%M:%SZ'), terminal.latitude, terminal.longitude))
+        _, data = self.buses()
+        self.assertEqual((data['buses'][0]['at'], data['buses'][0]['after']), (0, 0))
+        portal.cache.clear()
+        self.report(self.bus, 1)        # left the terminal, not yet at the plaza
+        _, data = self.buses()
+        self.assertEqual((data['buses'][0]['at'], data['buses'][0]['after']), (None, 0))
 
     def test_feed_hides_stale_and_foreign_buses(self):
         stale = self.env['bus.vehicle'].create({'name': 'Viejo', 'route_id': self.route.id, 'traccar_device_id': 6})
@@ -109,9 +123,41 @@ class TestPassengerPortal(HttpCase):
         self.assertNotEqual(self.buses()[1], first)
 
     def test_feed_is_rate_limited_per_address(self):
-        statuses = [self.buses()[0].status_code for _ in range(portal.RATE_LIMIT + 1)]
-        self.assertEqual(statuses[:portal.RATE_LIMIT], [200] * portal.RATE_LIMIT)
+        # Only requests that miss the cache count, such as lines that do not exist.
+        statuses = [self.buses('NOPE')[0].status_code for _ in range(portal.RATE_LIMIT + 1)]
+        self.assertEqual(statuses[:portal.RATE_LIMIT], [404] * portal.RATE_LIMIT)
         self.assertEqual(statuses[-1], 429)
+
+    def test_a_campus_behind_one_address_is_served_from_the_cache(self):
+        statuses = {self.buses()[0].status_code for _ in range(portal.RATE_LIMIT + 20)}
+        self.assertEqual(statuses, {200})
+
+    def test_rate_limiter_drops_quiet_addresses(self):
+        limiter = portal.RateLimiter(5, 10.0)
+        for i in range(100):
+            limiter.allow('ip-%d' % i, now=0)
+        self.assertEqual(len(limiter), 100)
+        limiter.allow('late', now=30)
+        self.assertEqual(len(limiter), 1)
+
+    def test_the_feed_says_which_way_each_bus_travels(self):
+        self.report(self.bus, 1)
+        terminal, plaza = self.route.stop_ids
+        Arrival = self.env['bus.stop.arrival']
+        Arrival.create({'vehicle_id': self.bus.id, 'stop_id': terminal.id,
+                        'arrival_time': self.now - timedelta(minutes=10)})
+        self.assertEqual(self.buses()[1]['buses'][0]['dir'], 1)
+        Arrival.create({'vehicle_id': self.bus.id, 'stop_id': plaza.id,
+                        'arrival_time': self.now - timedelta(minutes=5)})
+        portal.cache.clear()
+        # It reached the last stop: from there it heads back.
+        self.assertEqual(self.buses()[1]['buses'][0]['dir'], -1)
+
+    def test_the_route_page_takes_the_tiles_from_settings(self):
+        self.env['ir.config_parameter'].set_param('bus_tracking.tile_url', 'https://tiles.example.com/{z}/{x}/{y}.png')
+        self.assertIn('https://tiles.example.com/{z}/{x}/{y}.png', self.url_open('/rutas/L1').text)
+        self.env['ir.config_parameter'].set_param('bus_tracking.tile_url', 'http://insecure/{z}/{x}/{y}.png')
+        self.assertIn('basemaps.cartocdn.com', self.url_open('/rutas/L1').text)
 
     def test_rate_limiter_forgets_old_hits(self):
         limiter = portal.RateLimiter(2, 10.0)
@@ -122,6 +168,13 @@ class TestPassengerPortal(HttpCase):
         self.assertTrue(limiter.allow('ip', now=12))
 
     # -- language ----------------------------------------------------------------------
+    def test_page_language_and_the_current_choice_are_marked(self):
+        html = self.url_open('/rutas').text
+        self.assertIn('<html lang="es-EC"', html)
+        self.assertRegex(html, r'value="es"[^>]*aria-current="true"')
+        english = self.url_open('/rutas?lang=en').text
+        self.assertIn('<html lang="en"', english)
+
     def test_language_follows_the_browser_then_the_choice(self):
         self.assertIn('Elige tu ruta', self.url_open('/rutas').text)
         english = self.url_open('/rutas', headers={'Accept-Language': 'en-US,en;q=0.9'}).text
@@ -155,8 +208,32 @@ class TestPassengerPortal(HttpCase):
     def test_public_assets_are_versioned_so_browsers_never_keep_stale_copies(self):
         for url in ('/rutas', '/rutas/L1', '/'):
             html = self.url_open(url).text
-            self.assertRegex(html, r'landing\.css\?v=\d+', url)
+            self.assertRegex(html, r'site\.css\?v=\d+', url)
         self.assertRegex(self.url_open('/rutas/L1').text, r'portal_map\.js\?v=\d+')
+
+    def test_no_invented_numbers_when_no_bus_reports(self):
+        html = self.url_open('/rutas').text
+        self.assertIn('Sin buses con señal', html)
+        self.assertIn('Ahora no hay buses con señal', self.url_open('/').text)
+        for invented in ('8 buses', 'Frecuencia', 'min</span>', 'Accesible'):
+            self.assertNotIn(invented, html)
+
+    def test_route_page_promises_no_arrival_times(self):
+        html = self.url_open('/rutas/L1').text
+        self.assertNotIn('Llega en', html)
+        self.assertNotIn('probabil', html)
+
+    def test_routes_can_be_searched_by_stop_without_accents(self):
+        self.env['bus.route.stop'].create({'route_id': self.route.id, 'name': 'Píllaro centro',
+                                           'latitude': -1.17, 'longitude': -78.54})
+        found = self.url_open('/rutas?q=pillaro').text
+        self.assertIn('Linea Centro', found)
+        self.assertNotIn('Linea Centro', self.url_open('/rutas?q=quito').text)
+
+    def test_contact_is_only_shown_when_configured(self):
+        self.assertNotIn('tel:', self.url_open('/').text)
+        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.contact_phone', '+593 3 299 9999')
+        self.assertIn('tel:+59332999999', self.url_open('/').text)
 
     def test_landing_sends_passengers_to_the_routes(self):
         self.assertIn('href="/rutas"', self.url_open('/').text)

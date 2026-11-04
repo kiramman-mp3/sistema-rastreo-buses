@@ -108,15 +108,18 @@ Puntos a destacar:
 
 | Qué | Cantidad | Resultado |
 |---|---|---|
-| Pruebas automatizadas de Odoo | 150 | 0 fallos |
-| Suite en vivo (12 funcionales, 22 de error, 7 de rendimiento, 1 de usabilidad) | 42 | 3 fallos |
-| Auditoría aleatoria con semilla fija | 1.000 peticiones | 57 fallos (5,7 %) |
-| Cobertura de código (sentencias y ramas) | 1.144 sentencias | **93,8 %** |
+| Pruebas automatizadas de Odoo | 250 | 0 fallos |
+| Pruebas de la app de tableta | 72 | 0 fallos |
+| Suite en vivo (14 funcionales, 25 de error, 7 de rendimiento, 1 de usabilidad) | 47 | 0 fallos |
+| Auditoría aleatoria con semilla fija | 1.000 peticiones | 0 fallos |
+| Cobertura de código (sentencias y ramas) | 1.853 sentencias | **92,8 %** |
+
+Cifras de la corrida del 2-nov-2026 (`qa/ejecutar_todo.sh`). La evaluación del 28-oct había dado 3 fallos en la suite y 57 en la auditoría, todos del webhook, ya corregidos.
 
 **Rendimiento** (servidor de un solo proceso):
 
-- Uso normal: **0,037 s** en promedio por petición.
-- Con 20 hilos simultáneos: p95 de 1,6 s y **39 peticiones por segundo**. Para 100 buses reportando cada 10 segundos se necesitan 10, es decir casi cuatro veces el margen.
+- Uso normal: **0,044 s** en promedio por petición.
+- Con 20 hilos simultáneos: p95 de 1,9 s y **40 peticiones por segundo**. Para 100 buses reportando cada 10 segundos se necesitan 10, es decir casi cuatro veces el margen.
 - **Integridad concurrente:** 20 envíos idénticos a la vez guardan 1; 60 de 60 envíos de un mismo bus se guardan.
 
 **Cuadro de mando:** de 12 metas, 8 se cumplen. Las 4 que no se cumplen son: respuestas 5xx (27), posiciones con datos imposibles (33), defectos cerrados (70 % contra la meta de 90 %) y cobertura de rutas HTTP (84,2 % contra 100 %: faltan `/bus_tracking/track`, `/bus_tracking/stop/load` y `/bus_tracking/stop/save`). Las tres primeras vienen de los defectos de la siguiente sección.
@@ -142,42 +145,42 @@ Puntos a destacar:
 
 ## 8. Defectos abiertos y limitaciones (1 min 30 s)
 
-*"La evaluación encontró 10 defectos. 7 están cerrados y 3 siguen abiertos, y los tres tienen el mismo origen: el webhook no valida bien el contenido de la posición."*
+*"Hay 26 defectos registrados. Los 10 primeros salieron de la construcción y de la evaluación del 28 de octubre, y están cerrados. Los otros 16 los encontró la auditoría integral del 2 de noviembre: 15 ya están corregidos con su prueba, y queda uno abierto."*
 
 | Defecto | Qué pasa | Estado |
 |---|---|---|
-| DEF-008 | Se guardan posiciones con latitud o longitud imposibles (p. ej. 95°) | Abierto |
-| DEF-009 | Una latitud que no es número devuelve HTTP 500 | Abierto |
-| DEF-010 | Una hora GPS inválida devuelve HTTP 500 | Abierto |
+| DEF-008 a DEF-010 | Posiciones imposibles y HTTP 500 en el webhook | Cerrados (validación en `_apply_position` y pruebas E7 a E9 en la suite) |
+| DEF-011, DEF-012, DEF-015, DEF-016 | Credencial QR de chofer: permisos sólo en la vista, enlace en claro, credencial usada como sesión, choferes con acceso al panel | Cerrados |
+| DEF-017, DEF-024, DEF-025 | GPS de un bus sin turno: Odoo lo guardaba y la tableta no se apagaba al cerrar el turno ni sin señal | Cerrados |
+| DEF-013 | Contraseña de producción en el historial público | **Abierto**: historial ya limpio en local, falta subirlo y cambiar la contraseña |
 
-- **Causa raíz (cinco porqués):** se supuso que quien envía siempre manda datos correctos, porque todas las pruebas usaban datos válidos y una sola persona escribía el código y sus pruebas.
-- **Arreglo ya diseñado:** validar rango y tipo en `_apply_position`, capturar el error de formato en `parse_traccar_dt` y responder 400, añadir un `@api.constrains` de rango, y portar las pruebas E7, E8 y E9 a la suite de Odoo. Un solo cambio cierra los tres.
-- **Impacto medido:** 27 respuestas 5xx y 33 posiciones imposibles guardadas entre la suite y la auditoría. Fuera de eso, las consultas SQL de integridad dieron 0 en duplicados, alertas inconsistentes y recorridos incoherentes.
+- **Causa raíz común de la auditoría:** reglas que se cumplían sólo en un lado: el botón oculto en la vista pero el método abierto, el turno controlado en la tableta pero no en el servidor. Ahora cada regla se comprueba en el servidor y tiene su prueba.
+- **Impacto medido antes de corregir:** la tableta mostraba "sin próxima parada" desde la segunda vuelta, unos 10 pasajeros en la misma Wi-Fi recibían "demasiadas consultas", y webhook y cron a la vez daban HTTP 500.
 
 **Limitaciones que hay que decir en voz alta:**
 
 - El GPS se **simuló con peticiones HTTP**; no se ha hecho un turno completo con un celular real.
 - El push se probó en cifrado, firma y endpoints, pero no entregado a un navegador real.
-- No se ejecutó análisis estático (SonarQube, flake8, pylint-odoo) ni hay integración continua.
+- El CI corre flake8 con todas las reglas, el lint de la tableta y la suite de Odoo; no hay SonarQube ni pylint-odoo.
 - No se desplegó en Azure ni se probó con dominio público.
 - El kichwa es un borrador sin revisión de una persona hablante.
 - No hay QA independiente: quien desarrolla también probó.
 
-**Decisión del informe:** *"Es apto para un piloto controlado con personal de la universidad. La producción abierta espera a cerrar esos tres defectos y a probar un turno completo con celular y Traccar reales."*
+**Decisión del informe:** *"Es apto para un piloto controlado con personal de la universidad. La producción abierta espera a cerrar DEF-013 y a probar un turno completo con tableta y Traccar reales."*
 
 ---
 
 ## 9. Cierre (1 min)
 
-*"Para resumir: el sistema resuelve el problema que pidió el cliente: el pasajero ve los buses y reporta quejas sin login, y la administración recibe alertas. Está medido, no solo afirmado: 150 pruebas sin fallos, 93,8 % de cobertura y 0,037 segundos de respuesta media. Y está documentado con honestidad: sabemos qué falla, por qué falla y cómo se arregla."*
+*"Para resumir: el sistema resuelve el problema que pidió el cliente: el pasajero ve los buses y reporta quejas sin login, y la administración recibe alertas. Está medido, no solo afirmado: 250 pruebas de Odoo y 72 de la tableta sin fallos, 1.000 peticiones aleatorias sin un error, 92,8 % de cobertura y 0,044 segundos de respuesta media. Y está documentado con honestidad: sabemos qué falla, por qué falla y cómo se arregla."*
 
 **Próximos pasos, en orden:**
 
-1. Cerrar DEF-008 a DEF-010 y portar sus pruebas.
-2. Probar un turno completo con celular y Traccar reales.
-3. Repetir la prueba de carga con varios procesos y el volumen de 30 días.
-4. Análisis estático e integración continua.
-5. Desplegar en Azure y revisar el kichwa con una persona hablante.
+1. Cerrar DEF-013: subir el historial limpio y cambiar la contraseña del admin.
+2. Probar un turno completo de dos vueltas con tableta y Traccar reales, con corte de red y SOS sin señal.
+3. Repetir la suite en vivo, la auditoría y la carga con el código nuevo y varios procesos.
+4. Sumar SonarQube o pylint-odoo y una revisión de secretos al CI.
+5. Revisar el kichwa con una persona hablante.
 
 *"Gracias. Quedamos atentos a sus preguntas."*
 
@@ -237,15 +240,15 @@ No hay un cálculo en el proyecto. El plan recomienda una máquina virtual de 2 
 | Dato | Valor |
 |---|---|
 | Servicios de bus / líneas públicas | 11 / 4 (Troncal, Izamba, Pelileo, Píllaro) |
-| Pruebas de Odoo | 150, 0 fallos |
-| Suite en vivo | 42 casos, 3 fallos |
-| Auditoría aleatoria | 1.000 peticiones, 57 fallos (5,7 %) |
-| Fallos totales | 60 de 1.192 (5,03 %), todos del webhook |
-| Cobertura | 93,8 % |
-| Tiempo medio | 0,037 s |
-| Capacidad medida / necesaria | 39 req/s / 10 req/s |
-| Defectos | 10 registrados, 7 cerrados, 3 abiertos |
-| Metas del cuadro de mando | 8 de 12 cumplidas |
+| Pruebas de Odoo / tableta | 250 / 72, 0 fallos (2-nov) |
+| Suite en vivo | 47 casos, 0 fallos (28-oct: 42 casos, 3 fallos) |
+| Auditoría aleatoria | 1.000 peticiones, 0 fallos (28-oct: 57) |
+| Fallos totales | 0 de 1.297 (28-oct: 60 de 1.192, todos del webhook) |
+| Cobertura | 92,8 % |
+| Tiempo medio | 0,044 s |
+| Capacidad medida / necesaria | 40 req/s / 10 req/s |
+| Defectos | 26 registrados, 25 cerrados, 1 abierto (DEF-013) |
+| Metas del cuadro de mando | 12 de 12 cumplidas (28-oct: 8 de 12) |
 | Política | 7 reglas |
 | Lluvia de ideas | 94 ideas |
 | ISO 25010 | 7 cumple, 19 parcial, 5 no evaluado |

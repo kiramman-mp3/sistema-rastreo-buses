@@ -903,3 +903,263 @@ Transformación de la experiencia de usuario y arquitectura frontend del sistema
 
 - Jornada de campo con tableta física montada en bus y chofer real.
 - Build de producción en EAS con el nuevo layout de cabina.
+
+
+## 2026-11-02: rediseño de experiencia (fases 26 a 31) y corrección de la bitácora anterior
+
+Plan y hallazgos en `docs/PLAN-UX.md`; identidad en `docs/DISENO.md`; validación en `docs/calidad/12-validacion-ux.md`.
+
+### Corrección de la entrada del 2026-11-01
+
+Esa entrada daba por hechas y verificadas cosas que no lo estaban: tiempos de llegada "probabilísticos" (eran minutos calculados con el número de parada), una barra de cadencia (datos fijos que pedían acelerar a un bus fuera de ruta), contrastes AAA "verificados" (sin medición) y objetivos táctiles de 72 px (había botones de 46 px). Además, `develop` tenía 4 pruebas en fallo y 2 con error, aunque la entrada del 2026-10-30 decía "247 tests, 0 fallos". El detalle está en `docs/PLAN.md`, sección de las fases 23 a 25.
+
+### Qué se hizo
+
+1. **Fase 26, verdad y fallos críticos** (`fix/tablet-cabina-segura`, `fix/pruebas-base`, `fix/portal-datos-reales`):
+   - Tableta: sin barra de cadencia ni confirmación de llegada falsa; SOS como tipo de incidente propio (`sos`), con aviso push inmediato; la hoja de incidentes vuelve a ser accesible; abrir la app sin señal ya no cierra la sesión.
+   - Portal: fuera noticias, cifras, teléfono, redes y fotos generadas por IA; los cinco motivos reales de queja (dos se guardaban como "Otro"); búsqueda por parada sin tildes; teléfono y correo configurables en Ajustes.
+   - Pruebas base: el grupo Manager ya no implica el de chofer (los administradores podían entrar a la tableta y dejaban de ver los turnos ajenos), con migración `16.0.1.1.0`; credencial QR que se recalcula.
+2. **Fase 27, sistema de diseño** (`chore/sistema-diseno`): tokens papel, tinta, granate y señal en web, panel y tableta; Bricolage Grotesque y Atkinson Hyperlegible cargadas de verdad; marca de la línea con tres paradas; `qa/contraste.py`.
+3. **Fase 28, portal** (`feature/portal-pasajero-v2`): portada con la línea con más buses en vivo; "mi parada" con conteo de paradas (nunca minutos), recordada en el teléfono; el JSON público agrega solo el tramo de la línea; lista de líneas, quejas en una columna, boleto con el folio; seis fotos reales de Ambato de Wikimedia Commons con crédito; todo el texto en `portal_i18n.py`; `<html lang>` e idioma activo correctos (antes Odoo los pisaba con `en_US`).
+4. **Fase 29, panel** (`feature/panel-operacion`): cola de Atención (SOS, incidentes, alertas, mensajes nuevos), banda de SOS, acuse de incidentes (`acknowledged_by`, `acknowledged_at`) visible en la tableta, filtros con contador, animación lineal que se detiene sola, kanban de incidentes y mensajes, menús Operación y Flota, ícono de la app, login con saludo según la hora de Ecuador y foto de Ambato. Se regeneró `i18n/bus_tracking.pot`: Odoo descartaba las traducciones que no estaban en la plantilla.
+5. **Fase 30, tableta** (`feature/tablet-cabina-v2`): tema día y noche; próxima parada a 60 px con la franja de la línea; estado real del GPS a partir de la última muestra, la cola y los permisos; bloqueo en marcha salvo SOS; SOS con acuse de la central; hoja de incidentes, login y selección rehechos sin emojis y con textos de 20 px o más. Se corrigieron dos fallos previos: tras el login un chofer con turno abierto caía en la selección de bus, y el refresco del turno se reiniciaba con cada cambio de estado (pedía `/driver/state` sin parar).
+6. **Fase 31, validación** (`chore/validacion-ux`): inspector de diseño, `qa/accesibilidad.py` (axe-core), capturas antes y después en `docs/calidad/evidencias/ux/`, protocolo de pruebas con personas.
+7. Entorno local: `scripts/dev_seed.py`, `qa/capturas_ui.py`, `qa/capturas_tablet.py` (la app en modo web contra el Odoo local).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite Odoo en base limpia (`--test-tags /bus_tracking`) | 213 pruebas, 0 fallos, 0 errores (antes del trabajo: 4 fallos y 2 errores) |
+| Tableta: Jest | 13 suites, 56 pruebas PASS |
+| Tableta: `tsc --noEmit` y `expo lint --no-cache` | Sin errores |
+| Contraste de tokens (`qa/contraste.py`) | 20 de 20 pares cumplen |
+| Accesibilidad del portal (axe, WCAG 2.1 A/AA, 7 páginas × 2 tamaños) | 0 problemas |
+| Inspector de diseño de la portada (1440, 768, 390 px) | 0 fallos, 1 advertencia (sin video, justificada) |
+| Flujos en navegador | Mi parada, SOS y su acuse, bloqueo en marcha e idiomas comprobados con capturas |
+
+### Pendiente o sin confirmar
+
+- Pruebas con 5 personas por perfil (`docs/calidad/12-validacion-ux.md`, §5).
+- La cabina en una tableta física: lectura a 1 m al sol y de noche, vibración, TalkBack.
+- Probar el panel con lector de pantalla (el recorrido con teclado se hizo el 2026-11-02 y se corrigieron tres problemas; ver `docs/calidad/12-validacion-ux.md`).
+- Que la universidad entregue teléfono y correo oficiales, fotos propias de sus buses y apruebe el nombre y la marca.
+- Las coordenadas de `scripts/dev_seed.py` son aproximadas y solo sirven para desarrollo.
+- No se desplegó en Azure ni se fusionó `develop` en `main`.
+
+
+## 2026-11-02: auditoría integral y su plan (fases 1 a 8)
+
+Auditoría del back, el front y la app de tableta: 63 hallazgos (5 críticos, 18 altos, 27 medios, 13 bajos) en `docs/PLAN-AUDITORIA.md`, con el plan por fases. El equipo decidió: quitar la contraseña del historial, choferes de portal, descartar posiciones sin turno y apagar el GPS al terminar el turno aunque no haya señal.
+
+### Qué se hizo
+
+1. **Historial de Git**: la contraseña del admin de producción salió de todos los commits de `main` y `develop` (reescritos en local con `filter-branch`); `scripts/clean-azure-db.sh` pasó a pedir `ADMIN_PASSWORD`. Falta el `push --force` y cambiar la contraseña (DEF-013).
+2. **Fase 1, credenciales** (`fix/credenciales-chofer`): sólo administradores emiten, revocan o leen la credencial QR; la credencial no sirve como sesión ni `login_badge` renueva sesiones; la tableta nunca guarda la credencial como sesión; *Cerrar sesión de la tableta* deja la credencial; choferes como usuarios de portal, con migración `16.0.1.2.0`.
+3. **Fase 2, ingesta y avisos** (`fix/ingesta-y-avisos`): duplicado concurrente sin 500; posiciones de buses sin turno descartadas (ajuste para pruebas con `curl`); push que sobrevive a errores de red sin repetir avisos; respuesta HTML de Traccar como error claro; parámetros numéricos seguros; `/track` acotado a 24 h; secreto por URL obsoleto.
+4. **Fase 3, turno de la tableta** (`fix/turno-tableta`): próxima parada por vuelta y en el sentido del viaje; no se inicia turno sin dirección del GPS; buses sin GPS marcados; rutas archivadas rechazadas; hora real de los incidentes (migración `16.0.1.3.0`); la tableta apaga el GPS si la oficina cierra el turno, termina el turno sin señal y lo cierra después, guarda incidentes ante errores 5xx, abandona envíos colgados a los 10 s, serializa la cola, intenta enviar lo guardado antes de borrarlo, muestra el último error del GPS, explica 429 y 5xx, guarda el token sólo en el almacén seguro, sólo acepta https y confirma el cambio de servidor; sin permiso de micrófono.
+5. **Fase 4, portal y panel** (`fix/portal-y-panel`): el límite del feed cuenta sólo las consultas fuera de caché; el limitador olvida direcciones quietas; el portal cuenta paradas en el sentido del bus; un SOS sin atender no sale de la cola; nombres de bus únicos; mapa en vivo que redibuja paradas y trazados editados, avisa errores y saca del foco los marcadores filtrados; una sola dirección de teselas en Ajustes (CARTO, con atribución también en la tableta).
+6. **Fase 5, validaciones** (`fix/validaciones-modelo`): paradas, radio, color y periodo de grabación validados en el modelo; trazado medido en caché por ruta; una queja demasiado rápida pide reenviar en vez de perderse.
+7. **Fase 6, traducciones** (`chore/traducciones`): textos de choferes, rutas y recorridos en inglés con su traducción; `.pot` y `es.po` regenerados desde el módulo (sin los seis modelos borrados, sin entradas vacías); `qa/traducciones.py` lo comprueba.
+8. **Fase 7, CI y scripts** (`ci/pipeline-completo`, `chore/scripts-produccion`): el CI corre el lint de la tableta, flake8 completo en Python 3.9, el chequeo de traducciones y la suite de Odoo contra Postgres; `scripts/reset-prod.sh` reemplaza a `clean-azure-db.sh` (confirmación, respaldo previo, `init-prod.sh`, sin secretos); Traccar fijado en 6.16.0; Mailpit fuera del entorno de desarrollo.
+9. **Fase 8, documentación** (`docs/actualizacion-auditoria`): README, guía del chofer, producción, plan de la app, ISO 25010, guion de defensa y registro de defectos (DEF-011 a DEF-026).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite Odoo en base limpia, tras cada fase | 222 → 230 → 238 → 244 → 248 pruebas, 0 fallos, 0 errores |
+| Mismo comando que el CI (addons en solo lectura, `--addons-path` explícito, `grep` del resumen) | 248 pruebas, 0 fallos |
+| Tableta: Jest, `tsc --noEmit`, `expo lint` | 14 suites, 72 pruebas PASS; sin errores |
+| flake8 (`.flake8`) en el módulo y `dev_seed.py`; errores en `qa/` | Sin hallazgos |
+| `qa/traducciones.py` | 0 sin traducir, 0 modelos inexistentes (el `es.po` anterior: 38 y 6) |
+| Migración `16.0.1.2.0` en la base de desarrollo | `chofer1` y `chofer2` pasan a portal; `chofer1` entra por la API y `/web` lo saca del panel |
+| Caché del trazado (1.000 posiciones, trazado de 1.500 puntos) | 1,53 s → 0,76 s |
+
+### Problemas encontrados
+
+- La prueba de privacidad del feed falló al sumar el campo `dir`: era un cambio intencional y se actualizó la lista permitida.
+- El barrido del limitador partía del reloj del sistema y las pruebas usan un reloj propio: ahora empieza en la primera petición.
+- La validación de color rompió la prueba de inyección CSS: la prueba ahora mete el color malo por SQL, como dato viejo, y sigue comprobando la defensa del portal.
+- Al regenerar `es.po`, "Trips" heredó la traducción vieja "Tramos" y "Driver" la de "Conductor": se dio prioridad a las traducciones nuevas.
+- La primera actualización de la base de desarrollo chocó con los crons de Odoo en marcha (`could not serialize access`): hay que detener Odoo antes de `-u`.
+- `PAN-01` estaba mal diagnosticado: Odoo 16 ya recarga la ficha al cerrar el selector de paradas; sólo faltaba traducirlo.
+
+### Pendiente o sin confirmar
+
+- `git push --force-with-lease origin main develop` y cambiar la contraseña del admin (DEF-013).
+- El job `odoo-tests` del CI no se ha ejecutado en GitHub; se simuló en local con el mismo comando.
+- La suite en vivo, la auditoría aleatoria y las métricas (`qa/ejecutar_todo.sh`) siguen con los datos del 28-oct.
+- Turno real de dos vueltas en una tableta, con corte de red, SOS sin señal y cierre desde la oficina.
+- Los menús del panel siguen escritos en español en el código.
+
+### Corrida completa de QA (misma fecha)
+
+La primera corrida de `qa/ejecutar_todo.sh` la cortó Claude Code por falta de memoria del equipo. Se repitió por pasos (`odoo`, `suite`, `auditoria`, `metricas`), con Mailpit fuera y el Odoo de desarrollo detenido.
+
+| Prueba | Resultado |
+|---|---|
+| Odoo con cobertura (base desechable) | 250 pruebas, 0 fallos; cobertura 92,8 % |
+| Suite en vivo | 47 de 47 (antes: 44; las tres fallas eran cambios intencionales del plan) |
+| Auditoría aleatoria | 1.000 de 1.000; 0 respuestas 5xx inesperadas (los 503 de `/health` sin buses recientes son esperados) |
+| `X-Forwarded-For` falso | 10 respuestas 429 de 70: no burla el límite |
+| Cuadro de mando | 12 de 12 metas (el 28-oct: 8 de 12) |
+| Contraste / accesibilidad (axe, 7 páginas × 2 tamaños) | 20 de 20 / 0 problemas |
+| Capturas del portal y del panel | Cargan; el SOS de hace 13 h sigue en la cola de Atención |
+
+Problemas encontrados:
+
+- Un ajuste anterior de la suite en vivo cayó en E15 (trampa) en vez de E16 (envío rápido): ambos tenían el mismo texto.
+- La prueba de `X-Forwarded-For` y E21 usaban la línea real, que ahora sale de la caché y no cuenta en el límite: pasaron a una línea inexistente.
+- `qa/generar_docs.py` tenía cifras fijas del 28-oct (los 5xx se sumaban a mano y esa meta salía siempre "No"): ahora sale de los datos y la serie del 28-oct queda como dato histórico.
+- Faltaban pruebas de petición para `/bus_tracking/incident/ack`, `/stop/load` y `/stop/save` (cobertura de rutas 86,4 %): se agregaron. Dos llamadas que terminaban en error JSON (sin sesión y parada imposible) hacían fallar al azar otras pruebas HTTP con "Session expired" en el arnés de Odoo (1 error por corrida); se quitaron, porque esos casos ya los cubren otras pruebas. Sin ellas: 3 de 3 corridas limpias. La suite original también falló así 1 de 7 veces: es una intermitencia del arnés que conviene vigilar en el CI.
+- La base de desarrollo estaba en 16.0.1.2.0; se actualizó a 16.0.1.3.0 con Odoo detenido.
+
+Sin hacer: el informe PDF (`Informe_calidad_rastreo_buses.pdf`) sigue siendo el de la evaluación del 28-oct (texto redactado a mano y `reportlab` no instalado), las capturas de la tableta y la prueba en una tableta real.
+
+
+## 2026-11-02: app móvil adaptable y su auditoría de diseño (fases 32 a 37)
+
+### Qué se hizo
+
+Plan completo en `docs/PLAN-UI-MOVIL.md`. Rama de trabajo `feature/responsive-layout`; cada fase salió de ella en su propia rama y volvió con `--no-ff`.
+
+1. **Adaptabilidad.** La app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto menor a 600 dp es teléfono) y decide tamaños de letra, alto de controles y si los paneles van lado a lado o apilados. `Screen` cuida muescas, barras del sistema y teclado.
+2. **Fase 32, entorno de pruebas** (`chore/qa-movil`): `qa/mock_driver_api.py` (la API del chofer con escenarios normal, peor caso, una parada, vacío y bus ocupado), `qa/capturas_movil.py` (88 capturas web: 4 tamaños, día y noche) y `qa/capturas_android.py` (recorrido real en el emulador por tamaño y escala de fuente; restaura el emulador siempre).
+3. **Fase 33, avisos** (`fix/avisos-fijos`): `Notice` (palabra y forma, sin franja gruesa), prioridad pura de avisos, avisos fijos fuera del scroll, y la app manda su idioma a `/driver/state` (`pick_odoo_lang`; los choferes nuevos nacen en español).
+4. **Fase 34, respuesta táctil** (`feature/feedback-cabina`): `expo-haptics` en SOS, terminar turno y aviso de problema; SOS con relleno nativo, liberación de 200 ms y lógica de mantener probada aparte; respuesta inmediata al pulsar filas y chips.
+5. **Fase 35, tokens** (`refactor/tokens-diseno`): `space`, `border` y `shape` en `theme.ts`, guarda `spacing.test.ts` y color del texto del chip de la línea por contraste (`readableOn`, también en `qa/contraste.py`).
+6. **Fase 36, accesibilidad y contenido** (`feature/accesibilidad-contenido`): tope de escala de letra por tamaño, `Field`, estados vacíos, plurales (`tp`), distancias con el formato del idioma y, con letra al 130 % o más, páginas que hacen scroll con los botones principales a mano.
+7. **Fase 37, pulido** (`chore/pulido-plataforma`): listas de bus y línea con `FlatList` y filas memoizadas, movimiento de 200 ms al cambiar de parada, y el motivo por el que el gesto de atrás predictivo sigue apagado.
+8. Registro de defectos DEF-027 a DEF-034 en `qa/datos_calidad.py` y `docs/calidad/`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Tableta: Jest | 22 suites, 128 pruebas PASS |
+| Tableta: `tsc --noEmit` y `expo lint` | Sin errores ni avisos |
+| `python qa/contraste.py` | PASS, incluidos los chips de línea |
+| Flake8 del módulo y de `qa` (entorno virtual temporal) | 0 avisos |
+| Suite de Odoo con el comando del CI (`docker run`, base nueva) | 259 pruebas, 0 fallos, 0 errores |
+| Matriz web (4 tamaños, día y noche, 5 escenarios) | Sin desbordes horizontales ni errores de página |
+| Emulador Android (LDPlayer, Android 9) | Recorrido completo con fuente 1,0, 1,3 y 2,0 en teléfono y tableta |
+| Emulador, pasada final sobre el código definitivo | Cuatro tamaños con fuente 1,0 y teléfono vertical con 1,3, sin fallos; una primera pasada encontró que con dos avisos fijos desaparecía la próxima parada en un teléfono vertical bajo, y se corrigió (un solo aviso fijo con poca altura, el resto contado) |
+| SOS en el emulador | Mantener 1,1 s llena el botón y no dispara; al soltar se vacía |
+
+### Problemas encontrados
+
+- Con la fuente del sistema al 130 % o más el turno se desbordaba: a 1,3× desaparecía la próxima parada y a 2,0× el SOS y Terminar turno quedaban fuera de pantalla. La selección y los encabezados se desarmaban letra por letra. Se corrigió con páginas que hacen scroll, botón principal fijo y encabezados apilados (DEF-033).
+- Android informa un 130 % como `1.2999999`; la comparación `>= 1.3` no lo detectaba. Se añadió tolerancia y una prueba.
+- En el navegador, `flex: n` sobre un `ScrollView` queda anulado por su `flexGrow` base, y `flex: 0` colapsa un bloque; se usan propiedades explícitas.
+- Metro no recarga los cambios en esta ruta (tiene una "ó"): hay que reiniciar el servidor en cada prueba.
+- Se probó una vez contra producción con un usuario de chofer: se inició un turno del Bus 1 y se generó una alerta "Fuera de ruta" por la posición falsa del emulador. El turno se terminó y se cerró la sesión; **la alerta y el turno quedan en el historial** y conviene cerrarlos en Odoo. Desde entonces todo va contra el servidor simulado.
+
+### Pendiente o sin confirmar
+
+- Con Docker ya levantado se corrió la suite de Odoo: **259 pruebas, 0 fallos, 0 errores** con el comando exacto del CI. Incluye las de la fase 33: elegir el idioma de Odoo, el detalle de la alerta en español, inglés y kichwa con el usuario del chofer en inglés, y el idioma por defecto de un chofer nuevo.
+- `TestHttp` falla de forma intermitente cuando se corre con `docker compose run` (también sobre `develop`, 2 de 4 corridas: `Session expired` tras `authenticate('admin')`); con el comando del CI pasó 5 de 5. Parece un efecto del `odoo.conf` del compose (`proxy_mode`) o del volumen de datos compartido con el Odoo de desarrollo; no se investigó la causa.
+- La vibración, la fluidez del SOS bajo carga, el gesto de atrás y TalkBack solo se juzgan en un celular real; LDPlayer es Android 9 y no sirve para eso.
+- `expo-haptics` es un módulo nativo: las tabletas ya instaladas necesitan un build de EAS nuevo para vibrar.
+- El teclado en pantalla no apareció en LDPlayer, así que no se verificó cómo reacciona el formulario de ingreso.
+- La rama `feature/responsive-layout` no se ha fusionado a `develop`.
+
+## 2026-11-03: endurecimiento previo a la preview (dependencias, observabilidad, privacidad y operación)
+
+Parte del análisis de preparación para producción. Ramas de trabajo hijas de `feature/responsive-layout`, fusionadas con `--no-ff`.
+
+### Qué se hizo
+
+1. **Dependencias** (`chore/dependencias`): `npm audit fix` quitó las 2 vulnerabilidades altas (`@expo/cli`, `zod`); parches de Expo SDK 58 (`expo`, `expo-dev-client`, `expo-router`, `expo-task-manager`); Jest 29 a 30.5; `eas-cli` sale de las dependencias del proyecto y los scripts usan `npx eas-cli`; el `react` fijado a propósito para EAS se declara en `expo.install.exclude`. `expo-doctor`: 20 de 20. Quedan 11 avisos moderados de la cadena de herramientas de Expo (`glob`, `minimatch`, `@expo/*`), cuyo "arreglo" sería bajar Expo a la 51: no se aplicó.
+2. **Observabilidad** (`feature/observabilidad`): `/bus_tracking/health` informa la versión instalada del módulo; `POST /bus_tracking/driver/client_error` (con sesión de chofer, límite de 20 por minuto, entradas acotadas y saneadas) deja las fallas de la app en el registro de Odoo como `Tablet error`. La app registra los errores no atrapados con su pantalla, los guarda en una cola persistente (10, sin repetidos seguidos) y los envía al volver la señal; *Estado del GPS* muestra la última falla de los últimos 7 días.
+3. **Privacidad** (`feature/privacidad`): página pública `/privacidad` (es y en; el kichwa lee español) armada con los plazos reales de *Ajustes*, enlazada desde el pie y el formulario de quejas (o la política oficial si se configura); la app avisa al chofer al ingresar y antes de iniciar turno de que la oficina ve la posición; `docs/PRIVACIDAD.md` con el inventario y cómo atender un pedido de derechos.
+4. **Operación** (`chore/operaciones`): la cookie de sesión de Odoo sale con `Secure; SameSite=Lax` desde el proxy (probado con un Caddy real); `gitleaks` en el CI (`.gitleaks.toml`, solo permite la URL pública de teselas); `docs/OPERACION.md` (quién vigila el SOS, monitor, errores de tabletas, respaldos y ensayo de restauración, etiquetas y reversión, mantenimiento mensual).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo con el comando del CI (base nueva) | 276 pruebas, 0 fallos, 0 errores |
+| Tableta: Jest, `tsc`, `expo lint`, `expo-doctor` | 25 suites, 149 pruebas; sin errores; 20 de 20 |
+| Flake8 del módulo y de `qa`, `qa/traducciones.py` | 0 avisos, 0 sin traducir |
+| `caddy validate` del `Caddyfile` y prueba de la cookie | Configuración válida; `session_id` recibe `Secure; SameSite=Lax` y otras cookies no cambian |
+| `gitleaks` sobre el árbol | 0 hallazgos; detecta una clave falsa plantada (y no detecta una escrita en la misma línea que la URL permitida: límite documentado) |
+| Web de la app (login, selección, turno, GPS) | Sin errores de página ni desbordes |
+
+### Problemas encontrados
+
+- `gitleaks` sobre todas las ramas mostró que la contraseña de producción **sigue en `origin/main`** (commit `7d08bf3`): DEF-013 sigue abierto hasta el `git push --force-with-lease` de `main` y la rotación. Mi revisión anterior no la detectó (la clave lleva un carácter que mi patrón excluía), la de `gitleaks` sí.
+- La intermitencia de `TestHttp` con `docker compose run` no es por `proxy_mode` ni por el volumen compartido (6 de 6 corridas pasan en cada prueba); la causa sigue sin conocerse.
+- Un escape de barra invertida llegó colapsado al shell y rompió un literal de prueba; se arregló y no afecta al producto.
+
+### Pendiente o sin confirmar
+
+- La rotación de la contraseña del admin de producción y el `push --force` de `main` (los hace el equipo).
+- El panel de Traccar sigue público (`traccar.20.119.213.192.nip.io`) y la documentación aún dice que no se expone; el respaldo fuera del servidor, la jornada de campo con tableta física y el plan para Odoo 16 no se tocaron.
+- La política de privacidad es el texto del sistema: la universidad debe revisarla con quien lleve la protección de datos antes de adoptarla como oficial.
+- `expo-haptics` y los cambios de la app necesitan un build de EAS nuevo para llegar a las tabletas.
+
+## 2026-11-04: diagnóstico de transmisión GPS en vivo, corrección del webhook de Traccar (DEF-035/036) y adaptación para iOS CoreLocation (DEF-037/038)
+
+Resolución de incidencias reportadas en campo donde los teléfonos conectados no reflejaban posición en la plataforma web, creyendo inicialmente que se debía a descarte por inactividad o uso de ubicación simulada (*Fake GPS*).
+
+### Hipótesis y lluvia de ideas
+
+1. **Hipótesis 1 (Filtro de inmovilidad o Mock Location):** Se sospechó que Traccar o Android/iOS descartan ubicaciones si la velocidad es 0.0 km/h o la distancia es 0 m, o que el proveedor simulado no emitía pulsos continuos. *Resultado:* Descartada en Traccar/Android (Traccar no tiene filtros de distancia activos y Android Fused Provider emite tics regulares por `timeInterval`), pero **confirmada en iOS**, donde Apple CoreLocation suspende las actualizaciones si no hay desplazamiento físico.
+2. **Hipótesis 2 (Falta de turno activo en Odoo):** Odoo descarta posiciones de buses sin turno abierto (`accept_without_shift = False`). *Resultado:* El turno existía y estaba activo en Odoo para Bus 1 (`Shift id=5`), pero Odoo nunca recibía la petición HTTP.
+3. **Hipótesis 3 (Conectividad o proxy Caddy):** El subdominio `gps.20.119.213.192.nip.io` no era accesible o Caddy no enrutaba al puerto 5055. *Resultado:* Descartada. Caddy tenía certificados TLS válidos de Let's Encrypt y respondía 400 Bad Request ante peticiones sin parámetros (comportamiento esperado de OsmAnd).
+4. **Hipótesis 4 (Webhook Traccar -> Odoo desactivado):** Traccar recibía las posiciones pero no las enviaba a Odoo. *Resultado:* **Confirmada (Causa raíz principal DEF-035).** Faltaba la variable de entorno `FORWARD_ENABLE: "true"` en los archivos Docker Compose; sin ella, Traccar 6 no instancia el servicio de reenvío.
+5. **Hipótesis 5 (Saturación del pool de base de datos):** Odoo rechazaba el webhook por agotamiento de conexiones hacia Supabase. *Resultado:* **Confirmada (DEF-036).** El log de Odoo registraba `psycopg2.pool.PoolError: The Connection Pool Is Full` debido a `db_maxconn = 3`.
+6. **Hipótesis 6 (Inconsistencia en la interfaz móvil):** En la pantalla de Estado del GPS el identificador salía como `-` haciendo pensar que no había credenciales cargadas. *Resultado:* **Confirmada (DEF-037).** La vista leía la variable reactiva en memoria en vez de consultar `gpsStore` del almacenamiento asíncrono.
+7. **Hipótesis 7 (Comportamiento de CoreLocation en iOS):** En iPhone el GPS no envía datos si el usuario está quieto. *Resultado:* **Confirmada (DEF-038).** CoreLocation ignora `timeInterval` (parámetro exclusivo de Android) y `deferredUpdatesInterval` congela la entrega hasta detectar movimiento físico.
+
+### Qué se hizo
+
+1. **Diagnóstico de la infraestructura en producción (Azure VM `vm-buses`)**:
+   - Inspección remota mediante Azure CLI (`RG-BUSES-EASTUS2`).
+   - Verificación de los 3 contenedores: `rastreo-prod-proxy-1` (Caddy), `rastreo-prod-traccar-1` (Traccar), `rastreo-prod-odoo-1` (Odoo).
+   - Consulta a la base de datos de Odoo: se verificó que el **Bus 1** tenía `traccar_unique_id: b-5a7622ada23ff3c3` y un turno activo del chofer.
+2. **Corrección de Traccar y activación de reenvío (DEF-035)**:
+   - Se añadió `FORWARD_ENABLE: "true"` en `docker-compose.yml`, `docker-compose.prod.yml` y en el servidor de Azure.
+   - En Traccar 6+, definir `FORWARD_TYPE: "json"` y `FORWARD_URL` no es suficiente si `forward.enable` no está explícitamente en `true`.
+3. **Ampliación del pool de conexiones PostgreSQL (DEF-036)**:
+   - Se modificó `config/odoo.prod.conf` en el servidor de producción elevando `db_maxconn = 3` a `db_maxconn = 10`.
+   - Esto eliminó los errores `PoolError` frente al tráfico concurrente de Caddy, cron interno y webhook de Traccar sobre el pooler de Supabase.
+4. **Prueba de ingesta en vivo con Android / Fake GPS**:
+   - Tras reiniciar Traccar y Odoo, el teléfono Android transmitió coordenadas fijas a 0.0 km/h (`-1.270728, -78.624307`).
+   - Odoo comenzó a persistir cada paquete con intervalo exacto de 10 segundos, marcando el bus en estado "detenido" (`stopped`).
+   - `/bus_tracking/health` pasó de `503 Service Unavailable (stale)` a `200 OK (ok)`.
+5. **Corrección del identificador en pantalla de diagnóstico móvil (DEF-037)**:
+   - En `apps/conductor-tablet/app/gps.tsx`, la función `loadFacts` ahora consulta de forma asíncrona `gpsStore.get()`, garantizando que el `uniqueId` real se muestre en pantalla en lugar del guion `-`.
+6. **Adaptación para Apple CoreLocation en iOS (DEF-038)**:
+   - En `apps/conductor-tablet/src/gps/tracker.ts`, se eliminó `deferredUpdatesInterval: 10_000` (el cual en iOS bloquea las entregas hasta que haya desplazamiento).
+   - Se añadieron `showsBackgroundLocationIndicator: true` y `activityType: Location.ActivityType.AutomotiveNavigation`.
+   - Se implementó un **Stationary Heartbeat** cada 10 s: si no se han recibido tics del sistema en los últimos 9.5 s (porque el iPhone está quieto), solicita activamente `Location.getCurrentPositionAsync` y despacha el fix.
+   - Se agregó captura inmediata al presionar *Iniciar turno*.
+   - Se añadió un fallback automático a `Location.watchPositionAsync` en caso de ejecutarse en entornos sin soporte de background task manager (como Expo Go en iOS).
+   - En `apps/conductor-tablet/app.json` se configuraron `UIBackgroundModes: ["location", "fetch"]` e `isIosBackgroundLocationEnabled: true`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Ingesta HTTP OsmAnd en Traccar (`gps.20.119.213.192.nip.io`) | 200 OK; log registra `id: b-5a7622ada23ff3c3, lat: -1.26120, lon: -78.62540` |
+| Webhook Traccar -> Odoo con `FORWARD_ENABLE: true` | Webhook ejecutado con éxito; 5 posiciones de Bus 1 registradas de forma consecutiva cada 10 s |
+| Endpoint `/bus_tracking/health` en Azure | `HTTP/1.1 200 OK`, `{"status": "ok", "version": "16.0.1.3.0"}` |
+| Suite de pruebas unitarias móviles (Jest) | 25 suites pasadas, 149 pruebas OK (100% PASS) |
+| Verificación de tipos TypeScript en app móvil | `npm run typecheck` (`tsc --noEmit`) sin errores (PASS) |
+| Linter de Expo en app móvil | `npm run lint` (`expo lint`) 0 errores y 0 avisos (PASS) |
+| Generación de documentación de calidad (`qa/generar_docs.py`) | Regenerados 03, 04, 05 y 07; 38 defectos totales registrados (37 cerrados, 97.4%) |
+
+### Problemas encontrados
+
+- `FORWARD_ENABLE` faltaba en los archivos docker-compose porque durante la migración a Traccar 6 se asumió erróneamente que `FORWARD_TYPE=json` lo reemplazaba. Traccar 6 requiere ambos (DEF-035).
+- El límite de 3 conexiones en `odoo.prod.conf` provocaba fallas silenciosas en la recepción del webhook cuando coincidía con la ejecución de crons o peticiones del mapa en vivo (DEF-036).
+- `gps.tsx` mostraba un guion en *Dispositivo en Traccar* porque consultaba el snapshot en memoria de React antes de que se sincronizara, a pesar de que el valor ya estaba en `AsyncStorage` (DEF-037).
+- Apple CoreLocation en iOS no implementa temporizadores basados en tiempo (`timeInterval` es ignorado). Un dispositivo completamente estático deja de emitir actualizaciones de posición hasta que se fuerza un latido explícito o detecta movimiento (DEF-038).
+
+### Pendiente o sin confirmar
+
+- Compilar un nuevo build nativo de iOS (`npx eas-cli build --profile ios-altstore --platform ios`) para desplegar en el iPhone los permisos de `UIBackgroundModes` y el heartbeat de CoreLocation.
+- Probar el comportamiento del iPhone en un recorrido vehicular real en movimiento para validar el handoff entre el latido estacionario y los eventos continuos de desplazamiento de CoreLocation.
+

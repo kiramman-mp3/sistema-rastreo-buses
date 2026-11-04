@@ -1,14 +1,23 @@
 from datetime import datetime, timedelta
+from unittest.mock import patch
+
+from psycopg2 import IntegrityError
 
 from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
+from odoo.tools import mute_logger
 
 from .common import STOPS, BusCase, traccar_position
+from .test_driver_auth import make_driver
 
 
 @tagged('post_install', '-at_install')
 class TestIngest(BusCase):
+
+    def setUp(self):
+        super().setUp()
+        self.env['ir.config_parameter'].set_param('bus_tracking.accept_without_shift', '1')
 
     def test_position_is_stored_and_speed_converted(self):
         rec = self.bus._apply_position(
@@ -85,7 +94,8 @@ class TestIngest(BusCase):
         for minute, (name, lat, lon) in enumerate(STOPS):
             self.bus._apply_position(traccar_position(7, '2026-10-26T12:%02d:00Z' % (minute * 5), lat, lon))
             # a point between stops, so the bus leaves each radius
-            self.bus._apply_position(traccar_position(7, '2026-10-26T12:%02d:30Z' % (minute * 5), lat - 0.002, lon + 0.004))
+            when = '2026-10-26T12:%02d:30Z' % (minute * 5)
+            self.bus._apply_position(traccar_position(7, when, lat - 0.002, lon + 0.004))
         arrivals = self.env['bus.stop.arrival'].search(
             [('vehicle_id', '=', self.bus.id)], order='arrival_time asc')
         self.assertEqual(arrivals.mapped('stop_id.name'), [s[0] for s in STOPS])
@@ -155,3 +165,43 @@ class TestIngest(BusCase):
             'latitude': -33.4, 'longitude': -70.6})
         self.env['bus.position']._cron_cleanup()
         self.assertTrue(old.exists())
+
+    def test_a_concurrent_duplicate_is_skipped_without_error(self):
+        pos = traccar_position(7, '2026-10-26T12:00:00.000+00:00', -33.47, -70.62)
+        self.assertTrue(self.bus._apply_position(pos))
+        # The other request inserted it between our check and our insert.
+        with patch.object(type(self.env['bus.position']), 'search_count', return_value=0):
+            self.assertFalse(self.bus._apply_position(pos))
+        self.assertEqual(self.env['bus.position'].search_count([('vehicle_id', '=', self.bus.id)]), 1)
+
+    def test_positions_need_an_open_shift(self):
+        self.env['ir.config_parameter'].set_param('bus_tracking.accept_without_shift', '0')
+        payload = {'position': traccar_position(7, '2026-10-26T12:00:00Z', -33.47, -70.62)}
+        self.assertFalse(self.env['bus.vehicle']._process_traccar_payload(payload))
+        self.assertFalse(self.env['bus.position'].search_count([]))
+
+        driver = make_driver(self.env, login='chofer_ingesta')
+        shift = self.env['bus.shift'].create({
+            'user_id': driver.id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
+        self.assertTrue(self.env['bus.vehicle']._process_traccar_payload(payload))
+
+        shift._end()
+        later = {'position': traccar_position(7, '2026-10-26T12:01:00Z', -33.47, -70.62)}
+        self.assertFalse(self.env['bus.vehicle']._process_traccar_payload(later))
+        self.assertEqual(self.env['bus.position'].search_count([]), 1)
+
+    def test_numeric_settings_fall_back_on_typos(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.speed_limit', 'abc')
+        self.assertEqual(self.env['bus.alert']._param('speed_limit', 50), 50)
+        icp.set_param('bus_tracking.speed_limit', ' 60 ')
+        self.assertEqual(self.env['bus.alert']._param('speed_limit', 50), 60)
+        icp.set_param('bus_tracking.retention_days', 'nunca')
+        self.env['bus.position']._cron_cleanup()      # must not raise
+        icp.set_param('bus_tracking.complaint_retention_days', '9x')
+        self.env['bus.complaint']._cron_purge_contacts()
+
+    def test_bus_names_are_unique(self):
+        with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
+            self.env['bus.vehicle'].create({'name': self.bus.name})
+            self.env.flush_all()

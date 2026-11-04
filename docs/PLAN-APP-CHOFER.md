@@ -11,8 +11,8 @@ Una tableta en cada bus donde el chofer inicia sesión con su usuario de Odoo, e
 - La app es **nueva, en Expo (TypeScript)**. Traccar Client es Flutter, así que no se puede hacer un fork literal con Expo. Se replica su comportamiento (envío OsmAnd en segundo plano, cola sin red). Licencia Apache 2.0: se cita el origen en un `NOTICE`.
 - GPS por Traccar, igual que hoy (`GPS_DOMAIN` → Caddy → `traccar:5055`).
 - Login con usuario de Odoo por chofer, en el grupo `group_bus_driver`. Token propio, porque Odoo 16 solo acepta API keys en sus endpoints RPC.
-- Primera versión solo Android. iOS queda fuera.
-- Se necesita *development build* (EAS Build): Expo Go no sirve para GPS en segundo plano.
+- Primera versión orientada a Android en tabletas/teléfonos. Soporte para iOS añadido en 2026-11-04 (DEF-038: adaptación de Apple CoreLocation con stationary heartbeat, `showsBackgroundLocationIndicator` y `UIBackgroundModes: ["location", "fetch"]`).
+- Se necesita *development build* o standalone build (EAS Build): Expo Go no sirve para GPS en segundo plano.
 
 ## Mapa de fases
 
@@ -39,7 +39,7 @@ Hecho en la rama `feature/driver-backend` y merge `--no-ff` a `develop`.
 - Endpoints `POST /bus_tracking/driver/login`, `/logout`, `/me`, con límite de intentos y misma respuesta para clave mala y usuario sin rol.
 - Tests en `tests/test_driver_auth.py`.
 - El chofer se crea como usuario interno (`base.group_user`) más el grupo Driver. El grupo Driver no abre el panel por sí solo.
-- Suite del módulo (2026-10-30): 216 tests, 0 fallos.
+- Suite del módulo (2026-10-30): 216 tests, 0 fallos. Cifra de esa fecha; la actual está en `docs/PLAN-AUDITORIA.md` (248 tests el 2026-11-02).
 
 Criterio de aceptación: cumplido.
 
@@ -60,7 +60,7 @@ Archivos: `controllers/driver_api.py`, `models/bus_shift.py`, nuevo `models/bus_
 
 Tests: bus ocupado, turno doble, bus sin GPS, id de GPS ausente en `/me` y presente solo en `shift/start`, cierre de turnos viejos, incidente sin turno, coordenadas fuera de rango, `state` con parada alcanzada, chofer sin acceso a turnos ajenos.
 
-Criterio de aceptación: cubierto por `tests/test_driver_shift.py` (login → start → state/route/incident → end; el bus recibe `driver_id` = partner del chofer, que es lo que pinta el mapa en vivo). Suite del módulo 2026-10-30: 232 tests, 0 fallos.
+Criterio de aceptación: cubierto por `tests/test_driver_shift.py` (login → start → state/route/incident → end; el bus recibe `driver_id` = partner del chofer, que es lo que pinta el mapa en vivo). Suite del módulo 2026-10-30: 232 tests, 0 fallos (cifra de esa fecha; hoy son 248).
 
 ## Fase 18. Backend: vistas de staff y avisos
 
@@ -82,7 +82,9 @@ Carpeta `apps/conductor-tablet/`. Expo SDK vigente, TypeScript, `expo-router`.
 - Cliente de API con token en `expo-secure-store`. Un 401 cierra sesión y vuelve al login.
 - URL del servidor desde `EXPO_PUBLIC_ODOO_URL`, con valor por defecto para desarrollo.
 - Pantallas: Login, Selección de bus y ruta (buses con `available: false` aparecen deshabilitados), y recuperación del turno activo al abrir la app.
-- Tableta: orientación horizontal, textos y botones grandes, `expo-keep-awake`.
+- Tableta: textos y botones grandes, `expo-keep-awake`.
+- Pantallas adaptables: la app gira libre (`orientation: default`) y funciona en teléfono y tableta, vertical y horizontal. `src/ui/layout.ts` clasifica la pantalla (lado corto < 600 dp es teléfono) y decide: tamaños de texto (tableta 20-60 px, teléfono 16-40 px), alto mínimo de los controles (72 / 56 px), paneles lado a lado o apilados, y qué se oculta cuando falta altura. `Screen` (`src/ui/cabin.tsx`) cuida muescas, barras del sistema y teclado.
+- Gesto de atrás: `predictiveBackGestureEnabled` se mantiene en `false`. La tecla y el gesto de atrás funcionan igual; solo se evita la animación predictiva. Con un turno abierto, un gesto de atrás accidental sobre la pantalla del turno es un riesgo, y el emulador de pruebas (LDPlayer, Android 9) no puede validarlo. Reabrir cuando haya un Android 14 o superior real para probar login, selección, turno, incidente y GPS.
 - Herramientas: `tsc --noEmit`, `expo lint`, `jest-expo`.
 - `eas.json` con perfil `development` (APK).
 
@@ -103,6 +105,14 @@ Archivos en `src/gps/`.
 - Atribución a Traccar Client en `NOTICE`.
 
 Tests: construcción de la URL OsmAnd (conversión de unidades), cola (orden, reintento, tope), tarea con ubicación simulada.
+
+### Adaptación para iOS y corrección de reenvío Traccar (2026-11-04, DEF-035 a DEF-038)
+
+- **Diferencia CoreLocation vs Android**: En Android `timeInterval: 10_000` emite pulsos periódicos continuos del proveedor GNSS. En iOS, Apple CoreLocation ignora `timeInterval` y suspende las emisiones si el dispositivo está detenido. El parámetro `deferredUpdatesInterval` agravaba esto congelando los eventos hasta detectar desplazamiento físico.
+- **Stationary Heartbeat**: En `src/gps/tracker.ts`, se incorporó un latido periódico cada 10 s que verifica si han transcurrido más de 9.5 s sin eventos de posición. En reposo, ejecuta `Location.getCurrentPositionAsync` para emitir la coordenada fija a velocidad 0.0 km/h.
+- **Configuración nativa iOS**: En `app.json` se definieron `UIBackgroundModes: ["location", "fetch"]`, `showsBackgroundLocationIndicator: true` y `activityType: Location.ActivityType.AutomotiveNavigation`.
+- **Fallback en primer plano**: Si la app corre sin gestor de tareas en segundo plano (p. ej. Expo Go en iOS), conmuta de manera segura a `Location.watchPositionAsync`.
+- **Reenvío en Traccar 6 (DEF-035)**: Se requiere `FORWARD_ENABLE: "true"` en docker-compose para que Traccar reenvíe por HTTP POST JSON las posiciones a Odoo.
 
 Criterio de aceptación: URL OsmAnd (nudos, timestamp en segundos), cola (orden, reintento, topes) y tarea con ubicación simulada cubiertos por Jest. `tsc --noEmit`, `expo lint` y 20 tests: PASS. El id se pide en permisos **antes** de `shift/start`. Falta la prueba con pantalla apagada 30 min y cola 5 min sin red (fase 22, development build).
 
@@ -131,6 +141,8 @@ Criterio de aceptación (código): guía del chofer, sección de producción, RE
 
 ## Fase 25. App: ergonomía de cabina, cadencia headway y SOS anti-vibración
 
+> **Corrección (2026-11-02).** La barra de cadencia de esta fase usaba datos fijos y podía pedir a un bus fuera de ruta que acelerara; se eliminó en la fase 26. La confirmación de llegada no registraba nada y también se quitó. Los "72 px mínimos" no se cumplían en todos los botones. La cabina se rehízo en la fase 30 (`docs/PLAN-UX.md`); lo que sigue describe la versión anterior.
+
 Hecho en la rama `feature/driver-tablet-shift` y merge `--no-ff` a `develop`.
 
 - **Ergonomía visual y táctil para montaje en tablero (a 100 cm de los ojos):**
@@ -157,7 +169,7 @@ Hecho en la rama `feature/driver-tablet-shift` y merge `--no-ff` a `develop`.
 - El id de dispositivo sigue siendo la única credencial del lado de Traccar. Mitigación: solo se entrega durante un turno autenticado. Opcional: rotarlo al terminar el turno.
 - Android puede detener la tarea de GPS por ahorro de batería. Mitigación: servicio en primer plano y exclusión de optimización.
 - Las contraseñas de los choferes las gestiona Odoo. Definir quién crea los usuarios y cómo se restablecen.
-- Fuera de alcance, solo anotado: credenciales de Traccar en texto plano (`traccar_api.py:84-85`) y defectos DEF-008 a DEF-010 del webhook.
+- Fuera de alcance, solo anotado: credenciales de Traccar en texto plano (parámetros `bus_tracking.traccar_user` y `bus_tracking.traccar_password`, que lee `bus.traccar.api._get_conf`) y defectos DEF-008 a DEF-010 del webhook.
 
 ## Flujo de trabajo en Git
 

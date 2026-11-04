@@ -39,7 +39,8 @@ class TestOffRoute(BusCase):
         self.bus._apply_position(traccar_position(7, when.strftime('%Y-%m-%dT%H:%M:%SZ'), lat, lon, 10.0))
 
     def open_alerts(self):
-        return self.env['bus.alert'].search([('vehicle_id', '=', self.bus.id), ('kind', '=', 'off_route'), ('state', '=', 'open')])
+        return self.env['bus.alert'].search(
+            [('vehicle_id', '=', self.bus.id), ('kind', '=', 'off_route'), ('state', '=', 'open')])
 
     def test_far_from_the_line_between_the_stops_opens_an_alert_and_returning_closes_it(self):
         mid_lat = (self.stop['Terminal'].latitude + self.stop['Plaza'].latitude) / 2
@@ -85,7 +86,8 @@ class TestComplaintsAreReadOnlyInTheSystem(TransactionCase):
     def test_staff_cannot_create_or_delete_a_complaint_but_can_update_it(self):
         manager = self.env['res.users'].create({
             'name': 'Gestor', 'login': 'gestor@example.org',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_manager').id])]})
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_manager').id])]})
         complaint = self.env['bus.complaint'].create({'description': 'El bus no paro en la parada.'})
         with self.assertRaises(AccessError):
             self.env['bus.complaint'].with_user(manager).create({'description': 'No deberia poder crearla.'})

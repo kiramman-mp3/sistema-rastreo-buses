@@ -2,8 +2,7 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models
 
-from .geo import PathMeasure
-from .utils import MOVING_ABOVE_KMH
+from .utils import MOVING_ABOVE_KMH, int_param
 
 KINDS = [
     ('speeding', "Speeding"),
@@ -75,8 +74,7 @@ class BusAlert(models.Model):
     # ------------------------------------------------------------------
     @api.model
     def _param(self, key, default):
-        value = self.env['ir.config_parameter'].sudo().get_param('bus_tracking.' + key)
-        return int(value) if value not in (False, None, '') else default
+        return int_param(self.env, 'bus_tracking.' + key, default)
 
     @api.model
     def _open_alert(self, vehicle, kind, start_time, **vals):
@@ -125,15 +123,14 @@ class BusAlert(models.Model):
     def _check_off_route(self, vehicle, fix_time, open_alert):
         """Alert when a bus stays away from the line that joins the stops of its route."""
         limit = self._param('off_route_meters', 150)
-        lines = vehicle.route_id._map_lines() if limit > 0 and vehicle.route_id else []
-        points = lines[0]['points'] if lines else []
-        if not points or vehicle.current_stop_id:
+        measure = vehicle.route_id._path_measure() if limit > 0 and vehicle.route_id else None
+        if not measure or vehicle.current_stop_id:
             if vehicle.off_route_since:
                 vehicle.off_route_since = False
             if open_alert:
                 open_alert._close(fix_time)
             return
-        _along, offset = PathMeasure(points).locate(vehicle.last_latitude, vehicle.last_longitude)
+        _along, offset = measure.locate(vehicle.last_latitude, vehicle.last_longitude)
         if offset <= limit:
             vehicle.off_route_since = False
             if open_alert:
@@ -192,4 +189,5 @@ class BusAlert(models.Model):
                 'tag': 'bus-alert',
             }
             push._send_to_managers(payload)
-        pending.write({'notified': True})
+            # Marked one by one: whatever happens to the next one, this one is never sent twice.
+            alert.notified = True

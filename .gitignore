@@ -8,4 +8,8 @@ __pycache__/
 apps/*/node_modules/
 apps/*/.expo/
 *.apk
+*.ipa
 dist-mobile/
+.taste-skill/
+.agents/
+/assets/

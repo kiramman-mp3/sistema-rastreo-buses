@@ -1,528 +1,274 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Institutional UTA Transit emblem -->
+    <!-- Minimalist bus brand mark with the page colors: Granate #7A1A22, Señal #FFC62B, Tinta #172025, Blanco #FFFFFF -->
     <template id="brand_mark">
-        <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false" class="uta-brand-icon" width="40" height="40">
-            <defs>
-                <linearGradient id="utaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#8B1D24"/>
-                    <stop offset="100%" stop-color="#5E1217"/>
-                </linearGradient>
-            </defs>
-            <rect width="40" height="40" rx="10" fill="url(#utaGrad)"/>
-            <!-- Stylized transit bus silhouette in crisp white -->
-            <path d="M11 11C11 9.34315 12.3431 8 14 8H26C27.6569 8 29 9.34315 29 11V23C29 24.6569 27.6569 26 26 26H14C12.3431 26 11 24.6569 11 23V11Z" fill="#FFFFFF"/>
-            <rect x="13" y="11" width="14" height="6.5" rx="1.5" fill="#8B1D24"/>
-            <circle cx="15" cy="21.5" r="1.5" fill="#D97706"/>
-            <circle cx="25" cy="21.5" r="1.5" fill="#D97706"/>
-            <rect x="18" y="21" width="4" height="1.5" rx="0.75" fill="#0F172A"/>
-            <rect x="13.5" y="26" width="3" height="4" rx="1.5" fill="#FFFFFF"/>
-            <rect x="23.5" y="26" width="3" height="4" rx="1.5" fill="#FFFFFF"/>
+        <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false" class="marca-bus">
+            <!-- Side mirrors -->
+            <rect x="2" y="11" width="1.5" height="4.5" rx="0.75" fill="#7A1A22"/>
+            <rect x="28.5" y="11" width="1.5" height="4.5" rx="0.75" fill="#7A1A22"/>
+            <!-- Wheels -->
+            <rect x="5.5" y="25" width="4.5" height="4" rx="1.5" fill="#172025"/>
+            <rect x="22" y="25" width="4.5" height="4" rx="1.5" fill="#172025"/>
+            <!-- Main Bus Body -->
+            <rect x="4" y="4" width="24" height="23" rx="5" fill="#7A1A22"/>
+            <!-- Route Display Banner -->
+            <rect x="9.5" y="6.5" width="13" height="3" rx="1.2" fill="#172025"/>
+            <line x1="12" y1="8" x2="20" y2="8" stroke="#FFC62B" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- Windshield -->
+            <rect x="6.5" y="11" width="19" height="8.5" rx="2" fill="#172025"/>
+            <line x1="16" y1="11" x2="16" y2="19.5" stroke="#7A1A22" stroke-width="1.2"/>
+            <line x1="9" y1="13" x2="13.5" y2="13" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1" stroke-linecap="round"/>
+            <!-- Headlights -->
+            <circle cx="8.5" cy="23.5" r="1.75" fill="#FFC62B"/>
+            <circle cx="23.5" cy="23.5" r="1.75" fill="#FFC62B"/>
+            <!-- Grille / Bumper -->
+            <rect x="12.5" y="22.5" width="7" height="2" rx="0.75" fill="#172025"/>
         </svg>
     </template>
 
-    <!-- Shared Institutional Navigation Header -->
-    <template id="portal_header" name="UTA Public Portal Header">
-        <header class="site-header">
-            <div class="wrap header-inner">
-                <a class="header-brand marca" href="/" t-attf-aria-label="#{brand}, inicio">
+    <!-- Shared head of every public page. The inline line only marks that scripts run, so
+         entrances can hide content without ever hiding it from a browser without script. -->
+    <template id="site_head" name="Public site head">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+        <meta name="theme-color" content="#F1F3F2"/>
+        <meta name="description" t-att-content="s['home_lead']"/>
+        <link rel="icon" type="image/svg+xml" href="/bus_tracking/static/img/favicon.svg"/>
+        <link rel="alternate icon" type="image/png" href="/bus_tracking/static/img/favicon.png"/>
+        <link rel="preload" href="/bus_tracking/static/fonts/atkinson-400.woff2" as="font" type="font/woff2" crossorigin=""/>
+        <link rel="preload" href="/bus_tracking/static/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin=""/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/site.css?v=#{asset_v}"/>
+        <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/pages.css?v=#{asset_v}"/>
+        <script>document.documentElement.classList.add('js');</script>
+    </template>
+
+    <template id="portal_header" name="Public site header">
+        <a class="saltar" href="#contenido" t-esc="s['skip']"/>
+        <header class="cabecera">
+            <div class="marco">
+                <a class="marca" href="/" t-att-aria-label="brand">
                     <t t-call="bus_tracking.brand_mark"/>
-                    <div class="brand-text">
-                        <span class="brand-title"><t t-esc="brand"/></span>
-                        <span class="brand-sub">Universidad Técnica de Ambato</span>
-                    </div>
+                    <span t-esc="brand"/>
                 </a>
-                <nav class="header-nav" aria-label="Navegación principal">
-                    <a t-attf-class="nav-item #{'active' if active_nav == 'inicio' else ''}" href="/">Inicio</a>
-                    <a t-attf-class="nav-item #{'active' if active_nav == 'rutas' else ''}" href="/rutas">Rutas y Paradas</a>
-                    <a class="nav-item" href="/#nosotros">Sobre el Servicio</a>
-                    <a class="nav-item" href="/#novedades">Novedades</a>
-                    <a t-attf-class="nav-item #{'active' if active_nav == 'quejas' else ''}" href="/quejas">Atención / Quejas</a>
+                <nav t-att-aria-label="s['nav_lines']">
+                    <a href="/rutas" t-att-aria-current="'page' if active_nav == 'rutas' else None" t-esc="s['nav_lines']"/>
+                    <a href="/quejas" t-att-aria-current="'page' if active_nav == 'quejas' else None" t-esc="s['nav_write']"/>
                 </nav>
-                <div class="header-actions">
-                    <form t-if="languages and len(languages) &gt; 1" method="get" class="lang-form header-lang-form">
+                <div class="cabecera-acciones">
+                    <form t-if="languages and len(languages) &gt; 1" method="get" class="idiomas">
                         <t t-foreach="languages.items()" t-as="entry">
-                            <button type="submit" name="lang" t-att-value="entry[0]"
-                                    t-attf-class="lang #{'activa' if entry[0] == lang else ''}"
-                                    t-att-lang="entry[0]" t-att-aria-current="'true' if entry[0] == lang else None"
-                                    t-esc="entry[1]"/>
+                            <button type="submit" name="lang" t-att-value="entry[0]" t-att-lang="entry[0]"
+                                    t-att-aria-label="entry[1]" t-att-aria-current="'true' if entry[0] == site_lang else None">
+                                <span class="largo" t-esc="entry[1]"/><span class="corto" aria-hidden="true" t-esc="entry[0]"/>
+                            </button>
                         </t>
                     </form>
-                    <a class="btn btn-header-login" href="/web/login">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                    <a href="/web/login" class="boton-acceso" t-att-aria-label="s.get('staff_login', 'Iniciar sesión')" t-att-title="s.get('staff_login', 'Iniciar sesión')">
+                        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false">
+                            <path fill-rule="evenodd" d="M10 2a4 4 0 100 8 4 4 0 000-8zm-6 14a6 6 0 1112 0H4z" clip-rule="evenodd"/>
                         </svg>
-                        <span>Portal Chofer / Operaciones</span>
+                        <span t-esc="s.get('staff_login', 'Iniciar sesión')"/>
                     </a>
                 </div>
             </div>
         </header>
     </template>
 
-    <!-- Shared Dark Institutional Footer -->
-    <template id="portal_footer" name="UTA Public Portal Footer">
-        <footer class="footer-wrap">
-            <!-- Contact Ribbon -->
-            <div class="footer-contact-ribbon">
-                <div class="wrap ribbon-inner">
-                    <div class="ribbon-brand">
-                        <t t-call="bus_tracking.brand_mark"/>
-                        <div class="ribbon-brand-info">
-                            <span class="ribbon-name"><t t-esc="brand"/></span>
-                            <span class="ribbon-sub">Universidad Técnica de Ambato</span>
-                        </div>
-                    </div>
-                    <div class="ribbon-channels">
-                        <a href="tel:+59332848487" class="ribbon-contact-item">
-                            <span class="contact-icon">📞</span>
-                            <span>+593 (3) 284-8487</span>
-                        </a>
-                        <a href="mailto:transporte@uta.edu.ec" class="ribbon-contact-item">
-                            <span class="contact-icon">✉️</span>
-                            <span>transporte@uta.edu.ec</span>
-                        </a>
-                    </div>
-                    <div class="ribbon-social">
-                        <a href="https://facebook.com" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook UTA">
-                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                        </a>
-                        <a href="https://twitter.com" target="_blank" rel="noopener" class="social-icon" aria-label="X / Twitter UTA">
-                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                        </a>
-                        <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram UTA">
-                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                        </a>
-                        <a href="https://youtube.com" target="_blank" rel="noopener" class="social-icon" aria-label="YouTube UTA">
-                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                        </a>
-                    </div>
+    <template id="portal_footer" name="Public site footer">
+        <footer class="pie">
+            <div class="marco">
+                <div class="fila">
+                    <span t-esc="s['footer_what']"/>
+                    <nav t-att-aria-label="s['footer_what']">
+                        <a href="/rutas" t-esc="s['nav_lines']"/>
+                        <a href="/quejas" t-esc="s['nav_write']"/>
+                        <a t-att-href="privacy_link or '/privacidad'" t-esc="s['privacy_more']"/>
+                        <a t-if="contact and contact['phone']" t-attf-href="tel:#{contact['phone_href']}" t-esc="contact['phone']"/>
+                        <a t-if="contact and contact['email']" t-attf-href="mailto:#{contact['email']}" t-esc="contact['email']"/>
+                        <a href="/web/login" t-esc="s['staff']"/>
+                    </nav>
+                    <span class="fin"><t t-esc="datetime.date.today().year"/> · <t t-esc="brand"/></span>
                 </div>
-            </div>
-
-            <!-- Footer Navigation Columns -->
-            <div class="wrap footer-columns-grid">
-                <div class="footer-nav-col">
-                    <h4 class="footer-col-title">Servicios al Pasajero</h4>
-                    <ul class="footer-links-list">
-                        <li><a href="/rutas">Rutas Satelitales en Vivo</a></li>
-                        <li><a href="/rutas">Mapa de Paradas y Terminales</a></li>
-                        <li><a href="/rutas">Horarios y Frecuencias Académicas</a></li>
-                        <li><a href="/quejas">Buzón de Incidencias y Sugerencias</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-nav-col">
-                    <h4 class="footer-col-title">Campus Universitarios</h4>
-                    <ul class="footer-links-list">
-                        <li><span class="campus-item-text"><strong>Campus Huachi:</strong> Av. Los Chasquis y Río Guayllabamba</span></li>
-                        <li><span class="campus-item-text"><strong>Campus Ingahurco:</strong> Av. Colombia y Chile</span></li>
-                        <li><span class="campus-item-text"><strong>Campus Querochaca:</strong> Sector Cevallos</span></li>
-                    </ul>
-                </div>
-
-                <div class="footer-nav-col">
-                    <h4 class="footer-col-title">Soporte y Normativa</h4>
-                    <ul class="footer-links-list">
-                        <li><a href="/quejas">Reglamento de Transporte Institucional</a></li>
-                        <li><a href="/quejas">Protocolo de Seguridad y Emergencias</a></li>
-                        <li><a href="/quejas">Reporte de Pérdidas de Objetos</a></li>
-                        <li><a href="/web/login">Portal de Operaciones para Choferes</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-nav-col">
-                    <h4 class="footer-col-title">Enlaces Institucionales</h4>
-                    <ul class="footer-links-list">
-                        <li><a href="https://uta.edu.ec" target="_blank" rel="noopener">Portal Oficial UTA</a></li>
-                        <li><a href="https://sga.uta.edu.ec" target="_blank" rel="noopener">Sistema SGA Estudiantil</a></li>
-                        <li><a href="https://uta.edu.ec" target="_blank" rel="noopener">Dirección de Bienestar Universitario</a></li>
-                        <li><a href="https://uta.edu.ec" target="_blank" rel="noopener">Biblioteca General UTA</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Copyright Bar -->
-            <div class="footer-bottom-bar">
-                <div class="wrap bottom-bar-inner">
-                    <p class="bottom-copy">© <t t-esc="datetime.date.today().year"/> Universidad Técnica de Ambato. Dirección de Bienestar Universitario · Todos los derechos reservados.</p>
-                    <p class="bottom-location">Ambato, Tungurahua, Ecuador</p>
-                </div>
+                <p class="creditos">
+                    <t t-esc="s['photos_credit']"/>
+                    <a href="https://commons.wikimedia.org/wiki/File:Ambato_Avenida_Atahualpa_seen_from_the_entrance_to_Mall_de_los_Andes.jpg" rel="noopener">Ymblanter</a> (CC BY-SA 4.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:VIENDO_AL_INTERCAMBIADOR_HUACHI_GRANDE_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a> (CC BY 3.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:Fachada_nocturna_del_Terminal_Terrestre_Sur_de_Ambato.jpg" rel="noopener">Martín Vasco</a> (CC BY-SA 4.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:COLISEO_UNIVERSITARIO_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a> (CC BY 3.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:Vista_panor%C3%A1mica_de_la_ciudad_de_Ambato,_Tungurahua,_Ecuador.jpg" rel="noopener">Martín Vasco</a> (CC BY-SA 4.0),
+                    <a href="https://commons.wikimedia.org/wiki/File:Volc%C3%A1n_Tungurahua_Riobamba_-_Ecuador.jpg" rel="noopener">David Torres Costales</a> (CC BY-SA 3.0).
+                </p>
             </div>
         </footer>
     </template>
 
+    <!-- A line as a list of stops. Works without script (a plain list); site.js turns each stop into
+         a "my stop" button and places the live buses between the stops. -->
+    <template id="stop_line" name="Stop line">
+        <ol class="linea" t-attf-style="--c: #{line['color']}" t-att-data-linea="line['code']"
+            t-att-data-stops="line['stops_json']" t-att-data-i18n="line_i18n">
+            <li t-foreach="line['stops']" t-as="stop_name">
+                <span class="parada"><span class="punto"/><span class="nombre" t-esc="stop_name"/></span>
+            </li>
+        </ol>
+    </template>
+
     <template id="landing" name="Bus Tracking landing">
         <t t-call="web.layout">
-            <t t-set="title"><t t-esc="brand"/> | Universidad Técnica de Ambato</t>
-            <t t-set="body_classname" t-value="'o_bus_landing'"/>
-            <t t-set="head">
-                <meta name="description" content="Portal oficial de transporte de la Universidad Técnica de Ambato (UTA). Monitoreo en tiempo real de rutas y paradas universitarias."/>
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-                <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
-                <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/landing/landing.css?v=#{asset_v}"/>
-            </t>
-
-            <!-- Main Navigation Header -->
-            <t t-set="active_nav" t-value="'inicio'"/>
+            <t t-set="title"><t t-esc="brand"/> · <t t-esc="s['home_title']"/></t>
+            <t t-set="html_data" t-value="{'lang': 'es-EC' if site_lang == 'es' else ('qu' if site_lang == 'qu' else 'en')}"/>
+            <t t-set="body_classname" t-value="'o_bus_site o_bus_landing'"/>
+            <t t-set="head"><t t-call="bus_tracking.site_head"/></t>
             <t t-call="bus_tracking.portal_header"/>
 
-            <main>
-                <!-- Hero Section Empático y Humano -->
-                <section class="hero-section">
-                    <div class="hero-backdrop" style="background-image: url('/bus_tracking/static/img/landing/hero-bus.jpg');">
-                        <div class="hero-overlay"></div>
+            <main id="contenido">
+                <!-- First screen: the question, the stop search, and the busiest line working. -->
+                <section class="marco inicio-hero">
+                    <div class="hero-texto">
+                        <h1 class="entra" t-esc="s['home_title']"/>
+                        <p class="lead entra" style="--i: 1" t-esc="s['home_lead']"/>
+                        <form action="/rutas" method="get" role="search" class="buscador entra" style="--i: 2">
+                            <label class="sr-only" for="buscar-parada" t-esc="s['search_label']"/>
+                            <input type="search" id="buscar-parada" name="q" list="paradas" autocomplete="off"
+                                   t-att-placeholder="s['search_placeholder']"/>
+                            <button class="boton" type="submit" t-esc="s['search_go']"/>
+                        </form>
+                        <datalist id="paradas">
+                            <option t-foreach="stop_names" t-as="name" t-att-value="name"/>
+                        </datalist>
+                        <p class="total entra" style="--i: 3">
+                            <t t-if="total_buses == 1" t-esc="s['buses_now_one']"/>
+                            <t t-elif="total_buses" t-esc="s['buses_now_total'].format(n=total_buses)"/>
+                            <t t-else="" t-esc="s['buses_now_none']"/>
+                        </p>
                     </div>
-                    <div class="wrap hero-wrap">
-                        <div class="hero-text-block">
-                            <!-- Live Network Status Pill Bar -->
-                            <div class="hero-network-banner">
-                                <span class="network-pulse"></span>
-                                <span class="network-status-text">
-                                    <strong>Red Operativa:</strong>
-                                    <t t-if="total_active_buses">
-                                        <t t-esc="total_active_buses"/> buses en servicio regular
-                                    </t>
-                                    <t t-else="">
-                                        Unidades en circulación regular
-                                    </t>
-                                    · Frecuencia: 8-12 min
+
+                    <div t-if="featured" class="fragmento entra" style="--i: 2" data-ui="">
+                        <div class="fragmento-cabeza">
+                            <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
+                            <a class="fragmento-nombre" t-attf-href="/rutas/#{featured['code']}" t-esc="featured['name']"/>
+                            <span class="vivo" data-vivo="" t-esc="s['searching']"/>
+                        </div>
+                        <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['featured_hint']"/>
+                        <t t-set="line" t-value="featured"/>
+                        <t t-call="bus_tracking.stop_line"/>
+                    </div>
+                    <div t-else="" class="aviso">
+                        <strong t-esc="s['no_routes']"/>
+                    </div>
+                </section>
+
+                <!-- Every line, as two-ended rows: name on the left, buses now on the right. -->
+                <section class="marco inicio-lineas" id="lineas" aria-labelledby="titulo-lineas">
+                    <h2 id="titulo-lineas" class="entra" t-esc="s['lines_title']"/>
+                    <ul class="filas">
+                        <li t-foreach="lines" t-as="l" class="entra" t-attf-style="--i: #{l_index}">
+                            <a class="fila" t-attf-href="/rutas/#{l['code']}">
+                                <span class="chip-linea" t-attf-style="background: #{l['color']}" t-esc="l['code']"/>
+                                <span class="fila-nombre">
+                                    <strong t-esc="l['name']"/>
+                                    <span t-if="l['stops']" class="fila-sub">
+                                        <t t-esc="s['line_from_to'].format(a=l['stops'][0], b=l['stops'][-1])"/> ·
+                                        <t t-esc="s['line_stops_n'].format(n=len(l['stops']))"/>
+                                    </span>
                                 </span>
-                                <a href="/rutas" class="network-banner-link">Ver mapa en vivo →</a>
+                                <span t-attf-class="fila-valor #{'con-buses' if l['buses'] else ''}"
+                                      t-esc="s['buses_in_service'].format(n=l['buses']) if l['buses'] else s['no_service']"/>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- How it works: three statements; the fragment beside them changes with each one. -->
+                <section t-if="featured" class="marco inicio-como" aria-labelledby="titulo-como">
+                    <h2 id="titulo-como" t-esc="s['how_title']"/>
+                    <div class="como">
+                        <ol class="como-pasos">
+                            <li data-paso="1"><p class="frase" t-esc="s['how_1']"/><p t-esc="s['how_1b']"/></li>
+                            <li data-paso="2"><p class="frase" t-esc="s['how_2']"/><p t-esc="s['how_2b']"/></li>
+                            <li data-paso="3"><p class="frase" t-esc="s['how_3']"/><p t-esc="s['how_3b']"/></li>
+                        </ol>
+                        <div class="como-escenario" data-ui="" data-estado="1" aria-hidden="true">
+                            <div class="fragmento-cabeza">
+                                <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
+                                <span class="fragmento-nombre" t-esc="featured['name']"/>
                             </div>
-
-                            <h1 class="hero-headline">Muévete seguro hacia el campus</h1>
-                            <p class="hero-subtext">Consulta recorridos, horarios y buses en tiempo real sin complicaciones. Conectividad puntual entre facultades y campus universitarios para toda la comunidad académica.</p>
-
-                            <!-- Predictive Quick Search Box -->
-                            <div class="hero-search-card">
-                                <form action="/rutas" method="get" class="hero-search-form">
-                                    <div class="search-input-group">
-                                        <span class="search-field-icon">🔍</span>
-                                        <input type="text" name="q" id="hero-stop-search"
-                                               class="hero-search-input"
-                                               placeholder="¿A qué facultad o parada te diriges? Ej. Biblioteca, Huachi..."
-                                               list="stops-datalist" autocomplete="off"/>
-                                        <datalist id="stops-datalist">
-                                            <t t-foreach="stops" t-as="st">
-                                                <option t-att-value="st"/>
-                                            </t>
-                                        </datalist>
-                                        <button type="submit" class="btn btn-search-submit">
-                                            <span>Consultar</span>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                                <path d="M5 12h14M12 5l7 7-7 7"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </form>
-
-                                <!-- Quick Touch Chips for Campuses -->
-                                <div class="hero-quick-chips">
-                                    <span class="quick-chips-label">Atajos directos:</span>
-                                    <a href="/rutas?campus=huachi" class="chip-item">🏛️ Campus Huachi</a>
-                                    <a href="/rutas?campus=ingahurco" class="chip-item">🏥 Campus Ingahurco</a>
-                                    <a href="/rutas?campus=querochaca" class="chip-item">🌿 Campus Querochaca</a>
-                                    <a href="/rutas" class="chip-item chip-all">🗺️ Todas las rutas</a>
-                                </div>
-                            </div>
+                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus='El bus' if site_lang != 'en' else 'The bus', n=2)"/>
+                            <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
+                                <t t-foreach="featured['stops'][:5]" t-as="stop_name">
+                                    <li t-if="stop_name_index == 1" class="demo-bus">
+                                        <span class="bus-en-linea"><span class="ficha"><t t-call="bus_tracking.bus_glyph"/></span></span>
+                                    </li>
+                                    <li t-att-class="'demo-mia' if stop_name_index == 3 else None">
+                                        <span class="parada" t-att-aria-pressed="'true' if stop_name_index == 3 else None"
+                                              t-att-data-mia="s['mine_tag']">
+                                            <span class="punto"/><span class="nombre" t-esc="stop_name"/>
+                                        </span>
+                                    </li>
+                                </t>
+                            </ol>
                         </div>
                     </div>
                 </section>
 
-                <!-- Section "Líneas Destacadas de la Red" -->
-                <section class="products-section" id="rutas">
-                    <div class="wrap">
-                        <div class="section-badge-header">
-                            <span class="section-wings">人</span>
-                            <span class="section-badge-text">RED DE TRANSPORTE EN VIVO</span>
-                            <span class="section-wings">人</span>
-                        </div>
-                        <h2 class="section-main-title">Conectividad directa entre los campus de Ambato</h2>
-                        <p class="section-subtext">Nuestra flota cubre los corredores universitarios neurálgicos, garantizando traslados rápidos, seguros y predecibles para estudiantes, docentes y personal.</p>
-
-                        <div class="products-grid">
-                            <t t-if="routes">
-                                <article t-foreach="routes" t-as="r" class="product-card route-live-card">
-                                    <div class="product-top-badge" t-attf-style="background-color: #{r['color'] or '#8B1D24'};">
-                                        <span class="route-card-code" t-esc="r['code']"/>
-                                        <span class="route-card-live-dot"></span>
-                                    </div>
-                                    <div class="product-body">
-                                        <div class="route-service-indicator">
-                                            <t t-if="r['buses_count']">
-                                                <span class="service-dot ok"></span>
-                                                <span class="service-text"><t t-esc="r['buses_count']"/> buses en servicio activo</span>
-                                            </t>
-                                            <t t-else="">
-                                                <span class="service-dot regular"></span>
-                                                <span class="service-text">Servicio programado</span>
-                                            </t>
-                                        </div>
-                                        <h3 class="product-title" t-esc="r['name']"/>
-                                        <p class="product-desc">Corredor universitario con paradas autorizadas, tiempos auditados y cobertura integral.</p>
-                                        <div class="route-card-footer">
-                                            <span class="route-frequency">⏱️ Frecuencia: ~10 min</span>
-                                            <a t-attf-href="/rutas/#{r['code']}" class="product-link">
-                                                <span>Ver recorrido y paradas</span>
-                                                <span class="link-arrow">→</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </article>
-                            </t>
-                            <t t-else="">
-                                <!-- Fallback visual cards when no database routes configured -->
-                                <article class="product-card">
-                                    <div class="product-media">
-                                        <img src="/bus_tracking/static/img/landing/route-huachi.jpg" alt="Ruta Troncal Huachi - Ingahurco" class="product-img" loading="lazy"/>
-                                        <div class="product-badge-float">
-                                            <span class="badge-code">R-01</span>
-                                            <span class="badge-status">Troncal</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-body">
-                                        <h3 class="product-title">Troncal Huachi – Ingahurco</h3>
-                                        <p class="product-desc">Enlace directo entre el Campus Matriz y el Campus de la Salud e Ingeniería. Frecuencias cada 10 a 12 minutos.</p>
-                                        <a href="/rutas" class="product-link">
-                                            <span>Consultar paradas y unidades</span>
-                                            <span class="link-arrow">→</span>
-                                        </a>
-                                    </div>
-                                </article>
-                                <article class="product-card">
-                                    <div class="product-media">
-                                        <img src="/bus_tracking/static/img/landing/route-quero.jpg" alt="Expreso Inter-Campus Querochaca" class="product-img" loading="lazy"/>
-                                        <div class="product-badge-float">
-                                            <span class="badge-code">R-02</span>
-                                            <span class="badge-status">Expreso</span>
-                                        </div>
-                                    </div>
-                                    <div class="product-body">
-                                        <h3 class="product-title">Expreso Inter-Campus Querochaca</h3>
-                                        <p class="product-desc">Ruta rápida hacia el cantón Cevallos y la Facultad de Ciencias Agropecuarias en horarios clave.</p>
-                                        <a href="/rutas" class="product-link">
-                                            <span>Consultar paradas y unidades</span>
-                                            <span class="link-arrow">→</span>
-                                        </a>
-                                    </div>
-                                </article>
-                            </t>
-                        </div>
+                <!-- Photographs of the city, hung on the line like stops. -->
+                <section class="inicio-ciudad" aria-labelledby="titulo-ciudad">
+                    <div class="marco">
+                        <h2 id="titulo-ciudad" class="entra" t-esc="s['city_title']"/>
+                        <p class="entra" style="--i: 1" t-esc="s['city_lead']"/>
                     </div>
+                    <ol class="marco ciudad">
+                        <t t-foreach="[('av-atahualpa-mall', 'cap_atahualpa'), ('huachi-grande', 'cap_huachi'), ('terminal-sur', 'cap_terminal'), ('uta-edificio', 'cap_uta'), ('ambato-vista', 'cap_vista'), ('tungurahua', 'cap_tungurahua')]" t-as="photo">
+                            <li class="entra" t-attf-style="--i: #{photo_index}">
+                                <figure>
+                                    <img t-attf-src="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp"
+                                         t-attf-srcset="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/ambato/#{photo[0]}-1200.webp 1200w"
+                                         sizes="(min-width: 900px) 33vw, 80vw" loading="lazy" decoding="async"
+                                         t-att-alt="s[photo[1]]"/>
+                                    <figcaption><span class="punto"/><t t-esc="s[photo[1]]"/></figcaption>
+                                </figure>
+                            </li>
+                        </t>
+                    </ol>
                 </section>
 
-                <!-- Asymmetric Banner "Sobre Buses UTA" -->
-                <section class="about-split-section" id="nosotros">
-                    <div class="wrap">
-                        <div class="about-card-container">
-                            <div class="about-left-banner">
-                                <span class="about-kicker">COMPROMISO INSTITUCIONAL</span>
-                                <h2 class="about-title">Sobre Buses UTA</h2>
-                                <p class="about-lead">El Sistema de Transporte de la Universidad Técnica de Ambato es un servicio institucional prioritario impulsado por la Dirección de Bienestar Universitario, concebido para brindar traslados seguros, puntuales y dignos a estudiantes, profesores y trabajadores.</p>
-
-                                <ul class="about-features-list">
-                                    <li class="about-feature-item">
-                                        <span class="feature-check">✓</span>
-                                        <span>Rastreo GPS satelital continuo desde tabletas embarcadas en cada bus.</span>
-                                    </li>
-                                    <li class="about-feature-item">
-                                        <span class="feature-check">✓</span>
-                                        <span>Conectividad inter-campus garantizada para más de 15,000 estudiantes.</span>
-                                    </li>
-                                    <li class="about-feature-item">
-                                        <span class="feature-check">✓</span>
-                                        <span>Auditoría de cumplimiento de velocidades, itinerarios y paraderos oficiales.</span>
-                                    </li>
-                                    <li class="about-feature-item">
-                                        <span class="feature-check">✓</span>
-                                        <span>Servicio 100% gratuito para la comunidad universitaria regular.</span>
-                                    </li>
-                                </ul>
-
-                                <div class="about-actions">
-                                    <a href="/rutas" class="btn btn-about-cta">Conocer Rutas y Horarios</a>
-                                    <a href="/quejas" class="btn btn-about-outline">Atención y Sugerencias</a>
-                                </div>
-                            </div>
-                            <div class="about-right-media">
-                                <div class="media-mask-container">
-                                    <img src="/bus_tracking/static/img/landing/about-students.jpg" alt="Estudiantes de la Universidad Técnica de Ambato" class="about-photo" loading="lazy"/>
-                                    <div class="about-badge-overlay">
-                                        <div class="overlay-stat">
-                                            <strong>15,000+</strong>
-                                            <span>Estudiantes Beneficiados</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- One field: start a message to the transport team. -->
+                <section class="marco inicio-escribir" aria-labelledby="titulo-escribir">
+                    <form action="/quejas" method="get" class="escribir">
+                        <h2 id="titulo-escribir"><span class="suave" t-esc="s['write_q1']"/> <t t-esc="s['write_q2']"/></h2>
+                        <label class="sr-only" for="escribir-texto" t-esc="s['write_field']"/>
+                        <div class="buscador grande">
+                            <input type="text" id="escribir-texto" name="texto" maxlength="300"
+                                   t-att-placeholder="s['write_placeholder']" aria-describedby="escribir-nota"/>
+                            <button class="boton" type="submit" t-esc="s['write_go']"/>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Section "Avisos y Novedades del Servicio" -->
-                <section class="news-section" id="novedades">
-                    <div class="wrap">
-                        <div class="section-badge-header">
-                            <span class="section-wings">人</span>
-                            <span class="section-badge-text">AVISOS Y NOVEDADES</span>
-                            <span class="section-wings">人</span>
-                        </div>
-                        <h2 class="section-main-title">Mantente informado sobre el transporte institucional</h2>
-                        <p class="section-subtext">Comunicados operativos, mejoras de paradas y avisos de contingencia en tiempo real.</p>
-
-                        <div class="news-grid">
-                            <article class="news-story-card">
-                                <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-evaluaciones.jpg');">
-                                    <div class="story-overlay"></div>
-                                </div>
-                                <div class="story-content">
-                                    <div class="story-meta">
-                                        <span class="story-date">31 Octubre, 2026</span>
-                                        <span class="story-tag">OPERATIVIDAD</span>
-                                    </div>
-                                    <h3 class="story-title">Frecuencias ampliadas en horarios pico por evaluaciones de fin de ciclo</h3>
-                                    <p class="story-snippet">Se incorporan unidades de refuerzo a partir de las 17:00 en los campus Huachi e Ingahurco para garantizar el retorno oportuno.</p>
-                                    <a href="/rutas" class="story-link">
-                                        <span>Leer comunicado oficial</span>
-                                        <span class="story-arrow">→</span>
-                                    </a>
-                                </div>
-                            </article>
-
-                            <article class="news-story-card">
-                                <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-bahia.jpg');">
-                                    <div class="story-overlay"></div>
-                                </div>
-                                <div class="story-content">
-                                    <div class="story-meta">
-                                        <span class="story-date">28 Octubre, 2026</span>
-                                        <span class="story-tag">INFRAESTRUCTURA</span>
-                                    </div>
-                                    <h3 class="story-title">Nueva bahía de abordaje señalizada en el Campus Querochaca</h3>
-                                    <p class="story-snippet">Instalación de cubierta con paneles solares, iluminación nocturna y pantalla informativa con el arribo de los próximos buses.</p>
-                                    <a href="/rutas" class="story-link">
-                                        <span>Leer comunicado oficial</span>
-                                        <span class="story-arrow">→</span>
-                                    </a>
-                                </div>
-                            </article>
-
-                            <article class="news-story-card">
-                                <div class="story-backdrop" style="background-image: url('/bus_tracking/static/img/landing/news-tablet.jpg');">
-                                    <div class="story-overlay"></div>
-                                </div>
-                                <div class="story-content">
-                                    <div class="story-meta">
-                                        <span class="story-date">24 Octubre, 2026</span>
-                                        <span class="story-tag">TECNOLOGÍA</span>
-                                    </div>
-                                    <h3 class="story-title">Telemetría GPS y mapa cinemático en tiempo real</h3>
-                                    <p class="story-snippet">La flota cuenta ahora con interpolación continua de buses y monitoreo en vivo para toda la comunidad.</p>
-                                    <a href="/rutas" class="story-link">
-                                        <span>Leer comunicado oficial</span>
-                                        <span class="story-arrow">→</span>
-                                    </a>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section "Movilidad en tu Bolsillo" -->
-                <section class="app-showcase-section">
-                    <div class="watermark-monogram">UTA</div>
-                    <div class="wrap">
-                        <div class="app-showcase-grid">
-                            <div class="app-mockup-wrapper">
-                                <div class="smartphone-frame">
-                                    <div class="phone-speaker"></div>
-                                    <div class="phone-screen">
-                                        <div class="screen-header">
-                                            <div class="screen-brand-row">
-                                                <span class="screen-brand">Buses UTA</span>
-                                                <span class="screen-status-badge">🟢 En Vivo</span>
-                                            </div>
-                                            <div class="screen-stop-hero">
-                                                <span class="screen-stop-label">PRÓXIMA PARADA</span>
-                                                <span class="screen-stop-name">Campus Huachi - Puerta 2</span>
-                                            </div>
-                                        </div>
-                                        <div class="screen-map-sim">
-                                            <img src="/bus_tracking/static/img/landing/phone-map-live.png" alt="Mapa satelital de ruta en vivo Buses UTA" class="screen-map-real-img" loading="lazy"/>
-                                            <div class="map-live-overlay-chip">
-                                                <span class="live-dot-pulse"></span>
-                                                <span>GPS EN VIVO</span>
-                                            </div>
-                                        </div>
-                                        <div class="screen-bottom-card">
-                                            <div class="screen-route-name">Ruta Troncal Huachi – Querochaca</div>
-                                            <div class="screen-progress-bar">
-                                                <div class="progress-fill" style="width: 28%;"></div>
-                                            </div>
-                                            <div class="screen-eta">Hacia: Parada 2 · Arribo en ~3 min</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="app-info-content">
-                                <div class="section-badge-header align-left">
-                                    <span class="section-wings">人</span>
-                                    <span class="section-badge-text">MOVILIDAD EN TU BOLSILLO</span>
-                                    <span class="section-wings">人</span>
-                                </div>
-                                <h2 class="app-title">El rastreo satelital disponible en todos tus dispositivos</h2>
-                                <p class="app-lead">Diseñado para funcionar sin interrupciones. Sigue las unidades desde cualquier teléfono o computadora sin instalar aplicaciones pesadas, o accede al portal de operaciones para personal autorizado y conductores.</p>
-
-                                <div class="app-features-grid">
-                                    <div class="app-feature-box">
-                                        <span class="app-feat-icon">⚡</span>
-                                        <div>
-                                            <strong>Acceso Web Instantáneo</strong>
-                                            <p>Optimizado para navegar rápidamente en 4G, WiFi universitario o datos reducidos.</p>
-                                        </div>
-                                    </div>
-                                    <div class="app-feature-box">
-                                        <span class="app-feat-icon">📱</span>
-                                        <div>
-                                            <strong>App para Conductor y Personal</strong>
-                                            <p>Tableta embarcada con confirmación de turnos, mapa satelital y reporte de incidentes.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="app-cta-buttons">
-                                    <a href="/rutas" class="btn btn-store-primary">
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <line x1="2" y1="12" x2="22" y2="12"/>
-                                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/>
-                                        </svg>
-                                        <div class="btn-store-text">
-                                            <small>Abrir en tu Navegador</small>
-                                            <strong>Mapa Web Móvil</strong>
-                                        </div>
-                                    </a>
-
-                                    <a href="/web/login" class="btn btn-store-secondary">
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-                                            <line x1="12" y1="18" x2="12.01" y2="18"/>
-                                        </svg>
-                                        <div class="btn-store-text">
-                                            <small>Acceso Conductor / Flota</small>
-                                            <strong>Portal de Operaciones</strong>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <p id="escribir-nota" class="nota" t-esc="s['write_note']"/>
+                    </form>
+                    <div class="despues">
+                        <h3 t-esc="s['next_title']"/>
+                        <ol class="linea">
+                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_1']"/></span></li>
+                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_2']"/></span></li>
+                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_3']"/></span></li>
+                        </ol>
                     </div>
                 </section>
             </main>
 
-            <!-- Dark Institutional Footer -->
             <t t-call="bus_tracking.portal_footer"/>
+            <script t-attf-src="/bus_tracking/static/src/portal/site.js?v=#{asset_v}" defer="defer"></script>
         </t>
+    </template>
+
+    <!-- The small bus drawn inside a chip on the line: a front view, no icon font needed. -->
+    <template id="bus_glyph">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+            <rect x="3" y="2" width="14" height="14" rx="3" fill="currentColor"/>
+            <rect x="5" y="4.5" width="10" height="5" rx="1" fill="#172025" opacity="0.55"/>
+            <circle cx="7" cy="12.5" r="1.3" fill="#172025" opacity="0.55"/>
+            <circle cx="13" cy="12.5" r="1.3" fill="#172025" opacity="0.55"/>
+            <rect x="5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/>
+            <rect x="12.5" y="16" width="2.5" height="2.5" rx="1" fill="currentColor"/>
+        </svg>
     </template>
 </odoo>

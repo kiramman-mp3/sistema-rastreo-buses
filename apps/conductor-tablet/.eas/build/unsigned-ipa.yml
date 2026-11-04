@@ -1,0 +1,39 @@
+# Build iOS sin firmar para instalar con AltStore (AltStore re-firma con el Apple ID del usuario).
+build:
+  name: IPA sin firmar (AltStore)
+  steps:
+    - eas/checkout
+    - eas/install_node_modules
+    - run:
+        name: Prebuild iOS
+        command: |
+          set -eo pipefail
+          npx expo prebuild --platform ios --clean --no-install
+          ls -la ios
+    - run:
+        name: Instalar pods
+        command: |
+          set -eo pipefail
+          cd ios && pod install
+    - run:
+        name: Compilar app sin firma
+        command: |
+          set -eo pipefail
+          WORKSPACE=$(ls -d ios/*.xcworkspace | head -1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build | tail -n 50
+    - run:
+        name: Empaquetar .ipa
+        command: |
+          set -eo pipefail
+          rm -rf Payload && mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/*.app Payload/
+          zip -qry /tmp/conductor-tablet-unsigned.ipa Payload
+    - eas/upload_artifact:
+        name: Subir .ipa
+        inputs:
+          path: /tmp/conductor-tablet-unsigned.ipa

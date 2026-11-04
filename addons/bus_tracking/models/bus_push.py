@@ -103,6 +103,9 @@ class BusPushSubscription(models.Model):
             else:
                 _logger.warning("Push to subscription %s failed: %s", self.id, error)
             return False
+        except Exception as error:  # noqa: BLE001 - network errors, bad keys: one device must not stop the rest
+            _logger.warning("Push to subscription %s failed: %s", self.id, error)
+            return False
 
     @api.model
     def _send_to_user(self, user, payload):

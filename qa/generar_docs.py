@@ -49,9 +49,7 @@ def write(name, text):
 
 
 # ------------------------------------------------------------------ figures
-fallos = {'Coordenadas fuera de rango guardadas (DEF-008)': A['fallos_por_causa']['coordenadas fuera de rango guardadas'] + 1,
-          'Hora GPS inválida, HTTP 500 (DEF-010)': A['fallos_por_causa']['time_text'] + 1,
-          'Latitud no numérica, HTTP 500 (DEF-009)': A['fallos_por_causa']['lat_text'] + 1}
+fallos = dq.FALLOS_28OCT
 pareto_fallos = sorted(fallos.items(), key=lambda kv: -kv[1])
 graficos.pareto([(k.split(' (')[0].replace(', HTTP 500', '\n(HTTP 500)'), v) for k, v in pareto_fallos], 'pareto_fallos_evaluacion.png', 7.5)
 
@@ -154,12 +152,14 @@ n_aud, f_aud = A['total'], A['fallos']
 cerrados = sum(1 for d in dq.DEFECTOS if d[7] == 'Cerrado')
 datos = {d['consulta']: d['valor'] for d in M['datos']}
 invalid = [v for k, v in datos.items() if 'fuera de rango' in k][0]
-mini = lambda ok: 'Sí' if ok else '**No**'
+mini = lambda ok: 'Sí' if ok else '**No**'  # noqa: E731
+suite_5xx = sum(1 for c in S['casos'] if c.get('estado') == 'FAIL' and 'HTTP 5' in str(c.get('obtenido', '')))
+bad_5xx = A.get('estados_5xx_inesperados', A['estados_5xx']) + suite_5xx
 metas = [
     ['Pruebas de Odoo aprobadas', '100 %', pct(100.0 - 100.0 * f_unit / n_unit), mini(f_unit == 0)],
     ['Error en la suite en vivo', '< 10 %', pct(100.0 * f_suite / n_suite), mini(100.0 * f_suite / n_suite < 10)],
     ['Error en la auditoría', '< 10 %', pct(100.0 * f_aud / n_aud), mini(100.0 * f_aud / n_aud < 10)],
-    ['Respuestas HTTP 5xx ante cualquier entrada', '0', str(A['estados_5xx'] + 2), mini(False)],
+    ['Respuestas HTTP 5xx no esperadas ante cualquier entrada', '0', str(bad_5xx), mini(bad_5xx == 0)],
     ['Tiempo promedio de la auditoría', '< 0,5 s', n(A['tiempo']['mean']) + ' s', mini(A['tiempo']['mean'] < 0.5)],
     ['Latencia p95 con 20 hilos (P2, P7)', '< 2 s', '%s s / %s s' % (n(PERF.get('P2', {}).get('p95', 0)), n(PERF.get('P7', {}).get('p95', 0))), mini(bool(PERF.get('P2') and PERF.get('P7') and max(PERF['P2']['p95'], PERF['P7']['p95']) < 2))],
     ['Capacidad de ingesta (100 buses, un reporte cada 10 s)', '≥ 10 req/s', n(cap, 1) + ' req/s', mini(cap >= 10)],
@@ -187,7 +187,7 @@ Generado por `qa/generar_docs.py` con los datos de la ejecución del %(fecha)s. 
 
 %(metas)s
 
-Las metas que no se cumplen son las del defecto abierto en la validación de la posición (DEF-008 a DEF-010, ver `05-registro-de-defectos.md`) y la cobertura de tres rutas del panel (`/bus_tracking/track`, `/bus_tracking/stop/load` y `/bus_tracking/stop/save`) que no tienen prueba de petición.
+%(lectura_metas)s
 
 ## 2. Resultados por conjunto
 
@@ -218,7 +218,9 @@ Cobertura total: **%(cov)s** (%(stm)d sentencias, %(miss)d sin cubrir, %(br)d ra
 ## 7. Evidencias de esta tabla
 
 `docs/calidad/evidencias/`: `suite.json` y `suite.log`, `auditoria.json` y `auditoria.log`, `metricas.json`, `odoo_test.log`, `coverage.json` y `cobertura.txt`.
-''' % dict(fecha='28-oct-2026', metas=md_table(['Meta', 'Umbral', 'Resultado', 'Cumple'], metas),
+''' % dict(fecha=dq.FECHA_EVIDENCIAS, metas=md_table(['Meta', 'Umbral', 'Resultado', 'Cumple'], metas),
+           lectura_metas=('No se cumplen: ' + '; '.join(m[0] for m in metas if m[3] != 'Sí') + '.'
+                          if any(m[3] != 'Sí' for m in metas) else 'Se cumplen todas las metas.'),
            conjuntos=md_table(['Conjunto', 'Pruebas', 'Errores', '% error'], [
                ['Pruebas de Odoo', str(n_unit), str(f_unit), pct(100.0 * f_unit / n_unit)], ['Suite en vivo', str(n_suite), str(f_suite), pct(100.0 * f_suite / n_suite)],
                ['Auditoría aleatoria', miles(n_aud), str(f_aud), pct(100.0 * f_aud / n_aud)],
@@ -234,7 +236,7 @@ causa_txt = '\n\n'.join('### %s: %s\n\n- **Causa raíz:** %s\n- **Categoría:** 
 write('05-registro-de-defectos.md', '''
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y siguen **abiertos**. Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/PLAN-UI-MOVIL.md`). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -250,11 +252,8 @@ Resumen: %(total)d registrados, %(cerrados)d cerrados (%(pct)s), %(abiertos)d ab
 
 ## 3. Qué falta para cerrar los abiertos
 
-1. Validar en `_apply_position` la latitud (−90 a 90), la longitud (−180 a 180) y el tipo de cada campo; responder 400 y no guardar.
-2. Capturar el error de formato en `parse_traccar_dt` y responder 400.
-3. Agregar una restricción `@api.constrains` de rango en `bus.position`.
-4. Portar E7, E8 y E9 a `addons/bus_tracking/tests/test_http.py` para que la suite de Odoo los proteja, y volver a ejecutar `qa/ejecutar_todo.sh`.
-5. Limpiar las posiciones inválidas ya guardadas en las bases de desarrollo.
+1. DEF-013: hacer `git push --force-with-lease origin main develop` con el historial ya reescrito, pedir a todos que vuelvan a clonar y **cambiar la contraseña del admin** en el servidor (quien vio el commit viejo la conoce).
+2. Agregar una revisión de secretos antes de cada commit (por ejemplo `gitleaks` en el CI) para que no se repita.
 ''' % dict(tabla=md_table(['ID', 'Fecha', 'Detectado por', 'Defecto', 'Ubicación', 'Estado'], def_rows), total=len(dq.DEFECTOS), cerrados=cerrados,
            pct=pct(100.0 * cerrados / len(dq.DEFECTOS), 0), abiertos=len(dq.DEFECTOS) - cerrados, dens=n(len(dq.DEFECTOS) / (M['lineas']['python'] / 1000), 1),
            kloc=n(M['lineas']['python'] / 1000, 3), causas=causa_txt))
@@ -282,7 +281,7 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 %(t2)s
 
-**Lectura:** con solo 10 defectos la distribución es pareja; destacan la configuración y la validación de la entrada. Los de configuración ya están cerrados; los de validación siguen abiertos.
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Queda abierto uno de seguridad (DEF-013).
 
 ## 3. Problemas encontrados durante la construcción (%(np)d)
 

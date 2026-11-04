@@ -30,6 +30,20 @@ class TestDriverStaff(TransactionCase):
         self.incident.with_user(self.manager).unlink()
         self.assertFalse(self.incident.exists())
 
+    def test_staff_mark_an_incident_as_seen_and_it_leaves_the_map_queue(self):
+        self.assertIn(self.incident, self.env['bus.incident']._open_for_map())
+        self.incident.with_user(self.viewer).action_acknowledge()
+        self.assertEqual(self.incident.state, 'seen')
+        self.assertEqual(self.incident.acknowledged_by, self.viewer)
+        self.assertNotIn(self.incident, self.env['bus.incident']._open_for_map())
+        first = self.incident.acknowledged_at
+        self.incident.with_user(self.manager).action_acknowledge()       # the first person who saw it stays
+        self.assertEqual((self.incident.acknowledged_by, self.incident.acknowledged_at), (self.viewer, first))
+
+    def test_a_driver_cannot_mark_incidents_as_seen(self):
+        with self.assertRaises(AccessError):
+            self.incident.with_user(self.driver).action_acknowledge()
+
     def test_a_driver_cannot_read_incidents(self):
         with self.assertRaises(AccessError):
             self.env['bus.incident'].with_user(self.driver).search([])
@@ -57,3 +71,14 @@ class TestDriverStaff(TransactionCase):
     def test_a_plain_user_cannot_sign_a_tablet_out(self):
         with self.assertRaises(AccessError):
             self.shift.with_user(self.viewer).action_revoke_tablet()
+
+    def test_an_unattended_sos_stays_in_the_queue_however_old(self):
+        sos = self.env['bus.incident'].create({
+            'shift_id': self.shift.id, 'vehicle_id': self.bus.id, 'kind': 'sos'})
+        self.env.cr.execute(
+            "UPDATE bus_incident SET create_date = now() at time zone 'utc' - interval '30 hours' WHERE id IN %s",
+            [(sos.id, self.incident.id)])
+        self.env.invalidate_all()
+        queue = self.env['bus.incident']._open_for_map()
+        self.assertIn(sos, queue)
+        self.assertNotIn(self.incident, queue)

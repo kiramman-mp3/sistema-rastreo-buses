@@ -3,11 +3,15 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
-import { ingestLocations } from './runtime';
-import { gpsStore, locationQueue, writeLastSent } from './store';
+import { flushFixes, ingestLocations } from './runtime';
+import { gpsStore, locationQueue, readLastSent, writeLastError, writeLastSample, writeLastSent } from './store';
+import { t } from '../i18n';
 import type { GpsController } from './types';
 
 export const GPS_TASK = 'uta-bus-location';
+
+let foregroundWatcher: Location.LocationSubscription | null = null;
+let stationaryHeartbeat: ReturnType<typeof setInterval> | null = null;
 
 async function batteryPercent(): Promise<number | null> {
   try {
@@ -26,23 +30,81 @@ export const liveGps: GpsController = {
   },
   async start(uniqueId, url) {
     await gpsStore.set({ uniqueId, url });
-    const running = await Location.hasStartedLocationUpdatesAsync(GPS_TASK);
-    if (running) await Location.stopLocationUpdatesAsync(GPS_TASK);
-    await Location.startLocationUpdatesAsync(GPS_TASK, {
-      accuracy: Location.Accuracy.High,
-      timeInterval: 10_000,
-      distanceInterval: 0,
-      deferredUpdatesInterval: 10_000,
-      pausesUpdatesAutomatically: false,
-      foregroundService: {
-        notificationTitle: 'Buses UTA',
-        notificationBody: 'Enviando la posición del bus',
-        notificationColor: '#B91C1C',
-        killServiceOnDestroy: false,
-      },
-    });
+    if (foregroundWatcher) {
+      foregroundWatcher.remove();
+      foregroundWatcher = null;
+    }
+    if (stationaryHeartbeat) {
+      clearInterval(stationaryHeartbeat);
+      stationaryHeartbeat = null;
+    }
+
+    // Immediate initial fix upon starting the shift so the driver doesn't wait for the first interval.
+    Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High })
+      .then((loc) => runLocationTask([loc]))
+      .catch(() => undefined);
+
+    try {
+      const running = await Location.hasStartedLocationUpdatesAsync(GPS_TASK);
+      if (running) await Location.stopLocationUpdatesAsync(GPS_TASK);
+      await Location.startLocationUpdatesAsync(GPS_TASK, {
+        accuracy: Location.Accuracy.High,
+        timeInterval: 10_000,
+        distanceInterval: 0,
+        pausesUpdatesAutomatically: false,
+        showsBackgroundLocationIndicator: true,
+        activityType: Location.ActivityType.AutomotiveNavigation,
+        foregroundService: {
+          notificationTitle: t('gpsServiceTitle'),
+          notificationBody: t('gpsServiceBody'),
+          notificationColor: '#B91C1C',
+          killServiceOnDestroy: false,
+        },
+      });
+    } catch {
+      // In Expo Go or platforms without background tasks support,
+      // fallback to foreground watchPositionAsync so positions are actively sent.
+      try {
+        foregroundWatcher = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 10_000,
+            distanceInterval: 0,
+          },
+          (location) => {
+            void runLocationTask([location]);
+          },
+        );
+      } catch {
+        // Handled by permission snapshot & health view
+      }
+    }
+
+    // iOS CoreLocation ignores timeInterval and enters sleep mode when the device is stationary.
+    // This periodic heartbeat ensures stationary fixes (e.g. at traffic lights, terminals or testing)
+    // are sent to Traccar every 10 seconds while the app is running in the cockpit.
+    stationaryHeartbeat = setInterval(async () => {
+      try {
+        const lastSent = await readLastSent();
+        const now = Date.now();
+        if (!lastSent || now - lastSent.at >= 9_500) {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+          await runLocationTask([loc]);
+        }
+      } catch {
+        // Ignored
+      }
+    }, 10_000);
   },
   async stop() {
+    if (stationaryHeartbeat) {
+      clearInterval(stationaryHeartbeat);
+      stationaryHeartbeat = null;
+    }
+    if (foregroundWatcher) {
+      foregroundWatcher.remove();
+      foregroundWatcher = null;
+    }
     const registered = await TaskManager.isTaskRegisteredAsync(GPS_TASK);
     if (registered) {
       try {
@@ -51,7 +113,18 @@ export const liveGps: GpsController = {
         // Already stopped after process death.
       }
     }
-    await locationQueue.clear();
+    // Last chance for the points saved without signal; whatever does not go now is dropped.
+    const creds = await gpsStore.get();
+    await locationQueue.exclusive(async () => {
+      if (creds) {
+        try {
+          await flushFixes(locationQueue, creds);
+        } catch {
+          // Ending the shift never waits on the network.
+        }
+      }
+      await locationQueue.clear();
+    });
     await gpsStore.clear();
   },
 };
@@ -64,5 +137,7 @@ export async function runLocationTask(locations: Location.LocationObject[]) {
     creds,
     battery: batteryPercent,
     onSent: writeLastSent,
+    onSample: writeLastSample,
+    onError: writeLastError,
   });
 }

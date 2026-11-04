@@ -22,14 +22,15 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Configuración | 4 | 40,0 % | 40,0 % |
-| Validación de entrada | 3 | 30,0 % | 70,0 % |
-| Lógica | 2 | 20,0 % | 90,0 % |
-| Seguridad | 1 | 10,0 % | 100,0 % |
+| Lógica | 13 | 34,2 % | 34,2 % |
+| Configuración | 9 | 23,7 % | 57,9 % |
+| Seguridad | 7 | 18,4 % | 76,3 % |
+| Accesibilidad y diseño | 6 | 15,8 % | 92,1 % |
+| Validación de entrada | 3 | 7,9 % | 100,0 % |
 
-**Lectura:** con solo 10 defectos la distribución es pareja; destacan la configuración y la validación de la entrada. Los de configuración ya están cerrados; los de validación siguen abiertos.
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Queda abierto uno de seguridad (DEF-013).
 
-## 3. Problemas encontrados durante la construcción (53)
+## 3. Problemas encontrados durante la construcción (57)
 
 Cada viñeta de las secciones "Problemas encontrados" de la bitácora cuenta como un problema (los de la evaluación de calidad incluidos). Se clasificó cada uno en una de cinco categorías; la lista completa está al final.
 
@@ -37,11 +38,11 @@ Cada viñeta de las secciones "Problemas encontrados" de la bitácora cuenta com
 
 | Categoría | Problemas | % | % acumulado |
 |---|---|---|---|
-| Pruebas y su entorno | 16 | 30,2 % | 30,2 % |
-| Herramientas de shell y edición | 12 | 22,6 % | 52,8 % |
-| Entorno, dependencias y configuración | 10 | 18,9 % | 71,7 % |
-| Datos de entrada y supuestos sin confirmar | 8 | 15,1 % | 86,8 % |
-| Lógica y diseño del código | 7 | 13,2 % | 100,0 % |
+| Pruebas y su entorno | 16 | 28,1 % | 28,1 % |
+| Entorno, dependencias y configuración | 12 | 21,1 % | 49,1 % |
+| Herramientas de shell y edición | 12 | 21,1 % | 70,2 % |
+| Lógica y diseño del código | 9 | 15,8 % | 86,0 % |
+| Datos de entrada y supuestos sin confirmar | 8 | 14,0 % | 100,0 % |
 
 **Lectura:** más de la mitad de los problemas no estuvo en el producto sino en las **pruebas y su entorno** y en las **herramientas de shell**: tests mal escritos, bases sucias, rutas que Git Bash convierte, comillas. Con las tres primeras categorías se llega a cerca del 72 %. Acciones que salen de aquí: una base de pruebas nueva en cada corrida (ya está en `qa/ejecutar_todo.sh`), scripts en archivos y no en la línea de comandos, y versiones fijas de las dependencias.
 
@@ -104,3 +105,7 @@ Categorías: Pruebas y su entorno; Herramientas de shell y edición; Entorno, de
 | 51 | Evaluación (28-oct) | Dos corridas de la suite en vivo se pisaron y falsearon un resultado | Pruebas y su entorno |
 | 52 | Evaluación (28-oct) | Los límites de uso viven en memoria y hay que reiniciar el servidor antes de medir | Pruebas y su entorno |
 | 53 | Evaluación (28-oct) | Dos pruebas compartían buses y daban conteos falsos | Pruebas y su entorno |
+| 54 | Diagnóstico GPS (04-nov) | Traccar no reenviaba al webhook de Odoo por faltar FORWARD_ENABLE | Entorno, dependencias y configuración |
+| 55 | Diagnóstico GPS (04-nov) | Saturación del pool de conexiones PostgreSQL en Odoo por db_maxconn=3 | Entorno, dependencias y configuración |
+| 56 | Diagnóstico GPS (04-nov) | La pantalla Estado del GPS leía session.snapshot.gps en memoria y mostraba guion | Lógica y diseño del código |
+| 57 | Diagnóstico GPS (04-nov) | CoreLocation en iOS ignora timeInterval y suspende el GPS cuando el dispositivo está inmóvil | Lógica y diseño del código |

@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
 
 from ..models.geo import simplify, thin
@@ -39,10 +39,17 @@ class TestRecordTrack(BusCase):
             'route_id': self.route.id, 'vehicle_id': self.bus.id,
             'date_from': fields.Datetime.now() - timedelta(hours=1), 'date_to': fields.Datetime.now()})
 
+    def test_a_period_that_ends_before_it_starts_is_refused(self):
+        with self.assertRaises(ValidationError):
+            self.env['bus.route.record'].create({
+                'route_id': self.route.id, 'vehicle_id': self.bus.id,
+                'date_from': fields.Datetime.now(), 'date_to': fields.Datetime.now() - timedelta(hours=1)})
+
     def test_the_recorded_track_replaces_the_straight_line(self):
         self.assertEqual(len(self.route._map_lines()[0]['points']), 3)
         # an L shaped trip: east and then north, with many points per leg
-        trip = [(-33.45, -70.66 + i * 0.0005) for i in range(10)] + [(-33.45 + i * 0.0005, -70.6555) for i in range(1, 10)]
+        trip = ([(-33.45, -70.66 + i * 0.0005) for i in range(10)]
+                + [(-33.45 + i * 0.0005, -70.6555) for i in range(1, 10)])
         self.feed(trip)
         self.wizard().action_record()
         points = self.route._map_lines()[0]['points']
@@ -79,7 +86,8 @@ class TestRecordTrackAccess(BusCase):
         now = fields.Datetime.now().replace(microsecond=0)
         for i in range(4):
             when = now - timedelta(minutes=4 - i)
-            self.bus._apply_position(traccar_position(7, when.strftime('%Y-%m-%dT%H:%M:%SZ'), -33.45, -70.66 + i * 0.001, 5.0))
+            stamp = when.strftime('%Y-%m-%dT%H:%M:%SZ')
+            self.bus._apply_position(traccar_position(7, stamp, -33.45, -70.66 + i * 0.001, 5.0))
         wizard = self.env['bus.route.record'].with_user(manager).create({
             'route_id': self.route.id, 'vehicle_id': self.bus.id,
             'date_from': now - timedelta(hours=1), 'date_to': now})

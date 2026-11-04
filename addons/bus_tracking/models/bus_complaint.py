@@ -3,6 +3,8 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
+from .utils import int_param
+
 MAX_DESCRIPTION = 2000
 
 KINDS = [
@@ -69,8 +71,7 @@ class BusComplaint(models.Model):
     @api.model
     def _cron_purge_contacts(self):
         """Erase contact data some days after a complaint was resolved."""
-        value = self.env['ir.config_parameter'].sudo().get_param('bus_tracking.complaint_retention_days')
-        days = int(value) if value not in (False, None, '') else 90
+        days = int_param(self.env, 'bus_tracking.complaint_retention_days', 90)
         if days <= 0:
             return
         limit = fields.Datetime.now() - timedelta(days=days)
