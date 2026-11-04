@@ -80,6 +80,10 @@ PROBLEMAS = [
     ('Evaluación (28-oct)', 'Dos corridas de la suite en vivo se pisaron y falsearon un resultado', 'P'),
     ('Evaluación (28-oct)', 'Los límites de uso viven en memoria y hay que reiniciar el servidor antes de medir', 'P'),
     ('Evaluación (28-oct)', 'Dos pruebas compartían buses y daban conteos falsos', 'P'),
+    ('Diagnóstico GPS (04-nov)', 'Traccar no reenviaba al webhook de Odoo por faltar FORWARD_ENABLE', 'E'),
+    ('Diagnóstico GPS (04-nov)', 'Saturación del pool de conexiones PostgreSQL en Odoo por db_maxconn=3', 'E'),
+    ('Diagnóstico GPS (04-nov)', 'La pantalla Estado del GPS leía session.snapshot.gps en memoria y mostraba guion', 'L'),
+    ('Diagnóstico GPS (04-nov)', 'CoreLocation en iOS ignora timeInterval y suspende el GPS cuando el dispositivo está inmóvil', 'L'),
 ]
 
 # Defect log: id, date, who found it, description, where, root cause, category, status, test that guards it.
@@ -187,6 +191,18 @@ DEFECTOS = [
     ('DEF-034', '02-nov-2026', 'Auditoría de diseño móvil (P2)', 'La selección de bus y línea quedaba en blanco sin buses, sin líneas o con todos los buses en uso',
      'apps/conductor-tablet/app/select.tsx', 'No se pensó el estado vacío ni el caso de flota ocupada.',
      'Accesibilidad y diseño', 'Cerrado', 'Capturas de los escenarios empty y busy de qa/capturas_movil.py'),
+    ('DEF-035', '04-nov-2026', 'Diagnóstico en producción (Traccar/Odoo)', 'Traccar no reenviaba posiciones al webhook de Odoo por faltar FORWARD_ENABLE',
+     'docker-compose.yml, docker-compose.prod.yml', 'Se asumió que FORWARD_TYPE=json reemplazaba a FORWARD_ENABLE en Traccar 6, pero forward.enable es obligatorio para inicializar el reenviador de posiciones.',
+     'Configuración', 'Cerrado', 'Comprobación con curl hacia Traccar y verificación de ingesta de posiciones en Odoo y /bus_tracking/health en 200 OK'),
+    ('DEF-036', '04-nov-2026', 'Diagnóstico en producción (logs de Odoo)', 'Saturación del pool de conexiones PostgreSQL en Odoo (PoolError: The Connection Pool Is Full)',
+     'config/odoo.prod.conf (db_maxconn)', 'El límite db_maxconn=3 era insuficiente para soportar peticiones web concurrentes, cron y webhook en Supabase.',
+     'Configuración', 'Cerrado', 'Ajuste de db_maxconn=10 en odoo.prod.conf y verificación de consultas concurrentes sin error'),
+    ('DEF-037', '04-nov-2026', 'Prueba en dispositivo móvil (pantalla Estado del GPS)', 'Dispositivo en Traccar mostraba guion (-) aun con credenciales guardadas en el almacenamiento',
+     'apps/conductor-tablet/app/gps.tsx', 'La vista leía session.snapshot.gps (en memoria) en vez de leer de forma asíncrona gpsStore del almacenamiento seguro.',
+     'Lógica', 'Cerrado', 'Carga de uniqueId desde gpsStore en loadFacts() y tsc --noEmit PASS'),
+    ('DEF-038', '04-nov-2026', 'Prueba de campo en iOS (iPhone quieto)', 'El iPhone dejaba de transmitir ubicación por GPS al permanecer detenido o estático',
+     'apps/conductor-tablet/src/gps/tracker.ts, app.json', 'Apple CoreLocation ignora timeInterval (solo Android) y entra en reposo si no hay desplazamiento; además deferredUpdatesInterval retrasaba eventos hasta detectar movimiento.',
+     'Lógica', 'Cerrado', 'Implementación de Stationary Heartbeat periódico (10s), disparo inmediato al iniciar turno y eliminación de deferredUpdatesInterval; jest PASS (149 tests) y expo lint PASS'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
