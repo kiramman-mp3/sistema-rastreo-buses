@@ -23,6 +23,21 @@ Reglas que el código implementa hoy y que las pruebas verifican. Si una regla c
 | R15 | Las posiciones más antiguas que la retención (días, ajustable; 0 = conservar todo) se purgan cada día. | `bus_position._cron_cleanup` | `test_cleanup_…` |
 | R16 | Una posición con latitud fuera de −90 a 90, longitud fuera de −180 a 180 u hora ilegible **debe rechazarse con 400 sin guardarse**. | — | **No se cumple hoy** (DEF-008 a DEF-010); E7, E8, E9 |
 
+## 1.1 Reglas de horario, puntualidad y recorridos programados
+
+Piden el PDF del proyecto final (Actividades 4, 5 y 6). Todos los umbrales se cambian en *Configuración > Ajustes > Trips and punctuality*.
+
+| N.º | Regla | Valor por defecto | Por qué ese valor | Dónde vive | Prueba |
+|---|---|---|---|---|---|
+| R17 | Cada parada tiene minutos previstos desde la salida (no decrecen a lo largo de la ruta). Un horario dice a qué hora sale una línea y en qué días; el recorrido programado es un bus en un horario en una fecha. Las horas se escriben en hora de Ecuador (UTC-5) y se guardan en UTC. | — | Ecuador no tiene horario de verano | `bus_trip.py`, `bus_route.py` | `test_trips` |
+| R18 | Un bus no puede tener dos recorridos que se solapen; puede hacer otras rutas en otros horarios. | — | Un bus está en un solo sitio | `bus.trip._check_overlap` | `test_a_bus_cannot_have_two_trips…` |
+| R19 | Una llegada a una parada pertenece al recorrido programado de esa ruta cuya ventana (inicio previsto a fin previsto), ampliada por un margen, contiene la hora; si hay dos, el de inicio más cercano. | margen de 30 min | Un bus llega antes de salir y se queda después de llegar; 30 min cubre eso sin confundir recorridos consecutivos de 25 min | `bus.trip._on_arrival` | `TestTripRun` |
+| R20 | **Retraso:** una llegada es tardía si pasa de la hora prevista más la tolerancia; adelantada si llega antes de la hora prevista menos la tolerancia. Ejemplo del PDF: parada prevista a las 08:15, tolerancia 5 min, llegada a las 08:23: retraso de 8 min e incumplimiento de puntualidad. En el límite exacto (5 min 00 s) es puntual; con 5 min 01 s es tardía. | tolerancia de 5 min | El tráfico urbano de Ambato varía unos minutos de un día a otro; menos de 5 min haría saltar la alerta por ruido y más de 10 dejaría pasar retrasos que el pasajero sí nota | `bus.trip._register_arrival` | `test_the_example_of_the_assignment`, `test_the_tolerance_limit_is_exact` |
+| R21 | **Parada omitida:** al cerrar un recorrido, la parada sin llegada dentro de su radio es omitida. **Recorrido incompleto:** el que se cierra con alguna parada omitida o sin llegar a ninguna. Un recorrido que nunca arrancó genera una sola alerta de recorrido incompleto, no una por parada. | radio de la parada: 50 m | Es el radio que ya usa la detección de llegadas (R4); un GPS de celular tiene una exactitud de 5 a 20 m | `bus.trip._finalize`, `_evaluate_rules` | `TestSkippedAndIncomplete` |
+| R22 | **Salida tardía:** un recorrido planificado que no ha arrancado pasados 10 minutos de su hora prevista (una alerta por recorrido; 0 la desactiva). | 10 min | Es el mismo orden de magnitud que la alerta de bus sin señal (R7) | `bus.trip._cron_close_trips` | `TestLateStart` |
+| R23 | **Diferencia de tiempos:** un recorrido terminado cuya duración real difiere de la prevista en más de este porcentaje queda marcado. | 25 % | Un recorrido de 25 min que dura 31 min o más (o menos de 19) ya cambia la experiencia del pasajero | `bus.trip._evaluate_rules` | `TestDurationFlag` |
+| R24 | Un recorrido cuya ventana (y margen) terminó se cierra solo con lo que tiene; las alertas de estas reglas se escriben cerradas, una por recorrido, tipo y parada. | cada 10 min | Un cierre tardío no debe duplicar alertas | `bus.trip._cron_close_trips`, `bus.alert._trip_event` | `test_closing_twice…` |
+
 ## 2. Estándares de las interfaces
 
 | Interfaz | Respuesta correcta | Errores |
