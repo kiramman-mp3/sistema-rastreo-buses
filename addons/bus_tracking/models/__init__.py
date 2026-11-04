@@ -17,3 +17,5 @@ from . import bus_driver_token
 from . import bus_incident
 from . import res_users
 from . import res_config_settings
+# last: it creates SQL views over the tables of all the models above
+from . import bus_kpi_views
