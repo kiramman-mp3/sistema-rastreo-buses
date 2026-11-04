@@ -125,6 +125,31 @@ class TestHttp(HttpCase):
         self.assertEqual([v['name'] for v in result['vehicles']], ['Bus 1'])
         self.assertEqual(result['routes'][0]['stops'][0]['name'], 'A')
 
+    def test_live_endpoint_sends_the_routes_only_when_they_changed(self):
+        route = self.env['bus.route'].create({
+            'name': 'R', 'code': 'R1',
+            'stop_ids': [(0, 0, {'name': 'A', 'latitude': -33.45, 'longitude': -70.66})]})
+        self.authenticate('admin', 'admin')
+
+        def live(routes_key=''):
+            return self.url_open('/bus_tracking/live', data=json.dumps(
+                {'jsonrpc': '2.0', 'method': 'call', 'params': {'routes_key': routes_key}}),
+                headers={'Content-Type': 'application/json'}).json()['result']
+
+        first = live()
+        self.assertTrue(first['routes_key'])
+        self.assertEqual(len(first['routes']), 1)
+        # the page already has them: only the buses travel
+        same = live(first['routes_key'])
+        self.assertNotIn('routes', same)
+        self.assertEqual(same['routes_key'], first['routes_key'])
+        # a new stop changes the key and the lines come again
+        route.write({'stop_ids': [(0, 0, {'name': 'B', 'latitude': -33.46, 'longitude': -70.67})]})
+        self.env.flush_all()
+        changed = live(first['routes_key'])
+        self.assertNotEqual(changed['routes_key'], first['routes_key'])
+        self.assertEqual(len(changed['routes'][0]['stops']), 2)
+
     def test_live_endpoint_includes_open_alerts(self):
         self.bus._apply_position(traccar_position(
             7, fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'), -33.47, -70.62, speed_knots=50.0))

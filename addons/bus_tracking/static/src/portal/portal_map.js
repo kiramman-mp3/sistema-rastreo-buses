@@ -17,7 +17,7 @@
     var t = JSON.parse(el.dataset.i18n || "{}");
     var center = JSON.parse(el.dataset.center || "[-1.2417, -78.6167]");
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var GLIDE_MS = 9000;
+    var GLIDE_MS = 5000;   // as long as the refresh: the bus never waits for the next position
 
     var map = L.map(el, { zoomControl: false, scrollWheelZoom: false }).setView(center, 13);
     L.control.zoom({ position: "bottomright" }).addTo(map);

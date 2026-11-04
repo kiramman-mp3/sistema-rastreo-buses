@@ -15,7 +15,8 @@ const TILE_OPTIONS = {
     subdomains: "abcd",
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
-const REFRESH_MS = 10000;
+// The GPS reports every 5 s. Asking and gliding over the same short span keeps the bus close to where it is.
+const REFRESH_MS = 4000;
 const DEFAULT_CENTER = [-1.2417, -78.6167];
 const BUS_SVG = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">' +
     '<rect x="3" y="2" width="14" height="14" rx="3" fill="currentColor"/>' +
@@ -128,9 +129,13 @@ export class BusLiveMap extends Component {
 
     async refresh() {
         try {
-            const data = await this.rpc("/bus_tracking/live", {});
+            // The lines and stops rarely change and are the heavy part: the server only sends them when the key differs.
+            const data = await this.rpc("/bus_tracking/live", { routes_key: this.routesVersion || "" });
             this.state.vehicles = data.vehicles || [];
-            this.state.routes = data.routes || [];
+            if (data.routes) {
+                this.state.routes = data.routes;
+                this.routesVersion = data.routes_key;
+            }
             this.state.incidents = data.incidents || [];
             this.state.alertLabels = data.alert_labels || {};
             this.state.newComplaints = data.new_complaints || 0;
@@ -144,7 +149,7 @@ export class BusLiveMap extends Component {
             this.syncIncidents();
             this.warnAboutNewSos();
         } catch {
-            this.state.error = _t("Could not update. Retrying every 10 seconds.");
+            this.state.error = _t("Could not update. Retrying in a few seconds.");
         }
     }
 
@@ -290,8 +295,8 @@ export class BusLiveMap extends Component {
 
     drawRoutes(center) {
         const L = window.L;
-        // Stops and recorded tracks change too, not only the list of routes.
-        const key = this.state.routeId + "|" + JSON.stringify(this.state.routes);
+        // Stops and recorded tracks change too, not only the list of routes: the server's key covers them.
+        const key = this.state.routeId + "|" + this.routesVersion;
         if (key === this.routesKey) {
             return;
         }
