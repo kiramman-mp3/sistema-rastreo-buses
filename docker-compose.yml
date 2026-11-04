@@ -66,6 +66,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GRAFANA_DB_HOST: db:5432
       GRAFANA_DB_NAME: ${ODOO_DB:-buses}
+      GRAFANA_DB_SSLMODE: disable
       GRAFANA_DB_PASSWORD: ${GRAFANA_DB_PASSWORD:-grafana-dev}
       GRAFANA_JWT_SECRET: ${GRAFANA_JWT_SECRET:-dev-grafana-jwt-secret-change-me}
     entrypoint: ["/bin/sh", "/etc/grafana/entrypoint.sh"]
