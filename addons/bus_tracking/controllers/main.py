@@ -111,6 +111,12 @@ class BusTrackingController(http.Controller):
             date_from = date_to - timedelta(days=days - 1)
         return request.env['bus.kpi'].dashboard(date_from, date_to, route_ids, scope, bool(compare))
 
+    @http.route('/bus_tracking/grafana/token', type='json', auth='user')
+    def grafana_token(self):
+        """The address of Grafana and a short-lived token for the person who is signed in (bus users only)."""
+        self._check_user()
+        return request.env['bus.grafana'].access()
+
     @http.route('/bus_tracking/incident/ack', type='json', auth='user')
     def acknowledge_incident(self, incident_id):
         self._check_user()

@@ -6,5 +6,7 @@ per-file-ignores =
     addons/bus_tracking/models/portal_i18n.py: E128,E501
     # Runs inside `odoo shell`, which provides `env`.
     scripts/dev_seed.py: F821
+    # Writes the Grafana dashboards: the SQL of each panel is one long string.
+    scripts/gen_grafana_dashboards.py: E127,E128,E501
     # Odoo loads the submodules from the package files.
     __init__.py: F401

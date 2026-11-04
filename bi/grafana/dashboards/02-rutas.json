@@ -1,0 +1,550 @@
+{
+ "uid": "bus-rutas",
+ "title": "Rutas",
+ "description": "Cada línea frente a las demás: puntualidad, cumplimiento, retraso y distancia.",
+ "tags": [
+  "bus-tracking"
+ ],
+ "schemaVersion": 39,
+ "version": 1,
+ "editable": false,
+ "graphTooltip": 1,
+ "liveNow": false,
+ "refresh": "30s",
+ "timezone": "America/Guayaquil",
+ "time": {
+  "from": "now-30d",
+  "to": "now"
+ },
+ "timepicker": {
+  "refresh_intervals": [
+   "30s",
+   "1m",
+   "5m",
+   "15m"
+  ]
+ },
+ "links": [],
+ "templating": {
+  "list": [
+   {
+    "name": "route",
+    "label": "Línea",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT route_code FROM kpi_routes WHERE active ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "bus",
+    "label": "Bus",
+    "type": "query",
+    "datasource": {
+     "type": "grafana-postgresql-datasource",
+     "uid": "bus-kpi"
+    },
+    "query": "SELECT bus FROM (SELECT bus FROM kpi_trips UNION SELECT bus FROM kpi_alerts) b ORDER BY 1",
+    "refresh": 2,
+    "multi": true,
+    "includeAll": true,
+    "current": {
+     "text": "All",
+     "value": "$__all"
+    },
+    "sort": 1
+   },
+   {
+    "name": "scope",
+    "label": "Datos",
+    "type": "custom",
+    "multi": false,
+    "includeAll": false,
+    "query": "Reales y simulados : all, Solo reales : real, Solo simulados : simulated",
+    "current": {
+     "text": "Reales y simulados",
+     "value": "all"
+    },
+    "options": [
+     {
+      "text": "Reales y simulados",
+      "value": "all",
+      "selected": true
+     },
+     {
+      "text": "Solo reales",
+      "value": "real",
+      "selected": false
+     },
+     {
+      "text": "Solo simulados",
+      "value": "simulated",
+      "selected": false
+     }
+    ]
+   }
+  ]
+ },
+ "annotations": {
+  "list": []
+ },
+ "panels": [
+  {
+   "type": "barchart",
+   "title": "Puntualidad por línea (%)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT route_code AS \"Línea\",\n        100.0 * COUNT(*) FILTER (WHERE status <> 'late') / NULLIF(COUNT(*), 0) AS \"Puntualidad\"\n        FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "percent",
+     "max": 100,
+     "min": 0
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Puntualidad"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#7A1A22"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "vertical",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 1,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 8,
+    "h": 8
+   }
+  },
+  {
+   "type": "barchart",
+   "title": "Cumplimiento de ruta por línea (%)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT route_code AS \"Línea\",\n        100.0 * COUNT(*) FILTER (WHERE state = 'done') / NULLIF(COUNT(*), 0) AS \"Cumplimiento\"\n        FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "percent",
+     "max": 100,
+     "min": 0
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Cumplimiento"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#1E5560"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "vertical",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 2,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 0,
+    "w": 8,
+    "h": 8
+   }
+  },
+  {
+   "type": "barchart",
+   "title": "Retraso promedio por línea (min)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT route_code AS \"Línea\",\n        AVG(delay_min) AS \"Retraso\" FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND status = 'late' GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "m"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Retraso"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#9A4A14"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "vertical",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 3,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 0,
+    "w": 8,
+    "h": 8
+   }
+  },
+  {
+   "type": "barchart",
+   "title": "Distancia estimada y recorrida por línea (km)",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT route_code AS \"Línea\",\n        SUM(distance_est_km) AS \"Estimada\", SUM(distance_real_km) AS \"Recorrida\"\n        FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND distance_real_km > 0 GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     },
+     "unit": "km"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Estimada"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#FFC62B"
+        }
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Recorrida"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#172025"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "vertical",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 4,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "barchart",
+   "title": "Alertas por línea",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "SELECT COALESCE(route_code, 'Sin línea') AS \"Línea\", COUNT(*) AS \"Alertas\"\n        FROM kpi_alerts WHERE $__timeFilter(happened_at) AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) GROUP BY 1 ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 85,
+      "lineWidth": 0,
+      "gradientMode": "none"
+     },
+     "color": {
+      "mode": "palette-classic"
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Alertas"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#A1221B"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "orientation": "vertical",
+    "xTickLabelRotation": 0,
+    "stacking": "none",
+    "showValue": "auto",
+    "barWidth": 0.8,
+    "groupWidth": 0.75,
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    },
+    "tooltip": {
+     "mode": "multi",
+     "sort": "none"
+    }
+   },
+   "id": 5,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   }
+  },
+  {
+   "type": "table",
+   "title": "Comparación de líneas",
+   "description": "",
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-postgresql-datasource",
+      "uid": "bus-kpi"
+     },
+     "editorMode": "code",
+     "format": "table",
+     "rawQuery": true,
+     "rawSql": "WITH trips AS (\n            SELECT route_code, COUNT(*) AS trips, 100.0 * COUNT(*) FILTER (WHERE state = 'done') / COUNT(*) AS compliance,\n                   COALESCE(SUM(distance_est_km) FILTER (WHERE distance_real_km > 0), 0) AS est_km,\n                   COALESCE(SUM(distance_real_km), 0) AS real_km\n              FROM kpi_trips WHERE $__timeFilter(starts_at) AND state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) GROUP BY 1\n        ), stops AS (\n            SELECT route_code, 100.0 * COUNT(*) FILTER (WHERE status <> 'late') / COUNT(*) AS punctuality,\n                   AVG(delay_min) FILTER (WHERE status = 'late') AS delay\n              FROM kpi_trip_stops WHERE $__timeFilter(starts_at) AND trip_state IN ('done', 'incomplete') AND route_code IN ($route) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) AND actual_time IS NOT NULL GROUP BY 1\n        ), alerts AS (\n            SELECT route_code, COUNT(*) AS alerts FROM kpi_alerts WHERE $__timeFilter(happened_at) AND (route_code IN ($route) OR route_code IS NULL) AND bus IN ($bus) AND ('$scope' = 'all' OR ('$scope' = 'real' AND NOT simulated) OR ('$scope' = 'simulated' AND simulated)) GROUP BY 1\n        )\n        SELECT r.route_code AS \"Línea\", r.route_name AS \"Nombre\", COALESCE(trips.trips, 0) AS \"Recorridos\",\n               ROUND(trips.compliance::numeric, 1) AS \"Cumplimiento %\", ROUND(stops.punctuality::numeric, 1) AS \"Puntualidad %\",\n               ROUND(stops.delay::numeric, 1) AS \"Retraso prom. (min)\", ROUND(trips.est_km::numeric, 1) AS \"Km estimados\",\n               ROUND(trips.real_km::numeric, 1) AS \"Km recorridos\", COALESCE(alerts.alerts, 0) AS \"Alertas\"\n          FROM kpi_routes r LEFT JOIN trips USING (route_code) LEFT JOIN stops USING (route_code)\n          LEFT JOIN alerts USING (route_code) WHERE r.active AND r.route_code IN ($route) ORDER BY 1"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "align": "auto",
+      "cellOptions": {
+       "type": "auto"
+      },
+      "filterable": true
+     },
+     "noValue": "—"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true,
+    "cellHeight": "sm",
+    "sortBy": [],
+    "footer": {
+     "show": false
+    }
+   },
+   "id": 6,
+   "datasource": {
+    "type": "grafana-postgresql-datasource",
+    "uid": "bus-kpi"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 16,
+    "w": 24,
+    "h": 7
+   }
+  }
+ ]
+}
