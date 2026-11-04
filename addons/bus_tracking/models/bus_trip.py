@@ -175,6 +175,10 @@ class BusTrip(models.Model):
         compute='_compute_stats', store=True, help="Largest delay of the trip (0 when nothing was late).")
     delay_end_min = fields.Float(
         compute='_compute_stats', store=True, help="Delay at the last stop reached: the delay the trip piled up.")
+    expected_flags = fields.Char(
+        readonly=True, help="What a simulated trip is meant to trigger, to measure the detection.")
+    detected_flags = fields.Char(compute='_compute_flags', store=True, help="What the rules detected on the trip.")
+    detection_ok = fields.Boolean(compute='_compute_flags', store=True, help="Simulated trips: detected = expected.")
     late_start_alerted = fields.Boolean(default=False, readonly=True)
     alert_ids = fields.One2many('bus.alert', 'trip_id', string="Alerts")
     incident_ids = fields.One2many('bus.incident', 'trip_id', string="Incidents")
@@ -220,6 +224,32 @@ class BusTrip(models.Model):
             trip.duration_est_min = planned
             trip.duration_real_min = real
             trip.duration_diff_pct = (real - planned) / planned * 100.0 if planned and real else 0.0
+
+    @api.depends('state', 'stop_line_ids.status', 'alert_ids.kind', 'expected_flags')
+    def _compute_flags(self):
+        """The facts the rules found on a trip, as a sorted list of short words."""
+        for trip in self:
+            statuses = set(trip.stop_line_ids.mapped('status'))
+            kinds = set(trip.alert_ids.mapped('kind'))
+            flags = set()
+            if 'late' in statuses:
+                flags.add('late')
+            if 'early' in statuses:
+                flags.add('early')
+            if 'skipped' in statuses and statuses & {'on_time', 'late', 'early'}:
+                flags.add('skipped')
+            if trip.state == 'incomplete':
+                flags.add('incomplete')
+            if 'late_start' in kinds:
+                flags.add('not_started')
+            if 'off_route' in kinds:
+                flags.add('off_route')
+            if 'speeding' in kinds:
+                flags.add('speeding')
+            trip.detected_flags = ','.join(sorted(flags))
+            expected = ','.join(sorted(f for f in (trip.expected_flags or '').split(',') if f))
+            trip.detection_ok = bool(trip.simulated and trip.state in ('done', 'incomplete')
+                                     and trip.detected_flags == expected)
 
     @api.depends('stop_line_ids.status', 'stop_line_ids.delay_min', 'stop_line_ids.actual_time')
     def _compute_stats(self):
@@ -345,8 +375,10 @@ class BusTrip(models.Model):
                 Alert._trip_event(self, 'skipped_stop', when, stop_id=line.stop_id.id)
         if self.state == 'incomplete':
             Alert._trip_event(self, 'incomplete_trip', when, threshold=skipped)
+        # Only a trip that reached its last stop has a duration worth comparing with the plan.
         limit = int_param(self.env, 'bus_tracking.time_diff_pct', 25)
-        self.time_flag = bool(self.duration_real_min and limit > 0 and abs(self.duration_diff_pct) > limit)
+        self.time_flag = bool(
+            self.state == 'done' and self.duration_real_min and limit > 0 and abs(self.duration_diff_pct) > limit)
 
     def _compute_real_figures(self):
         """Distance driven and how far from the line of the route, from the positions stored during the trip."""

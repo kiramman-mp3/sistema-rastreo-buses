@@ -2,6 +2,7 @@ from . import traccar_api
 from . import bus_route
 from . import bus_route_record
 from . import bus_trip
+from . import trip_simulator
 from . import bus_route_gpx
 from . import bus_vehicle
 from . import bus_position
