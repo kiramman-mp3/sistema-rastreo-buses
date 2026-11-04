@@ -30,6 +30,13 @@ class BusRoute(models.Model):
     track_points = fields.Integer(string="Points of the recorded track", compute='_compute_counts')
     stop_count = fields.Integer(compute='_compute_counts')
     vehicle_count = fields.Integer(compute='_compute_counts')
+    distance_km = fields.Float(
+        compute='_compute_distance_km', store=True, digits=(10, 2),
+        help="Length of the line of the route (the recorded track, or the stops joined in order): "
+             "the estimated distance.")
+    origin_stop_id = fields.Many2one('bus.route.stop', compute='_compute_ends', string="From")
+    destination_stop_id = fields.Many2one('bus.route.stop', compute='_compute_ends', string="To")
+    schedule_ids = fields.One2many('bus.route.schedule', 'route_id', string="Schedules")
 
     _sql_constraints = [
         ('code_uniq', 'unique(code)', "Route code must be unique."),
@@ -40,6 +47,18 @@ class BusRoute(models.Model):
         for route in self:
             if route.color and not re.match(r'^#[0-9a-fA-F]{6}$', route.color):
                 raise ValidationError(_("The color must look like #1e5560."))
+
+    @api.depends('track_json', 'stop_ids.latitude', 'stop_ids.longitude', 'stop_ids.sequence')
+    def _compute_distance_km(self):
+        for route in self:
+            points = route._recorded_points() or [[stop.latitude, stop.longitude] for stop in route.stop_ids]
+            route.distance_km = round(PathMeasure(points).length / 1000.0, 2) if len(points) > 1 else 0.0
+
+    @api.depends('stop_ids.sequence')
+    def _compute_ends(self):
+        for route in self:
+            route.origin_stop_id = route.stop_ids[:1]
+            route.destination_stop_id = route.stop_ids[-1:] if len(route.stop_ids) > 1 else False
 
     def _recorded_points(self):
         self.ensure_one()
@@ -119,6 +138,20 @@ class BusRouteStop(models.Model):
     latitude = fields.Float(digits=(10, 7), required=True)
     longitude = fields.Float(digits=(10, 7), required=True)
     radius = fields.Integer(default=50, help="Arrival radius in meters.")
+    planned_offset_min = fields.Integer(
+        string="Planned minutes", default=0,
+        help="Minutes after the bus leaves the first stop that it should be at this one. The first stop is 0.")
+
+    @api.constrains('planned_offset_min', 'sequence', 'route_id')
+    def _check_planned_offset(self):
+        """The planned minutes never go back along the route."""
+        for route in self.mapped('route_id'):
+            previous = 0
+            for stop in route.stop_ids.sorted(lambda s: (s.sequence, s.id)):
+                if stop.planned_offset_min < 0 or stop.planned_offset_min < previous:
+                    raise ValidationError(_("The planned minutes of the stops cannot go back along the route "
+                                            "(check %s).", stop.name))
+                previous = stop.planned_offset_min
 
     @api.constrains('latitude', 'longitude', 'radius')
     def _check_place(self):
