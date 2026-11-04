@@ -6,7 +6,8 @@ produce posiciones: lo que fue tarde, omitido o desviado lo deciden las reglas d
     docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo \\
         --log-level=error < scripts/seed_recorridos.py
 
-Imprime el informe entre las marcas <<<INFORME y INFORME>>> (es lo que se copia a docs/calidad/13-recorridos-de-prueba.md).
+Imprime el informe entre las marcas <<<INFORME y INFORME>>>
+(es lo que se copia a docs/calidad/13-recorridos-de-prueba.md).
 Repetirlo agrega otros 12 recorridos en días anteriores.
 """
 SCENARIO_ES = {
@@ -48,10 +49,11 @@ for trip in trips.sorted(lambda t: (t.route_id.code, t.planned_start)):
         trip.distance_est_km, trip.distance_real_km))
 ok = len(trips.filtered('detection_ok'))
 print('<<<INFORME')
-print('| N.º | Ruta | Fecha | Escenario | Qué debía detectarse | Qué detectó el sistema | Coincide | Paradas visitadas / tarde / omitidas '
-      '| Retraso al final (min) | Distancia estimada / recorrida (km) |')
+print('| N.º | Ruta | Fecha | Escenario | Qué debía detectarse | Qué detectó el sistema | Coincide '
+      '| Paradas visitadas / tarde / omitidas | Retraso al final (min) | Distancia estimada / recorrida (km) |')
 print('|---|---|---|---|---|---|---|---|---|---|')
 print('\n'.join(rows))
 print()
-print('Recorridos simulados: %d. Detección correcta: %d de %d (%.1f %%).' % (len(trips), ok, len(trips), 100.0 * ok / len(trips)))
+print('Recorridos simulados: %d. Detección correcta: %d de %d (%.1f %%).'
+      % (len(trips), ok, len(trips), 100.0 * ok / len(trips)))
 print('INFORME>>>')
