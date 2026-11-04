@@ -7,8 +7,11 @@
     <menuitem id="menu_bus_live_map" name="Live Map" parent="menu_bus_root"
               action="action_live_map" sequence="10"/>
 
-    <menuitem id="menu_bus_dashboard" name="Indicators" parent="menu_bus_root"
-              action="action_live_dashboard" sequence="12"/>
+    <menuitem id="menu_bus_indicators" name="Indicators" parent="menu_bus_root" sequence="12"/>
+    <menuitem id="menu_bus_dashboard" name="Odoo dashboard" parent="menu_bus_indicators"
+              action="action_live_dashboard" sequence="10"/>
+    <menuitem id="menu_bus_grafana" name="Grafana" parent="menu_bus_indicators"
+              action="action_grafana" sequence="20"/>
 
     <!-- Operation: what happens today. Fleet: what the service is made of. -->
     <menuitem id="menu_bus_operation" name="Operations" parent="menu_bus_root" sequence="15"/>
