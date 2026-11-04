@@ -243,7 +243,7 @@ class TestDriverShiftApi(HttpCase):
             self.assertIn('alerts', resp.json())
 
     def test_alert_details_follow_the_language_of_the_app(self):
-        """The Odoo user of the driver reads English; the app asks for Spanish, English or the Kichwa draft."""
+        """The Odoo user of the driver reads English; the app asks for Spanish, English or Kichwa."""
         self.env['res.lang']._activate_lang('es_EC')
         token = self.token()
         self.start(token)
@@ -257,7 +257,7 @@ class TestDriverShiftApi(HttpCase):
             return self.post(STATE, body, token=token).json()['alerts'][0]['detail']
 
         self.assertEqual(detail({'lang': 'es'}), spanish)
-        self.assertEqual(detail({'lang': 'qu'}), spanish)   # the Kichwa draft reads Spanish
+        self.assertEqual(detail({'lang': 'qu'}), spanish)   # Odoo has no Kichwa: it reads Spanish
         self.assertEqual(detail({'lang': 'en'}), english)
         self.assertEqual(detail({}), english)               # no language sent: the one of the Odoo user
         self.assertEqual(detail({'lang': 'zz'}), english)   # not an app language: ignored
