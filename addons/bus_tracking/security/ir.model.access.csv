@@ -27,3 +27,10 @@ access_bus_incident_user,bus.incident user,model_bus_incident,group_bus_user,1,0
 access_bus_incident_manager,bus.incident manager,model_bus_incident,group_bus_manager,1,0,0,1
 access_bus_route_record_manager,bus.route.record manager,model_bus_route_record,group_bus_manager,1,1,1,1
 access_bus_route_gpx_manager,bus.route.gpx manager,model_bus_route_gpx,group_bus_manager,1,1,1,1
+access_bus_route_schedule_user,bus.route.schedule user,model_bus_route_schedule,group_bus_user,1,0,0,0
+access_bus_route_schedule_manager,bus.route.schedule manager,model_bus_route_schedule,group_bus_manager,1,1,1,1
+access_bus_trip_user,bus.trip user,model_bus_trip,group_bus_user,1,0,0,0
+access_bus_trip_manager,bus.trip manager,model_bus_trip,group_bus_manager,1,1,1,1
+access_bus_trip_stop_user,bus.trip.stop user,model_bus_trip_stop,group_bus_user,1,0,0,0
+access_bus_trip_stop_manager,bus.trip.stop manager,model_bus_trip_stop,group_bus_manager,1,1,0,0
+access_bus_trip_assign_manager,bus.trip.assign manager,model_bus_trip_assign,group_bus_manager,1,1,1,1

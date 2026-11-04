@@ -47,6 +47,23 @@ class ResConfigSettings(models.TransientModel):
         help="Alert when a bus stays this far from the road of its trip. 0 disables the alert.")
     bus_off_route_minutes = fields.Integer(
         string="... for at least (minutes)", config_parameter='bus_tracking.off_route_minutes', default=3)
+    bus_trip_horizon_days = fields.Integer(
+        string="Create scheduled trips for the next (days)", config_parameter='bus_tracking.trip_horizon_days',
+        default=2, help="Every hour the schedules with a default bus create their trips for this many days ahead.")
+    bus_punctuality_tolerance = fields.Integer(
+        string="Punctuality tolerance (minutes)", config_parameter='bus_tracking.punctuality_tolerance_min', default=5,
+        help="An arrival later than the planned time plus this is late; "
+             "earlier than the planned time minus this is early.")
+    bus_trip_margin = fields.Integer(
+        string="Trip window margin (minutes)", config_parameter='bus_tracking.trip_margin_min', default=30,
+        help="A stop arrival belongs to a trip when it falls between the planned start and end, "
+             "widened by this margin.")
+    bus_late_start_minutes = fields.Integer(
+        string="Late-start alert after (minutes)", config_parameter='bus_tracking.late_start_minutes', default=10,
+        help="Alert when a planned trip has not started this long after its planned departure. 0 disables the alert.")
+    bus_time_diff_pct = fields.Integer(
+        string="Duration difference flagged beyond (%)", config_parameter='bus_tracking.time_diff_pct', default=25,
+        help="A finished trip whose real duration differs from the planned one by more than this is flagged.")
     bus_brand_name = fields.Char(
         string="Name shown to passengers", config_parameter='bus_tracking.brand_name', default='Buses UTA',
         help="Appears on the public pages, the sign-in page and the page titles.")
