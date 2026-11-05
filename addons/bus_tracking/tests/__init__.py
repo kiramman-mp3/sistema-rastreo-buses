@@ -28,3 +28,5 @@ from . import test_grafana_access
 from . import test_grafana_dashboards
 from . import test_fleet
 from . import test_demo_report
+from . import test_boundaries
+from . import test_traccar_consistency
