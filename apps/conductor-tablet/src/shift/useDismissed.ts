@@ -13,13 +13,15 @@ export function useDismissed(shiftId: number | undefined) {
   useEffect(() => {
     if (shiftId === undefined) return undefined;
     let live = true;
-    loadDismissed(shiftId, AsyncStorage).then((stored) => {
-      if (!live) return;
-      setClosed((current) => ({
-        shiftId,
-        keys: Array.from(new Set([...stored, ...(current.shiftId === shiftId ? current.keys : [])])),
-      }));
-    });
+    loadDismissed(shiftId, AsyncStorage)
+      .then((stored) => {
+        if (!live) return;
+        setClosed((current) => ({
+          shiftId,
+          keys: Array.from(new Set([...stored, ...(current.shiftId === shiftId ? current.keys : [])])),
+        }));
+      })
+      .catch(() => undefined); // nothing stored: the notices simply show again
     return () => {
       live = false;
     };

@@ -34,7 +34,7 @@ def parse_unit_log(path):
                 starts.append((datetime.strptime(m.group(1), '%Y-%m-%d %H:%M:%S,%f'), m.group(2), m.group(3), m.group(4)))
             elif 'post-tests in' in line:
                 end = datetime.strptime(line[:23], '%Y-%m-%d %H:%M:%S,%f')
-            m2 = re.search(r'(\d+) failed, (\d+) error\(s\) of (\d+) tests', line)
+            m2 = re.search(r'(\d{1,9}) failed, (\d{1,9}) error\(s\) of (\d{1,9}) tests', line)
             if m2:
                 failed, errors, total = map(int, m2.groups())
     tests = []

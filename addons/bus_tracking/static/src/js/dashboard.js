@@ -65,7 +65,7 @@ export class BusDashboard extends Component {
             await this.load();
             this.poll = setInterval(() => {
                 if (!document.hidden) {
-                    this.load();
+                    this.load().catch(() => {});
                 }
             }, REFRESH_MS);
             this.clock = setInterval(() => {
@@ -84,14 +84,14 @@ export class BusDashboard extends Component {
     async load() {
         const params = {
             scope: this.state.scope,
-            route_ids: this.state.routeId ? [parseInt(this.state.routeId, 10)] : null,
+            route_ids: this.state.routeId ? [Number.parseInt(this.state.routeId, 10)] : null,
             compare: true,
         };
         if (this.state.range === "custom") {
             params.date_from = this.state.from;
             params.date_to = this.state.to;
         } else {
-            params.days = parseInt(this.state.range, 10);
+            params.days = Number.parseInt(this.state.range, 10);
         }
         try {
             this.state.data = await this.rpc("/bus_tracking/dashboard", params);
