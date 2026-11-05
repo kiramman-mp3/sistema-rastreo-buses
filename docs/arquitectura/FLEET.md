@@ -34,7 +34,11 @@ Cambiar el dato en cualquiera de los dos lados lo copia al otro **una sola vez**
 - **Los buses simulados** (los del simulador de recorridos) **no llegan a Fleet**: no son vehículos de la empresa.
 - **Borrar el vehículo en Fleet no borra el bus** (el enlace queda vacío; Fleet mismo impide borrar vehículos con historial de conductor).
 - **Permisos**: el gestor de buses recibe el grupo *Administrator* de Fleet (el *Officer* de Fleet solo ve el vehículo que conduce) y ve el menú **Buses › Fleet › Fleet vehicles**. Los demás usuarios de buses no lo ven.
-- **Pantallas**: el bus tiene el botón **Open in Fleet** y el campo «Fleet vehicle»; el vehículo de Fleet muestra el bloque «GPS tracking» (bus, dispositivo Traccar, conexión, última posición) y el botón «Open the bus».
+- **Pantallas y unificación**: Toda la gestión de la flota se centralizó en `fleet.vehicle` para evitar duplicidad:
+  - El submenú redundante **Buses** bajo Flota se oculta (`active="False"`), dejando **Vehículos de flota** como único punto de acceso.
+  - El formulario del vehículo incorpora en el encabezado los botones de acción (`View on map`, `Register GPS in Traccar`, `Sync now`, `Start/Stop demo report`), el botón de estadística **Live Map** y la pestaña **GPS tracking** con el código QR para la tableta del chofer.
+  - Se eliminó el botón redundante **Bus Details**.
+  - Se ocultó el bloque estático **Driver** (Conductor e historial) del formulario vehicular: en el sistema de transporte público de la UTA los buses no pertenecen a un conductor fijo, sino que los choferes toman cualquier unidad de forma dinámica mediante **Turnos** (`bus.shift`).
 
 ## 4. Instalación y migración
 

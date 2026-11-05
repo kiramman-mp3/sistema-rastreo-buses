@@ -349,6 +349,18 @@ Resumen: 48 registrados, 48 cerrados (100 %), 0 abiertos. Densidad: 9,5 defectos
 - **Categoría:** Lógica
 - **Prueba que lo protege:** SonarQube: bugs 16 → 0, vulnerabilidades 12 → 0, deuda 107 → 0 min; 512 y 167 pruebas siguen en verde (docs/calidad/16-sonarqube.md)
 
+### DEF-049: Fallo de serialización concurrente en PostgreSQL al actualizar vistas en producción
+
+- **Causa raíz:** Ejecución de `odoo -u bus_tracking` con el contenedor de producción en marcha ejecutando tareas cron en segundo plano (`SerializationFailure: concurrent update`).
+- **Categoría:** Infraestructura y despliegue
+- **Prueba que lo protege:** Procedimiento de actualización con parada limpia del servicio web antes de la inicialización de esquemas.
+
+### DEF-050: Error de validación XML en Odoo por uso de atributo `@string` en selector XPath
+
+- **Causa raíz:** Odoo 16 prohíbe el uso de `@string` en selectores XPath por ser un atributo traducible sujeto a localización (`View inheritance may not use attribute 'string' as a selector`).
+- **Categoría:** Interfaz y vistas
+- **Prueba que lo protege:** Selector por elemento de campo hijo `//group[field[@name='driver_id']]` validado por `ir.ui.view._check_xml()`.
+
 ## 3. Qué falta para cerrar los abiertos
 
 No queda ningún defecto abierto. DEF-013 (una credencial en el historial de git) se cerró al reescribir el historial y rotar la contraseña; `gitleaks` corre en el CI (`.github/workflows/ci.yml`) para que no se repita.
