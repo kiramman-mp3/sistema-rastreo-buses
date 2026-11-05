@@ -39,7 +39,7 @@ async function loadFacts(): Promise<Facts> {
     errorQueue.last(),
     gpsStore.get(),
   ]);
-  const at = appFailure ? Date.parse(appFailure.at) : NaN;
+  const at = appFailure ? Date.parse(appFailure.at) : Number.NaN;
   const recent = appFailure !== null && Number.isFinite(at) && Date.now() - at < APP_ERROR_RECENT_MS;
   // Only a failure newer than the last good send still explains anything.
   const error =

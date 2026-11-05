@@ -10,10 +10,12 @@ export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, set] = useState<Lang>(getLang());
   useEffect(() => onLang(set), []);
   useEffect(() => {
-    AsyncStorage.getItem(KEY).then((value) => {
-      if (value === 'es' || value === 'en' || value === 'qu') setLang(value);
-      else setLang(languageForLocale(deviceLocale()));
-    });
+    AsyncStorage.getItem(KEY)
+      .then((value) => {
+        if (value === 'es' || value === 'en' || value === 'qu') setLang(value);
+        else setLang(languageForLocale(deviceLocale()));
+      })
+      .catch(() => setLang(languageForLocale(deviceLocale())));
   }, []);
   return <LangContext.Provider value={lang}>{children}</LangContext.Provider>;
 }

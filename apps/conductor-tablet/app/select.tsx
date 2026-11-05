@@ -124,7 +124,10 @@ export default function Select() {
         text: t('signOut'),
         style: 'destructive',
         onPress: () => {
-          session.logout().finally(() => router.replace('/'));
+          session
+            .logout()
+            .catch(() => undefined)
+            .finally(() => router.replace('/'));
         },
       },
     ]);
