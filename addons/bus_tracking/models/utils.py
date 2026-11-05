@@ -142,10 +142,3 @@ def float_to_clock(value):
     """6.2667 -> '06:16'."""
     total = int(round(value * 60))
     return '%02d:%02d' % divmod(total, 60)
-
-
-def local_now(env):
-    """Current local time (Ecuador) as an aware datetime."""
-    import pytz
-    from datetime import datetime
-    return datetime.now(pytz.timezone(LOCAL_TIMEZONE))

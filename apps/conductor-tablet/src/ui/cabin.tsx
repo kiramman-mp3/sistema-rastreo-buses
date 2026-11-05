@@ -268,7 +268,7 @@ export function SosButton({ onFire, title, hint, holding, status, inline }: SosP
     const current = createHold(SOS_HOLD_MS, () => {
       setPressing(false);
       progress.setValue(0);
-      hapticCommit();
+      hapticCommit().catch(() => undefined);
       fire.current();
     });
     hold.current = current;
@@ -312,7 +312,7 @@ export function SosButton({ onFire, title, hint, holding, status, inline }: SosP
       accessibilityLabel={`${title}. ${hint}`}
       accessibilityActions={[{ name: 'activate', label: title }]}
       onAccessibilityAction={() => {
-        hapticCommit();
+        hapticCommit().catch(() => undefined);
         onFire();
       }}
       style={[

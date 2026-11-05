@@ -14,3 +14,9 @@ dist-mobile/
 .agents/
 /assets/
 qa/salida/
+
+# SonarQube
+.scannerwork/
+.sonar-out/
+coverage.xml
+apps/conductor-tablet/coverage/

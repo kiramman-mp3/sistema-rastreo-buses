@@ -8,6 +8,7 @@ from odoo import fields, http
 from odoo.exceptions import AccessError, ValidationError
 from odoo.http import Response, request
 
+from ..models.bus_trip import utc_to_local_date
 from ..models.utils import int_param, map_center, tile_url
 from .portal import line_positions
 
@@ -34,7 +35,7 @@ class BusTrackingController(http.Controller):
             alerts.setdefault(alert.vehicle_id.id, []).append(alert.kind)
         alert_labels = dict(env['bus.alert']._fields['kind']._description_selection(env))
         vehicles = []
-        buses = env['bus.vehicle'].search([('last_fix_time', '!=', False)])
+        buses = env['bus.vehicle'].search([('last_fix_time', '!=', False), ('simulated', '=', False)])
         positions = {}
         for route in buses.mapped('route_id'):
             positions.update(line_positions(route, buses.filtered(lambda b, r=route: b.route_id == r)))
@@ -75,8 +76,8 @@ class BusTrackingController(http.Controller):
         } for incident in env['bus.incident']._open_for_map()]
         new_complaints = env['bus.complaint'].search_count([('state', '=', 'new')])
         all_routes = env['bus.route'].search([])
-        key = hashlib.sha1(repr([(r.id, r.write_date, r.stop_ids.ids, r.stop_ids.mapped('write_date'))
-                                 for r in all_routes]).encode()).hexdigest()
+        state = [(r.id, r.write_date, r.stop_ids.ids, r.stop_ids.mapped('write_date')) for r in all_routes]
+        key = hashlib.sha256(repr(state).encode()).hexdigest()       # only tells "did the lines change
         routes = None if routes_key == key else [{
             'id': r.id,
             'name': r.name,
@@ -96,6 +97,25 @@ class BusTrackingController(http.Controller):
         if routes is not None:
             data['routes'] = routes
         return data
+
+    @http.route('/bus_tracking/dashboard', type='json', auth='user')
+    def dashboard(self, days=None, date_from=None, date_to=None, route_ids=None, scope='all', compare=True):
+        """The indicators and the series of the dashboard. `days` is a period that ends today (local date)."""
+        self._check_user()
+        if days:
+            try:
+                days = min(max(int(days), 1), 366)
+            except (TypeError, ValueError):
+                raise ValidationError("days must be a number.")
+            date_to = utc_to_local_date(fields.Datetime.now())
+            date_from = date_to - timedelta(days=days - 1)
+        return request.env['bus.kpi'].dashboard(date_from, date_to, route_ids, scope, bool(compare))
+
+    @http.route('/bus_tracking/grafana/token', type='json', auth='user')
+    def grafana_token(self):
+        """The address of Grafana and a short-lived token for the person who is signed in (bus users only)."""
+        self._check_user()
+        return request.env['bus.grafana'].access()
 
     @http.route('/bus_tracking/incident/ack', type='json', auth='user')
     def acknowledge_incident(self, incident_id):
@@ -148,7 +168,8 @@ class BusTrackingController(http.Controller):
         if isinstance(payload, dict):
             try:
                 env['bus.vehicle']._process_traccar_payload(payload)
-            except (ValueError, ValidationError):
+            except (ValueError, ValidationError) as error:
+                env['bus.position.reject']._log(payload, str(error.args[0]) if error.args else 'invalid')
                 return Response(status=400)
         return Response(status=200)
 

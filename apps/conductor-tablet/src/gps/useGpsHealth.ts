@@ -50,8 +50,10 @@ export function useGpsHealth(everyMs = 3_000): GpsReading {
         lon: sample?.lon ?? sent?.lon ?? null,
       });
     }
-    read();
-    const id = setInterval(read, everyMs);
+    read().catch(() => undefined);
+    const id = setInterval(() => {
+      read().catch(() => undefined);
+    }, everyMs);
     return () => {
       live = false;
       clearInterval(id);

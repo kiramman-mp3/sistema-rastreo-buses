@@ -52,6 +52,14 @@ def utc_z(value):
     return value.isoformat() + 'Z' if value else None
 
 
+def plan_fields(line):
+    """The planned time of a stop on the scheduled trip and, once the bus reached it, the delay in minutes."""
+    if not line:
+        return {'planned_at': None, 'delay_min': None}
+    return {'planned_at': utc_z(line.planned_time),
+            'delay_min': round(line.delay_min, 1) if line.actual_time else None}
+
+
 class BusDriverApi(http.Controller):
     """JSON API for the driver tablet app. It authenticates with its own bearer token
     (Odoo 16 only accepts API keys on its RPC endpoints, not on controllers)."""
@@ -223,6 +231,10 @@ class BusDriverApi(http.Controller):
         ])
         sos = request.env['bus.incident'].sudo().search(
             [('shift_id', '=', shift.id), ('kind', '=', 'sos')], order='create_date desc', limit=1)
+        # The planned time of each stop and the delay so far, when the bus has a scheduled trip right now.
+        scheduled = request.env['bus.trip'].sudo()._trips_around(
+            bus, fields.Datetime.now(), ('planned', 'running'), route=shift.route_id)[:1]
+        plan = {line.stop_id.id: line for line in scheduled.stop_line_ids}
         # The alert details read in the language of the app, not in the one of the Odoo user.
         installed = request.env['res.lang'].sudo().search([('active', '=', True)]).mapped('code')
         lang = pick_odoo_lang((read_body() or {}).get('lang'), installed, fallback=user.lang)
@@ -244,6 +256,7 @@ class BusDriverApi(http.Controller):
                 'name': stop.name,
                 'sequence': stop.sequence,
                 'arrived_at': utc_z(arrived.get(stop.id)),
+                **plan_fields(plan.get(stop.id)),
             } for stop in trip['stops']],
             'alerts': [{
                 'id': alert.id,

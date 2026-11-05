@@ -1,6 +1,6 @@
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -20,7 +20,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-010 | 28-oct-2026 | Suite en vivo (E9) y auditoría | Una hora GPS inválida produce HTTP 500 en el webhook | models/utils.py (parse_traccar_dt), controllers/main.py | Cerrado |
 | DEF-011 | 02-nov-2026 | Auditoría integral (SEC-01) | Cualquier usuario interno podía emitir o revocar la credencial QR de otro chofer por RPC | models/res_users.py | Cerrado |
 | DEF-012 | 02-nov-2026 | Auditoría integral (SEC-02) | El enlace con el token de la credencial QR se guardaba en claro y lo leía cualquier usuario interno | models/res_users.py | Cerrado |
-| DEF-013 | 02-nov-2026 | Auditoría integral (SEC-03) | La contraseña del admin de producción estaba escrita en un script del repositorio público | scripts/clean-azure-db.sh | Abierto |
+| DEF-013 | 02-nov-2026 | Auditoría integral (SEC-03) | La contraseña del admin de producción estaba escrita en un script del repositorio público | scripts/clean-azure-db.sh | Cerrado |
 | DEF-014 | 02-nov-2026 | Auditoría integral (OPS-01) | El script de reinicio borraba producción sin confirmar y luego fallaba por llamar métodos inexistentes | scripts/clean-azure-db.sh | Cerrado |
 | DEF-015 | 02-nov-2026 | Auditoría integral (SEC-04) | La credencial QR servía como sesión y una sesión robada se renovaba para siempre por login_badge | models/bus_driver_token.py, controllers/driver_api.py | Cerrado |
 | DEF-016 | 02-nov-2026 | Auditoría integral (SEC-05) | Los choferes eran usuarios internos y podían abrir el panel con la clave de la tableta | models/res_users.py | Cerrado |
@@ -46,8 +46,18 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-036 | 04-nov-2026 | Diagnóstico en producción (logs de Odoo) | Saturación del pool de conexiones PostgreSQL en Odoo (PoolError: The Connection Pool Is Full) | config/odoo.prod.conf (db_maxconn) | Cerrado |
 | DEF-037 | 04-nov-2026 | Prueba en dispositivo móvil (pantalla Estado del GPS) | Dispositivo en Traccar mostraba guion (-) aun con credenciales guardadas en el almacenamiento | apps/conductor-tablet/app/gps.tsx | Cerrado |
 | DEF-038 | 04-nov-2026 | Prueba de campo en iOS (iPhone quieto) | El iPhone dejaba de transmitir ubicación por GPS al permanecer detenido o estático | apps/conductor-tablet/src/gps/tracker.ts, app.json | Cerrado |
+| DEF-039 | 04-nov-2026 | Pruebas del simulador de recorridos (R4) | El segundo escenario simulado de un bus no producía recorrido: sus posiciones se descartaban | models/trip_simulator.py | Cerrado |
+| DEF-040 | 04-nov-2026 | Pruebas de las métricas (R5) | La desviación promedio (T5) devolvía vacío cuando todos los recorridos iban exactos | models/bus_kpi.py | Cerrado |
+| DEF-041 | 04-nov-2026 | Pruebas de las métricas (R5) | Un indicador calculado justo después de crear un recorrido no lo veía | models/bus_kpi.py | Cerrado |
+| DEF-042 | 04-nov-2026 | Pruebas de calidad del sistema (R5) | El registro de posiciones rechazadas se caía con cargas raras (sin diccionario, campos de otro tipo) | models/bus_quality.py | Cerrado |
+| DEF-043 | 04-nov-2026 | Prueba del tablero en el navegador (R6) | El tablero de Odoo se quedaba en «Cargando…» con un error del cliente | static/src/xml/dashboard.xml | Cerrado |
+| DEF-044 | 04-nov-2026 | Prueba del tablero en el navegador (R6) | Las tarjetas del tablero salían apiladas y flotando sobre el título | static/src/css/dashboard.css | Cerrado |
+| DEF-045 | 04-nov-2026 | Pruebas de las vistas SQL (R7) | El módulo no se instalaba: «relation bus_vehicle does not exist» | models/__init__.py, models/bus_kpi_views.py | Cerrado |
+| DEF-046 | 04-nov-2026 | Prueba de Grafana en el navegador (R7) | Con un token de 5 minutos, Grafana se quedaba sin datos al vencer | models/bus_grafana.py, static/src/js/grafana.js | Cerrado |
+| DEF-047 | 04-nov-2026 | Pruebas de la integración con Fleet (R8) | Los gestores de buses no veían los vehículos de Fleet | security/security.xml | Cerrado |
+| DEF-048 | 05-nov-2026 | Análisis estático con SonarQube (R10) | 16 bugs: promesas sin manejar que perdían errores; un hash SHA-1; una función muerta con pytz; una comparación de NaN consigo mismo | apps/conductor-tablet, static/src/js, controllers/main.py, models/ | Cerrado |
 
-Resumen: 38 registrados, 37 cerrados (97 %), 1 abiertos. Densidad: 13,2 defectos por KLOC (2,871 KLOC de Python sin pruebas).
+Resumen: 48 registrados, 48 cerrados (100 %), 0 abiertos. Densidad: 9,5 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -127,7 +137,7 @@ Resumen: 38 registrados, 37 cerrados (97 %), 1 abiertos. Densidad: 13,2 defectos
 
 - **Causa raíz:** Un script de emergencia se versionó con el secreto en vez de leerlo de .env.prod; no hay revisión de secretos antes del commit.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Historial reescrito en local; falta el push forzado y cambiar la contraseña
+- **Prueba que lo protege:** Contraseña de producción rotada (confirmado por el responsable el 04-nov-2026), script reescrito sin secretos y gitleaks en el CI; el historial público conserva la clave anterior, ya inservible
 
 ### DEF-014: El script de reinicio borraba producción sin confirmar y luego fallaba por llamar métodos inexistentes
 
@@ -279,7 +289,66 @@ Resumen: 38 registrados, 37 cerrados (97 %), 1 abiertos. Densidad: 13,2 defectos
 - **Categoría:** Lógica
 - **Prueba que lo protege:** Implementación de Stationary Heartbeat periódico (10s), disparo inmediato al iniciar turno y eliminación de deferredUpdatesInterval; jest PASS (149 tests) y expo lint PASS
 
+### DEF-039: El segundo escenario simulado de un bus no producía recorrido: sus posiciones se descartaban
+
+- **Causa raíz:** Se supuso que un bus podía recibir posiciones con fecha anterior a la última; el sistema ignora a propósito las más viejas que last_fix_time.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_trip_simulator.py: cada escenario se ejecuta tras otro con el bus reiniciado (_reset)
+
+### DEF-040: La desviación promedio (T5) devolvía vacío cuando todos los recorridos iban exactos
+
+- **Causa raíz:** Odoo no guarda un 0,0 que nunca se escribió: queda NULL en la base y AVG de NULL es NULL.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_kpi.py (T5 con recorridos exactos) y COALESCE en la consulta
+
+### DEF-041: Un indicador calculado justo después de crear un recorrido no lo veía
+
+- **Causa raíz:** Las consultas SQL leen las tablas y el ORM aún tenía los cambios en memoria sin escribir.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** flush_all() antes de consultar; test_kpi.py crea y mide en la misma transacción
+
+### DEF-042: El registro de posiciones rechazadas se caía con cargas raras (sin diccionario, campos de otro tipo)
+
+- **Causa raíz:** Se asumió que lo rechazado siempre era un diccionario bien formado, justo lo contrario de lo que se rechaza.
+- **Categoría:** Validación de entrada
+- **Prueba que lo protege:** test_quality.py: test_garbage_does_not_break_the_log
+
+### DEF-043: El tablero de Odoo se quedaba en «Cargando…» con un error del cliente
+
+- **Causa raíz:** Las plantillas de OWL no conocen String(): la comparación se escribió como en JavaScript puro.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** Captura con Playwright de las siete pestañas sin errores de consola (qa de esta etapa) y método routeSelected
+
+### DEF-044: Las tarjetas del tablero salían apiladas y flotando sobre el título
+
+- **Causa raíz:** Las clases del tablero (o_bus_card, o_bus_tab) ya las usaba el mapa en vivo con otra posición y otro estilo.
+- **Categoría:** Accesibilidad y diseño
+- **Prueba que lo protege:** Prefijo propio o_dash_* y capturas de escritorio y móvil
+
+### DEF-045: El módulo no se instalaba: «relation bus_vehicle does not exist»
+
+- **Causa raíz:** Las vistas kpi_* se creaban en el orden de carga de los modelos, antes de las tablas que leen.
+- **Categoría:** Configuración
+- **Prueba que lo protege:** TestKpiViews: el módulo se instala y las nueve vistas existen; el modelo se carga al final
+
+### DEF-046: Con un token de 5 minutos, Grafana se quedaba sin datos al vencer
+
+- **Causa raíz:** Se supuso que Grafana abría una sesión con el token; en realidad el navegador lo reenvía en cada consulta.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** qa/grafana_smoke.py y TestGrafanaAccess: duración configurable (480 min por defecto) con renovación al 90 %; el rol de solo lectura limita el daño
+
+### DEF-047: Los gestores de buses no veían los vehículos de Fleet
+
+- **Causa raíz:** El grupo «Officer» de Fleet solo ve el vehículo que conduce; hace falta el grupo «Administrator».
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** test_fleet.py: test_a_manager_can_open_the_fleet_menu_and_the_buses_stay_in_the_bus_menu
+
+### DEF-048: 16 bugs: promesas sin manejar que perdían errores; un hash SHA-1; una función muerta con pytz; una comparación de NaN consigo mismo
+
+- **Causa raíz:** Llamadas «dispara y olvida» sin .catch y código heredado sin revisión estática.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** SonarQube: bugs 16 → 0, vulnerabilidades 12 → 0, deuda 107 → 0 min; 512 y 167 pruebas siguen en verde (docs/calidad/16-sonarqube.md)
+
 ## 3. Qué falta para cerrar los abiertos
 
-1. DEF-013: hacer `git push --force-with-lease origin main develop` con el historial ya reescrito, pedir a todos que vuelvan a clonar y **cambiar la contraseña del admin** en el servidor (quien vio el commit viejo la conoce).
-2. Agregar una revisión de secretos antes de cada commit (por ejemplo `gitleaks` en el CI) para que no se repita.
+No queda ningún defecto abierto. DEF-013 (una credencial en el historial de git) se cerró al reescribir el historial y rotar la contraseña; `gitleaks` corre en el CI (`.github/workflows/ci.yml`) para que no se repita.

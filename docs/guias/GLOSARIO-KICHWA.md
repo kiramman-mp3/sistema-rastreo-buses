@@ -19,13 +19,29 @@ uso oficial. Los textos están en `addons/bus_tracking/models/portal_i18n.py`,
 | contraseña | pakashka shimi | privacidad | pakashka willaykuna |
 | otro | shuk | siguiente | katik |
 
+Vocabulario de los recorridos, los indicadores y el tablero (R1 a R11):
+
+| Español | Kichwa | Español | Kichwa |
+|---|---|---|---|
+| recorrido | purishka | planificado | yuyashka |
+| tarde (retraso) | kipa | adelantado | ñawpa |
+| a tiempo | pachapi | hora, tiempo | pacha |
+| simulado, hecho | rurashka | real | chiqan |
+| medir, comparar | tupuy, tupuchiy | guardar | waqaychay |
+| porcentaje de | pachakmanta | indicador | yupay |
+| horario | ruray pacha | alerta | yuyachik |
+| incidente | pasashka | día | punchay |
+
+Los días de la semana, Grafana, Fleet, SQL, p95 y los nombres de campos técnicos se dejaron como en español o en inglés.
+Las frases largas (ayudas y explicaciones de los indicadores) son las que más necesitan la revisión de una persona hablante.
+
 Se dejaron como en español las palabras que ya se dicen así: bus, GPS, QR, SOS, correo, telefono, servidor,
 accidente, tráfico, cámara.
 
 ## El panel de Odoo (la oficina)
 
 Odoo no trae kichwa. El módulo agrega el idioma `qu_EC` (`data/languages.xml`) y su catálogo
-`addons/bus_tracking/i18n/qu.po` con los 417 textos del módulo. Cada persona lo elige en
+`addons/bus_tracking/i18n/qu.po` con los 769 textos del módulo. Cada persona lo elige en
 **Preferencias > Idioma**. La tableta también lo pide, y por eso los avisos del servidor («Hasta 60 km/h»,
 etc.) salen en kichwa.
 

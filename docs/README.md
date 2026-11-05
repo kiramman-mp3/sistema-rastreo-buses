@@ -15,12 +15,18 @@ docs/
 │   ├── PLAN-APP-CHOFER.md         # Plan de implementación de la app móvil (fases 16 a 22, 25 e iOS)
 │   ├── PLAN-UX.md                 # Plan de rediseño de experiencia de usuario y cabina
 │   ├── PLAN-UI-MOVIL.md           # Plan de adaptabilidad responsiva y ergonomía móvil
-│   └── PLAN-AUDITORIA.md          # Plan de remediación de auditoría integral ISO/IEC 25010
+│   ├── PLAN-AUDITORIA.md          # Plan de remediación de auditoría integral ISO/IEC 25010
+│   ├── PLAN-RUBRICA.md            # Plan para cubrir la rúbrica del proyecto final (fases R1 a R12) y su estado final
+│   ├── REQUISITOS.md              # Análisis del problema y requisitos funcionales y no funcionales con criterio de aceptación
+│   ├── ARQUITECTURA-Y-DATOS.md    # Arquitectura, flujo de un dato y modelo de datos
+│   └── FLEET.md                   # Integración con Odoo Fleet: decisión, reglas y migración
 │
 ├── guias/                         # Manuales operativos y guías de puesta en marcha
 │   ├── GUIA-CHOFER.md             # Manual de usuario para choferes en tableta o teléfono (Android/iOS)
 │   ├── OPERACION.md               # Guía diaria de operación y despacho en consola de Odoo
 │   ├── PRODUCCION.md              # Guía de despliegue en servidor Azure VM, Caddy HTTPS y backups
+│   ├── GRAFANA.md                 # Grafana incrustado en Odoo: rol de solo lectura, token, despliegue y operación
+│   ├── DEMO-TRACCAR-CLIENT.md     # Demostración con un celular y Traccar Client, evidencias y Azure frente a Cloudflare
 │   └── PERSONALIZACION.md         # Parámetros institucionales UTA, mapa en Ambato y límites
 │
 ├── diseno/                        # Identidad visual, tokens y marco normativo
@@ -41,7 +47,15 @@ docs/
 │   ├── 10-evidencias-y-reproduccion.md # Instrucciones para reproducir pruebas y verificar evidencias
 │   ├── 11-elementos-acs.md        # Administración de la Configuración del Software (SCM/ACS)
 │   ├── 12-validacion-ux.md        # Protocolo de evaluación heurística y usabilidad con usuarios
-│   ├── Informe_calidad_rastreo_buses.pdf # Informe formal compilado para auditoría externa
+│   ├── 13-recorridos-de-prueba.md # 12 recorridos simulados y la comparación entre lo esperado y lo detectado
+│   ├── 14-metricas-de-transporte.md # Los 12 indicadores con fórmula, fuente, umbrales, SQL y resultado (generado del código)
+│   ├── 15-tablero-grafana.md      # Tablero de Odoo y Grafana incrustado: contenido, pruebas y hallazgos
+│   ├── 16-sonarqube.md            # Análisis estático con SonarQube: antes y después, interpretación y evidencia
+│   ├── 17-rendimiento-por-volumen.md # Tiempos de cada pantalla hasta 1 000 000 de posiciones
+│   ├── 18-mejora-continua-pdca.md # Ishikawa, Pareto y cuatro ciclos PDCA de la etapa de la rúbrica
+│   ├── 19-matriz-de-trazabilidad.md # Cada actividad, entregable y criterio con su evidencia
+│   ├── Informe_final_proyecto_rastreo_buses.pdf # Informe final del proyecto con las evidencias actuales
+│   ├── Informe_calidad_rastreo_buses.pdf # Informe de la evaluación del 28-oct-2026 (histórico)
 │   ├── evidencias/                # Registros crudos en JSON y logs de pruebas y auditorías
 │   └── figuras/                   # Gráficos de cobertura, Pareto e Ishikawa generados
 │
@@ -93,12 +107,15 @@ Para optimizar la consulta según el perfil del lector, se recomiendan los sigui
 | **Arquitectura** | [`PLAN.md`](arquitectura/PLAN.md) | Roadmap general de fases 0 a 15 | Desarrolladores, Arquitectos |
 | **Arquitectura** | [`PLAN-APP-CHOFER.md`](arquitectura/PLAN-APP-CHOFER.md) | Diseño de la app del conductor | Desarrolladores móviles |
 | **Arquitectura** | [`PLAN-UX.md`](arquitectura/PLAN-UX.md) | Decisiones de interacción y flujo | Diseñadores, Frontend |
+| **Arquitectura** | [`PLAN-RUBRICA.md`](arquitectura/PLAN-RUBRICA.md) | Plan de implementación para cubrir la rúbrica del proyecto final | Equipo, docente |
 | **Arquitectura** | [`PLAN-UI-MOVIL.md`](arquitectura/PLAN-UI-MOVIL.md) | Accesibilidad y ergonomía táctil | Desarrolladores móviles |
 | **Arquitectura** | [`PLAN-AUDITORIA.md`](arquitectura/PLAN-AUDITORIA.md) | Plan de contingencia y hardening | Líderes técnicos, Seguridad |
 | **Guías** | [`GUIA-CHOFER.md`](guias/GUIA-CHOFER.md) | Manual operativo de cabina | Choferes de autobús |
 | **Guías** | [`OPERACION.md`](guias/OPERACION.md) | Gestión de tráfico y alertas | Supervisores de flota |
 | **Guías** | [`PRODUCCION.md`](guias/PRODUCCION.md) | Manual de administración de servidores | Administradores de sistemas |
 | **Guías** | [`PERSONALIZACION.md`](guias/PERSONALIZACION.md) | Parámetros específicos de la UTA | Administradores de Odoo |
+| **Guías** | [`GRAFANA.md`](guias/GRAFANA.md) | Tableros de Grafana dentro de Odoo | Administradores de sistemas |
+| **Guías** | [`DEMO-TRACCAR-CLIENT.md`](guias/DEMO-TRACCAR-CLIENT.md) | Demostración con celular y Traccar Client | Equipo del proyecto, defensa |
 | **Diseño** | [`DISENO.md`](diseno/DISENO.md) | Tokens, colores y componentes UI | Diseñadores, Frontend |
 | **Diseño** | [`PRIVACIDAD.md`](diseno/PRIVACIDAD.md) | Tratamiento de datos y retención | Oficial de privacidad, Jurídico |
 | **Calidad** | [`calidad/`](calidad/) | Carpeta completa de calidad ISO 25010 | Auditores, QA Engineers |

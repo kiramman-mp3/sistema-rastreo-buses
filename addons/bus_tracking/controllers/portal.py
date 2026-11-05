@@ -204,7 +204,8 @@ class BusPortal(http.Controller):
     @staticmethod
     def _fresh_buses(route):
         limit = fields.Datetime.now() - SHOW_BUSES_FOR
-        return route.vehicle_ids.filtered(lambda b: b.last_fix_time and b.last_fix_time >= limit)
+        return route.vehicle_ids.filtered(
+            lambda b: b.last_fix_time and b.last_fix_time >= limit and not b.simulated)
 
     # ------------------------------------------------------------------
     @http.route(['/privacidad', '/transporte/privacidad'], type='http', auth='public', methods=['GET'])

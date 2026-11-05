@@ -1,6 +1,10 @@
 # Plan de implementación: rastreo de buses (Odoo 16 + Traccar)
 
-Estado: **[HECHO]** construido y probado, **[HECHO*]** construido pero sin probar en entorno real, **[PENDIENTE]** no iniciado.
+Estado: **[HECHO]** construido y probado, **[HECHO*]** construido pero sin probar en entorno real, **[PENDIENTE]** no iniciado o no presente en el código actual.
+
+> **Proyecto final integrador (rúbrica de Gestión de Calidad del Software):** el plan para cubrir todos sus criterios,
+> con fases, tareas, pruebas y evidencias, está en [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md). Lo que esta página marca como
+> **[PENDIENTE]** y se retoma allí lleva la referencia de la fase (R1 a R12).
 
 ## Contexto del cliente
 
@@ -68,9 +72,9 @@ Criterio de aceptación: un GPS asignado a un bus aparece en Odoo con posición 
 |---|---|
 | Mapa en vivo con filtro por ruta, estado del bus y trazado de 4 h | HECHO (probado en Chrome, sin errores de consola) |
 | Detección de llegada a paradas y reporte de llegadas | HECHO |
-| Ruta dibujada siguiendo las calles | HECHO*: calculada con OpenStreetMap y OSRM, 34 trazados (`docs/TRAZADOS.md`); falta grabarlos y verificarlos con un bus real |
-| Viajes con horario (`bus.trip`) y puntualidad | HECHO (probado con posiciones simuladas) |
-| Estimación de llegada a la próxima parada | HECHO (portal; usa la velocidad del horario) |
+| Ruta dibujada siguiendo las calles | HECHO: asistentes «Cargar un archivo GPX» y «Grabar el trazado desde un bus»; PENDIENTE cargar el trazado de las 4 líneas y verificarlo con un bus real |
+| Viajes con horario (`bus.trip`) y puntualidad | HECHO (R1 a R3, versión 16.0.1.6.0): horarios, asignación por fecha y hora, recorridos programados, retraso por parada y tolerancia ajustable. Horarios de las 4 líneas simulados hasta confirmar los oficiales |
+| Estimación de llegada a la próxima parada | PENDIENTE: ya existe el horario previsto, falta calcular y mostrar el «cuánto falta»; no es parte de la rúbrica |
 
 ## Fase 5. Alertas **[PARCIAL]**
 
@@ -82,17 +86,19 @@ Las reglas y sus umbrales son un supuesto mío (la fase 0 no se respondió) y se
 | Bus sin señal | Un bus que reportó en las últimas 6 horas y lleva 10 minutos en silencio; se cierra al volver a reportar | HECHO |
 | Parada larga fuera de paradero | Detenido 15 minutos o más, lejos de cualquier parada de su ruta; se cierra al moverse | HECHO |
 | Desvío de ruta | Más de 150 m del trazado por 3 min; solo con trazados grabados o verificados | HECHO |
-| Recorrido no iniciado | 10 min después de la hora planificada, una alerta por bus | HECHO |
+| Salida tarde (recorrido no iniciado) | 10 min después de la hora planificada, una alerta por recorrido | HECHO (R3) |
+| Llegada tarde | Más de 5 min después de la hora planificada de una parada (tolerancia ajustable), una alerta por parada | HECHO (R3) |
+| Parada omitida y recorrido incompleto | Al cerrar el recorrido: una alerta por parada nunca alcanzada y una por el recorrido | HECHO (R3) |
 | Aviso por correo o mensaje | Hoy las alertas se ven en el menú `Alertas` y como etiqueta roja en el mapa en vivo | PENDIENTE (depende del canal que se elija) |
 
 ## Fase 6. Reportes **[PARCIAL]**
 
 | Reporte | Estado |
 |---|---|
-| Actividad diaria por bus: kilómetros, minutos en movimiento y detenido, velocidad máxima (gráfico, tabla dinámica y lista) | HECHO |
+| Actividad diaria por bus: kilómetros, minutos en movimiento y detenido, velocidad máxima (gráfico, tabla dinámica y lista) | PARCIAL: los kilómetros por línea y por día están en el tablero (R6, R7); por bus, minutos en movimiento y velocidad máxima siguen PENDIENTES |
 | Llegadas a paradas | HECHO (desde antes) |
-| Puntualidad contra horario | HECHO (`Reportes > Puntualidad`) |
-| Historial reproducible de un viaje en el mapa | HECHO (botón Replay; sin probar con viajes reales) |
+| Puntualidad contra horario | HECHO (R5, R6 y R7: indicador T2, tablero de Odoo y Grafana) |
+| Historial reproducible de un viaje en el mapa | HECHO (R7): el tablero «Recorridos» de Grafana dibuja el trazado de un recorrido elegido y sus paradas |
 
 ## Fase 7. Calidad **[PARCIAL]**
 
@@ -102,7 +108,8 @@ Las reglas y sus umbrales son un supuesto mío (la fase 0 no se respondió) y se
 - **[HECHO]** Informe de calidad en PDF (`docs/calidad/`) con 42 pruebas en vivo, auditoría de 1000 peticiones y cobertura de 93,8 %. Halló 3 defectos abiertos (DEF-008 a DEF-010) en la validación de la posición del webhook.
 - **[HECHO]** Corregir DEF-008 a DEF-010 y portar E7, E8 y E9 a las pruebas de Odoo (verificados con 247 tests Odoo y 46/47 suite en vivo; ver la fila del 2026-11-01 más abajo: esa cifra no era cierta en `develop`).
 - **[HECHO]** Documentación de calidad en `docs/calidad/` (política, reglas, casos, resultados, defectos, lluvia de ideas, Pareto, Ishikawa, ISO y evidencias).
-- **[PENDIENTE]** Análisis estático (flake8, pylint-odoo, SonarQube) e integración continua; una persona de QA independiente.
+- **[HECHO]** Análisis estático: flake8 en el CI y **SonarQube** (R10, `docs/calidad/16-sonarqube.md`: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades abiertas, cobertura 78,4 %).
+- **[PENDIENTE]** Una persona de QA independiente; `pylint-odoo`.
 
 ## Fase 8. Producción **[PARCIAL]**
 
@@ -180,7 +187,12 @@ Recomendación: **una máquina virtual Linux** (por ejemplo 2 vCPU y 4 a 8 GB) c
 - Posible mejora posterior: base de datos administrada (Azure Database for PostgreSQL) y alertas de Azure Monitor sobre `/bus_tracking/health`.
 - Lo que no puedo hacer yo: crear recursos en tu suscripción de Azure. Puedo dejar guías y plantillas, pero no las podré probar contra tu cuenta.
 
-## Fase 15. Recorridos oficiales de la UTA **[HECHA salvo las confirmaciones con la universidad]**
+## Fase 15. Recorridos oficiales de la UTA **[PARCIAL: horarios y recorridos simulados hechos en R1 a R4; faltan los oficiales]**
+
+> Lo que sigue describe lo que se construyó en octubre con el PDF institucional de recorridos. Ese código no está en el
+> repositorio actual (no hay modelo de recorridos ni de viajes, ni importador, ni *Horario de hoy*). El proyecto final
+> exige horarios previstos, asignación por fecha y hora y puntualidad, así que la fase se retoma y se amplía en
+> [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md) (R1 y R2).
 
 Fuente: `RECORRIDOS-INSTITUCIONALES-2025.pdf`. Detalle, anomalías y supuestos en `docs/RECORRIDOS.md`.
 
@@ -205,9 +217,33 @@ Fuente: `RECORRIDOS-INSTITUCIONALES-2025.pdf`. Detalle, anomalías y supuestos e
 5. Fase 14 (Azure) cuando haya suscripción y dominio.
 
 
-## Simplificación (2026-10-27)
+## Retomado para el proyecto final (2026-11-04)
 
-El alcance se redujo: ver la entrada de `docs/academico/BITACORA.md` de esa fecha. Las fases sobre roster, trazados por calle, viajes y puntualidad, correo y respuestas a quejas quedan **canceladas**.
+Las fases de recorridos oficiales, viajes con horario y puntualidad se retoman: el PDF del proyecto final pide
+horarios previstos de rutas y paradas, asignación de rutas a vehículos por fecha y horario, retrasos con tolerancia,
+métricas de transporte y un tablero de indicadores. El plan completo, con el orden, las tareas, las pruebas y la
+evidencia de cada fase, está en [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md). La entrada del 27 de octubre de
+`docs/academico/BITACORA.md` se conserva como historia del proyecto.
+
+### Estado de las fases del proyecto final (2026-11-05)
+
+Las doce fases de [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md) están hechas y probadas en desarrollo (versión 16.0.1.6.0, 544 pruebas de Odoo y 167 de Jest en verde):
+
+| Fase | Qué quedó | Documento |
+|---|---|---|
+| R1 a R3 | Horarios, asignación por fecha y hora, recorridos programados, registro de paradas y reglas de incumplimiento | `docs/calidad/02-estandares-y-reglas.md` §1.1 |
+| R4 | Simulador y 12 recorridos de prueba identificados como simulados | `docs/calidad/13-recorridos-de-prueba.md` |
+| R5 | 12 indicadores calculados con SQL | `docs/calidad/14-metricas-de-transporte.md` |
+| R6 | Tablero dentro de Odoo | `docs/calidad/15-tablero-grafana.md` |
+| R7 | Grafana incrustado y vistas SQL de solo lectura | `docs/guias/GRAFANA.md` |
+| R8 | Integración con Odoo Fleet | `docs/arquitectura/FLEET.md` |
+| R9 | Reporte de demostración por bus y guía de Traccar Client | `docs/guias/DEMO-TRACCAR-CLIENT.md` |
+| R10 | SonarQube | `docs/calidad/16-sonarqube.md` |
+| R11 | Pruebas de límites, integración Traccar–Odoo y rendimiento por volumen | `docs/calidad/17-rendimiento-por-volumen.md` |
+| R12 | Requisitos, arquitectura, mejora continua, matriz de trazabilidad y guion de defensa | `docs/arquitectura/REQUISITOS.md`, `docs/calidad/19-matriz-de-trazabilidad.md` |
+
+**Pendiente de la rúbrica** (no depende del código): capturas y ensayo con un celular real y Traccar Client, confirmar con el docente el uso de Grafana, y desplegar la versión nueva en Azure con respaldo previo.
+
 
 ## App de tableta para choferes (fases 16 a 22) **[código en develop; falta jornada real]**
 

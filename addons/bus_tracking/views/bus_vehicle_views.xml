@@ -33,10 +33,22 @@
                             attrs="{'invisible': [('traccar_device_id', '!=', 0)]}"
                             confirm="Creates a device in Traccar with a random identifier for this bus."/>
                     <button name="action_sync_now" type="object" string="Sync now" groups="bus_tracking.group_bus_manager"/>
+                    <button name="action_start_demo_report" type="object" string="Start demo report"
+                            groups="bus_tracking.group_bus_manager"
+                            attrs="{'invisible': ['|', ('demo_report', '=', True), ('traccar_device_id', '=', 0)]}"
+                            confirm="This bus will keep the positions of its phone without a driver shift for the next 8 hours. Use it to show the system with Traccar Client."/>
+                    <button name="action_stop_demo_report" type="object" string="Stop demo report"
+                            groups="bus_tracking.group_bus_manager"
+                            attrs="{'invisible': [('demo_report', '=', False)]}"/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
                             attrs="{'invisible': [('active', '=', True)]}"/>
+                    <div class="alert alert-warning" role="status" attrs="{'invisible': [('demo_report', '=', False)]}">
+                        Demo report: this bus keeps the positions of its phone without a shift until
+                        <field name="demo_report_until" readonly="1" class="oe_inline"/>.
+                    </div>
+                    <field name="demo_report" invisible="1"/>
                     <div class="oe_title">
                         <h1><field name="name" placeholder="e.g. Bus 12"/></h1>
                     </div>

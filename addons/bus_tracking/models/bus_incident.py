@@ -28,6 +28,7 @@ class BusIncident(models.Model):
     latitude = fields.Float(digits=(10, 7))
     longitude = fields.Float(digits=(10, 7))
     notified = fields.Boolean(default=False, index=True)
+    trip_id = fields.Many2one('bus.trip', string="Trip", ondelete='set null', index=True)
     acknowledged_by = fields.Many2one('res.users', string="Seen by", readonly=True, copy=False)
     acknowledged_at = fields.Datetime(string="Seen at", readonly=True, copy=False, index=True)
     state = fields.Selection([('open', "Open"), ('seen', "Seen")], compute='_compute_state', store=True,
@@ -57,6 +58,9 @@ class BusIncident(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        for record in records:
+            record.trip_id = self.env['bus.trip']._trip_at(
+                record.vehicle_id, record.reported_at or fields.Datetime.now())
         if any(r.kind == 'sos' for r in records):
             # An emergency must not wait for the next minute of the cron.
             cron = self.env.ref('bus_tracking.cron_push_incidents', raise_if_not_found=False)
