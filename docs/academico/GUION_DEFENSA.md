@@ -6,6 +6,81 @@ Reparto sugerido si exponen dos personas: quien desarrolló presenta las seccion
 
 ---
 
+# PARTE A. Defensa del proyecto final (rúbrica de Gestión de Calidad)
+
+Esta parte sigue la sección 8 del PDF «Presentación y defensa»: se demuestra el sistema **con la posición de un celular que usa Traccar Client**, se verifica el registro del vehículo, la asignación de una ruta, la consulta de posiciones,
+el historial de recorridos y el cálculo de los indicadores, se muestra **un caso de cumplimiento y uno de incumplimiento** explicando las reglas, y se presentan el diseño, la calidad y las mejoras. La parte B (más abajo) es el guion general
+del proyecto; esta parte es la que se ensaya para la rúbrica. Duración sugerida: **15 min de demostración y exposición, 5 de preguntas.**
+
+## A.1. Antes de empezar (preparación, 10 min antes)
+
+| Qué | Cómo |
+|---|---|
+| Servidor arriba y celular con datos móviles | `https://<dominio>` abre; el celular **sin Wi-Fi**; Traccar Client configurado (`docs/guias/DEMO-TRACCAR-CLIENT.md`) |
+| El bus de la demostración | Buses › Fleet › Buses › el bus: dispositivo GPS registrado; botón **Start demo report** pulsado (dura 8 h) |
+| Un recorrido programado para la hora de la defensa | Buses › Fleet › Schedules: horario de la línea con ese bus; o Buses › Operations › Scheduled trips |
+| Los 12 recorridos simulados | Buses › Configuration › Simulate trips › «Create the demo set» (si hace falta); se identifican como simulados |
+| Pantallas abiertas en pestañas | Mapa en vivo · Scheduled trips · Indicators › Odoo dashboard · Indicators › Grafana · `docs/calidad/16-sonarqube.md` |
+
+## A.2. Orden de la demostración (≈ 9 min)
+
+1. **Registro del vehículo (1 min).** Buses › Fleet › Buses › el bus: placa, capacidad, ruta, dispositivo Traccar y el botón **Open in Fleet**: *«cada bus tiene su vehículo en Odoo Fleet, con la placa, el chofer y los asientos sincronizados»*.
+2. **Asignación de una ruta (1 min).** Buses › Fleet › Schedules: horario de la línea y botón **Assign a bus** (por fecha y hora); un bus no puede tener dos recorridos a la misma hora.
+3. **Consulta de posiciones (1 min).** Mapa en vivo con el celular moviéndose por datos móviles; en el celular, Traccar Client con la dirección `https://gps.<dominio>` y 5 s de intervalo.
+4. **Caso de CUMPLIMIENTO (2 min).** El recorrido del celular o, si no hay tiempo físico, el recorrido simulado «L1 Puntual» (Scheduled trips): paradas **a tiempo**, retraso 0, distancia recorrida ≈ estimada, sin alertas. Se abre el recorrido y se leen las paradas con hora planificada y real.
+5. **Caso de INCUMPLIMIENTO (2 min).** El recorrido simulado «L2 Con retraso» (4 paradas tarde, 12 min al final, alerta de llegada tarde) y «L3 Se detuvo antes de la última parada» (parada omitida, recorrido incompleto), con sus alertas.
+6. **Historial e indicadores (2 min).** Indicators › Odoo dashboard: los 12 indicadores, comparación con el periodo anterior, pestañas Lines, Punctuality, Trips, Incidents; pestaña **Formulas** para mostrar la consulta SQL de una cifra. Un vistazo a Grafana.
+
+> Si el celular falla el día de la defensa, los recorridos simulados (identificados como tales) cubren los dos casos y la cadena real queda demostrada con las capturas de la lista de evidencias de `DEMO-TRACCAR-CLIENT.md` §5.
+
+## A.3. Las reglas que deciden el resultado (para explicar)
+
+*«Cada parada de un recorrido tiene una hora planificada. Si el bus llega más de **5 minutos** después, la llegada es **tarde** y se genera la alerta; si llega más de 5 minutos antes, es **adelantada**. Si el recorrido termina y nunca estuvo en una parada, esa parada queda **omitida** y el recorrido **incompleto**.
+Si pasan **10 minutos** de la hora de salida y el bus no ha empezado, hay una alerta de **salida tarde**. Si la duración real difiere de la planificada en más de **25 %**, se marca. La desviación se mide contra el trazado de la ruta. Todo eso son ajustes que el gestor puede cambiar.»*
+Fuente: `docs/calidad/02-estandares-y-reglas.md` §1.1 (reglas R17 a R24) y las pruebas de caja negra en `tests/test_trip_rules.py` y `tests/test_boundaries.py`.
+
+## A.4. Las 11 preguntas del PDF y dónde se responden
+
+| Pregunta | Pantalla o consulta | Qué decir |
+|---|---|---|
+| ¿Dónde se encuentra actualmente el vehículo? | Mapa en vivo de Odoo y portal del pasajero | La última posición válida y su hora; el bus conectado se ve en verde |
+| ¿Qué ruta está realizando? | Recorrido programado (Scheduled trips) y cabecera del turno en la tableta | El horario asigna ruta y bus por fecha y hora |
+| ¿Qué paradas ha visitado? | Líneas del recorrido abierto (hora planificada y real por parada); tira de paradas de la tableta | Cada parada tiene estado: a tiempo, tarde, adelantada u omitida |
+| ¿Está cumpliendo los horarios establecidos? | Puntualidad (T2) y paradas del recorrido | Porcentaje de llegadas dentro de la tolerancia |
+| ¿Cuánto tiempo de retraso ha acumulado? | «Delay at the end» del recorrido y retraso promedio (T3) | El retraso que el recorrido fue acumulando hasta su última parada |
+| ¿Se ha desviado de su ruta? | Alerta de desvío y desviación media (T5); trazado en Grafana › Recorridos | Distancia de las posiciones al trazado; más de 150 m es salirse |
+| ¿Cuántos recorridos ha realizado? | Pestaña Trips del tablero y «Recorridos por día» | Hechos e incompletos por día y por línea |
+| ¿Qué porcentaje de recorridos se ha cumplido correctamente? | Cumplimiento de ruta (T1) | Recorridos que llegaron a todas las paradas entre los cerrados |
+| ¿Cuáles son las incidencias más frecuentes? | Pestaña Incidents (Pareto) y Grafana › Incidencias | Pocos tipos explican la mayoría; en los datos de prueba, sin señal y llegada tarde |
+| ¿Qué tan confiable es el sistema implementado? | System quality: S1 a S4 y `docs/calidad/17-rendimiento-por-volumen.md` | Integridad de posiciones, exactitud de la sincronización, tiempo de respuesta (p95 menor que 2 s hasta 1 000 000 de posiciones) y detección correcta (12 de 12) |
+| ¿Qué mejoras se realizaron para incrementar la calidad? | `docs/calidad/18-mejora-continua-pdca.md` y `16-sonarqube.md` | 16 bugs y 12 vulnerabilidades de SonarQube a 0; 48 defectos cerrados; 544 + 167 pruebas |
+
+## A.5. Calidad, diseño y mejoras (≈ 4 min)
+
+- **Diseño** (`docs/arquitectura/ARQUITECTURA-Y-DATOS.md`): Traccar reenvía a Odoo; Odoo evalúa recorridos y reglas y calcula indicadores con SQL; dos tableros. *«El indicador es una consulta que se puede ejecutar: no hay números escritos a mano.»*
+- **Pruebas** (`docs/calidad/03-plan-y-casos-de-prueba.md`, `19-matriz-de-trazabilidad.md`): caja negra y blanca, integración Traccar–Odoo con la auditoría de sincronización, rendimiento por volumen.
+- **Calidad** (`docs/calidad/16-sonarqube.md`): Quality Gate aprobado, 0 bugs, 0 vulnerabilidades abiertas, cobertura 78,4 %; **límites**: el JavaScript del módulo no tiene pruebas unitarias y Community no analiza inyecciones ni dependencias.
+- **Mejora continua** (`18-mejora-continua-pdca.md`): Ishikawa, Pareto y cuatro ciclos PDCA con comparación antes y después.
+
+## A.6. Ensayo
+
+Un ensayo completo consta de: **(1)** la preparación de A.1; **(2)** la demostración de A.2 con un caso de cumplimiento y uno de incumplimiento; **(3)** responder las 11 preguntas de A.4 sin mirar la tabla; **(4)** abrir la pestaña Formulas y explicar de dónde sale una cifra.
+Registrar en `docs/academico/BITACORA.md` la fecha del ensayo, lo que falló y lo que se corrigió. **Pendiente: el ensayo con celular real.**
+
+## A.7. Preguntas difíciles de esta parte
+
+| Pregunta | Respuesta |
+|---|---|
+| ¿Por qué Grafana si el PDF dice Power BI? | El tablero obligatorio es el de Odoo (alternativa A del PDF, completo). Grafana es un complemento gratuito y liviano, con los tableros como código; si no valiera, el de Odoo cubre el criterio por sí solo |
+| ¿Los datos son reales? | Los recorridos de prueba son **simulados e identificados** (`simulated`), lo que el PDF permite; las posiciones de la demostración física son reales. Nunca se mezclan en silencio: el tablero tiene filtro «Real / Simulated / Both» |
+| ¿Cómo sé que una cifra no es estática? | Pestaña Formulas: la consulta de cada indicador; agregar un recorrido o una alerta y volver a consultar |
+| ¿Qué pasa si Traccar pierde una posición? | La auditoría diaria la detecta (S2 baja) y la consulta periódica de Odoo recupera la última; hay una prueba de integración de eso |
+| ¿Qué no está bien todavía? | El JavaScript del módulo sin pruebas unitarias (0 % medido), kichwa sin revisión de una persona hablante, concurrencia sin medir, y la evidencia física con Traccar Client se completa con el celular |
+
+---
+
+# PARTE B. Guion general del proyecto
+
 ## 0. Apertura (30 s)
 
 *"Buenos días. Les presentamos el sistema de rastreo de buses de la Universidad Técnica de Ambato: una aplicación que muestra en un mapa, en vivo, dónde está cada bus, avisa cuando algo anda mal y deja que el pasajero levante una queja. Vamos a explicar por qué se hizo, cómo funciona, qué calidad tiene medida con datos reales y qué nos falta todavía."*

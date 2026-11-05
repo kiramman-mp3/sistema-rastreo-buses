@@ -8,21 +8,21 @@ Ocho características y sus subcaracterísticas.
 
 | Característica | Subcaracterística | Nivel | Evidencia |
 |---|---|---|---|
-| Adecuación funcional | Completitud funcional | Parcial | Las funciones del alcance reducido existen (mapa, recorridos, alertas, push, portal, quejas); el kichwa está en borrador |
-| | Corrección funcional | Parcial | 12 de 12 casos funcionales y 150 pruebas de Odoo pasan; DEF-008 a DEF-010 abiertos |
+| Adecuación funcional | Completitud funcional | Cumple | Mapa, portal, quejas, push, turnos y app del chofer, **horarios y asignación, recorridos programados, reglas de incumplimiento, 12 indicadores, tablero en Odoo y Grafana y Fleet** (`docs/calidad/19-matriz-de-trazabilidad.md`); el kichwa está sin revisión de una persona hablante |
+| | Corrección funcional | Cumple | 544 pruebas de Odoo, 167 de la app y 47 casos en vivo pasan; los 12 recorridos simulados dan lo esperado (12 de 12); 48 defectos, ninguno abierto |
 | | Pertinencia funcional | Parcial | Recorridos automáticos y pasajero sin login, como pidió el cliente; sin validar con personas usuarias |
-| Eficiencia de desempeño | Comportamiento temporal | Cumple | Media de 0,037 s en la auditoría; 0,043 s en P1; p95 de 1,6 s con 20 hilos |
+| Eficiencia de desempeño | Comportamiento temporal | Cumple | Media de 0,036 s en la auditoría; p95 de cada pantalla menor que 160 ms hasta 100 000 posiciones y 5 000 recorridos y de 704 ms con 1 000 000 y 50 000 (`17-rendimiento-por-volumen.md`); P7 (un bus, 20 hilos) está en el límite de 2 s |
 | | Uso de recursos | No evaluado | No se midió CPU ni memoria |
-| | Capacidad | Parcial | 39 req/s con 20 hilos en un proceso (se necesitan 10); falta el volumen de 30 días y varios procesos |
+| | Capacidad | Cumple | 35 a 40 req/s con 20 hilos en un proceso (se necesitan 10) y el volumen de 30 días (1 000 000 de posiciones) medido; falta probar varios procesos y la concurrencia de varios gestores |
 | Compatibilidad | Coexistencia | Parcial | Convive con otros contenedores (`ODOO_PORT` resolvió el conflicto del puerto 8069) |
-| | Interoperabilidad | Parcial | Traccar 6 por webhook y REST verificado con GPS simulado; sin celular real |
+| | Interoperabilidad | Parcial | Traccar 6 por webhook y REST verificado con GPS simulado y con prueba de integración que compara las dos bases (`test_traccar_consistency.py`); Odoo Fleet integrado; Grafana por vistas SQL. Falta la prueba con un celular real y Traccar Client (guía lista) |
 | Usabilidad | Reconocimiento de la adecuación | Parcial | Landing y portal con textos claros; sin prueba con personas |
 | | Capacidad de aprendizaje | Parcial | `docs/guias/GUIA-CHOFER.md`; sin medir |
 | | Operabilidad | Parcial | Panel de Odoo y mapa; portal revisado a 390 px |
 | | Protección ante errores del usuario | Cumple | U1: 7 de 7 mensajes de rechazo claros, sin SQL ni trazas; el formulario conserva lo escrito |
 | | Estética de la interfaz | Parcial | Diseño pulido el 28-oct; fotos provisionales |
 | | Accesibilidad | Parcial | Tipografía legible, foco visible, `prefers-reduced-motion`; sin auditoría formal |
-| Fiabilidad | Madurez | Parcial | 0 fallos en 150 pruebas; 25 respuestas 500 en la auditoría |
+| Fiabilidad | Madurez | Cumple | 0 fallos en 544 pruebas de Odoo y 167 de la app; 1 000 de 1 000 peticiones de la auditoría correctas, sin respuestas 5xx |
 | | Disponibilidad | No evaluado | Hay `/health` y healthchecks; no se midió en un servidor real |
 | | Tolerancia a fallos | Parcial | Cron de respaldo del webhook; sobrevive a errores de Traccar (`test_cron_survives_traccar_errors`); falla ante datos mal formados |
 | | Capacidad de recuperación | Cumple | Respaldo y restauración (en base paralela y completa) probados |
@@ -33,9 +33,9 @@ Ocho características y sus subcaracterísticas.
 | | Autenticidad | Parcial | Secreto del webhook en tiempo constante (por URL, obsoleto), login de Odoo, permisos comprobados en el método y no sólo en la vista (DEF-011), credencial QR separada de la sesión (DEF-015) y la app sólo acepta servidores https o confirma el cambio; el identificador del celular sigue siendo la única credencial del GPS |
 | Mantenibilidad | Modularidad | Cumple | Un modelo y un controlador por responsabilidad |
 | | Reusabilidad | Parcial | `RateLimiter`, `TtlCache` y `geo` compartidos entre portal y quejas |
-| | Analizabilidad | Parcial | Bitácora y pruebas con nombres descriptivos; flake8 con todas las reglas en el CI y chequeo de traducciones; sin pylint-odoo ni SonarQube |
-| | Modificabilidad | Cumple | Umbrales, marca, mapa y retención se cambian en Ajustes; cobertura de 93,8 % protege los cambios |
-| | Capacidad de ser probado | Cumple | 150 + 42 pruebas y la auditoría; los límites en memoria exigen reiniciar para medir |
+| | Analizabilidad | Parcial | Bitácora y pruebas con nombres descriptivos; flake8 con todas las reglas en el CI y chequeo de traducciones; SonarQube con Quality Gate aprobado y 0 bugs (`16-sonarqube.md`); sin pylint-odoo |
+| | Modificabilidad | Cumple | Umbrales, marca, mapa y retención se cambian en Ajustes; cobertura de 95,9 % en Python (78,4 % en todo el código según SonarQube) protege los cambios |
+| | Capacidad de ser probado | Cumple | 544 + 167 pruebas, 47 casos en vivo, la auditoría y la prueba de humo de Grafana; los límites en memoria exigen reiniciar para medir |
 | Portabilidad | Adaptabilidad | Parcial | Configurable por Ajustes e idiomas por diccionario |
 | | Instalabilidad | Cumple | `docker compose up` y `scripts/init-prod.sh`, repetidos desde cero |
 | | Capacidad de reemplazo | No evaluado | |

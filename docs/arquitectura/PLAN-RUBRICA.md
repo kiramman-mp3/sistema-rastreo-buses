@@ -7,6 +7,28 @@ resumen de la brecha está en la sección 1; las fases (R1 a R12) en la sección
 Estados: **[HECHO]** verificado en el código o en la documentación, **[PARCIAL]** existe pero no cubre todo lo que pide el PDF,
 **[FALTA]** no existe.
 
+## Estado final (2026-11-05)
+
+Las fases R1 a R12 se implementaron en ramas propias, con pruebas, y se integraron a `develop` (versión del módulo 16.0.1.6.0; 544 pruebas de Odoo, 167 de Jest y 19 comprobaciones de Grafana en verde; SonarQube con el Quality Gate aprobado).
+La sección 0 que sigue es el **punto de partida** del 2026-11-04 y se conserva como historia; la tabla de abajo es el estado actual. Los desvíos respecto del plan y sus motivos están en la columna final.
+
+| Fase | Estado | Evidencia | Desvío respecto del plan |
+|---|---|---|---|
+| R1 horarios y asignación | **[HECHO]** | `bus_trip.py`, `tests/test_trips.py` | — |
+| R2 recorrido y registro | **[HECHO]** | `tests/test_trip_run.py` | — |
+| R3 reglas | **[HECHO]** | `02-estandares-y-reglas.md` §1.1, `tests/test_trip_rules.py` | — |
+| R4 recorridos simulados | **[HECHO]** (12 de 12) | `13-recorridos-de-prueba.md` | Doce recorridos en lugar de diez |
+| R5 métricas | **[HECHO]** | `14-metricas-de-transporte.md` (generado del código) | — |
+| R6 tablero de Odoo | **[HECHO]** | `15-tablero-grafana.md` §2 | — |
+| R7 Grafana | **[HECHO]** | `15-tablero-grafana.md`, `docs/guias/GRAFANA.md`, `qa/grafana_smoke.py` | El token dura 480 min y no 5: Grafana no abre sesión con JWT y reenvía el token en cada consulta (DEF-046). Sin minigráficos en las tarjetas ni línea acumulada en el Pareto (límites de Grafana); sin reglas de alerta (opcional) |
+| R8 Fleet | **[HECHO]** | `docs/arquitectura/FLEET.md`, `tests/test_fleet.py` | Se implica el grupo *Administrator* de Fleet, no *Officer* (DEF-047) |
+| R9 Traccar Client | **[HECHO]** salvo la evidencia con celular | `DEMO-TRACCAR-CLIENT.md`, `tests/test_demo_report.py` | La marca de demostración caduca a las 8 horas (más segura que una marca fija) |
+| R10 SonarQube | **[HECHO]** | `16-sonarqube.md` | El documento es el 16 y no el 14 (el 14 son las métricas) |
+| R11 pruebas y rendimiento | **[HECHO]** | `17-rendimiento-por-volumen.md`, `test_boundaries.py`, `test_traccar_consistency.py` | No hizo falta agregar índices |
+| R12 documentación y defensa | **[HECHO]** | `REQUISITOS.md`, `ARQUITECTURA-Y-DATOS.md`, `18-mejora-continua-pdca.md`, `19-matriz-de-trazabilidad.md`, `GUION_DEFENSA.md` parte A | La rama fue `docs/r12-cierre` |
+
+**Pendiente (no depende del código):** capturas y ensayo con un celular real; confirmar con el docente que Grafana sirve en lugar de Power BI; desplegar la versión nueva en Azure con respaldo previo; revisión del kichwa por una persona hablante.
+
 ## 0. Estado base verificado (2026-11-04)
 
 | Pide el PDF | Hoy |

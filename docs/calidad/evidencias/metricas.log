@@ -1,11 +1,11 @@
 {
  "cobertura": {
-  "sentencias": 1853,
-  "perdidas": 96,
-  "ramas": 494,
-  "ramas_parciales": 52,
-  "porcentaje": 92.84192586280358,
-  "solo_lineas": 94.81921208850513,
+  "sentencias": 3086,
+  "perdidas": 87,
+  "ramas": 860,
+  "ramas_parciales": 66,
+  "porcentaje": 95.91991890522047,
+  "solo_lineas": 97.18081659105638,
   "archivos": [
    {
     "archivo": "__init__.py",
@@ -33,7 +33,7 @@
    },
    {
     "archivo": "controllers/complaints.py",
-    "sentencias": 100,
+    "sentencias": 99,
     "perdidas": 0,
     "ramas": 24,
     "ramas_parciales": 0,
@@ -41,11 +41,11 @@
    },
    {
     "archivo": "controllers/driver_api.py",
-    "sentencias": 197,
-    "perdidas": 16,
-    "ramas": 70,
-    "ramas_parciales": 17,
-    "cobertura": 87.64044943820225
+    "sentencias": 231,
+    "perdidas": 17,
+    "ramas": 84,
+    "ramas_parciales": 18,
+    "cobertura": 88.88888888888889
    },
    {
     "archivo": "controllers/landing.py",
@@ -57,19 +57,19 @@
    },
    {
     "archivo": "controllers/main.py",
-    "sentencias": 88,
-    "perdidas": 1,
-    "ramas": 22,
-    "ramas_parciales": 3,
-    "cobertura": 96.36363636363636
+    "sentencias": 114,
+    "perdidas": 0,
+    "ramas": 26,
+    "ramas_parciales": 2,
+    "cobertura": 98.57142857142857
    },
    {
     "archivo": "controllers/portal.py",
-    "sentencias": 174,
+    "sentencias": 181,
     "perdidas": 6,
     "ramas": 44,
     "ramas_parciales": 3,
-    "cobertura": 94.95412844036697
+    "cobertura": 95.11111111111111
    },
    {
     "archivo": "controllers/push.py",
@@ -88,8 +88,16 @@
     "cobertura": 81.81818181818181
    },
    {
+    "archivo": "migrations/16.0.1.6.0/post-migrate.py",
+    "sentencias": 4,
+    "perdidas": 0,
+    "ramas": 0,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
     "archivo": "models/__init__.py",
-    "sentencias": 14,
+    "sentencias": 22,
     "perdidas": 0,
     "ramas": 0,
     "ramas_parciales": 0,
@@ -97,11 +105,11 @@
    },
    {
     "archivo": "models/bus_alert.py",
-    "sentencias": 125,
-    "perdidas": 14,
-    "ramas": 60,
-    "ramas_parciales": 4,
-    "cobertura": 84.86486486486487
+    "sentencias": 144,
+    "perdidas": 2,
+    "ramas": 70,
+    "ramas_parciales": 3,
+    "cobertura": 97.66355140186916
    },
    {
     "archivo": "models/bus_complaint.py",
@@ -120,52 +128,44 @@
     "cobertura": 97.10144927536231
    },
    {
-    "archivo": "models/bus_incident.py",
-    "sentencias": 54,
-    "perdidas": 0,
-    "ramas": 12,
-    "ramas_parciales": 1,
-    "cobertura": 98.48484848484848
-   },
-   {
-    "archivo": "models/bus_position.py",
-    "sentencias": 32,
-    "perdidas": 0,
-    "ramas": 8,
-    "ramas_parciales": 1,
-    "cobertura": 97.5
-   },
-   {
-    "archivo": "models/bus_push.py",
-    "sentencias": 81,
-    "perdidas": 4,
-    "ramas": 8,
-    "ramas_parciales": 0,
-    "cobertura": 95.50561797752809
-   },
-   {
-    "archivo": "models/bus_route.py",
-    "sentencias": 123,
-    "perdidas": 4,
-    "ramas": 32,
-    "ramas_parciales": 2,
-    "cobertura": 96.12903225806451
-   },
-   {
-    "archivo": "models/bus_route_record.py",
-    "sentencias": 30,
+    "archivo": "models/bus_fleet.py",
+    "sentencias": 69,
     "perdidas": 1,
-    "ramas": 8,
-    "ramas_parciales": 1,
-    "cobertura": 94.73684210526316
+    "ramas": 20,
+    "ramas_parciales": 2,
+    "cobertura": 96.62921348314607
    },
    {
-    "archivo": "models/bus_run.py",
-    "sentencias": 40,
+    "archivo": "models/bus_grafana.py",
+    "sentencias": 46,
     "perdidas": 0,
-    "ramas": 10,
+    "ramas": 4,
     "ramas_parciales": 0,
     "cobertura": 100.0
    },
    {
-    "archivo": "models/b
+    "archivo": "models/bus_incident.py",
+    "sentencias": 57,
+    "perdidas": 0,
+    "ramas": 14,
+    "ramas_parciales": 1,
+    "cobertura": 98.59154929577464
+   },
+   {
+    "archivo": "models/bus_kpi.py",
+    "sentencias": 182,
+    "perdidas": 0,
+    "ramas": 40,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
+    "archivo": "models/bus_kpi_views.py",
+    "sentencias": 20,
+    "perdidas": 0,
+    "ramas": 6,
+    "ramas_parciales": 1,
+    "cobertura": 96.15384615384616
+   },
+   {
+    "archivo": "models

@@ -1,2 +1,2 @@
-1000 de 1000 correctas (0.00 % de error). Media 0.0442 s, máx. 0.3474 s. 5xx: 58. Fallos por causa: {}
+1000 de 1000 correctas (0.00 % de error). Media 0.0363 s, máx. 0.1586 s. 5xx: 0. Fallos por causa: {}
 Con X-Forwarded-For distinto en cada petición: 10 respuestas 429 de 70
