@@ -5265,3 +5265,63 @@ msgstr "🔴 Sin conexión"
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__connection__online
 msgid "🟢 Connected"
 msgstr "🟢 Conectado"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Bus Details"
+msgstr "Detalles del bus"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Bus & Route"
+msgstr "Bus y Ruta"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Traccar GPS"
+msgstr "GPS Traccar"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Last Coordinates"
+msgstr "Últimas coordenadas"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_id
+msgid "Tracked as bus"
+msgstr "Monitoreado como bus"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_status
+msgid "Status"
+msgstr "Estado"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_current_stop_id
+msgid "Current Stop"
+msgstr "Parada actual"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_last_speed
+msgid "Last Speed"
+msgstr "Última velocidad"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_last_course
+msgid "Last Course"
+msgstr "Último rumbo"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_traccar_unique_id
+msgid "Traccar Unique ID"
+msgstr "ID único de Traccar"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_tablet_setup_link
+msgid "Tablet setup link"
+msgstr "Enlace de configuración de tablet"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_tablet_qr
+msgid "Tablet QR"
+msgstr "QR para tablet"

@@ -8,9 +8,15 @@ useDefault = true
 # are allowed, not whole files. Limit: a real secret written on the same line as that address would not be
 # reported either, so keep the tile address on a line of its own.
 [allowlist]
-description = "Public CARTO tile key inside the tile address"
+description = "Public CARTO tile key, SonarQube issue ids and the token placeholder in the SonarQube commands"
 regexTarget = "line"
+# The SonarQube exports hold issue ids (UUIDs), not credentials. Only these two files.
+paths = [
+  '''docs/calidad/evidencias/sonarqube/(antes-hallazgos|despues-hallazgos-aceptados)\.json''',
+]
 regexes = [
+  # The documented SonarQube command reads the token from the environment: curl -u "$SONAR_TOKEN:" ...
+  '''curl -u "\$SONAR_TOKEN:"''',
   '''basemaps\.cartocdn\.com/rastertiles/voyager/[^'" ]*\?key=''',
   # models/utils.py continues the address on the next line (it must fit 120 columns): only that exact shape.
   '''^\s*'\?key=[A-Za-z0-9_.~-]+'\)\s*$''',
