@@ -84,7 +84,24 @@ unit_names = {'test_alerts': 'Alertas de velocidad, sin señal y parada larga', 
               'test_ingest': 'Ingesta de posiciones, llegadas y purga', 'test_portal': 'Portal público, privacidad, caché y límite de uso',
               'test_push': 'Notificaciones push: permisos, cifrado y endpoints', 'test_runs': 'Recorridos automáticos',
               'test_simple': 'Línea del mapa, desvío, push de alertas y permisos de quejas', 'test_stop_picker': 'Editor de paradas en el mapa',
-              'test_traccar_sync': 'Sincronización con Traccar (respuestas simuladas)', 'test_track': 'Trazado grabado y simplificación'}
+              'test_traccar_sync': 'Sincronización con Traccar (respuestas simuladas)', 'test_track': 'Trazado grabado y simplificación',
+              'test_trips': 'Horarios, asignación por fecha y hora, recorridos programados y sus restricciones (R1)',
+              'test_trip_run': 'Registro del recorrido: paradas, retraso, tolerancia, distancias y cierre (R2)',
+              'test_trip_rules': 'Reglas de llegada tarde, parada omitida, recorrido incompleto y salida tarde (R3)',
+              'test_trip_simulator': 'Simulador: los 10 escenarios y el conjunto de 12 recorridos, esperado contra detectado (R4)',
+              'test_kpi': 'Los 12 indicadores contra recorridos hechos a mano con resultado conocido (R5)',
+              'test_quality': 'Auditoría de sincronización, rechazos de posiciones y muestras de rendimiento (R5)',
+              'test_dashboard': 'Datos del tablero de Odoo, ruta JSON y permisos (R6)',
+              'test_grafana_views': 'Vistas SQL kpi_* y rol de solo lectura de la base (R7)',
+              'test_grafana_access': 'Token de acceso a Grafana, ajustes y menú (R7)',
+              'test_grafana_dashboards': 'Los seis tableros: archivos, cada consulta y las mismas cifras que los indicadores (R7)',
+              'test_fleet': 'Enlace con Odoo Fleet en los dos sentidos y migración (R8)',
+              'test_demo_report': 'Reporte de demostración por bus: acepta, caduca y se detiene (R9)',
+              'test_boundaries': 'Caja negra: valores válidos, inválidos y en el límite de reglas, posiciones y periodos (R11)',
+              'test_traccar_consistency': 'Integración Traccar–Odoo: webhook, auditoría de sincronización y consulta periódica (R11)',
+              'test_driver_auth': 'Acceso del chofer a la API de la tableta', 'test_driver_badge': 'Credencial y QR del chofer',
+              'test_driver_shift': 'Turnos del chofer: inicio, fin, estado, incidentes y SOS', 'test_driver_staff': 'Permisos del personal sobre turnos y choferes',
+              'test_privacy': 'Privacidad: lo que el pasajero no puede ver y la retención de datos'}
 unit_rows = [['`%s.py`' % f['archivo'], unit_names.get(f['archivo'], ''), str(f['n']), n(f['mean']), n(f['max'])] for f in UNIT['tiempos_por_archivo']]
 casos_rows = [[c['id'], c['tipo'], c['objetivo'], c['entrada'], c['esperado'], c['estado']] for c in CASOS]
 areas_rows = [[a['area'], str(a['n']), str(a['fail']), n(a['mean']), n(a['max'])] for a in A['areas']]
@@ -150,6 +167,14 @@ n_unit, f_unit = UNIT['total'], UNIT['fallos'] + UNIT['errores']
 n_suite, f_suite = S['resumen']['total'], S['resumen']['fail']
 n_aud, f_aud = A['total'], A['fallos']
 cerrados = sum(1 for d in dq.DEFECTOS if d[7] == 'Cerrado')
+abiertos_lista = [d for d in dq.DEFECTOS if d[7] != 'Cerrado']
+if abiertos_lista:
+    pendiente = chr(10).join('%d. %s: %s' % (i, d[0], d[3]) for i, d in enumerate(abiertos_lista, start=1))
+    lectura_abiertos = 'Quedan abiertos: %s.' % ', '.join(d[0] for d in abiertos_lista)
+else:
+    pendiente = ('No queda ningún defecto abierto. DEF-013 (una credencial en el historial de git) se cerró al reescribir el historial y rotar la '
+                 'contraseña; `gitleaks` corre en el CI (`.github/workflows/ci.yml`) para que no se repita.')
+    lectura_abiertos = 'No queda ningún defecto abierto.'
 datos = {d['consulta']: d['valor'] for d in M['datos']}
 invalid = [v for k, v in datos.items() if 'fuera de rango' in k][0]
 mini = lambda ok: 'Sí' if ok else '**No**'  # noqa: E731
@@ -236,7 +261,7 @@ causa_txt = '\n\n'.join('### %s: %s\n\n- **Causa raíz:** %s\n- **Categoría:** 
 write('05-registro-de-defectos.md', '''
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -252,9 +277,8 @@ Resumen: %(total)d registrados, %(cerrados)d cerrados (%(pct)s), %(abiertos)d ab
 
 ## 3. Qué falta para cerrar los abiertos
 
-1. DEF-013: hacer `git push --force-with-lease origin main develop` con el historial ya reescrito, pedir a todos que vuelvan a clonar y **cambiar la contraseña del admin** en el servidor (quien vio el commit viejo la conoce).
-2. Agregar una revisión de secretos antes de cada commit (por ejemplo `gitleaks` en el CI) para que no se repita.
-''' % dict(tabla=md_table(['ID', 'Fecha', 'Detectado por', 'Defecto', 'Ubicación', 'Estado'], def_rows), total=len(dq.DEFECTOS), cerrados=cerrados,
+%(pendiente)s
+''' % dict(pendiente=pendiente, tabla=md_table(['ID', 'Fecha', 'Detectado por', 'Defecto', 'Ubicación', 'Estado'], def_rows), total=len(dq.DEFECTOS), cerrados=cerrados,
            pct=pct(100.0 * cerrados / len(dq.DEFECTOS), 0), abiertos=len(dq.DEFECTOS) - cerrados, dens=n(len(dq.DEFECTOS) / (M['lineas']['python'] / 1000), 1),
            kloc=n(M['lineas']['python'] / 1000, 3), causas=causa_txt))
 
@@ -281,7 +305,7 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 %(t2)s
 
-**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Queda abierto uno de seguridad (DEF-013).
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). %(lectura_abiertos)s
 
 ## 3. Problemas encontrados durante la construcción (%(np)d)
 
@@ -299,5 +323,5 @@ Categorías: %(cats)s.
 
 %(todo)s
 ''' % dict(t1=md_table(['Causa', 'Fallos', '%', '% acumulado'], pareto_rows(pareto_fallos)), t2=md_table(['Categoría', 'Defectos', '%', '% acumulado'], pareto_rows(pareto_def)),
-           t3=md_table(['Categoría', 'Problemas', '%', '% acumulado'], pareto_rows(pareto_prob)), np=len(dq.PROBLEMAS),
+           t3=md_table(['Categoría', 'Problemas', '%', '% acumulado'], pareto_rows(pareto_prob)), np=len(dq.PROBLEMAS), lectura_abiertos=lectura_abiertos,
            cats='; '.join(dq.CATEGORIAS.values()), todo=md_table(['N.º', 'Sesión', 'Problema', 'Categoría'], prob_rows)))
