@@ -57,6 +57,12 @@
                     </div>
                 </button>
             </xpath>
+            <xpath expr="//group[@string='Driver']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='open_assignation_logs']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="GPS tracking" name="bus_tracking" groups="bus_tracking.group_bus_user"
                       attrs="{'invisible': [('bus_id', '=', False)]}">
