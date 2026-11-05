@@ -1,0 +1,189 @@
+{
+ "goal_p95_ms": 2000.0,
+ "repeats": 15,
+ "results": [
+  {
+   "positions": 1000,
+   "trips": 100,
+   "rows": {
+    "positions": 1000,
+    "trips": 100,
+    "trip_stops": 500,
+    "alerts": 33
+   },
+   "measures": {
+    "live_refresh": {
+     "p50": 21.6,
+     "p95": 47.8,
+     "max": 49.4,
+     "kb": 2.7,
+     "rows": 6
+    },
+    "live_first_load": {
+     "p50": 22.0,
+     "p95": 39.6,
+     "max": 48.9,
+     "kb": 5.1,
+     "rows": 6
+    },
+    "bus_history_4h": {
+     "p50": 23.4,
+     "p95": 35.2,
+     "max": 36.4,
+     "kb": 20.4,
+     "rows": 167
+    },
+    "trip_list": {
+     "p50": 51.2,
+     "p95": 61.4,
+     "max": 65.1,
+     "kb": 16.3,
+     "rows": 80
+    },
+    "indicators_30d": {
+     "p50": 16.7,
+     "p95": 35.7,
+     "max": 36.1,
+     "kb": 11.5,
+     "rows": 12
+    },
+    "dashboard_30d": {
+     "p50": 32.9,
+     "p95": 50.5,
+     "max": 53.2,
+     "kb": 31.7,
+     "rows": 60
+    },
+    "dashboard_90d": {
+     "p50": 50.2,
+     "p95": 58.7,
+     "max": 66.9,
+     "kb": 34.1,
+     "rows": 60
+    }
+   }
+  },
+  {
+   "positions": 10000,
+   "trips": 1000,
+   "rows": {
+    "positions": 10000,
+    "trips": 1000,
+    "trip_stops": 5000,
+    "alerts": 333
+   },
+   "measures": {
+    "live_refresh": {
+     "p50": 38.0,
+     "p95": 43.9,
+     "max": 49.3,
+     "kb": 2.7,
+     "rows": 6
+    },
+    "live_first_load": {
+     "p50": 26.4,
+     "p95": 38.4,
+     "max": 42.0,
+     "kb": 5.1,
+     "rows": 6
+    },
+    "bus_history_4h": {
+     "p50": 48.5,
+     "p95": 84.0,
+     "max": 84.4,
+     "kb": 205.4,
+     "rows": 1667
+    },
+    "trip_list": {
+     "p50": 54.3,
+     "p95": 62.8,
+     "max": 67.3,
+     "kb": 16.5,
+     "rows": 80
+    },
+    "indicators_30d": {
+     "p50": 39.5,
+     "p95": 52.7,
+     "max": 55.9,
+     "kb": 11.5,
+     "rows": 12
+    },
+    "dashboard_30d": {
+     "p50": 65.9,
+     "p95": 78.9,
+     "max": 106.2,
+     "kb": 31.5,
+     "rows": 60
+    },
+    "dashboard_90d": {
+     "p50": 61.5,
+     "p95": 79.0,
+     "max": 91.8,
+     "kb": 34.0,
+     "rows": 60
+    }
+   }
+  },
+  {
+   "positions": 100000,
+   "trips": 5000,
+   "rows": {
+    "positions": 100000,
+    "trips": 5000,
+    "trip_stops": 25001,
+    "alerts": 1666
+   },
+   "measures": {
+    "live_refresh": {
+     "p50": 27.5,
+     "p95": 39.1,
+     "max": 49.6,
+     "kb": 2.7,
+     "rows": 6
+    },
+    "live_first_load": {
+     "p50": 32.3,
+     "p95": 47.5,
+     "max": 48.6,
+     "kb": 5.1,
+     "rows": 6
+    },
+    "bus_history_4h": {
+     "p50": 73.9,
+     "p95": 89.0,
+     "max": 90.6,
+     "kb": 354.8,
+     "rows": 2868
+    },
+    "trip_list": {
+     "p50": 45.8,
+     "p95": 59.5,
+     "max": 62.4,
+     "kb": 18.0,
+     "rows": 80
+    },
+    "indicators_30d": {
+     "p50": 73.8,
+     "p95": 98.9,
+     "max": 98.9,
+     "kb": 11.5,
+     "rows": 12
+    },
+    "dashboard_30d": {
+     "p50": 135.9,
+     "p95": 151.2,
+     "max": 154.6,
+     "kb": 31.6,
+     "rows": 60
+    },
+    "dashboard_90d": {
+     "p50": 131.3,
+     "p95": 155.9,
+     "max": 186.3,
+     "kb": 34.1,
+     "rows": 60
+    }
+   }
+  }
+ ]
+}
