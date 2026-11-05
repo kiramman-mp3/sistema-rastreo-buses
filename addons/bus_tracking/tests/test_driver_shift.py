@@ -188,6 +188,29 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual(self.bus.driver_id, self.driver.partner_id)
         self.assertEqual(self.bus.route_id, self.route)
 
+    def test_state_gives_the_planned_time_of_each_stop_and_the_delay(self):
+        self.stops['Campus'].planned_offset_min = 20
+        now = fields.Datetime.now().replace(microsecond=0)
+        trip = self.env['bus.trip'].create({
+            'vehicle_id': self.bus.id, 'route_id': self.route.id, 'planned_start': now - timedelta(minutes=2)})
+        token = self.token()
+        self.start(token)
+        stops = {s['id']: s for s in self.post(STATE, token=token).json()['stops']}
+        terminal = stops[self.stops['Terminal'].id]
+        self.assertEqual(terminal['planned_at'], trip.planned_start.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        self.assertIsNone(terminal['delay_min'])
+        # the bus reaches the Terminal 4 minutes after the plan
+        line = trip.stop_line_ids.filtered(lambda ln: ln.stop_id == self.stops['Terminal'])
+        line.write({'actual_time': trip.planned_start + timedelta(minutes=4), 'delay_min': 4.0, 'status': 'on_time'})
+        stops = {s['id']: s for s in self.post(STATE, token=token).json()['stops']}
+        self.assertEqual(stops[self.stops['Terminal'].id]['delay_min'], 4.0)
+
+    def test_state_has_no_planned_time_without_a_scheduled_trip(self):
+        token = self.token()
+        self.start(token)
+        stops = self.post(STATE, token=token).json()['stops']
+        self.assertEqual({s['planned_at'] for s in stops}, {None})
+
     def test_start_rejects_a_bus_without_gps(self):
         self.bus.traccar_unique_id = False
         resp = self.start(self.token())

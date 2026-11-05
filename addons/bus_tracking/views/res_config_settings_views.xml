@@ -94,6 +94,66 @@
                             </div>
                         </div>
                     </div>
+                    <h2>Grafana dashboards</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_grafana_url"/>
+                                <div class="text-muted">
+                                    The dashboards of the Indicators menu are embedded from here.
+                                </div>
+                                <field name="bus_grafana_url" placeholder="https://grafana.example.com"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_grafana_secret"/>
+                                <div class="text-muted">
+                                    The same value as GRAFANA_JWT_SECRET of the Grafana service.
+                                </div>
+                                <field name="bus_grafana_secret" password="True"/>
+                                <label for="bus_grafana_minutes"/>
+                                <field name="bus_grafana_minutes"/>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Trips and punctuality</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_punctuality_tolerance"/>
+                                <div class="text-muted">
+                                    An arrival later than the planned time plus this is late; earlier than the
+                                    planned time minus this is early.
+                                </div>
+                                <field name="bus_punctuality_tolerance"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_trip_horizon_days"/>
+                                <field name="bus_trip_horizon_days"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_trip_margin"/>
+                                <field name="bus_trip_margin"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_late_start_minutes"/>
+                                <field name="bus_late_start_minutes"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_time_diff_pct"/>
+                                <field name="bus_time_diff_pct"/>
+                            </div>
+                        </div>
+                    </div>
                     <h2>Alerts</h2>
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box">

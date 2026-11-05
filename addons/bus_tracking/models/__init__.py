@@ -1,8 +1,14 @@
 from . import traccar_api
 from . import bus_route
 from . import bus_route_record
+from . import bus_trip
+from . import trip_simulator
+from . import bus_quality
+from . import bus_kpi
+from . import bus_grafana
 from . import bus_route_gpx
 from . import bus_vehicle
+from . import bus_fleet
 from . import bus_position
 from . import bus_alert
 from . import bus_complaint
@@ -13,3 +19,5 @@ from . import bus_driver_token
 from . import bus_incident
 from . import res_users
 from . import res_config_settings
+# last: it creates SQL views over the tables of all the models above
+from . import bus_kpi_views

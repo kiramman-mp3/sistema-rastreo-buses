@@ -52,3 +52,20 @@ describe('sos phase', () => {
     expect(sosPhase(null, { status: 'sending', at })).toBe('sending');
   });
 });
+
+describe('planned times', () => {
+  test('the planned time and the delay of each stop reach the view', () => {
+    const planned = [
+      { id: 1, name: 'A', sequence: 10, arrived_at: '2026-10-30T15:04:00Z', planned_at: '2026-10-30T15:00:00Z', delay_min: 4 },
+      { id: 2, name: 'B', sequence: 20, arrived_at: null, planned_at: '2026-10-30T15:10:00Z', delay_min: null },
+    ];
+    const [first, second] = classifyStops(planned, null);
+    expect(first).toMatchObject({ plannedAt: '2026-10-30T15:00:00Z', delayMin: 4, status: 'arrived' });
+    expect(second).toMatchObject({ plannedAt: '2026-10-30T15:10:00Z', delayMin: null, status: 'next' });
+  });
+
+  test('a stop without a scheduled trip has no planned time', () => {
+    const [stop] = classifyStops([{ id: 1, name: 'A', sequence: 10, arrived_at: null }], null);
+    expect(stop).toMatchObject({ plannedAt: null, delayMin: null });
+  });
+});

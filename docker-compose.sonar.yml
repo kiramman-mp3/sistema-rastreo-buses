@@ -1,0 +1,25 @@
+# SonarQube Community for development only: it analyses the project and its Quality Gate is read from here.
+#   docker compose -f docker-compose.sonar.yml up -d       # http://localhost:9000  (admin / admin, change it)
+#   scripts/sonar-scan.sh                                  # coverage + analysis
+# It is never part of the production stack. The data lives in the volumes below; `down -v` erases them.
+name: rastreo-sonar
+
+services:
+  sonarqube:
+    image: ${SONARQUBE_IMAGE:-sonarqube:26.10.0.133078-community}
+    restart: "no"
+    ports:
+      - "${SONAR_PORT:-9000}:9000"
+    environment:
+      # Docker Desktop on Windows does not let a container raise vm.max_map_count; development only.
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    mem_limit: 3g
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-extensions:/opt/sonarqube/extensions
+      - sonar-logs:/opt/sonarqube/logs
+
+volumes:
+  sonar-data:
+  sonar-extensions:
+  sonar-logs:

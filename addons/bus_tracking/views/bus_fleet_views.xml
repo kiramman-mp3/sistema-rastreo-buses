@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- The bus points to its vehicle in Fleet -->
+    <record id="view_bus_vehicle_form_fleet" model="ir.ui.view">
+        <field name="name">bus.vehicle.form.fleet</field>
+        <field name="model">bus.vehicle</field>
+        <field name="inherit_id" ref="bus_tracking.view_bus_vehicle_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_fleet" type="object" string="Open in Fleet"
+                        groups="bus_tracking.group_bus_manager"/>
+            </xpath>
+            <xpath expr="//field[@name='driver_id']" position="before">
+                <field name="fleet_vehicle_id" groups="bus_tracking.group_bus_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- and the vehicle in Fleet shows what the tracking knows about it -->
+    <record id="view_fleet_vehicle_form_bus" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.bus</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="before">
+                <group string="GPS tracking" attrs="{'invisible': [('bus_id', '=', False)]}"
+                       groups="bus_tracking.group_bus_user">
+                    <group>
+                        <field name="bus_id"/>
+                        <field name="bus_traccar_device_id"/>
+                    </group>
+                    <group>
+                        <field name="bus_connection"/>
+                        <field name="bus_last_fix_time"/>
+                    </group>
+                    <div colspan="2">
+                        <button name="action_open_bus" type="object" string="Open the bus" class="btn-secondary"/>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_tree_bus" model="ir.ui.view">
+        <field name="name">fleet.vehicle.tree.bus</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='license_plate']" position="after">
+                <field name="bus_traccar_device_id" optional="show" groups="bus_tracking.group_bus_user"/>
+                <field name="bus_connection" optional="show" groups="bus_tracking.group_bus_user"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -16,3 +16,17 @@ from . import test_driver_shift
 from . import test_driver_badge
 from . import test_driver_staff
 from . import test_privacy
+from . import test_trips
+from . import test_trip_run
+from . import test_trip_rules
+from . import test_trip_simulator
+from . import test_kpi
+from . import test_quality
+from . import test_dashboard
+from . import test_grafana_views
+from . import test_grafana_access
+from . import test_grafana_dashboards
+from . import test_fleet
+from . import test_demo_report
+from . import test_boundaries
+from . import test_traccar_consistency

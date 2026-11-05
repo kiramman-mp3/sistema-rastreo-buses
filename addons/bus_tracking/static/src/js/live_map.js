@@ -55,7 +55,7 @@ function utcSeconds(text) {
         return null;
     }
     const when = Date.parse(text.replace(" ", "T") + "Z");
-    return isNaN(when) ? null : (Date.now() - when) / 1000;
+    return Number.isNaN(when) ? null : (Date.now() - when) / 1000;
 }
 
 export class BusLiveMap extends Component {
@@ -98,7 +98,7 @@ export class BusLiveMap extends Component {
             await this.refresh();
             this.poll = setInterval(() => {
                 if (!document.hidden) {
-                    this.refresh();
+                    this.refresh().catch(() => {});
                 }
             }, REFRESH_MS);
             this.clock = setInterval(() => {
@@ -106,7 +106,7 @@ export class BusLiveMap extends Component {
             }, 1000);
             this.onVisible = () => {
                 if (!document.hidden) {
-                    this.refresh();
+                    this.refresh().catch(() => {});
                 }
             };
             document.addEventListener("visibilitychange", this.onVisible);
