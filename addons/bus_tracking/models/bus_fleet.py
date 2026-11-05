@@ -80,7 +80,7 @@ class BusVehicle(models.Model):
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
 
-    bus_id = fields.Many2one('bus.vehicle', string="Tracked as bus", compute='_compute_bus', compute_sudo=True)
+    bus_id = fields.Many2one('bus.vehicle', string="Tracked as bus", compute='_compute_bus', search='_search_bus_id', compute_sudo=True)
     bus_traccar_device_id = fields.Integer(string="GPS device (Traccar)", related='bus_id.traccar_device_id')
     bus_connection = fields.Selection(related='bus_id.connection', string="GPS connection")
     bus_last_fix_time = fields.Datetime(related='bus_id.last_fix_time', string="Last position")
@@ -104,6 +104,10 @@ class FleetVehicle(models.Model):
         by_vehicle = {bus.fleet_vehicle_id.id: bus for bus in buses}
         for vehicle in self:
             vehicle.bus_id = by_vehicle.get(vehicle.id, False)
+
+    def _search_bus_id(self, operator, value):
+        buses = self.env['bus.vehicle'].sudo().with_context(active_test=False).search([('id', operator, value)])
+        return [('id', 'in', buses.mapped('fleet_vehicle_id').ids)]
 
     @api.model_create_multi
     def create(self, vals_list):
