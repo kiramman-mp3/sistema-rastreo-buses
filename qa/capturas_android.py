@@ -75,7 +75,7 @@ def wait_for(*needles, seconds=20, clickable=False):
 
 def screen_size():
     text = adb('shell', 'wm', 'size')
-    found = re.findall(r'(\d+)x(\d+)', text)
+    found = re.findall(r'(\d{1,5})x(\d{1,5})', text)
     width, height = found[-1]  # the override, when there is one, is listed last
     return int(width), int(height)
 
