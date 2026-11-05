@@ -19,7 +19,7 @@
     <menuitem id="menu_bus_fleet_vehicles" name="Fleet vehicles" parent="menu_bus_fleet"
               action="fleet.fleet_vehicle_action" sequence="5" groups="bus_tracking.group_bus_manager"/>
     <menuitem id="menu_bus_vehicle" name="Buses" parent="menu_bus_fleet"
-              action="action_bus_vehicle" sequence="10"/>
+              action="action_bus_vehicle" sequence="10" active="False"/>
     <menuitem id="menu_bus_run" name="Trips" parent="menu_bus_fleet"
               action="action_bus_run" sequence="20"/>
     <menuitem id="menu_bus_route" name="Routes" parent="menu_bus_fleet"
