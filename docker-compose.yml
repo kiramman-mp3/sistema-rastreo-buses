@@ -49,8 +49,36 @@ services:
       - traccar-data:/opt/traccar/data
       - traccar-logs:/opt/traccar/logs
 
+  # Grafana, the second dashboard (profile "bi": docker compose --profile bi up -d grafana).
+  # Reads the kpi_* views of Odoo with the read-only role of scripts/grafana-role.sh, and is embedded in Odoo.
+  grafana:
+    profiles: ["bi"]
+    image: grafana/grafana-oss:11.6.0
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    env_file:
+      - ./bi/grafana/grafana.env
+    environment:
+      GF_SERVER_ROOT_URL: http://localhost:${GRAFANA_PORT:-3000}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GRAFANA_DB_HOST: db:5432
+      GRAFANA_DB_NAME: ${ODOO_DB:-buses}
+      GRAFANA_DB_SSLMODE: disable
+      GRAFANA_DB_PASSWORD: ${GRAFANA_DB_PASSWORD:-grafana-dev}
+      GRAFANA_JWT_SECRET: ${GRAFANA_JWT_SECRET:-dev-grafana-jwt-secret-change-me}
+    entrypoint: ["/bin/sh", "/etc/grafana/entrypoint.sh"]
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./bi/grafana/entrypoint.sh:/etc/grafana/entrypoint.sh:ro
+      - ./bi/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./bi/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
 volumes:
   db-data:
   odoo-data:
   traccar-data:
   traccar-logs:
+  grafana-data:

@@ -9,6 +9,11 @@ KINDS = [
     ('offline', "No signal"),
     ('long_stop', "Long stop"),
     ('off_route', "Off route"),
+    # Rules of the scheduled trips. They are events, not states: they are written closed, once per trip.
+    ('late_arrival', "Late arrival"),
+    ('skipped_stop', "Skipped stop"),
+    ('incomplete_trip', "Incomplete trip"),
+    ('late_start', "Late start"),
 ]
 
 # A bus that never reported in this long is parked for the night, not "without signal".
@@ -34,6 +39,9 @@ class BusAlert(models.Model):
     latitude = fields.Float(digits=(10, 7))
     longitude = fields.Float(digits=(10, 7))
     detail = fields.Char(compute='_compute_detail')
+    trip_id = fields.Many2one('bus.trip', string="Trip", ondelete='set null', index=True)
+    stop_id = fields.Many2one('bus.route.stop', string="Stop", ondelete='set null')
+    delay_min = fields.Float(help="Minutes after the planned time.")
 
     def init(self):
         # One open alert per bus and kind, enforced by the database.
@@ -51,7 +59,7 @@ class BusAlert(models.Model):
             else:
                 alert.duration_minutes = 0.0
 
-    @api.depends('kind', 'max_speed', 'threshold', 'duration_minutes', 'distance_m')
+    @api.depends('kind', 'max_speed', 'threshold', 'duration_minutes', 'distance_m', 'delay_min', 'stop_id')
     @api.depends_context('lang')
     def _compute_detail(self):
         for alert in self:
@@ -66,8 +74,42 @@ class BusAlert(models.Model):
             elif alert.kind == 'off_route':
                 alert.detail = _("Up to %(meters)d m away from its route (limit %(limit)d m)",
                                  meters=round(alert.distance_m), limit=round(alert.threshold))
+            elif alert.kind == 'late_arrival':
+                alert.detail = _("%(minutes)d min late at %(stop)s (tolerance %(limit)d min)",
+                                 minutes=round(alert.delay_min), stop=alert.stop_id.name or '',
+                                 limit=round(alert.threshold))
+            elif alert.kind == 'skipped_stop':
+                alert.detail = _("Did not stop at %(stop)s", stop=alert.stop_id.name or '')
+            elif alert.kind == 'incomplete_trip':
+                alert.detail = _("%(n)d stops of the trip were not reached", n=round(alert.threshold))
+            elif alert.kind == 'late_start':
+                alert.detail = _("The trip had not started %(minutes)d min after its planned time",
+                                 minutes=round(alert.delay_min))
             else:
                 alert.detail = False
+
+    @api.model
+    def _trip_event(self, trip, kind, when, **vals):
+        """A rule of a scheduled trip was broken. Written closed: it is a fact, there is nothing to wait for.
+        One per trip, kind and stop."""
+        stop = vals.get('stop_id')
+        existing = self.search(
+            [('trip_id', '=', trip.id), ('kind', '=', kind), ('stop_id', '=', stop or False)], limit=1)
+        if existing:
+            return existing
+        bus = trip.vehicle_id
+        return self.create(dict(
+            vals,
+            vehicle_id=bus.id,
+            route_id=trip.route_id.id,
+            trip_id=trip.id,
+            kind=kind,
+            state='closed',
+            start_time=when,
+            end_time=when,
+            latitude=bus.last_latitude,
+            longitude=bus.last_longitude,
+        ))
 
     # ------------------------------------------------------------------
     # Rules
@@ -86,6 +128,7 @@ class BusAlert(models.Model):
             vals,
             vehicle_id=vehicle.id,
             route_id=vehicle.route_id.id,
+            trip_id=self.env['bus.trip']._trip_at(vehicle, start_time).id,
             kind=kind,
             start_time=start_time,
             latitude=vehicle.last_latitude,

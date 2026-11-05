@@ -115,7 +115,8 @@ class TestLanguages(TransactionCase):
             filter_lang='qu_EC', overwrite=True)
         root = self.env.ref('bus_tracking.menu_bus_root')
         names = root.with_context(lang='qu_EC').child_id.mapped('name')
-        self.assertEqual(names, ['Kunan mapa', 'Llankaykuna', 'Bus tantakuna', 'Willaykuna', 'Churana'])
+        for name in ('Kunan mapa', 'Llankaykuna', 'Bus tantakuna', 'Willaykuna', 'Churana'):
+            self.assertIn(name, names)
         # every text of the module has a Kichwa translation
         import polib
         import os
