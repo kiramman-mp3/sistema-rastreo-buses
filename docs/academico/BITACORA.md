@@ -1163,3 +1163,41 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Compilar un nuevo build nativo de iOS (`npx eas-cli build --profile ios-altstore --platform ios`) para desplegar en el iPhone los permisos de `UIBackgroundModes` y el heartbeat de CoreLocation.
 - Probar el comportamiento del iPhone en un recorrido vehicular real en movimiento para validar el handoff entre el latido estacionario y los eventos continuos de desplazamiento de CoreLocation.
 
+
+## 2026-11-04 y 05: proyecto final, fases R1 a R12 de `PLAN-RUBRICA.md`
+
+### Qué se hizo
+
+- **R1 a R3** (módulo 16.0.1.5.0): horarios y asignación por fecha y hora, recorridos programados con sus paradas, registro de llegadas con retraso y tolerancia, y las reglas de llegada tarde, parada omitida, recorrido incompleto y salida tarde.
+- **R4 y R5**: simulador de recorridos (solo produce posiciones; las reglas deciden el resultado), 12 recorridos simulados identificados, y 12 indicadores calculados con SQL (`bus.kpi`).
+- **R6**: tablero dentro de Odoo con siete pestañas. **R7**: nueve vistas `kpi_*`, rol de base de solo lectura, Grafana con seis tableros como código, token firmado por Odoo, incrustación y prueba de humo.
+- **R8**: Odoo Fleet como dependencia, vehículo de Fleet enlazado a cada bus y sincronizado (16.0.1.6.0). **R9**: reporte de demostración por bus (8 h) y guía de Traccar Client.
+- **R10**: SonarQube con cobertura de Python y Jest; 27 hallazgos corregidos y 12 aceptados con justificación. **R11**: pruebas de límites, integración Traccar–Odoo y rendimiento por volumen hasta 1 000 000 de posiciones.
+- Traducción al español y al kichwa de los 351 textos nuevos (769 en total).
+- **R12**: requisitos, arquitectura y modelo de datos, métricas generadas del código, mejora continua (PDCA), matriz de trazabilidad, guion de defensa y registro con 10 defectos nuevos (DEF-039 a DEF-048).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Pruebas de Odoo | 544 de 544 |
+| Pruebas de Jest de la app | 167 de 167 |
+| Linter (`flake8`) y `tsc` | Sin avisos |
+| `qa/grafana_smoke.py` | 19 de 19 |
+| SonarQube | Quality Gate aprobado; bugs 16 → 0, vulnerabilidades 12 → 0, cobertura 78,4 % |
+| Rendimiento por volumen | Peor p95: 704 ms con 1 000 000 de posiciones y 50 000 recorridos (meta: 2 000 ms) |
+
+### Problemas encontrados
+
+- El módulo no se instalaba porque las vistas SQL se creaban antes de las tablas que leen (DEF-045).
+- El tablero de Odoo fallaba por usar `String()` en una plantilla de OWL y sus clases CSS chocaban con las del mapa (DEF-043, DEF-044).
+- Grafana con JWT no abre sesión: el token de 5 minutos dejaba el tablero sin datos (DEF-046).
+- El grupo «Officer» de Fleet solo ve el vehículo que conduce (DEF-047).
+- SonarQube halló 16 bugs, sobre todo promesas sin manejar (DEF-048); el primer informe de cobertura de Python se ignoró por rutas incorrectas (20,4 % en lugar de 78,4 %).
+
+### Pendiente o sin confirmar
+
+- Capturas y ensayo con un celular real y Traccar Client por datos móviles.
+- Confirmar con el docente que Grafana sirve en lugar de Power BI.
+- Desplegar la versión 16.0.1.6.0 en Azure (respaldo, migración de Fleet y de las vistas, Grafana con su subdominio).
+- Revisión del kichwa por una persona hablante; pruebas unitarias del JavaScript del módulo; análisis de dependencias; prueba de concurrencia.
