@@ -25,7 +25,7 @@ def _point(node):
         lat, lon = float(node.get('lat')), float(node.get('lon'))
     except (TypeError, ValueError):
         return None
-    if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0) or lat != lat or lon != lon:
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):          # also false for NaN
         return None
     return [lat, lon]
 
