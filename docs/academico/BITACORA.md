@@ -1201,3 +1201,39 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Confirmar con el docente que Grafana sirve en lugar de Power BI.
 - Desplegar la versión 16.0.1.6.0 en Azure (respaldo, migración de Fleet y de las vistas, Grafana con su subdominio).
 - Revisión del kichwa por una persona hablante; pruebas unitarias del JavaScript del módulo; análisis de dependencias; prueba de concurrencia.
+
+
+## 2026-11-05: Unificación de vehículos de Flota, depuración de UI y correcciones de CI
+
+### Qué se hizo
+
+- **Instalación de la skill Playwright**: Integrada en `.agents/skills/playwright/` y en la configuración global para soportar automatización de pruebas E2E y pruebas de interfaz en navegador real.
+- **Corrección de fallos de CI y formateo flake8**:
+  - Corrección de `E501 line too long` en `addons/bus_tracking/models/bus_fleet.py` (líneas 49 y 83).
+  - Corrección de `W293 blank line contains whitespace` en `addons/bus_tracking/tests/test_fleet.py` (líneas 168 y 173).
+  - Ajuste en `FleetVehicle._ensure_bus()` para no forzar la creación de buses en vehículos ajenos que no pertenezcan al transporte colectivo, restaurando el paso de las pruebas unitarias.
+- **Resolución de actualización en Azure VM**: Diagnóstico y corrección del error `SerializationFailure: could not serialize access due to concurrent update` en PostgreSQL, deteniendo limpiamente el servicio de Odoo antes de actualizar `bus_tracking` e iniciando posteriormente el contenedor de producción.
+- **Unificación de la interfaz de Flota**:
+  - Incorporación en el encabezado del vehículo de los botones de acción (`action_open_map`, `action_register_gps`, `action_sync_now`, demo report).
+  - Adición del botón de estadística **Live Map** y de la pestaña completa **Rastreo GPS** (con ruta, conexión, estado, coordenadas y QR de tableta).
+  - Ocultamiento del submenú redundante **Buses** (`menu_bus_vehicle active="False"`) bajo Flota, consolidando el acceso en **Vehículos de flota**.
+  - Eliminación del botón redundante **Bus Details** del formulario de vehículos.
+  - Ocultamiento del bloque estático **CONDUCTOR** (`<group string="Driver">` y el botón de historial `open_assignation_logs`) del formulario de vehículos, alineando la interfaz con el modelo operativo dinámico de la UTA (los choferes no se asignan estáticamente a un vehículo sino mediante turnos dinámicos `bus.shift`).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Pipeline de CI (GitHub Actions `df4f4cf`) | 4 de 4 trabajos en verde (Odoo Test Suite 3m16s, Addon Lint 14s, Conductor Tablet 51s, Secret scan 16s) |
+| Linter (`flake8`) | 0 errores, 0 advertencias de estilo |
+| Renderizado en base de datos (`buses` en Azure) | `fleet.vehicle` devuelve encabezado con botones de rastreo, pestaña de GPS y bloque de Conductor oculto |
+| Menús de Flota en producción | `menu_bus_vehicle.active = False`, solo visibles Vehículos de flota, Viajes, Rutas, Horarios y Choferes |
+
+### Problemas encontrados
+
+- `could not serialize access due to concurrent update` al actualizar el módulo en caliente en Azure con crons activos en PostgreSQL (DEF-049).
+- `View inheritance may not use attribute 'string' as a selector` al intentar seleccionar `<group string="Driver">` con `@string`; resuelto usando el selector por campo hijo `//group[field[@name='driver_id']]` (DEF-050).
+
+### Pendiente o sin confirmar
+
+- Forzar recarga en navegadores clientes (`Ctrl + Shift + R`) para refrescar la caché local de vistas de Odoo.
