@@ -12,7 +12,7 @@ function channels(hex: string): [number, number, number] | null {
   const match = /^#([0-9a-f]{3}|[0-9a-f]{6})([0-9a-f]{2})?$/i.exec(hex.trim());
   if (!match) return null;
   const digits = match[1].length === 3 ? match[1].replace(/./g, (c) => c + c) : match[1];
-  return [0, 2, 4].map((i) => parseInt(digits.slice(i, i + 2), 16)) as [number, number, number];
+  return [0, 2, 4].map((i) => Number.parseInt(digits.slice(i, i + 2), 16)) as [number, number, number];
 }
 
 /** WCAG relative luminance of a #RGB or #RRGGBB colour; null when it is not one (a name, rgb(), junk). */
