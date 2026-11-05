@@ -165,12 +165,12 @@ class TestFleetLink(TransactionCase):
     def test_fleet_vehicle_delegates_tracking_actions_to_bus(self):
         self.bus.traccar_device_id = 1234
         vehicle = self.bus.fleet_vehicle_id
-        
+
         # Open live map
         map_action = vehicle.action_open_map()
         self.assertEqual(map_action['tag'], 'bus_tracking.live_map')
         self.assertEqual(map_action['params']['vehicle_id'], self.bus.id)
-        
+
         # Demo report
         manager = self.env['res.users'].create({
             'name': 'Gestor Demo', 'login': 'fleet-manager-demo',
@@ -187,13 +187,16 @@ class TestFleetLink(TransactionCase):
         self.assertEqual(bus_action['res_model'], 'bus.vehicle')
         self.assertEqual(bus_action['res_id'], self.bus.id)
 
-    def test_creating_fleet_vehicle_automatically_ensures_bus(self):
+    def test_fleet_vehicle_ensure_bus(self):
         new_vehicle = self.Fleet.create({
             'model_id': self.bus._fleet_model().id,
             'license_plate': 'TBX-9999',
             'seats': 42,
         })
-        self.assertTrue(new_vehicle.bus_id)
-        self.assertEqual(new_vehicle.bus_id.plate, 'TBX-9999')
-        self.assertEqual(new_vehicle.bus_id.capacity, 42)
-        self.assertEqual(new_vehicle.bus_id.fleet_vehicle_id, new_vehicle)
+        self.assertFalse(new_vehicle.bus_id)
+        bus = new_vehicle._ensure_bus()
+        self.assertTrue(bus)
+        self.assertEqual(bus.plate, 'TBX-9999')
+        self.assertEqual(bus.capacity, 42)
+        self.assertEqual(bus.fleet_vehicle_id, new_vehicle)
+        self.assertEqual(new_vehicle.bus_id, bus)
