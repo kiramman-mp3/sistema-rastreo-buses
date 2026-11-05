@@ -60,11 +60,11 @@ export default function IncidentScreen() {
       });
       setResult(outcome);
       setNote('');
-      hapticDone();
+      hapticDone().catch(() => undefined);
       back.current = setTimeout(() => router.back(), BACK_AFTER_MS);
     } catch {
       setResult('error');
-      hapticFail();
+      hapticFail().catch(() => undefined);
     } finally {
       setBusy(false);
     }
