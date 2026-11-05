@@ -54,7 +54,8 @@ docs/
 │   ├── 17-rendimiento-por-volumen.md # Tiempos de cada pantalla hasta 1 000 000 de posiciones
 │   ├── 18-mejora-continua-pdca.md # Ishikawa, Pareto y cuatro ciclos PDCA de la etapa de la rúbrica
 │   ├── 19-matriz-de-trazabilidad.md # Cada actividad, entregable y criterio con su evidencia
-│   ├── Informe_calidad_rastreo_buses.pdf # Informe formal compilado para auditoría externa
+│   ├── Informe_final_proyecto_rastreo_buses.pdf # Informe final del proyecto con las evidencias actuales
+│   ├── Informe_calidad_rastreo_buses.pdf # Informe de la evaluación del 28-oct-2026 (histórico)
 │   ├── evidencias/                # Registros crudos en JSON y logs de pruebas y auditorías
 │   └── figuras/                   # Gráficos de cobertura, Pareto e Ishikawa generados
 │
