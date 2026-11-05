@@ -46,7 +46,7 @@ class BusVehicle(models.Model):
                 vehicle = Fleet.search([('license_plate', '=', bus.plate), ('model_id', '!=', False)]).filtered(
                     lambda v: not everyone.search_count([('fleet_vehicle_id', '=', v.id)]))[:1]
             if not vehicle:
-                vehicle = Fleet.create(dict(bus._fleet_values(), model_id=bus._fleet_model().id))
+                vehicle = Fleet.with_context(**{SYNC: True}).create(dict(bus._fleet_values(), model_id=bus._fleet_model().id))
             bus.with_context(**{SYNC: True}).fleet_vehicle_id = vehicle
             linked |= bus
         return linked
@@ -84,6 +84,18 @@ class FleetVehicle(models.Model):
     bus_traccar_device_id = fields.Integer(string="GPS device (Traccar)", related='bus_id.traccar_device_id')
     bus_connection = fields.Selection(related='bus_id.connection', string="GPS connection")
     bus_last_fix_time = fields.Datetime(related='bus_id.last_fix_time', string="Last position")
+    bus_route_id = fields.Many2one('bus.route', string="Route", related='bus_id.route_id', readonly=False)
+    bus_status = fields.Selection(related='bus_id.status', string="Status")
+    bus_current_stop_id = fields.Many2one('bus.route.stop', related='bus_id.current_stop_id', string="Current Stop")
+    bus_last_speed = fields.Float(related='bus_id.last_speed', string="Last Speed")
+    bus_last_course = fields.Float(related='bus_id.last_course', string="Last Course")
+    bus_last_latitude = fields.Float(related='bus_id.last_latitude', string="Latitude")
+    bus_last_longitude = fields.Float(related='bus_id.last_longitude', string="Longitude")
+    bus_traccar_unique_id = fields.Char(related='bus_id.traccar_unique_id', string="Traccar Unique ID")
+    bus_demo_report = fields.Boolean(related='bus_id.demo_report', string="Demo report")
+    bus_demo_report_until = fields.Datetime(related='bus_id.demo_report_until', string="Demo report until")
+    bus_tablet_setup_link = fields.Char(related='bus_id.tablet_setup_link', string="Tablet setup link")
+    bus_tablet_qr = fields.Binary(related='bus_id.tablet_qr', string="Tablet QR")
 
     @api.depends('license_plate')
     def _compute_bus(self):
@@ -92,6 +104,14 @@ class FleetVehicle(models.Model):
         by_vehicle = {bus.fleet_vehicle_id.id: bus for bus in buses}
         for vehicle in self:
             vehicle.bus_id = by_vehicle.get(vehicle.id, False)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        vehicles = super().create(vals_list)
+        if not self.env.context.get(SYNC):
+            for vehicle in vehicles:
+                vehicle._ensure_bus()
+        return vehicles
 
     def write(self, vals):
         result = super().write(vals)
@@ -105,9 +125,52 @@ class FleetVehicle(models.Model):
                 bus.with_context(**{SYNC: True}).write(values)
         return result
 
+    def _ensure_bus(self):
+        self.ensure_one()
+        bus = self.bus_id
+        if not bus:
+            bus = self.env['bus.vehicle'].sudo().with_context(active_test=False).search(
+                [('fleet_vehicle_id', '=', self.id)], limit=1)
+            if not bus and self.license_plate:
+                bus = self.env['bus.vehicle'].sudo().with_context(active_test=False).search(
+                    [('plate', '=', self.license_plate)], limit=1)
+            if not bus:
+                bus = self.env['bus.vehicle'].with_context(**{SYNC: True}).create({
+                    'name': self.name or f"Bus {self.license_plate or ''}",
+                    'plate': self.license_plate or False,
+                    'driver_id': self.driver_id.id if self.driver_id else False,
+                    'capacity': self.seats or 30,
+                    'fleet_vehicle_id': self.id,
+                })
+            else:
+                bus.with_context(**{SYNC: True}).fleet_vehicle_id = self.id
+            self.bus_id = bus
+        return bus
+
     def action_open_bus(self):
         self.ensure_one()
+        bus = self._ensure_bus()
         return {
             'type': 'ir.actions.act_window', 'name': _("Bus"), 'res_model': 'bus.vehicle',
-            'res_id': self.bus_id.id, 'view_mode': 'form', 'target': 'current',
+            'res_id': bus.id, 'view_mode': 'form', 'target': 'current',
         }
+
+    def action_register_gps(self):
+        self.ensure_one()
+        return self._ensure_bus().action_register_gps()
+
+    def action_sync_now(self):
+        self.ensure_one()
+        return self._ensure_bus().action_sync_now()
+
+    def action_open_map(self):
+        self.ensure_one()
+        return self._ensure_bus().action_open_map()
+
+    def action_start_demo_report(self):
+        self.ensure_one()
+        return self._ensure_bus().action_start_demo_report()
+
+    def action_stop_demo_report(self):
+        self.ensure_one()
+        return self._ensure_bus().action_stop_demo_report()

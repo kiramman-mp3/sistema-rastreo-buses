@@ -16,27 +16,92 @@
         </field>
     </record>
 
-    <!-- and the vehicle in Fleet shows what the tracking knows about it -->
+    <!-- and the vehicle in Fleet integrates full bus tracking features -->
     <record id="view_fleet_vehicle_form_bus" model="ir.ui.view">
         <field name="name">fleet.vehicle.form.bus</field>
         <field name="model">fleet.vehicle</field>
         <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//notebook" position="before">
-                <group string="GPS tracking" attrs="{'invisible': [('bus_id', '=', False)]}"
-                       groups="bus_tracking.group_bus_user">
-                    <group>
-                        <field name="bus_id"/>
-                        <field name="bus_traccar_device_id"/>
-                    </group>
-                    <group>
-                        <field name="bus_connection"/>
-                        <field name="bus_last_fix_time"/>
-                    </group>
-                    <div colspan="2">
-                        <button name="action_open_bus" type="object" string="Open the bus" class="btn-secondary"/>
+            <xpath expr="//header" position="inside">
+                <button name="action_open_map" type="object" string="View on map" class="btn-primary"
+                        attrs="{'invisible': [('bus_id', '=', False)]}"/>
+                <button name="action_register_gps" type="object" string="Register GPS in Traccar"
+                        class="btn-primary" groups="bus_tracking.group_bus_manager"
+                        attrs="{'invisible': [('bus_traccar_device_id', '!=', 0)]}"
+                        confirm="Creates a device in Traccar with a random identifier for this bus."/>
+                <button name="action_sync_now" type="object" string="Sync now" groups="bus_tracking.group_bus_manager"
+                        attrs="{'invisible': [('bus_id', '=', False)]}"/>
+                <button name="action_start_demo_report" type="object" string="Start demo report"
+                        groups="bus_tracking.group_bus_manager"
+                        attrs="{'invisible': ['|', ('bus_demo_report', '=', True), '|', ('bus_id', '=', False), ('bus_traccar_device_id', '=', 0)]}"
+                        confirm="This bus will keep the positions of its phone without a driver shift for the next 8 hours. Use it to show the system with Traccar Client."/>
+                <button name="action_stop_demo_report" type="object" string="Stop demo report"
+                        groups="bus_tracking.group_bus_manager"
+                        attrs="{'invisible': [('bus_demo_report', '=', False)]}"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="alert alert-warning" role="status" attrs="{'invisible': [('bus_demo_report', '=', False)]}">
+                    Demo report: this bus keeps the positions of its phone without a shift until
+                    <field name="bus_demo_report_until" readonly="1" class="oe_inline"/>.
+                </div>
+                <field name="bus_demo_report" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_map" type="object" class="oe_stat_button" icon="fa-map-marker"
+                        attrs="{'invisible': [('bus_id', '=', False)]}" groups="bus_tracking.group_bus_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Live Map</span>
                     </div>
-                </group>
+                </button>
+                <button name="action_open_bus" type="object" class="oe_stat_button" icon="fa-bus"
+                        attrs="{'invisible': [('bus_id', '=', False)]}" groups="bus_tracking.group_bus_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Bus Details</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="GPS tracking" name="bus_tracking" groups="bus_tracking.group_bus_user"
+                      attrs="{'invisible': [('bus_id', '=', False)]}">
+                    <group>
+                        <group string="Bus &amp; Route">
+                            <field name="bus_id" readonly="1"/>
+                            <field name="bus_route_id"/>
+                            <field name="bus_connection"/>
+                            <field name="bus_status" widget="badge"
+                                   decoration-success="bus_status == 'moving'"
+                                   decoration-warning="bus_status == 'stopped'"/>
+                            <field name="bus_current_stop_id"/>
+                        </group>
+                        <group string="Traccar GPS">
+                            <field name="bus_traccar_device_id" readonly="1"/>
+                            <field name="bus_traccar_unique_id" readonly="1"/>
+                            <field name="bus_last_fix_time" readonly="1"/>
+                            <field name="bus_last_speed" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Driver tablet (Buses UTA app)" groups="bus_tracking.group_bus_manager">
+                        <group>
+                            <field name="bus_tablet_setup_link" readonly="1"/>
+                            <div colspan="2" class="text-muted">
+                                In the Buses UTA app, tap "Scan QR". This code holds the address of the Odoo server.
+                                The tracking credentials are assigned automatically when the driver starts a shift.
+                            </div>
+                        </group>
+                        <group>
+                            <field name="bus_tablet_qr" widget="image" options="{'size': [220, 220]}" nolabel="1"/>
+                        </group>
+                    </group>
+                    <group string="Last Coordinates">
+                        <group>
+                            <field name="bus_last_latitude" readonly="1"/>
+                            <field name="bus_last_longitude" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="bus_last_course" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>
@@ -47,8 +112,14 @@
         <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='license_plate']" position="after">
-                <field name="bus_traccar_device_id" optional="show" groups="bus_tracking.group_bus_user"/>
+                <field name="bus_route_id" optional="show" groups="bus_tracking.group_bus_user"/>
                 <field name="bus_connection" optional="show" groups="bus_tracking.group_bus_user"/>
+                <field name="bus_status" widget="badge"
+                       decoration-success="bus_status == 'moving'"
+                       decoration-warning="bus_status == 'stopped'"
+                       optional="show" groups="bus_tracking.group_bus_user"/>
+                <field name="bus_last_fix_time" optional="show" groups="bus_tracking.group_bus_user"/>
+                <field name="bus_traccar_device_id" optional="hide" groups="bus_tracking.group_bus_user"/>
             </xpath>
         </field>
     </record>
