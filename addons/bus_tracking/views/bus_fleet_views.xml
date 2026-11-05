@@ -56,12 +56,6 @@
                         <span class="o_stat_text">Live Map</span>
                     </div>
                 </button>
-                <button name="action_open_bus" type="object" class="oe_stat_button" icon="fa-bus"
-                        attrs="{'invisible': [('bus_id', '=', False)]}" groups="bus_tracking.group_bus_user">
-                    <div class="o_stat_info">
-                        <span class="o_stat_text">Bus Details</span>
-                    </div>
-                </button>
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="GPS tracking" name="bus_tracking" groups="bus_tracking.group_bus_user"
