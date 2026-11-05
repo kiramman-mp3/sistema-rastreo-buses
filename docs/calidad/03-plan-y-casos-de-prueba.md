@@ -6,7 +6,7 @@ Documento de pruebas en el sentido de ISO/IEC/IEEE 29119-3: estrategia, diseño 
 
 | Nivel | Qué prueba | Herramienta | Cantidad |
 |---|---|---|---|
-| Unitarias y de integración | Modelos, reglas de negocio, controladores y permisos dentro de Odoo, en una base limpia | `TransactionCase` y `HttpCase` de Odoo 16, con coverage.py | 250 pruebas |
+| Unitarias y de integración | Modelos, reglas de negocio, controladores y permisos dentro de Odoo, en una base limpia | `TransactionCase` y `HttpCase` de Odoo 16, con coverage.py | 544 pruebas |
 | Suite en vivo | El sistema como lo usan un celular, un pasajero y un administrador, por HTTP y XML-RPC | `qa/qa_suite.py` | 47 casos |
 | Auditoría aleatoria | Robustez ante entradas normales y límite, con semilla fija, sobre 15 áreas | `qa/auditoria.py` | 1.000 peticiones |
 | Datos | Estado real de la base tras las pruebas (rangos, duplicados, coherencia) | Consultas SQL en `qa/metricas.py` | 11 consultas |
@@ -19,26 +19,41 @@ Documento de pruebas en el sentido de ISO/IEC/IEEE 29119-3: estrategia, diseño 
 - Específicos: ninguna entrada puede causar una respuesta HTTP 5xx; ningún registro con datos imposibles; el feed público nunca muestra placa, conductor ni velocidad; capacidad de ingesta de al menos 10 peticiones por segundo (100 buses, un reporte cada 10 s).
 - Un defecto corregido debe quedar protegido por una prueba nueva (ver `01-politica-y-alcance.md`).
 
-## 3. Pruebas de Odoo (250)
+## 3. Pruebas de Odoo (544)
 
 | Archivo | Qué verifica | Pruebas | Media (s) | Máx. (s) |
 |---|---|---|---|---|
-| `test_alerts.py` | Alertas de velocidad, sin señal y parada larga | 14 | 0,0189 | 0,0700 |
-| `test_complaints.py` | Quejas: modelo, formulario y antiabuso | 30 | 0,1511 | 0,7410 |
-| `test_driver_auth.py` |  | 22 | 1,0749 | 4,9330 |
-| `test_driver_badge.py` |  | 16 | 0,7163 | 2,4180 |
-| `test_driver_shift.py` |  | 22 | 1,1075 | 1,7210 |
-| `test_driver_staff.py` |  | 8 | 1,2635 | 1,2910 |
-| `test_gps_setup.py` | Registro del GPS del celular y QR | 8 | 0,0267 | 0,0680 |
-| `test_http.py` | Webhook, salud, mapa en vivo y landing | 20 | 0,2394 | 1,2640 |
-| `test_ingest.py` | Ingesta de posiciones, llegadas y purga | 25 | 0,0275 | 0,4430 |
-| `test_portal.py` | Portal público, privacidad, caché y límite de uso | 28 | 0,1713 | 0,6480 |
-| `test_push.py` | Notificaciones push: permisos, cifrado y endpoints | 15 | 0,5904 | 1,3040 |
-| `test_runs.py` | Recorridos automáticos | 8 | 0,0234 | 0,0290 |
-| `test_simple.py` | Línea del mapa, desvío, push de alertas y permisos de quejas | 7 | 0,0229 | 0,0550 |
-| `test_stop_picker.py` | Editor de paradas en el mapa | 9 | 0,0107 | 0,0370 |
-| `test_traccar_sync.py` | Sincronización con Traccar (respuestas simuladas) | 8 | 0,0147 | 0,0260 |
-| `test_track.py` | Trazado grabado y simplificación | 10 | 0,0302 | 0,0760 |
+| `test_alerts.py` | Alertas de velocidad, sin señal y parada larga | 14 | 0,0299 | 0,1300 |
+| `test_boundaries.py` | Caja negra: valores válidos, inválidos y en el límite de reglas, posiciones y periodos (R11) | 26 | 0,0483 | 0,1770 |
+| `test_complaints.py` | Quejas: modelo, formulario y antiabuso | 30 | 0,2230 | 0,9530 |
+| `test_dashboard.py` | Datos del tablero de Odoo, ruta JSON y permisos (R6) | 20 | 0,2394 | 0,8840 |
+| `test_demo_report.py` | Reporte de demostración por bus: acepta, caduca y se detiene (R9) | 10 | 0,0196 | 0,0350 |
+| `test_driver_auth.py` | Acceso del chofer a la API de la tableta | 22 | 1,1179 | 5,0290 |
+| `test_driver_badge.py` | Credencial y QR del chofer | 16 | 0,7597 | 2,4850 |
+| `test_driver_shift.py` | Turnos del chofer: inicio, fin, estado, incidentes y SOS | 38 | 1,0672 | 2,2950 |
+| `test_driver_staff.py` | Permisos del personal sobre turnos y choferes | 8 | 1,3348 | 1,3570 |
+| `test_fleet.py` | Enlace con Odoo Fleet en los dos sentidos y migración (R8) | 22 | 0,0563 | 0,1860 |
+| `test_gps_setup.py` | Registro del GPS del celular y QR | 8 | 0,0435 | 0,0980 |
+| `test_grafana_access.py` | Token de acceso a Grafana, ajustes y menú (R7) | 21 | 0,1251 | 0,8920 |
+| `test_grafana_dashboards.py` | Los seis tableros: archivos, cada consulta y las mismas cifras que los indicadores (R7) | 20 | 0,1413 | 0,1760 |
+| `test_grafana_views.py` | Vistas SQL kpi_* y rol de solo lectura de la base (R7) | 14 | 0,1601 | 0,2120 |
+| `test_http.py` | Webhook, salud, mapa en vivo y landing | 22 | 0,2687 | 1,3560 |
+| `test_ingest.py` | Ingesta de posiciones, llegadas y purga | 25 | 0,0338 | 0,4840 |
+| `test_kpi.py` | Los 12 indicadores contra recorridos hechos a mano con resultado conocido (R5) | 24 | 0,1864 | 0,7480 |
+| `test_portal.py` | Portal público, privacidad, caché y límite de uso | 31 | 0,1915 | 0,5780 |
+| `test_privacy.py` | Privacidad: lo que el pasajero no puede ver y la retención de datos | 12 | 0,1035 | 0,2720 |
+| `test_push.py` | Notificaciones push: permisos, cifrado y endpoints | 15 | 0,6165 | 1,3770 |
+| `test_quality.py` | Auditoría de sincronización, rechazos de posiciones y muestras de rendimiento (R5) | 16 | 0,0331 | 0,0620 |
+| `test_runs.py` | Recorridos automáticos | 8 | 0,0387 | 0,0500 |
+| `test_simple.py` | Línea del mapa, desvío, push de alertas y permisos de quejas | 9 | 0,1159 | 0,5490 |
+| `test_stop_picker.py` | Editor de paradas en el mapa | 9 | 0,0152 | 0,0480 |
+| `test_traccar_consistency.py` | Integración Traccar–Odoo: webhook, auditoría de sincronización y consulta periódica (R11) | 6 | 0,1655 | 0,2170 |
+| `test_traccar_sync.py` | Sincronización con Traccar (respuestas simuladas) | 8 | 0,0214 | 0,0420 |
+| `test_track.py` | Trazado grabado y simplificación | 17 | 0,0359 | 0,1170 |
+| `test_trip_rules.py` | Reglas de llegada tarde, parada omitida, recorrido incompleto y salida tarde (R3) | 17 | 0,0469 | 0,0870 |
+| `test_trip_run.py` | Registro del recorrido: paradas, retraso, tolerancia, distancias y cierre (R2) | 18 | 0,0436 | 0,0730 |
+| `test_trip_simulator.py` | Simulador: los 10 escenarios y el conjunto de 12 recorridos, esperado contra detectado (R4) | 16 | 0,6215 | 3,5080 |
+| `test_trips.py` | Horarios, asignación por fecha y hora, recorridos programados y sus restricciones (R1) | 22 | 0,0240 | 0,0770 |
 
 Comando (base nueva, sin datos de demostración):
 
@@ -106,21 +121,21 @@ Cada petición tiene su resultado esperado decidido antes de enviarla. Pasa si e
 
 | Área | Peticiones | Errores | Media (s) | Máx. (s) |
 |---|---|---|---|---|
-| 01 Webhook: posición válida | 68 | 0 | 0,0386 | 0,0666 |
-| 02 Webhook: secreto ausente o falso | 74 | 0 | 0,0295 | 0,0518 |
-| 03 Webhook: cuerpo que no es JSON | 72 | 0 | 0,0313 | 0,0504 |
-| 04 Webhook: JSON que no es un objeto | 64 | 0 | 0,0337 | 0,0522 |
-| 05 Webhook: dispositivo desconocido | 81 | 0 | 0,0301 | 0,0501 |
-| 06 Webhook: valores inválidos en la posición | 83 | 0 | 0,0305 | 0,0495 |
-| 07 Webhook: método incorrecto | 48 | 0 | 0,0294 | 0,0491 |
-| 08 Portal: lista de rutas | 63 | 0 | 0,0850 | 0,2349 |
-| 09 Portal: mapa de una ruta pública | 60 | 0 | 0,0791 | 0,2185 |
-| 10 Portal: ruta inexistente, privada o hostil | 81 | 0 | 0,0323 | 0,0517 |
-| 11 Feed público de buses | 56 | 0 | 0,0317 | 0,0543 |
-| 12 Feed de ruta inexistente o privada | 59 | 0 | 0,0316 | 0,0511 |
-| 13 Salud del servicio | 58 | 0 | 0,0317 | 0,0521 |
-| 14 Formulario de quejas y páginas públicas | 70 | 0 | 0,0793 | 0,2098 |
-| 15 Quejas: envíos inválidos | 63 | 0 | 0,0773 | 0,3474 |
+| 01 Webhook: posición válida | 68 | 0 | 0,0309 | 0,0545 |
+| 02 Webhook: secreto ausente o falso | 74 | 0 | 0,0243 | 0,0464 |
+| 03 Webhook: cuerpo que no es JSON | 72 | 0 | 0,0238 | 0,0371 |
+| 04 Webhook: JSON que no es un objeto | 64 | 0 | 0,0222 | 0,0388 |
+| 05 Webhook: dispositivo desconocido | 81 | 0 | 0,0242 | 0,0421 |
+| 06 Webhook: valores inválidos en la posición | 83 | 0 | 0,0292 | 0,0437 |
+| 07 Webhook: método incorrecto | 48 | 0 | 0,0216 | 0,0355 |
+| 08 Portal: lista de rutas | 63 | 0 | 0,0729 | 0,1313 |
+| 09 Portal: mapa de una ruta pública | 60 | 0 | 0,0724 | 0,1089 |
+| 10 Portal: ruta inexistente, privada o hostil | 81 | 0 | 0,0248 | 0,0450 |
+| 11 Feed público de buses | 56 | 0 | 0,0253 | 0,0490 |
+| 12 Feed de ruta inexistente o privada | 59 | 0 | 0,0229 | 0,0394 |
+| 13 Salud del servicio | 58 | 0 | 0,0257 | 0,0412 |
+| 14 Formulario de quejas y páginas públicas | 70 | 0 | 0,0689 | 0,1586 |
+| 15 Quejas: envíos inválidos | 63 | 0 | 0,0605 | 0,1507 |
 
 ## 6. Pruebas manuales registradas en la bitácora
 
