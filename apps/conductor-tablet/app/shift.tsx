@@ -40,7 +40,7 @@ function gpsLabel(health: string, queued: number): string {
 function localTime(iso: string | null | undefined): string {
   if (!iso) return '';
   const when = new Date(iso);
-  return isNaN(when.getTime()) ? '' : `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
+  return Number.isNaN(when.getTime()) ? '' : `${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}`;
 }
 
 function distance(meters: number | null): string | null {
@@ -139,17 +139,15 @@ export default function ShiftScreen() {
           if (error instanceof NetworkError && live) setStale(true);
         }
       }
-      tick();
-      const id = setInterval(tick, 12_000);
+      tick().catch(() => undefined);
+      const id = setInterval(() => {
+        tick().catch(() => undefined);
+      }, 12_000);
       return () => {
         live = false;
         clearInterval(id);
         // on the web (previews) the lock may never have been granted, and it throws
-        try {
-          deactivateKeepAwake().catch(() => undefined);
-        } catch {
-          // nothing to release
-        }
+        deactivateKeepAwake().catch(() => undefined);
       };
     }, [actions]),
   );
@@ -161,7 +159,7 @@ export default function ShiftScreen() {
         text: t('endShift'),
         style: 'destructive',
         onPress: () => {
-          hapticCommit();
+          hapticCommit().catch(() => undefined);
           session
             .endShift()
             .then((result) => {

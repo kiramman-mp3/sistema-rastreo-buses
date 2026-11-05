@@ -22,7 +22,9 @@ export function normalizeOdooUrl(raw: string): string | null {
     if (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLocalHost(url.hostname))) return null;
     url.hash = '';
     url.search = '';
-    url.pathname = url.pathname.replace(/\/web\/?$/, '').replace(/\/+$/, '');
+    let path = url.pathname.replace(/\/web\/?$/, '');
+    while (path.endsWith('/')) path = path.slice(0, -1);
+    url.pathname = path;
     return url.toString().replace(/\/$/, '');
   } catch {
     return null;
