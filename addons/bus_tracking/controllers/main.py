@@ -76,8 +76,8 @@ class BusTrackingController(http.Controller):
         } for incident in env['bus.incident']._open_for_map()]
         new_complaints = env['bus.complaint'].search_count([('state', '=', 'new')])
         all_routes = env['bus.route'].search([])
-        key = hashlib.sha1(repr([(r.id, r.write_date, r.stop_ids.ids, r.stop_ids.mapped('write_date'))
-                                 for r in all_routes]).encode()).hexdigest()
+        state = [(r.id, r.write_date, r.stop_ids.ids, r.stop_ids.mapped('write_date')) for r in all_routes]
+        key = hashlib.sha256(repr(state).encode()).hexdigest()       # only tells "did the lines change
         routes = None if routes_key == key else [{
             'id': r.id,
             'name': r.name,
