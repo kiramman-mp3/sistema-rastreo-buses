@@ -24,6 +24,7 @@
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
                 <button name="action_open_map" type="object" string="View on map" class="btn-primary"
+                        groups="bus_tracking.group_bus_user"
                         attrs="{'invisible': [('bus_id', '=', False)]}"/>
                 <button name="action_register_gps" type="object" string="Register GPS in Traccar"
                         class="btn-primary" groups="bus_tracking.group_bus_manager"
@@ -40,11 +41,13 @@
                         attrs="{'invisible': [('bus_demo_report', '=', False)]}"/>
             </xpath>
             <xpath expr="//div[hasclass('oe_title')]" position="before">
-                <div class="alert alert-warning" role="status" attrs="{'invisible': [('bus_demo_report', '=', False)]}">
+                <field name="bus_id" invisible="1"/>
+                <field name="bus_demo_report" invisible="1"/>
+                <field name="bus_traccar_device_id" invisible="1"/>
+                <div class="alert alert-warning" role="status" attrs="{'invisible': [('bus_demo_report', '=', False)]}" groups="bus_tracking.group_bus_user">
                     Demo report: this bus keeps the positions of its phone without a shift until
                     <field name="bus_demo_report_until" readonly="1" class="oe_inline"/>.
                 </div>
-                <field name="bus_demo_report" invisible="1"/>
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_open_map" type="object" class="oe_stat_button" icon="fa-map-marker"
