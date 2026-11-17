@@ -68,20 +68,22 @@ VIEWS = {
           LEFT JOIN bus_route r ON r.id = i.route_id""",
 
     # The positions of each trip: what draws the path of a trip on a map.
+    # Joined on the bus and the time, so a filter on one trip reads its positions through the (bus, time) index.
     'kpi_positions': """
         SELECT p.id AS position_id, t.trip_id, p.fix_time, t.route_code, t.bus, t.simulated,
                p.latitude::float AS latitude, p.longitude::float AS longitude, COALESCE(p.speed, 0) AS speed
-          FROM bus_position p
-          JOIN kpi_trips t ON t.real_start IS NOT NULL
-           AND p.vehicle_id = (SELECT vehicle_id FROM bus_trip WHERE id = t.trip_id)
-           AND p.fix_time BETWEEN t.real_start AND COALESCE(t.real_end, t.real_start + interval '12 hours')""",
+          FROM kpi_trips t
+          JOIN bus_trip bt ON bt.id = t.trip_id
+          JOIN bus_position p ON p.vehicle_id = bt.vehicle_id
+           AND p.fix_time BETWEEN t.real_start AND COALESCE(t.real_end, t.real_start + interval '12 hours')
+         WHERE t.real_start IS NOT NULL""",
 
+    # From the counts kept per day (bus.position.day, refreshed every 30 minutes), not from the positions.
     'kpi_positions_daily': """
-        SELECT (p.fix_time - interval '5 hours')::date AS local_day, r.code AS route_code, v.simulated,
-               COUNT(*) AS positions, AVG(COALESCE(p.speed, 0)) AS avg_speed
-          FROM bus_position p
-          JOIN bus_vehicle v ON v.id = p.vehicle_id
-          LEFT JOIN bus_route r ON r.id = v.route_id
+        SELECT d.local_day, r.code AS route_code, d.simulated,
+               SUM(d.positions)::bigint AS positions, SUM(d.speed_sum) / NULLIF(SUM(d.positions), 0) AS avg_speed
+          FROM bus_position_day d
+          LEFT JOIN bus_route r ON r.id = d.route_id
          GROUP BY 1, 2, 3""",
 
     # The timed queries of the system (S3): one row per measurement.
@@ -92,7 +94,7 @@ VIEWS = {
     # The four software indicators (S1 to S4), one row per day with something to say.
     'kpi_software': """
         WITH stored AS (
-            SELECT (fix_time - interval '5 hours')::date AS d, COUNT(*) AS n FROM bus_position GROUP BY 1
+            SELECT local_day AS d, SUM(positions) AS n FROM bus_position_day GROUP BY 1
         ), rejected AS (
             SELECT (create_date - interval '5 hours')::date AS d, COUNT(*) AS n FROM bus_position_reject GROUP BY 1
         ), audits AS (

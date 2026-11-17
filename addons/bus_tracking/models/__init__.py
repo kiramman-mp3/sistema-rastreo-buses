@@ -10,6 +10,7 @@ from . import bus_route_gpx
 from . import bus_vehicle
 from . import bus_fleet
 from . import bus_position
+from . import bus_position_day
 from . import bus_alert
 from . import bus_complaint
 from . import bus_push
