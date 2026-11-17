@@ -1,4 +1,6 @@
 import logging
+import re
+from datetime import datetime, timedelta
 
 import requests
 
@@ -8,6 +10,9 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 TIMEOUT = 10
+# Traccar tokens expire; one asked with the password can last this long. Revoke it in Traccar if it leaks.
+TOKEN_DAYS = 3650
+TOKEN_RE = re.compile(r'^[A-Za-z0-9_\-.=]+$')
 
 
 class BusTraccarApi(models.AbstractModel):
@@ -81,6 +86,13 @@ class BusTraccarApi(models.AbstractModel):
             'deviceId': device_id, 'from': since.strftime(stamp), 'to': until.strftime(stamp)}) or []
 
     @api.model
+    def delete_positions(self, device_id, until):
+        """Delete the positions Traccar holds for a device before a UTC datetime."""
+        stamp = '%Y-%m-%dT%H:%M:%SZ'
+        return self._call('delete', '/positions', params={
+            'deviceId': device_id, 'from': '1970-01-01T00:00:00Z', 'to': until.strftime(stamp)})
+
+    @api.model
     def create_device(self, name, unique_id):
         return self._call('post', '/devices', json={'name': name, 'uniqueId': unique_id})
 
@@ -99,4 +111,31 @@ class BusTraccarApi(models.AbstractModel):
         server = self._get('/server')
         server['registration'] = False
         self._call('put', '/server', json=server)
+        self.switch_to_token()
+        return True
+
+    @api.model
+    def _request_token(self, conf):
+        """A long-lived API token of the stored user. Traccar answers it as plain text, not JSON."""
+        expiration = (datetime.utcnow() + timedelta(days=TOKEN_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        try:
+            resp = requests.post('%s/api/session/token' % conf['url'], data={'expiration': expiration},
+                                 auth=(conf['user'], conf['password']), timeout=TIMEOUT)
+        except requests.RequestException as e:
+            raise UserError(_("Cannot reach Traccar: %s", e))
+        token = (resp.text or '').strip() if resp.ok else ''
+        if not TOKEN_RE.match(token):
+            raise UserError(_("Traccar did not give an API token (error %s).", resp.status_code))
+        return token
+
+    @api.model
+    def switch_to_token(self):
+        """Keep an API token instead of the administrator password, so a copy of the database does not
+        hold the password. Does nothing when a token is already stored or there is no password."""
+        conf = self._get_conf()
+        if conf['token'] or not (conf['user'] and conf['password']):
+            return False
+        icp = self.env['ir.config_parameter'].sudo()
+        icp.set_param('bus_tracking.traccar_token', self._request_token(conf))
+        icp.set_param('bus_tracking.traccar_password', False)
         return True

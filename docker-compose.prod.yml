@@ -10,6 +10,8 @@ x-logging: &logging
     max-file: "5"
 
 services:
+  # Local Postgres, only for development and labs (COMPOSE_PROFILES=local-db). Production uses Supabase:
+  # DB_HOST and TRACCAR_DATABASE_URL in .env.prod point there, and scripts/db.sh reaches it for the scripts.
   db:
     profiles: ["local-db"]
     image: ${POSTGRES_IMAGE:-postgres:15}
@@ -132,7 +134,8 @@ services:
     environment:
       DOMAIN: ${DOMAIN:?set DOMAIN in .env.prod}
       GPS_DOMAIN: ${GPS_DOMAIN:?set GPS_DOMAIN in .env.prod}
-      TRACCAR_DOMAIN: ${TRACCAR_DOMAIN:-traccar.20.119.213.192.nip.io}
+      TRACCAR_DOMAIN: ${TRACCAR_DOMAIN:-traccar.localhost}
+      TRACCAR_PANEL_ALLOW: ${TRACCAR_PANEL_ALLOW:-127.0.0.1/32}
       GRAFANA_DOMAIN: ${GRAFANA_DOMAIN:-grafana.localhost}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env.prod}
     ports:
