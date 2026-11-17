@@ -49,6 +49,7 @@ describe('driver i18n', () => {
   test('alert kinds map in the active language', () => {
     setLang('en');
     expect(alertLabel('speeding')).toBe('Speeding');
+    expect(alertLabel('skipped_stop')).toBe('Skipped stop');
     expect(getLang()).toBe('en');
   });
 
