@@ -8,7 +8,7 @@ Qué datos trata el sistema, por qué, cuánto tiempo y cómo atender a quien pi
 
 | Dato | De quién | Para qué | Dónde | Cuánto tiempo | Quién lo ve |
 |---|---|---|---|---|---|
-| Posición, hora y velocidad del bus | Choferes (indirecto: es del bus) | Mapa en vivo, alertas, historial | `bus.position`, Traccar | `bus_tracking.retention_days` (Ajustes: *Conservar posiciones (días)*, 30 por defecto; **0 = no se borra**). En una instalación nueva el valor no se guarda hasta pulsar *Guardar* en Ajustes y, mientras tanto, no se borra nada (DEF-053). Traccar guarda su propia copia y no la purga | Personal autorizado; el pasajero ve solo posición y línea, sin chofer ni placa |
+| Posición, hora y velocidad del bus | Choferes (indirecto: es del bus) | Mapa en vivo, alertas, historial | `bus.position`, Traccar | `bus_tracking.retention_days` (Ajustes: *Conservar posiciones (días)*, 30 por defecto; **0 = no se borra**). El mismo cron pide a Traccar que borre su copia del mismo periodo | Personal autorizado; el pasajero ve solo posición y línea, sin chofer ni placa |
 | Turnos (inicio, fin, bus, ruta, chofer) | Choferes | Operación, auditoría | `bus.shift` | **No se borran solos** | Personal |
 | Incidentes y SOS (tipo, nota, hora, posición, quién lo atendió) | Choferes | Atender emergencias | `bus.incident` | **No se borran solos** | Personal |
 | Usuario, nombre, contraseña (con hash) | Choferes | Entrar a la app | `res.users` | Mientras exista el usuario | Administradores |

@@ -30,7 +30,7 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 | Infraestructura y despliegue | 2 | 3,2 % | 98,4 % |
 | Interfaz y vistas | 1 | 1,6 % | 100,0 % |
 
-**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Quedan abiertos: DEF-053, DEF-054, DEF-055, DEF-056, DEF-057, DEF-058, DEF-059, DEF-060, DEF-061, DEF-062, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Quedan abiertos: DEF-056, DEF-057, DEF-058, DEF-059, DEF-060, DEF-061, DEF-062, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.
 
 ## 3. Problemas encontrados durante la construcción (57)
 

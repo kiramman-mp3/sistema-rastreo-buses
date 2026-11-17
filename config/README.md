@@ -10,5 +10,6 @@ Archivos de configuración del servidor ERP Odoo 16 para los distintos entornos 
 * **`odoo.prod.conf`** *(generado en despliegue)*: Configuración para el entorno de producción en Azure VM (`docker-compose.prod.yml`). Incluye:
   * `proxy_mode = True`: Reconocimiento de cabeceras HTTPS reenviadas por el proxy perimetral Caddy (`X-Forwarded-Proto`, `X-Forwarded-For`).
   * `workers = 2`: Modo multiproceso para aislar peticiones HTTP de usuarios y crons periódicos de fondo.
-  * `db_maxconn = 10`: Tamaño del pool de conexiones `psycopg2` para evitar saturación (`PoolError`) ante ráfagas concurrentes del webhook de Traccar y crons.
+  * `db_maxconn = 8`: Conexiones por proceso de Odoo. Con 2 workers, el cron y el de tiempo real son unas 32 como máximo: comprueba que el pooler de tu plan de Supabase admite ese número antes de subirlo.
+  * `db_sslmode`: `require` con Supabase y `prefer` con la base local (lo elige `init-prod.sh`).
   * `limit_time_cpu = 120` y `limit_time_real = 240`: Límites de tiempo para evitar bloqueos por transacciones largas.

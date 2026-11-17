@@ -60,9 +60,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-050 | 05-nov-2026 | Actualización del módulo en Azure | Error de validación XML en Odoo por uso de atributo `@string` en selector XPath | views/bus_fleet_views.xml | Cerrado |
 | DEF-051 | 17-nov-2026 | Segunda auditoría integral (X1) | XSS guardado en el portal público: el nombre de una parada se inserta como HTML en el tooltip del mapa | static/src/portal/portal_map.js, static/src/js/stop_picker.js | Cerrado |
 | DEF-052 | 17-nov-2026 | Segunda auditoría integral (W1) | Un SOS guardado sin señal puede desaparecer de la cola de la tableta | apps/conductor-tablet/src/incidents/queue.ts | Cerrado |
-| DEF-053 | 17-nov-2026 | Segunda auditoría integral (B1) | Las posiciones nunca se purgan en una instalación nueva | models/bus_position.py, scripts/init-prod.sh | Abierto |
-| DEF-054 | 17-nov-2026 | Segunda auditoría integral (B2) | La base de datos de producción no arranca tras un down y up del compose | docker-compose.prod.yml, .env.prod.example | Abierto |
-| DEF-055 | 17-nov-2026 | Segunda auditoría integral (B4) | El panel de Traccar es público y su dominio por defecto publica la IP del servidor | docker-compose.prod.yml, proxy/Caddyfile | Abierto |
+| DEF-053 | 17-nov-2026 | Segunda auditoría integral (B1) | Las posiciones nunca se purgan en una instalación nueva | models/bus_position.py, scripts/init-prod.sh | Cerrado |
+| DEF-054 | 17-nov-2026 | Segunda auditoría integral (B2) | La base de datos de producción no arranca tras un down y up del compose | docker-compose.prod.yml, .env.prod.example | Cerrado |
+| DEF-055 | 17-nov-2026 | Segunda auditoría integral (B4) | El panel de Traccar es público y su dominio por defecto publica la IP del servidor | docker-compose.prod.yml, proxy/Caddyfile | Cerrado |
 | DEF-056 | 17-nov-2026 | Segunda auditoría integral (B3) | El login del panel de Odoo no tiene límite de intentos ni segundo factor | proxy/Caddyfile, despliegue | Abierto |
 | DEF-057 | 17-nov-2026 | Segunda auditoría integral (N1) | Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers | models/bus_alert.py | Abierto |
 | DEF-058 | 17-nov-2026 | Segunda auditoría integral (X2) | Las posiciones guardadas sin señal se pierden al terminar el turno | apps/conductor-tablet/src/state/session.ts | Abierto |
@@ -71,7 +71,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Abierto |
 | DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Abierto |
 
-Resumen: 62 registrados, 52 cerrados (84 %), 10 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 62 registrados, 55 cerrados (89 %), 7 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -391,19 +391,19 @@ Resumen: 62 registrados, 52 cerrados (84 %), 10 abiertos. Densidad: 12,3 defecto
 
 - **Causa raíz:** El cron usa 0 (conservar todo) si el parámetro no existe y Ajustes sólo guarda los 30 días al pulsar Guardar.
 - **Categoría:** Configuración
-- **Prueba que lo protege:** Fase 39: test de purga sin parámetro y migración que fija la retención
+- **Prueba que lo protege:** test_ingest.py: sin el parámetro se borran las posiciones de más de 30 días y se pide a Traccar borrar las suyas
 
 ### DEF-054: La base de datos de producción no arranca tras un down y up del compose
 
 - **Causa raíz:** El servicio db está en el perfil local-db, que el ejemplo no activa; el ejemplo apunta a Supabase y los scripts asumen la base local.
 - **Categoría:** Infraestructura y despliegue
-- **Prueba que lo protege:** Fase 39: init-prod.sh, down y up -d en una VM Linux limpia
+- **Prueba que lo protege:** scripts/db.sh probado contra un Postgres con TLS (crear base, pg_dump y pg_restore); falta init-prod.sh completo contra un proyecto de Supabase (fase 46)
 
 ### DEF-055: El panel de Traccar es público y su dominio por defecto publica la IP del servidor
 
 - **Causa raíz:** Se publicó el panel para la demostración y quedó como valor por defecto del compose.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Fase 39: el proxy no sirve el panel de Traccar (o sólo a la red de la universidad)
+- **Prueba que lo protege:** caddy adapt: el sitio del panel responde 404 fuera de TRACCAR_PANEL_ALLOW (por defecto 127.0.0.1/32) y el compose ya no lleva la IP
 
 ### DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
 
@@ -451,13 +451,10 @@ Resumen: 62 registrados, 52 cerrados (84 %), 10 abiertos. Densidad: 12,3 defecto
 
 Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
 
-1. DEF-053: Las posiciones nunca se purgan en una instalación nueva
-2. DEF-054: La base de datos de producción no arranca tras un down y up del compose
-3. DEF-055: El panel de Traccar es público y su dominio por defecto publica la IP del servidor
-4. DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
-5. DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
-6. DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
-7. DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
-8. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
-9. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
-10. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
+1. DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
+2. DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
+3. DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
+4. DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
+5. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
+6. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
+7. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
