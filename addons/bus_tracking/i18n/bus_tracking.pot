@@ -4409,6 +4409,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/bus_tracking/models/traccar_api.py:0
 #, python-format
+msgid "Traccar did not give an API token (error %s)."
+msgstr ""
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/traccar_api.py:0
+#, python-format
 msgid "Traccar did not answer with JSON: %s"
 msgstr ""
 

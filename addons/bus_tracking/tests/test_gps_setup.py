@@ -1,5 +1,9 @@
 import base64
+import importlib.util
+from pathlib import Path
 from unittest.mock import patch
+
+import requests
 
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
@@ -90,18 +94,58 @@ class TestGpsSetup(BusCase):
         icp.set_param('bus_tracking.traccar_user', '')
         icp.set_param('bus_tracking.traccar_password', '')
         server = {'id': 1, 'registration': True, 'readonly': False}
-        with patch(API + 'post', return_value=fake_response({'id': 1})) as post, \
+        token = fake_response('tok_ABC-123=')
+        token.text = 'tok_ABC-123=\n'                                 # Traccar answers plain text
+        with patch(API + 'post', side_effect=[fake_response({'id': 1}), token]) as post, \
                 patch(API + 'get', return_value=fake_response(dict(server))) as get, \
                 patch(API + 'put', return_value=fake_response({})) as put:
             self.assertTrue(self.env['bus.traccar.api'].bootstrap_admin('boss@example.com', 'pw-123'))
-        self.assertEqual(post.call_args.args[0], 'http://traccar:8082/api/users')
-        self.assertEqual(post.call_args.kwargs['json']['email'], 'boss@example.com')
-        self.assertIsNone(post.call_args.kwargs['auth'])             # registration is anonymous
+        register, ask_token = post.call_args_list
+        self.assertEqual(register.args[0], 'http://traccar:8082/api/users')
+        self.assertEqual(register.kwargs['json']['email'], 'boss@example.com')
+        self.assertIsNone(register.kwargs['auth'])                   # registration is anonymous
+        self.assertEqual(ask_token.args[0], 'http://traccar:8082/api/session/token')
+        self.assertEqual(ask_token.kwargs['auth'], ('boss@example.com', 'pw-123'))
         self.assertEqual(get.call_args.kwargs['auth'], ('boss@example.com', 'pw-123'))
         self.assertEqual(put.call_args.args[0], 'http://traccar:8082/api/server')
         self.assertEqual(put.call_args.kwargs['json'], dict(server, registration=False))
         self.assertEqual(icp.get_param('bus_tracking.traccar_user'), 'boss@example.com')
-        self.assertEqual(icp.get_param('bus_tracking.traccar_password'), 'pw-123')
+        # The password is swapped for a long-lived token, so a database copy does not hold it (S5).
+        self.assertEqual(icp.get_param('bus_tracking.traccar_token'), 'tok_ABC-123=')
+        self.assertFalse(icp.get_param('bus_tracking.traccar_password'))
+
+    def test_an_existing_install_swaps_its_password_for_a_token(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.traccar_token', '')
+        token = fake_response('x')
+        token.text = 'tok123'
+        with patch(API + 'post', return_value=token):
+            self.assertTrue(self.env['bus.traccar.api'].switch_to_token())
+        self.assertEqual(icp.get_param('bus_tracking.traccar_token'), 'tok123')
+        self.assertFalse(icp.get_param('bus_tracking.traccar_password'))
+        with patch(API + 'post') as post:
+            self.assertFalse(self.env['bus.traccar.api'].switch_to_token())   # already on a token
+        post.assert_not_called()
+
+    def test_the_upgrade_keeps_the_password_when_traccar_does_not_answer(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.traccar_token', '')
+        path = Path(__file__).resolve().parents[1] / 'migrations' / '16.0.1.7.0' / 'post-migrate.py'
+        spec = importlib.util.spec_from_file_location('post_migrate_token', path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with patch(API + 'post', side_effect=requests.ConnectionError('down')):
+            module.migrate(self.env.cr, '16.0.1.6.0')                # must not raise
+        self.assertEqual(icp.get_param('bus_tracking.traccar_password'), 'secret')
+
+    def test_a_page_instead_of_a_token_keeps_the_password(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.traccar_token', '')
+        page = fake_response('x')
+        page.text = '<html>Bad gateway</html>'
+        with patch(API + 'post', return_value=page), self.assertRaises(UserError):
+            self.env['bus.traccar.api'].switch_to_token()
+        self.assertEqual(icp.get_param('bus_tracking.traccar_password'), 'secret')
 
     def test_bootstrap_does_nothing_when_credentials_exist(self):
         with patch(API + 'post') as post:
