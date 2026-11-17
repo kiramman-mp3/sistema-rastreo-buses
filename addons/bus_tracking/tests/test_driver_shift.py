@@ -1,5 +1,6 @@
 import json
 from datetime import timedelta
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.exceptions import ValidationError
@@ -151,6 +152,75 @@ class TestTripProgress(TransactionCase):
         trip = self.shift._trip_progress()
         self.assertEqual(trip['direction'], 'forward')
         self.assertEqual(trip['next_stop'], self.a)
+
+
+@tagged('post_install', '-at_install')
+class TestSkippedStopsOnAShift(TransactionCase):
+    """A bus on a shift without a scheduled trip: the stops it should have met and did not are reported when it
+    reaches a later one."""
+
+    def setUp(self):
+        super().setUp()
+        self.route = self.env['bus.route'].create({'name': 'R5', 'code': 'R5', 'stop_ids': [
+            (0, 0, {'sequence': i, 'name': name, 'latitude': -1.3 - i / 100, 'longitude': -78.5})
+            for i, name in enumerate('ABCDE', start=1)]})
+        self.a, self.b, self.c, self.d, self.e = self.route.stop_ids
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus S', 'route_id': self.route.id})
+        self.shift = self.env['bus.shift'].create({
+            'user_id': make_driver(self.env).id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
+        self.shift.start = fields.Datetime.now() - timedelta(hours=3)
+
+    def arrive(self, stop, minutes_ago):
+        arrival = self.env['bus.stop.arrival'].create({
+            'vehicle_id': self.bus.id, 'stop_id': stop.id,
+            'arrival_time': fields.Datetime.now() - timedelta(minutes=minutes_ago)})
+        self.env['bus.alert']._on_stop_reached(arrival)
+
+    def skipped(self):
+        return self.env['bus.alert'].search(
+            [('vehicle_id', '=', self.bus.id), ('kind', '=', 'skipped_stop')]).mapped('stop_id')
+
+    def test_starting_at_the_fourth_stop_reports_the_three_before(self):
+        self.arrive(self.d, 50)
+        self.assertEqual(self.skipped(), self.a | self.b | self.c)
+        alert = self.env['bus.alert'].search([('stop_id', '=', self.a.id)])
+        self.assertEqual((alert.state, alert.trip_id.id), ('closed', False))
+        self.assertTrue(alert.detail)
+
+    def test_a_stop_missed_on_the_way_is_reported(self):
+        self.arrive(self.a, 60)
+        self.arrive(self.b, 50)
+        self.arrive(self.d, 40)                          # drove past C
+        self.assertEqual(self.skipped(), self.c)
+
+    def test_a_trip_that_follows_every_stop_reports_nothing(self):
+        for stop, ago in ((self.a, 60), (self.b, 50), (self.c, 40)):
+            self.arrive(stop, ago)
+        self.assertFalse(self.skipped())
+
+    def test_starting_at_the_far_end_is_not_skipping_the_others(self):
+        self.arrive(self.e, 60)
+        self.arrive(self.d, 50)
+        self.assertFalse(self.skipped())
+
+    def test_the_same_stop_is_reported_once_per_trip(self):
+        self.arrive(self.a, 60)
+        self.arrive(self.c, 50)
+        self.arrive(self.d, 45)
+        self.arrive(self.c, 40)                          # GPS noise: back in the radius of C
+        self.arrive(self.d, 35)
+        self.assertEqual(len(self.env['bus.alert'].search([('kind', '=', 'skipped_stop')])), 1)
+
+    def test_without_a_shift_nothing_is_reported(self):
+        self.shift.state = 'done'
+        self.arrive(self.d, 50)
+        self.assertFalse(self.skipped())
+
+    def test_a_scheduled_trip_reports_its_own(self):
+        self.env['bus.alert'].search([]).unlink()
+        with patch.object(type(self.env['bus.trip']), '_trip_at', lambda _self, *a: self.env['bus.trip'].browse(1)):
+            self.arrive(self.d, 50)
+        self.assertFalse(self.skipped())
 
 
 @tagged('post_install', '-at_install')

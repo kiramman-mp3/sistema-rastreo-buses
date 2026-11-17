@@ -126,6 +126,35 @@ class BusAlert(models.Model):
         ))
 
     @api.model
+    def _on_stop_reached(self, arrival):
+        """A bus on a shift without a scheduled trip reached a stop: the stops it should have met before, in the
+        direction it travels, and never reached are reported now. A scheduled trip reports its own
+        (bus.trip._register_arrival)."""
+        bus, stop, when = arrival.vehicle_id, arrival.stop_id, arrival.arrival_time
+        if self.env['bus.trip']._trip_at(bus, when):
+            return
+        shift = self.env['bus.shift'].sudo().search([
+            ('vehicle_id', '=', bus.id), ('state', '=', 'active'), ('start', '<=', when)], limit=1)
+        if not shift or stop.route_id != shift.route_id:
+            return
+        progress = shift._trip_progress(before=when)
+        ordered = list(progress['stops'])
+        if stop not in ordered:
+            return
+        reached = [i for i, s in enumerate(ordered) if s.id in progress['arrived']]
+        if not reached and stop in (ordered[0], ordered[-1]):
+            return                      # the trip starts at this end; nothing was due before it
+        for missed in ordered[(reached[-1] + 1 if reached else 0):ordered.index(stop)]:
+            domain = [('vehicle_id', '=', bus.id), ('kind', '=', 'skipped_stop'), ('stop_id', '=', missed.id),
+                      ('trip_id', '=', False), ('start_time', '>=', progress['start'])]
+            if not self.search(domain, limit=1):
+                self.create({
+                    'vehicle_id': bus.id, 'route_id': stop.route_id.id, 'kind': 'skipped_stop',
+                    'stop_id': missed.id, 'state': 'closed', 'start_time': when, 'end_time': when,
+                    'latitude': bus.last_latitude, 'longitude': bus.last_longitude,
+                })
+
+    @api.model
     def _create_once(self, domain, vals):
         """Create, or return the record another request created at the same moment (webhook and cron can handle
         the same bus at once). Without this the unique index fails the whole request and the position is lost."""
