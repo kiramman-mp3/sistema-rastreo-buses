@@ -120,6 +120,17 @@ class ResUsers(models.Model):
         for user in self:
             user.driver_badge_active = user.id in users_with_token and bool(user.driver_badge_qr)
 
+    def action_edit_driver(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Edit driver"),
+            'res_model': 'bus.driver.edit',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_user_id': self.id},
+        }
+
     def _check_badge_manager(self):
         # The buttons are hidden in the view, but the methods can be called over RPC.
         if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_manager')):
