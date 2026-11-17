@@ -88,6 +88,14 @@ export async function flushFixes(
   return { sent, error };
 }
 
+/**
+ * Whether the backup heartbeat must ask for a position. It looks at the last fix, not the last send: without
+ * signal nothing is sent, and judging by the send added an extra position to the queue every few seconds.
+ */
+export function heartbeatDue(lastFixAt: number | null, now: number, intervalMs: number): boolean {
+  return lastFixAt === null || now - lastFixAt >= intervalMs - 500;
+}
+
 export async function ingestLocations(
   locations: LocationSample[],
   options: {
