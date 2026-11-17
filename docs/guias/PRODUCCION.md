@@ -8,22 +8,24 @@ Guía para instalar y operar el sistema en un servidor. Todo lo de esta página 
 - Dos nombres DNS que apunten al servidor, por ejemplo `buses.tuempresa.cl` (Odoo) y `gps.tuempresa.cl` (a donde la tableta envía la posición OsmAnd).
 - Puertos abiertos hacia internet: solo 80 y 443. Los celulares también entran por HTTPS (443).
 - Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza.
-- **Ojo:** hoy el proxy sí publica el panel de Traccar en `TRACCAR_DOMAIN`, y si esa variable falta el compose usa `traccar.20.119.213.192.nip.io`. Mientras no se cierre DEF-055 (fase 39 de `docs/arquitectura/PLAN-AUDITORIA-2.md`), define `TRACCAR_DOMAIN` con un nombre propio y protege ese dominio, o quita el bloque `{$TRACCAR_DOMAIN}` de `proxy/Caddyfile`.
+- El panel de Traccar no hace falta: Odoo lo administra por su API. Si quieres abrirlo, define `TRACCAR_DOMAIN` y en `TRACCAR_PANEL_ALLOW` las redes que pueden verlo (por ejemplo la de la universidad, `200.0.0.0/24`; separadas por espacio). Al resto el proxy le responde 404. Por defecto sólo lo ve la propia máquina.
 
 ### Base de datos: Supabase (decidido) o local
 
 Desde el 2026-11-17 la base de producción es **Supabase** (decisión 1 de `docs/arquitectura/PLAN-AUDITORIA-2.md`). La base local queda para desarrollo y laboratorio.
 
-**Ojo, hoy los scripts aún no soportan Supabase** (fase 39). `init-prod.sh` levanta un Postgres local y crea ahí el rol y la base `traccar`, y `backup.sh`, `restore.sh` y `reset-prod.sh` sólo trabajan con el contenedor `db`. Hasta cerrar la fase 39:
+Los scripts hablan con Supabase desde un contenedor cliente de Postgres (`scripts/db.sh`), siempre con TLS:
 
-- Crea la base `traccar`, su usuario y el rol de Grafana desde la consola SQL de Supabase.
-- Usa el *session pooler* (puerto 5432), nunca el *transaction pooler* (6543), y `sslmode=require`.
-- Respalda con `pg_dump` desde un cliente igual o más nuevo que el servidor. El filestore de Odoo se respalda aparte, porque vive en el volumen `odoo-data` del servidor.
+- `init-prod.sh` crea en Supabase la base `traccar` (con el mismo usuario del proyecto), instala Odoo en su base, crea el rol de Grafana y escribe `db_sslmode = require` en `config/odoo.prod.conf`.
+- `backup.sh` y `restore.sh` vuelcan y restauran las dos bases de Supabase. El filestore de Odoo vive en el volumen `odoo-data` del servidor y va en el mismo respaldo.
+- Usa el *session pooler* (puerto 5432) o la conexión directa, nunca el *transaction pooler* (6543): Odoo mantiene conexiones largas y usa `LISTEN/NOTIFY`.
+- `POSTGRES_IMAGE` es también el cliente: debe ser de la misma versión mayor que el servidor de Supabase o más nueva, o `pg_dump` se niega a correr.
+- `reset-prod.sh` sólo trabaja con la base local; en Supabase las bases se borran desde su consola.
 
 
 - **Local (desarrollo y laboratorio)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db,bi` (o `local-db` sin Grafana) en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
-- `.env.prod.example` trae hoy los valores de Supabase. Si usas la base local, deja `DB_HOST` vacío y quita `TRACCAR_DATABASE_URL`.
-- **Externa (Supabase, la de producción)**: pon `DB_HOST`, `DB_USER`, `TRACCAR_DATABASE_URL` y `TRACCAR_DB_USER` del proveedor (el ejemplo trae marcadores `TU_PROYECTO`). Las bases y los usuarios se crean en la consola del proveedor, los respaldos los hace el proveedor y `reset-prod.sh` se niega a correr.
+- `.env.prod.example` trae los valores de Supabase. Si usas la base local, pon `DB_HOST=db` y quita `TRACCAR_DATABASE_URL`.
+- **Supabase (producción)**: pon `DB_HOST`, `DB_USER` y `DB_PASSWORD` de *Supabase > Connect* (session pooler), y en `TRACCAR_DATABASE_URL`, `TRACCAR_DB_USER` y `TRACCAR_DB_PASSWORD` el mismo host, usuario y contraseña (el ejemplo trae marcadores `TU_PROYECTO`).
 
 ## Instalación
 
@@ -44,7 +46,7 @@ La segunda ejecución:
 
 Es seguro repetirla: no sobrescribe `.env.prod`, la configuración ni las bases existentes.
 
-**Retención de posiciones:** el script no la fija y, sin el parámetro, el cron no borra nada (DEF-053). Hasta que se cierre la fase 39, abre *Ajustes > Rastreo de buses*, revisa *Conservar posiciones (días)* y pulsa **Guardar** una vez: así queda fijado el plazo que muestra la pantalla (30 días por defecto).
+**Retención de posiciones:** el cron diario borra las posiciones de más de 30 días en Odoo y pide a Traccar que borre las suyas del mismo periodo. El plazo se cambia en *Ajustes > Rastreo de buses > Conservar posiciones (días)*; 0 conserva todo.
 
 Después, a mano:
 
@@ -52,7 +54,7 @@ Después, a mano:
 2. Crea las rutas y sus paradas, y un bus por cada tableta (o celular de respaldo).
 3. En cada bus pulsa **Register GPS in Traccar**. El identificador OsmAnd lo recibe la app al **iniciar el turno**, no se teclea en la tableta. Sigue `docs/guias/GUIA-CHOFER.md`.
 
-No hace falta tocar el panel de Traccar: el script crea su cuenta de administrador (contraseña aleatoria guardada en Odoo), cierra el registro abierto, y Odoo crea los dispositivos por su API.
+No hace falta tocar el panel de Traccar: el script crea su cuenta de administrador, cierra el registro abierto y guarda en Odoo un token de API de 10 años en lugar de la contraseña. Odoo crea los dispositivos por esa API.
 
 ## Qué cambia respecto al entorno de desarrollo
 
@@ -69,7 +71,7 @@ No hace falta tocar el panel de Traccar: el script crea su cuenta de administrad
 
 ## Tamaño de la base
 
-Con Supabase el espacio tiene límite y costo, así que la retención es obligatoria. Cada bus guarda una posición en Odoo y otra en Traccar cada pocos segundos mientras tiene turno. Mide el tamaño real tras la primera semana con `SELECT pg_size_pretty(pg_database_size(current_database()));` en cada base. Con eso elige el plan y el plazo de *Conservar posiciones (días)*. Hasta la fase 39 Traccar no purga sus posiciones.
+Con Supabase el espacio tiene límite y costo, así que la retención es obligatoria. Cada bus guarda una posición en Odoo y otra en Traccar cada pocos segundos mientras tiene turno. Mide el tamaño real tras la primera semana con `SELECT pg_size_pretty(pg_database_size(current_database()));` en cada base. Con eso elige el plan y el plazo de *Conservar posiciones (días)*, que vale para Odoo y para Traccar.
 
 ## Respaldos
 
@@ -141,7 +143,7 @@ Si un secreto se filtra (por ejemplo, quedó en un commit), cámbialo; borrarlo 
 | Contraseña maestra de Odoo | Genera otro hash como lo hace `init-prod.sh` y reemplaza `admin_passwd` en `config/odoo.prod.conf`; reinicia Odoo. |
 | `WEBHOOK_SECRET` | Cámbialo en `.env.prod` y en *Ajustes > Webhook secret* de Odoo al mismo valor; `docker compose ... up -d traccar odoo`. |
 | `DB_PASSWORD` / `TRACCAR_DB_PASSWORD` | `ALTER ROLE ... PASSWORD` en Postgres, luego el mismo valor en `.env.prod`, y `up -d`. |
-| Administrador de Traccar | `bootstrap-traccar.sh` no lo cambia si ya existe: cámbialo en el panel de Traccar por el proxy y guárdalo en los Ajustes de Odoo. |
+| Token de Traccar | Revócalo en el panel de Traccar (abriéndolo con `TRACCAR_PANEL_ALLOW`), genera otro desde la cuenta del administrador y pégalo en *Ajustes > Traccar API token* de Odoo. |
 | Credencial QR de un chofer | *Choferes > chofer > Revocar credencial* y *Generar credencial QR*. |
 
 ## Choferes: usuarios, tokens y tabletas
@@ -196,9 +198,6 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 |---|---|---|
 | DEF-051 | XSS guardado en el portal público por el nombre de una parada | No importar GPX de origen desconocido; revisar los nombres de las paradas |
 | DEF-052 | La tableta puede perder un SOS guardado sin señal | Ante un SOS, confirmar por radio o teléfono |
-| DEF-053 | Las posiciones no se purgan | Pulsar *Guardar* en Ajustes (ver Instalación) |
-| DEF-054 | Los scripts asumen la base local y la de producción es Supabase | Crear `traccar` y respaldar a mano (ver *Base de datos*); con base local, `COMPOSE_PROFILES=local-db,bi` |
-| DEF-055 | Panel de Traccar público | Ver Requisitos |
 | DEF-056 | Login del panel sin límite ni 2FA | Contraseñas largas y `fail2ban` en el host |
 | DEF-057 | Falsa alerta "No signal" tras cada turno | Ignorarla si el bus no tiene turno |
 | DEF-058, DEF-059 | Se pierden posiciones e incidentes guardados sin señal al cerrar el turno | Terminar el turno con señal |
@@ -210,8 +209,7 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 - El login de choferes (`/bus_tracking/driver/login`) sí tiene límite de intentos; el login del panel de Odoo no.
 - El usuario de base de datos de Odoo es superusuario de Postgres (el patrón de la imagen oficial).
 - No hay límite de intentos de login, ni autenticación en dos pasos, ni bloqueo de IPs (por ejemplo con fail2ban). Plan: fase 40.
-- La contraseña del administrador de Traccar se guarda en claro en los parámetros de Odoo y el token de la credencial QR del chofer queda en la base durante 365 días (sólo lo leen los managers).
+- El token de API de Traccar y el de la credencial QR del chofer (365 días) se guardan en la base; sólo los leen los administradores y los managers. Quien tenga una copia de la base puede usarlos: revócalos si se filtra.
 - El token de Grafana viaja en la URL del iframe y dura 8 horas.
-- La base de Traccar no purga sus posiciones.
 - El perfil `production` de `eas.json` tiene `ios.simulator: true`: no sirve para iPhone o iPad reales.
 - Los respaldos no se copian fuera del servidor automáticamente.
