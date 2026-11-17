@@ -283,6 +283,9 @@ class BusVehicle(models.Model):
 
     def action_register_gps(self):
         """Create the phone's device in Traccar with a random identifier."""
+        # Checked before calling Traccar: failing on the write afterwards would leave an orphan device there.
+        if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_manager')):
+            raise AccessError(_("Only managers can register a GPS device."))
         api = self.env['bus.traccar.api']
         for bus in self:
             if bus.traccar_device_id:

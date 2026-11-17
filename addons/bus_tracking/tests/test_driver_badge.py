@@ -1,6 +1,11 @@
+import importlib.util
 import json
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
+
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.tests import HttpCase, TransactionCase, tagged
+from odoo.tools import mute_logger
 
 from ..controllers.driver_api import account_limiter, login_limiter
 from .test_driver_auth import make_driver
@@ -33,14 +38,14 @@ class TestDriverBadge(TransactionCase):
 
     def test_badge_actions_on_res_users(self):
         self.assertFalse(self.driver.driver_badge_active)
-        self.driver.action_generate_driver_badge()
+        action = self.driver.action_generate_driver_badge()
         self.assertTrue(self.driver.driver_badge_active)
-        self.assertTrue(self.driver.driver_badge_qr)
-        self.assertTrue(self.driver.driver_badge_link.startswith('uta-buses://login?'))
+        shown = self.env[action['res_model']].browse(action['res_id'])
+        self.assertTrue(shown.qr)
+        self.assertTrue(shown.link.startswith('uta-buses://login?'))
 
         self.driver.action_revoke_driver_badge()
         self.assertFalse(self.driver.driver_badge_active)
-        self.assertFalse(self.driver.driver_badge_qr)
 
     def test_is_bus_driver_search_and_compute(self):
         self.assertTrue(self.driver.is_bus_driver)
@@ -88,16 +93,42 @@ class TestDriverBadge(TransactionCase):
         self.driver.with_user(manager).action_revoke_driver_badge()
         self.assertFalse(self.driver.driver_badge_active)
 
-    def test_only_managers_read_the_badge_link(self):
-        self.driver.action_generate_driver_badge()
+    def test_the_badge_is_shown_once_and_only_its_hash_is_kept(self):
+        manager = make_driver(self.env, login='gestor_link', groups='bus_tracking.group_bus_manager')
+        action = self.driver.with_user(manager).action_generate_driver_badge()
+        shown = self.env['bus.driver.badge'].with_user(manager).browse(action['res_id'])
+        raw = parse_qs(urlparse(shown.link).query)['token'][0]
+        self.assertEqual(self.tokens._user_for_badge(raw), self.driver)
         viewer = make_driver(self.env, login='visor_link', groups='bus_tracking.group_bus_user')
         with self.assertRaises(AccessError):
-            self.driver.with_user(viewer).read(['driver_badge_link'])
-        with self.assertRaises(AccessError):
-            self.driver.with_user(viewer).read(['driver_badge_qr'])
-        manager = make_driver(self.env, login='gestor_link', groups='bus_tracking.group_bus_manager')
-        link = self.driver.with_user(manager).read(['driver_badge_link'])[0]['driver_badge_link']
-        self.assertTrue(link.startswith('uta-buses://login?'))
+            self.env['bus.driver.badge'].with_user(viewer).browse(shown.id).read(['link'])
+        shown.action_done()
+        self.assertFalse(shown.exists())
+        # Nothing else in the database holds the raw token.
+        self.assertNotIn('driver_badge_link', self.env['res.users']._fields)
+        self.env.flush_all()
+        self.env.cr.execute("SELECT count(*) FROM bus_driver_token WHERE token_hash = %s", (raw,))
+        self.assertEqual(self.env.cr.fetchone()[0], 0)
+        self.assertTrue(self.driver.driver_badge_active)
+
+    def test_the_upgrade_deletes_stored_badges_and_revokes_them(self):
+        raw = self.tokens._issue_badge(self.driver)
+        session = self.tokens._issue(self.driver, 'Tablet 1')
+        self.env['ir.attachment'].sudo().create({
+            'name': 'driver_badge_qr', 'res_model': 'res.users', 'res_id': self.driver.id,
+            'res_field': 'driver_badge_qr', 'raw': b'png'})
+        path = Path(__file__).resolve().parents[1] / 'migrations' / '16.0.1.8.0' / 'post-migrate.py'
+        spec = importlib.util.spec_from_file_location('post_migrate_badge', path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.env.flush_all()
+        with mute_logger('odoo.addons.bus_tracking.migrations'):
+            module.migrate(self.env.cr, '16.0.1.7.0')
+        self.env.invalidate_all()
+        self.assertFalse(self.env['ir.attachment'].sudo().search(
+            [('res_model', '=', 'res.users'), ('res_field', '=', 'driver_badge_qr')]))
+        self.assertFalse(self.tokens._user_for_badge(raw))
+        self.assertEqual(self.tokens._user_for(session), self.driver)
 
     def test_a_badge_is_not_a_session(self):
         raw = self.tokens._issue_badge(self.driver)

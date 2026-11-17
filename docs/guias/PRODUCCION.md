@@ -132,7 +132,7 @@ Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y
 
 Antes de la primera puesta en marcha real, fija las versiones de `ODOO_IMAGE` y `POSTGRES_IMAGE` en `.env.prod`. Traccar ya viene fijado en `traccar/traccar:6.16.0` (la versión con la que se verificó el reenvío); prueba una nueva en desarrollo antes de cambiar `TRACCAR_IMAGE`.
 
-La versión 16.0.1.2.0 del módulo convierte a los choferes existentes en usuarios de portal y la 16.0.1.3.0 rellena la hora de los incidentes viejos; las dos corren solas en el paso 4.
+La versión 16.0.1.2.0 del módulo convierte a los choferes existentes en usuarios de portal y la 16.0.1.3.0 rellena la hora de los incidentes viejos; las dos corren solas en el paso 4. La 16.0.1.8.0 borra las credenciales QR guardadas y las revoca, porque las copias de seguridad anteriores las contienen: **genera e imprime una credencial nueva para cada chofer** después de actualizar (mientras tanto entran con usuario y contraseña).
 
 ## Empezar de cero
 
@@ -155,11 +155,11 @@ Si un secreto se filtra (por ejemplo, quedó en un commit), cámbialo; borrarlo 
 
 ## Choferes: usuarios, tokens y tabletas
 
-Cada chofer es un **usuario de portal** de Odoo (`base.group_portal` + `group_bus_driver`), creado desde *Flota > Choferes*: entra a la API de la tableta, pero no al panel de Odoo, ni ve contactos o usuarios. La contraseña la restablece un gestor en Odoo.
+Cada chofer es un **usuario de portal** de Odoo (`base.group_portal` + `group_bus_driver`), creado desde *Flota > Nuevo chofer*: entra a la API de la tableta, pero no al panel de Odoo, ni ve contactos o usuarios. Un manager de buses lo crea y lo edita (botón *Editar chofer* en su ficha) sin ser administrador de Odoo: el asistente sólo toca choferes y sólo sus datos, nunca sus grupos. Cambiar la contraseña cierra las sesiones de sus tabletas (la credencial QR sigue valiendo). El menú *Choferes* sólo lo ven los managers.
 
 La tableta no usa API keys de Odoo. Tras `/bus_tracking/driver/login` guarda un token (en Odoo sólo su huella; `bus.driver.token`, 30 días, cron de purga) en el almacén seguro de Android. Un 401 en la app borra el token local.
 
-La **credencial QR** (365 días) sólo sirve para pedir una sesión en `/bus_tracking/driver/login_badge`; no abre la API por sí sola y una sesión no puede renovarse por ese camino. Sólo los administradores la generan, la revocan o ven su enlace. La app sólo acepta servidores `https://` (o de la red local en desarrollo) y pide confirmar si un QR cambia el servidor.
+La **credencial QR** (365 días) sólo sirve para pedir una sesión en `/bus_tracking/driver/login_badge`; no abre la API por sí sola y una sesión no puede renovarse por ese camino. Sólo los managers la generan o la revocan. Odoo la muestra una sola vez, al generarla, y guarda sólo su huella: hay que imprimirla en ese momento; si se pierde, se genera otra. La app sólo acepta servidores `https://` (o de la red local en desarrollo) y pide confirmar si un QR cambia el servidor.
 
 El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`). Odoo no guarda una dirección `http://` salvo en la red local (laboratorio), y si encuentra una guardada antes no deja iniciar turnos (`no_gps_url`); la tableta tampoco envía a ella.
 
@@ -199,11 +199,7 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 ## Riesgos abiertos (auditoría del 17-nov-2026)
 
-La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 42 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS) ya están hechas. Siguen abiertos:
-
-| Defecto | Riesgo | Medida provisional |
-|---|---|---|
-| DEF-060 | Un manager de buses que no es administrador de Odoo quizá no pueda gestionar choferes | Gestionar los choferes con un administrador |
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 43 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Faltan la fase 44 (carga y purga), la 45 (build y dependencias) y, sobre todo, la 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
 
 ## Limitaciones conocidas
 
@@ -212,7 +208,7 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 - El usuario de base de datos de Odoo es superusuario de Postgres (el patrón de la imagen oficial).
 - El segundo factor (2FA) es opcional para cada usuario: Odoo sólo sabe imponerlo por correo y el sistema no usa correo. Pide a cada administrador y manager que lo active (ver *Acceso al panel*).
 - Los contadores de intentos de login viven en la memoria de cada worker: se reinician al reiniciar Odoo.
-- El token de API de Traccar y el de la credencial QR del chofer (365 días) se guardan en la base; sólo los leen los administradores y los managers. Quien tenga una copia de la base puede usarlos: revócalos si se filtra.
+- El token de API de Traccar se guarda en la base y sólo lo leen los administradores. Quien tenga una copia de la base puede usarlo: revócalo en Traccar si se filtra. De las credenciales QR y de las sesiones de la tableta sólo se guarda la huella.
 - El token de Grafana viaja en la URL del iframe y dura 8 horas.
 - El perfil `production` de `eas.json` tiene `ios.simulator: true`: no sirve para iPhone o iPad reales.
 - Los respaldos no se copian fuera del servidor automáticamente.

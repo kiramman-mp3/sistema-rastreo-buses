@@ -82,3 +82,52 @@ class TestDriverStaff(TransactionCase):
         queue = self.env['bus.incident']._open_for_map()
         self.assertIn(sos, queue)
         self.assertNotIn(self.incident, queue)
+
+    # -- managing drivers (Z1) ---------------------------------------------------
+    def test_a_bus_manager_who_is_not_an_odoo_admin_manages_drivers(self):
+        self.assertFalse(self.manager.has_group('base.group_erp_manager'))
+        Edit = self.env['bus.driver.edit'].with_user(self.manager)
+        # Odoo's own users form stays closed to them: the wizard is the way.
+        with self.assertRaises(AccessError):
+            self.env['res.users'].with_user(self.manager).create({'name': 'X', 'login': 'x'})
+        Edit.create({'name': 'Chofer Nuevo', 'login': 'nuevo', 'password': 'clave-nueva-1'}).action_save()
+        new = self.env['res.users'].search([('login', '=', 'nuevo')])
+        self.assertTrue(new.has_group('bus_tracking.group_bus_driver'))
+        self.assertTrue(new.has_group('base.group_portal'))
+        self.assertFalse(new.has_group('base.group_user'))
+        self.env['res.users'].with_user(new).sudo()._check_credentials('clave-nueva-1', {'interactive': True})
+        wizard = Edit.with_context(default_user_id=new.id).create({})
+        self.assertEqual((wizard.name, wizard.login), ('Chofer Nuevo', 'nuevo'))
+        wizard.write({'name': 'Chofer Renombrado', 'password': 'otra-clave-2', 'active': False})
+        wizard.action_save()
+        self.assertEqual((new.name, new.active), ('Chofer Renombrado', False))
+        self.assertFalse(wizard.password)
+        new.with_user(self.manager).action_generate_driver_badge()
+
+    def test_the_driver_wizard_never_touches_staff(self):
+        for staff in (self.manager, self.viewer, self.env.ref('base.user_admin')):
+            with self.assertRaises(AccessError):
+                self.env['bus.driver.edit'].with_user(self.manager).with_context(
+                    default_user_id=staff.id).create({})
+        wizard = self.env['bus.driver.edit'].with_user(self.manager).create(
+            {'user_id': self.viewer.id, 'name': 'X', 'login': 'visor', 'password': 'robada-123'})
+        with self.assertRaises(AccessError):
+            wizard.action_save()
+        with self.assertRaises(AccessError):
+            self.env['bus.driver.edit'].with_user(self.viewer).create({'name': 'X', 'login': 'x'})
+
+    def test_only_managers_see_the_drivers_menu(self):
+        menu = self.env.ref('bus_tracking.menu_bus_driver')
+        self.assertEqual(menu.groups_id, self.env.ref('bus_tracking.group_bus_manager'))
+
+    def test_a_new_password_signs_the_tablets_out_and_keeps_the_badge(self):
+        Token = self.env['bus.driver.token']
+        session = Token._issue(self.driver, 'tablet')
+        badge = Token._issue_badge(self.driver)
+        self.driver.write({'driver_password': 'clave-cambiada-9'})
+        self.assertFalse(Token._user_for(session))
+        self.assertEqual(Token._user_for_badge(badge), self.driver)
+        # Any other change keeps the session.
+        session = Token._issue(self.driver, 'tablet')
+        self.driver.write({'phone': '0999999999'})
+        self.assertEqual(Token._user_for(session), self.driver)
