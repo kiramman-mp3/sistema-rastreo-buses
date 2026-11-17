@@ -2,7 +2,9 @@ import json
 from datetime import timedelta
 
 from odoo import fields
+from odoo.exceptions import ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
+from odoo.tools import mute_logger
 
 from ..controllers.driver_api import account_limiter, error_limiter, login_limiter
 from ..models.utils import pick_odoo_lang
@@ -395,6 +397,25 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual(resp.status_code, 409)
         self.assertEqual(resp.json(), {'error': 'no_gps_url'})
         self.assertFalse(self.env['bus.shift'].search_count([('vehicle_id', '=', self.bus.id)]))
+
+    def test_start_never_hands_the_identifier_to_a_plain_http_address(self):
+        icp = self.env['ir.config_parameter'].sudo()
+        icp.set_param('bus_tracking.gps_url', 'http://gps.example.com')     # saved before https was required
+        with mute_logger('odoo.addons.bus_tracking.controllers.driver_api'):
+            resp = self.start(self.token())
+        self.assertEqual((resp.status_code, resp.json()), (409, {'error': 'no_gps_url'}))
+        self.assertNotIn('b-secret', resp.text)
+        icp.set_param('bus_tracking.gps_url', 'http://192.168.1.20:5055')    # a lab on the local network
+        self.assertEqual(self.start(self.token()).status_code, 200)
+
+    def test_the_gps_address_setting_needs_https_outside_the_local_network(self):
+        Settings = self.env['res.config.settings']
+        for bad in ('http://gps.example.com', 'ftp://gps.example.com', 'gps.example.com', 'http://8.8.8.8:5055'):
+            with self.subTest(bad), self.assertRaises(ValidationError):
+                Settings.create({'bus_gps_url': bad})
+        for good in ('https://gps.example.com', 'https://gps.example.com:8443/osmand', 'http://localhost:5055',
+                     'http://10.0.2.2:5055', 'http://tablet-lab.local', 'http://[::1]:5055'):
+            Settings.create({'bus_gps_url': good})
 
     def test_start_refuses_an_archived_route(self):
         self.route.active = False

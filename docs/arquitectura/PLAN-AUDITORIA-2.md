@@ -164,7 +164,10 @@ Hecho. El servidor acepta un incidente si su `reported_at` cae dentro de un turn
 - `fix: keep the simulator away from real data` (sin push de alertas simuladas, sin escribir en rutas reales, cierre sólo de sus viajes).
 - Pruebas: `test_alerts.py` (turno cerrado no da "No signal"), `test_driver_shift.py` (incidente con `reported_at` dentro de un turno recién cerrado), `session.test.ts` (orden de cierre), `test_ingest.py` (alerta concurrente), `test_trip_simulator.py` (sin push, ruta real intacta).
 
-### Fase 42. `fix/tableta-servidor-y-gps` (Y1, Y2, Y3, X3, Y5) — S
+### Fase 42. `fix/tableta-servidor-y-gps` (Y1, Y2, Y3, X3, Y5) — S — hecha (2026-11-17)
+
+Hecho. Al cambiar de servidor la tableta cierra la sesión (y olvida el fin de turno pendiente del servidor anterior). Para `http` se admite la red local (`localhost`, IP privadas, `.local`) para laboratorio; `/shift/start` trata una dirección `http` antigua como ausente (`no_gps_url`). Y5: se optó por no actuar sobre los enlaces, porque cualquier página podría abrirlos; abren el login con un aviso para escanear desde la app.
+
 
 - `fix: sign out when the server changes` (borrar token, detener GPS, volver al login) y avisarlo en el diálogo.
 - `fix: switch server only after the badge is accepted`.

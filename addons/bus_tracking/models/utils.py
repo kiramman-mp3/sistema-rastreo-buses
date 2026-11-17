@@ -1,3 +1,4 @@
+import ipaddress
 import math
 import re
 import unicodedata
@@ -105,6 +106,28 @@ def fold(text):
 def safe_http_url(value):
     value = (value or '').strip()
     return value if value.lower().startswith(('http://', 'https://')) and ' ' not in value else ''
+
+
+GPS_URL_SHAPE = re.compile(r'^(https?)://(\[[^\]\s]+\]|[^\s/:]+)(:\d+)?(/\S*)?$', re.IGNORECASE)
+
+
+def is_local_host(host):
+    """A host on this machine or the local network, where plain http is acceptable for tests."""
+    host = host.strip('[]').lower()
+    if host == 'localhost' or host.endswith('.local'):
+        return True
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return address.is_loopback or address.is_private
+
+
+def secure_gps_url(value):
+    """The device identifier, the only credential of a bus, travels in this address: https only, except on a
+    local network (DEF-062)."""
+    match = GPS_URL_SHAPE.match((value or '').strip())
+    return bool(match) and (match.group(1).lower() == 'https' or is_local_host(match.group(2)))
 
 
 EARTH_RADIUS_M = 6371000.0
