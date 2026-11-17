@@ -384,6 +384,9 @@ describe('session', () => {
 
     await session.flushIncidents();
     expect(await queue.size()).toBe(1);
+    status = 401;
+    await session.flushIncidents();
+    expect(await queue.size()).toBe(1);
     status = 200;
     await session.flushIncidents();
     expect(await queue.size()).toBe(0);
