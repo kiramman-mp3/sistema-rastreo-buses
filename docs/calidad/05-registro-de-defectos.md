@@ -63,7 +63,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-053 | 17-nov-2026 | Segunda auditoría integral (B1) | Las posiciones nunca se purgan en una instalación nueva | models/bus_position.py, scripts/init-prod.sh | Cerrado |
 | DEF-054 | 17-nov-2026 | Segunda auditoría integral (B2) | La base de datos de producción no arranca tras un down y up del compose | docker-compose.prod.yml, .env.prod.example | Cerrado |
 | DEF-055 | 17-nov-2026 | Segunda auditoría integral (B4) | El panel de Traccar es público y su dominio por defecto publica la IP del servidor | docker-compose.prod.yml, proxy/Caddyfile | Cerrado |
-| DEF-056 | 17-nov-2026 | Segunda auditoría integral (B3) | El login del panel de Odoo no tiene límite de intentos ni segundo factor | proxy/Caddyfile, despliegue | Abierto |
+| DEF-056 | 17-nov-2026 | Segunda auditoría integral (B3) | El login del panel de Odoo no tiene límite de intentos ni segundo factor | proxy/Caddyfile, despliegue | Cerrado |
 | DEF-057 | 17-nov-2026 | Segunda auditoría integral (N1) | Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers | models/bus_alert.py | Abierto |
 | DEF-058 | 17-nov-2026 | Segunda auditoría integral (X2) | Las posiciones guardadas sin señal se pierden al terminar el turno | apps/conductor-tablet/src/state/session.ts | Abierto |
 | DEF-059 | 17-nov-2026 | Segunda auditoría integral (W2) | Un incidente o SOS guardado sin señal se borra si el turno ya cerró | controllers/driver_api.py, apps/conductor-tablet/src/state/session.ts | Abierto |
@@ -71,7 +71,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Abierto |
 | DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Abierto |
 
-Resumen: 62 registrados, 55 cerrados (89 %), 7 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 62 registrados, 56 cerrados (90 %), 6 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -409,7 +409,7 @@ Resumen: 62 registrados, 55 cerrados (89 %), 7 abiertos. Densidad: 12,3 defectos
 
 - **Causa raíz:** Odoo Community no limita los intentos y el proxy tampoco; quedó como limitación conocida.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Fase 40: auth_totp obligatorio para managers y fail2ban sobre el log de Odoo
+- **Prueba que lo protege:** TestPanelSignIn: la espera tras fallos se duplica hasta una hora y auth_totp está instalado (2FA opcional por usuario: imponerlo exige correo); test_driver_auth: otra dirección no bloquea al chofer
 
 ### DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
 
@@ -451,10 +451,9 @@ Resumen: 62 registrados, 55 cerrados (89 %), 7 abiertos. Densidad: 12,3 defectos
 
 Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
 
-1. DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
-2. DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
-3. DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
-4. DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
-5. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
-6. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
-7. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
+1. DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
+2. DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
+3. DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
+4. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
+5. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
+6. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
