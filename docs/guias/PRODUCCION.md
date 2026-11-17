@@ -108,7 +108,7 @@ Es destructivo: detiene Odoo y Traccar, reemplaza las bases `odoo` y `traccar` y
 ## Acceso al panel
 
 - **Intentos fallidos.** Tras 5 fallos desde una misma dirección, Odoo la hace esperar 60 s, y la espera se duplica con cada fallo siguiente hasta una hora (`base.login_cooldown_after` y `base.login_cooldown_duration` en *Ajustes > Técnico > Parámetros del sistema*). El login de la tableta tiene su propio límite: 10 intentos por minuto por dirección y 60 por usuario desde cualquier dirección.
-- **Segundo factor.** Cada administrador y manager lo activa en *Mi perfil > Seguridad de la cuenta > Autenticación en dos pasos* con una app de códigos (Google Authenticator, Aegis). En *Ajustes > Usuarios*, la columna *Autenticación en dos pasos* muestra quién lo tiene.
+- **Segundo factor.** Cada administrador y manager lo activa en *Mi perfil > Seguridad de la cuenta > Autenticación de dos factores* con una app de códigos (Google Authenticator, Aegis). En *Ajustes > Usuarios*, los filtros de *Autenticación de dos factores* muestran quién lo tiene y quién no.
 - **Bloqueo de direcciones (opcional).** Para cortar en el cortafuegos a quien insiste, `fail2ban` puede leer el log del contenedor de Odoo (`docker inspect --format '{{.LogPath}}' <contenedor de odoo>`), buscar `Login failed for db:.* from <HOST>` y bloquear en la cadena `DOCKER-USER`: los puertos publicados por Docker no pasan por `INPUT`.
 - **Versión.** `/bus_tracking/health` sólo muestra la versión del módulo a quien tiene sesión en Odoo.
 
