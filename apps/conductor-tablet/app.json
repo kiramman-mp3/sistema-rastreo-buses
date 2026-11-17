@@ -3,7 +3,7 @@
     "name": "Buses UTA",
     "slug": "conductor-tablet",
     "scheme": "uta-buses",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
