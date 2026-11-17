@@ -176,7 +176,10 @@ Hecho. Al cambiar de servidor la tableta cierra la sesión (y olvida el fin de t
 - `feat: sign in from a badge link opened by the camera` o quitar el esquema del enlace si no se va a usar.
 - Pruebas: `session.test.ts` (cambio de servidor sin token), `osmand.test.ts` (rechaza `http` externo), `runtime.test.ts` (sin duplicados sin señal), `test_driver_shift.py` (`gps_url` http rechazada).
 
-### Fase 43. `fix/permisos-choferes` (Z1, Z2, X5, S1, S2) — M
+### Fase 43. `fix/permisos-choferes` (Z1, Z2, X5, S1, S2) — M — hecha (2026-11-17)
+
+Hecho. El test confirmó Z1 (`You are not allowed to create 'User'`). No se dio a los managers escritura sobre `res.users`: con ella podrían poner a un chofer en cualquier grupo. El asistente `bus.driver.edit` crea, edita y archiva choferes con `sudo()` y rechaza a quien no sea chofer de portal. El QR se muestra en `bus.driver.badge`, que se borra al pulsar *Listo* (o en el vacío de transitorios). La migración 16.0.1.8.0 borra las credenciales guardadas y las revoca.
+
 
 - `test: a bus manager who is not an odoo admin manages drivers`: confirma o descarta Z1.
 - Según el resultado y la decisión 4: `feat: manage drivers from a wizard`.
