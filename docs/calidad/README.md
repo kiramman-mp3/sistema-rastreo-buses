@@ -12,7 +12,7 @@ Regla del proyecto: **cada vez que se pruebe, se mida o se corrija algo relacion
 | [02-estandares-y-reglas.md](02-estandares-y-reglas.md) | Reglas de negocio R1 a R16, semántica de las respuestas HTTP, convenciones y análisis estático |
 | [03-plan-y-casos-de-prueba.md](03-plan-y-casos-de-prueba.md) | Estrategia, criterios de aceptación y todos los casos de prueba *(generado)* |
 | [04-resultados-y-metricas.md](04-resultados-y-metricas.md) | Cuadro de mando, tiempos, cobertura y estado de los datos *(generado)* |
-| [05-registro-de-defectos.md](05-registro-de-defectos.md) | Defectos DEF-001 a DEF-048 con causa raíz y estado *(generado)* |
+| [05-registro-de-defectos.md](05-registro-de-defectos.md) | Defectos DEF-001 a DEF-062 con causa raíz y estado *(generado)* |
 | [06-lluvia-de-ideas.md](06-lluvia-de-ideas.md) | 94 ideas del proyecto, categorizadas, con su estado |
 | [07-pareto.md](07-pareto.md) | Tres diagramas de Pareto: fallos de la evaluación, defectos y problemas de la construcción *(generado)* |
 | [08-ishikawa.md](08-ishikawa.md) | Dos diagramas de Ishikawa con los cinco porqués |
@@ -36,16 +36,19 @@ Otros contenidos de la carpeta:
 
 Los documentos marcados *(generado)* los escribe `qa/generar_docs.py` desde las evidencias: **no se editan a mano**, se vuelve a ejecutar el script.
 
-## Estado resumido (ejecución del 28-oct-2026)
+## Estado resumido (evidencias del 5-nov-2026 y segunda auditoría del 17-nov-2026)
 
 | Medida | Resultado |
 |---|---|
-| Pruebas de Odoo | 150, 0 fallos |
-| Suite en vivo | 42 casos, 3 fallos (DEF-008 a DEF-010) |
-| Auditoría aleatoria | 1000 peticiones, 5,7 % de error |
-| Cobertura de código | 93,8 % |
-| Defectos | 10 registrados, 7 cerrados, 3 abiertos |
-| Decisión | Apto para un piloto controlado; producción abierta tras cerrar los defectos y probar con un celular real |
+| Pruebas de Odoo | 544, 0 fallos (5-nov) |
+| Pruebas de la app (Jest) | 167, 0 fallos (17-nov); lint y typecheck en verde |
+| Suite en vivo | 47 de 47 |
+| Auditoría aleatoria | 1000 peticiones, sin respuestas 5xx inesperadas |
+| Cobertura de código | 95,9 % de Python; 78,4 % de todo el código según SonarQube |
+| Defectos | 62 registrados, 50 cerrados, 12 abiertos (DEF-051 a DEF-062) |
+| Decisión | No apto para producción general. Apto para un piloto vigilado tras las fases 38 a 40 de [`PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md) |
+
+El estado del 28-oct (150 pruebas, 3 defectos abiertos) se conserva en `Informe_calidad_rastreo_buses.pdf`.
 
 ## Cómo se genera cada cosa
 
