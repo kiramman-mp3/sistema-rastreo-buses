@@ -1315,4 +1315,36 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 
 - Fase 46: VM Linux con dominios y Let's Encrypt, proyecto real de Supabase, jornada con dos tabletas, carga de 50 buses y `qa/ejecutar_todo.sh`. Sin ella no hay `v1.0.0-rc1`.
 - Generar e imprimir una credencial QR nueva para cada chofer después de actualizar a 16.0.1.8.0.
-- Nada se subió a `origin`: `develop` va por delante y `main` no se tocó.
+- Nada se subió a `origin` ese día (se subió después, en la entrada siguiente).
+
+## 2026-11-17: despliegue de la versión 16.0.1.8.0 en la VM de Azure
+
+### Qué se hizo
+
+- `develop` se subió a GitHub. El primer CI falló en gitleaks por un token inventado en `test_gps_setup.py`; se cambió por `fake-token`.
+- La VM `vm-buses` (Ubuntu 22.04, `Standard_B1ms`, 2 GB de RAM y 2 GB de swap) estaba apagada desde el 8-nov. Al encenderla, el sitio daba 502: Supabase había pausado el proyecto por inactividad y el pooler respondía `(ENOTFOUND) tenant/user ... not found`. Se reanudó desde la consola de Supabase y Odoo se conectó solo.
+- Despliegue con el procedimiento de `PRODUCCION.md` > *Actualizar*: la VM pasó de `main` a `develop`, el módulo de `16.0.1.6.0` a `16.0.1.8.0` (migraciones 16.0.1.7.0 y 16.0.1.8.0; se revocaron las 2 credenciales QR) y `odoo.prod.conf` a la plantilla nueva (`list_db = False`, `db_maxconn = 8`). Traccar quedó fijado en `traccar/traccar:6.16.0`, la versión que ya corría con `latest`. Se recreó el rol `grafana_reader`.
+- El despliegue encontró dos defectos de los scripts, corregidos en `develop`: no tenían permiso de ejecución (se commitearon desde Windows) y el cliente de Postgres era 15 mientras Supabase corre 17.11, así que `pg_dump` se negaba a respaldar. `.env.prod.example` trae ahora `POSTGRES_IMAGE=postgres:17`.
+- Respaldo fuera de la VM: cuenta de almacenamiento privada `stbusesuta11900` (contenedor `backups`, sin acceso público), con los respaldos del 3-nov y del 17-nov. Se descargaron y se comprobaron con `SHA256SUMS`.
+- SSH (puerto 22) sólo desde `192.188.46.70/32`. Las consultas a la VM se hacen con `az vm run-command`, que no usa SSH.
+- Se borraron los contenedores `buses-db-1` y `rastreo-prod-db-1`, bases locales de antes de Supabase. Sus volúmenes (`buses_db-data`, `rastreo-prod_db-data`) se conservan.
+- App de la tableta 1.1.0: variable `EXPO_PUBLIC_ODOO_URL` creada en el entorno `production` de EAS; builds de Android (`production`) y de iOS (`ios-altstore`).
+- Se quitó del historial de Git la coautoría de herramientas de IA (`Co-Authored-By`, `Claude-Session`) con `git filter-repo`. El contenido de cada rama y etiqueta es idéntico, pero cambiaron todos los identificadores de commit: los que cita esta bitácora antes de esta entrada ya no existen.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| CI en GitHub (gitleaks, Odoo, lint y traducciones, tableta) | En verde en los cinco pushes después de la corrección de gitleaks |
+| `https://busesuta2340.eastus2.cloudapp.azure.com` | 200 |
+| `/bus_tracking/health` | `stale`: ningún bus transmite |
+| Memoria de la VM con todo arrancado | Unos 760 MB usados, 893 MB disponibles, swap sin usar |
+| Respaldo descargado | `sha256sum -c` correcto en los tres archivos |
+
+### Pendiente o sin confirmar
+
+- Instalar la app 1.1.0 y generar e imprimir una credencial QR nueva para cada chofer.
+- Supabase gratuito vuelve a pausarse tras unos 7 días sin uso: reanudarlo antes de cada demo. En producción hace falta un plan que no se pause.
+- Si cambia la IP de quien administra, actualizar la regla `default-allow-ssh` del grupo `vm-busesNSG`.
+- Los respaldos nuevos no se copian solos a la cuenta de almacenamiento: falta programarlo.
+- Fase 46 sin hacer: jornada real con tabletas y prueba de carga.
