@@ -127,6 +127,25 @@ class TestTripProgress(TransactionCase):
         self.assertEqual(trip['direction'], 'forward')
         self.assertEqual(trip['next_stop'], self.b)
 
+    def test_missing_the_first_stop_moves_on_to_the_one_after_the_last_reached(self):
+        self.arrive(self.b, 50)                          # never entered the radius of A
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['direction'], 'forward')
+        self.assertEqual(set(trip['arrived']), {self.b.id})
+        self.assertEqual(trip['next_stop'], self.c)
+
+    def test_a_trip_can_start_at_any_stop(self):
+        five = self.env['bus.route'].create({'name': 'R5', 'code': 'R5', 'stop_ids': [
+            (0, 0, {'sequence': i, 'name': name, 'latitude': -1.3 - i / 100, 'longitude': -78.5})
+            for i, name in enumerate('ABCDE', start=1)]})
+        a, b, c, d, e = five.stop_ids
+        self.bus.route_id = five
+        self.shift.route_id = five
+        self.arrive(d, 50)
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['next_stop'], e)
+        self.assertEqual(set(trip['arrived']), {d.id})
+
     def test_arrivals_before_the_shift_do_not_count(self):
         self.arrive(self.c, 300)
         trip = self.shift._trip_progress()
