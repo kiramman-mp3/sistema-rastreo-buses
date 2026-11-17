@@ -1276,3 +1276,43 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Las seis decisiones de la sección 2 del plan: base por defecto, 2FA, panel de Traccar, gestión de choferes, incidentes tras el cierre y credencial QR.
 - Confirmar con una prueba DEF-060 y los hallazgos marcados como inferidos.
 - Correr la suite de Odoo y flake8 sobre esta base.
+
+## 2026-11-17: fases 38 a 45 de la segunda auditoría
+
+### Qué se hizo
+
+- Base de producción decidida: **Supabase** (pooler de sesión en el puerto 5432, `sslmode=require`). Las otras cinco decisiones del plan se tomaron con la opción recomendada.
+- Fase 38: nombres de parada como texto en los mapas (DEF-051) y colas de incidentes y errores de la tableta serializadas (DEF-052).
+- Fase 39: purga de 30 días por defecto y también en Traccar (DEF-053); scripts para base externa con TLS (`scripts/db.sh`) y `db_maxconn` dentro del límite del pooler (DEF-054); panel de Traccar sólo desde las IP permitidas (DEF-055); Odoo guarda un token de Traccar en lugar de la contraseña.
+- Fase 40: espera tras fallos de login que se duplica hasta una hora, `auth_totp` instalado, límite por usuario en la tableta y versión del health sólo para el personal (DEF-056).
+- Fase 41: "No signal" sólo con turno (DEF-057), la tableta envía las posiciones guardadas antes de cerrar el turno (DEF-058), incidentes aceptados hasta 2 h después del cierre (DEF-059), alertas concurrentes sin error, un evento por viaje, parada y tipo, y el simulador aislado de los datos reales.
+- Fase 42: cambiar de servidor cierra la sesión (DEF-061), la credencial de otro servidor sólo lo cambia si la acepta, el GPS sólo por `https` fuera de la red local (DEF-062), latido basado en la última posición y aviso cuando la cámara del sistema abre la app.
+- Fase 43: asistente para que un manager no administrador gestione choferes (DEF-060, confirmado con un test), menú de choferes sólo para managers, registro de GPS sólo para managers, sesiones revocadas al cambiar la contraseña y credencial QR mostrada una vez sin guardarse (migración 16.0.1.8.0).
+- Fase 44: auditoría de sincronización con dos consultas por bus, purga del historial (365 días), recorrido del mapa limitado a 2 000 puntos, conteo diario de posiciones para Grafana y push con presupuesto de tiempo.
+- Fase 45: perfil `production` para iOS real y URL desde el entorno de EAS, `node-forge` 1.4.3, exportación del bundle y cobertura en el CI.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo (como el CI, Postgres 15) | 579 de 579 |
+| Cobertura de Python bajo la suite | 97 % de las líneas del módulo (sin pruebas ni migraciones) |
+| flake8 del módulo | 0 avisos |
+| App: Jest, `tsc` y ESLint | 179 de 179, sin errores |
+| App: `npx expo export --platform android` | Bundle generado |
+| `qa/traducciones.py` | 0 entradas sin traducir |
+| `scripts/db.sh` contra un Postgres con TLS que imita Supabase | Crea, respalda y restaura |
+| `kpi_positions_daily` con 1 000 000 de posiciones | 340 ms antes, 1,7 ms después |
+
+### Problemas encontrados
+
+- El hallazgo B3 era en parte falso: Odoo 16 ya limitaba los intentos por dirección. Se endureció en vez de crearlo.
+- Imponer el 2FA exige correo, y el sistema no lo usa: queda opcional por usuario.
+- `npm audit fix` reescribía el lockfile y subía el total de avisos. Quedan `glob`, `minimatch` y `picomatch`, de herramientas de build; `picomatch` no tiene versión corregida.
+- Evitar que Grafana se recargue al renovar el token (W4) depende de cómo trate Grafana la sesión del `auth_token`: queda documentado como limitación.
+
+### Pendiente o sin confirmar
+
+- Fase 46: VM Linux con dominios y Let's Encrypt, proyecto real de Supabase, jornada con dos tabletas, carga de 50 buses y `qa/ejecutar_todo.sh`. Sin ella no hay `v1.0.0-rc1`.
+- Generar e imprimir una credencial QR nueva para cada chofer después de actualizar a 16.0.1.8.0.
+- Nada se subió a `origin`: `develop` va por delante y `main` no se tocó.
