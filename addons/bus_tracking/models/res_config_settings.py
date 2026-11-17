@@ -3,6 +3,8 @@ import re
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
+from .bus_position import DEFAULT_RETENTION_DAYS
+
 
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
@@ -25,7 +27,7 @@ class ResConfigSettings(models.TransientModel):
              "driver has it on an open shift.")
     traccar_webhook_secret = fields.Char(string="Webhook secret", config_parameter='bus_tracking.webhook_secret')
     bus_position_retention_days = fields.Integer(
-        string="Keep positions (days)", config_parameter='bus_tracking.retention_days', default=30,
+        string="Keep positions (days)", config_parameter='bus_tracking.retention_days', default=DEFAULT_RETENTION_DAYS,
         help="Older positions are deleted daily. 0 keeps everything.")
     bus_stale_minutes = fields.Integer(
         string="Report as down after (minutes)", config_parameter='bus_tracking.stale_minutes', default=10,

@@ -81,6 +81,13 @@ class BusTraccarApi(models.AbstractModel):
             'deviceId': device_id, 'from': since.strftime(stamp), 'to': until.strftime(stamp)}) or []
 
     @api.model
+    def delete_positions(self, device_id, until):
+        """Delete the positions Traccar holds for a device before a UTC datetime."""
+        stamp = '%Y-%m-%dT%H:%M:%SZ'
+        return self._call('delete', '/positions', params={
+            'deviceId': device_id, 'from': '1970-01-01T00:00:00Z', 'to': until.strftime(stamp)})
+
+    @api.model
     def create_device(self, name, unique_id):
         return self._call('post', '/devices', json={'name': name, 'uniqueId': unique_id})
 
