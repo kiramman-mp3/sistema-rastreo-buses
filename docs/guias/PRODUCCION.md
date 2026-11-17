@@ -7,11 +7,13 @@ Guía para instalar y operar el sistema en un servidor. Todo lo de esta página 
 - Un servidor Linux con Docker y Docker Compose v2.
 - Dos nombres DNS que apunten al servidor, por ejemplo `buses.tuempresa.cl` (Odoo) y `gps.tuempresa.cl` (a donde la tableta envía la posición OsmAnd).
 - Puertos abiertos hacia internet: solo 80 y 443. Los celulares también entran por HTTPS (443).
-- Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza. El panel de Traccar no se expone.
+- Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza.
+- **Ojo:** hoy el proxy sí publica el panel de Traccar en `TRACCAR_DOMAIN`, y si esa variable falta el compose usa `traccar.20.119.213.192.nip.io`. Mientras no se cierre DEF-055 (fase 39 de `docs/arquitectura/PLAN-AUDITORIA-2.md`), define `TRACCAR_DOMAIN` con un nombre propio y protege ese dominio, o quita el bloque `{$TRACCAR_DOMAIN}` de `proxy/Caddyfile`.
 
 ### Base de datos: local o Supabase
 
-- **Local (recomendado para empezar)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual.
+- **Local (recomendado para empezar)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db,bi` (o `local-db` sin Grafana) en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
+- `.env.prod.example` trae hoy los valores de Supabase. Si usas la base local, deja `DB_HOST` vacío y quita `TRACCAR_DATABASE_URL`.
 - **Externa (Supabase u otra)**: pon `DB_HOST`, `DB_USER`, `TRACCAR_DATABASE_URL` y `TRACCAR_DB_USER` del proveedor (el ejemplo trae marcadores `TU_PROYECTO`). Las bases y los usuarios se crean en la consola del proveedor, los respaldos los hace el proveedor y `reset-prod.sh` se niega a correr.
 
 ## Instalación
@@ -33,6 +35,8 @@ La segunda ejecución:
 
 Es seguro repetirla: no sobrescribe `.env.prod`, la configuración ni las bases existentes.
 
+**Retención de posiciones:** el script no la fija y, sin el parámetro, el cron no borra nada (DEF-053). Hasta que se cierre la fase 39, abre *Ajustes > Rastreo de buses*, revisa *Conservar posiciones (días)* y pulsa **Guardar** una vez: así queda fijado el plazo que muestra la pantalla (30 días por defecto).
+
 Después, a mano:
 
 1. Entra a `https://<DOMAIN>` como `admin` con la contraseña que mostró el script y cámbiala.
@@ -49,7 +53,7 @@ No hace falta tocar el panel de Traccar: el script crea su cuenta de administrad
 | Secretos | Aleatorios, en `.env.prod` (no se versiona). Contraseña maestra de Odoo guardada como hash. |
 | Webhook | Traccar lo llama por la red interna de Docker con el secreto en la cabecera `X-Webhook-Secret`, para que no quede en los logs. El proxy devuelve 404 si alguien lo pide desde internet. |
 | Base de datos de Odoo | `list_db = False`, `dbfilter` fijo, y `/web/database/*` bloqueado en el proxy. |
-| Traccar | Usa Postgres (no la base H2 de pruebas), con un usuario propio. El panel solo se ve por el proxy. |
+| Traccar | Usa Postgres (no la base H2 de pruebas), con un usuario propio. El panel se publica por el proxy en `TRACCAR_DOMAIN` (ver Requisitos). |
 | Odoo | 2 workers, límites de memoria y de tiempo, código montado en solo lectura. |
 | Logs | Rotación de 10 MB x 5 archivos por servicio. |
 | Salud | Healthchecks en Postgres, Odoo y Traccar; `restart: unless-stopped`. |
@@ -171,11 +175,30 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 - Carga con muchos buses.
 - `eas build` de producción (hace falta cuenta Expo y firmar el APK).
 
+## Riesgos abiertos (auditoría del 17-nov-2026)
+
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Antes de un piloto deben cerrarse las fases 38 a 40:
+
+| Defecto | Riesgo | Medida provisional |
+|---|---|---|
+| DEF-051 | XSS guardado en el portal público por el nombre de una parada | No importar GPX de origen desconocido; revisar los nombres de las paradas |
+| DEF-052 | La tableta puede perder un SOS guardado sin señal | Ante un SOS, confirmar por radio o teléfono |
+| DEF-053 | Las posiciones no se purgan | Pulsar *Guardar* en Ajustes (ver Instalación) |
+| DEF-054 | La base local no arranca tras `down` y `up` | `COMPOSE_PROFILES=local-db,bi` |
+| DEF-055 | Panel de Traccar público | Ver Requisitos |
+| DEF-056 | Login del panel sin límite ni 2FA | Contraseñas largas y `fail2ban` en el host |
+| DEF-057 | Falsa alerta "No signal" tras cada turno | Ignorarla si el bus no tiene turno |
+| DEF-058, DEF-059 | Se pierden posiciones e incidentes guardados sin señal al cerrar el turno | Terminar el turno con señal |
+
 ## Limitaciones conocidas
 
 - El identificador del dispositivo es la única credencial del protocolo OsmAnd: quien lo conozca puede enviar posiciones falsas de ese bus. Es aleatorio y solo lo ven los administradores; si se filtra, hay que registrar el bus de nuevo (hoy no hay un botón para rotarlo).
 - Solo se admite el protocolo OsmAnd (la app de tableta). Los GPS físicos con otros protocolos exigirían abrir su puerto en el servidor y en la red de Azure, y esos no van cifrados.
 - El login de choferes (`/bus_tracking/driver/login`) sí tiene límite de intentos; el login del panel de Odoo no.
 - El usuario de base de datos de Odoo es superusuario de Postgres (el patrón de la imagen oficial).
-- No hay límite de intentos de login, ni autenticación en dos pasos, ni bloqueo de IPs (por ejemplo con fail2ban).
+- No hay límite de intentos de login, ni autenticación en dos pasos, ni bloqueo de IPs (por ejemplo con fail2ban). Plan: fase 40.
+- La contraseña del administrador de Traccar se guarda en claro en los parámetros de Odoo y el token de la credencial QR del chofer queda en la base durante 365 días (sólo lo leen los managers).
+- El token de Grafana viaja en la URL del iframe y dura 8 horas.
+- La base de Traccar no purga sus posiciones.
+- El perfil `production` de `eas.json` tiene `ios.simulator: true`: no sirve para iPhone o iPad reales.
 - Los respaldos no se copian fuera del servidor automáticamente.
