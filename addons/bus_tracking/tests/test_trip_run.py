@@ -116,8 +116,12 @@ class TestTripRun(RunCase):
     def test_missing_the_first_stop_still_counts_the_others(self):
         self.at(3, BETWEEN, 10)                         # starts on the road, never entered the Terminal
         self.at(10, PLAZA)
-        self.at(25, HOSPITAL)
         trip = self.trip_
+        # Reaching the Plaza already tells the Terminal was skipped, before the trip ends.
+        self.assertEqual((trip.state, self.line('Terminal').status), ('running', 'skipped'))
+        alert = self.env['bus.alert'].search([('trip_id', '=', trip.id), ('kind', '=', 'skipped_stop')])
+        self.assertEqual(alert.stop_id, self.stop['Terminal'])
+        self.at(25, HOSPITAL)
         self.assertEqual(trip.state, 'incomplete')
         self.assertEqual(self.line('Terminal').status, 'skipped')
         self.assertEqual((self.line('Plaza').status, self.line('Hospital').status), ('on_time', 'on_time'))

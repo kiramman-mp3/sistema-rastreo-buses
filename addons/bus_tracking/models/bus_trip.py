@@ -343,6 +343,11 @@ class BusTrip(models.Model):
         })
         if self.state == 'planned':
             self.write({'state': 'running', 'real_start': arrival.arrival_time})
+        # The stops before this one that the bus never reached were skipped: say so now, not at the end of the trip.
+        behind = lines.filtered(lambda ln: ln.sequence < line.sequence and ln.status == 'pending')
+        behind.write({'status': 'skipped'})
+        for missed in behind:
+            self.env['bus.alert']._trip_event(self, 'skipped_stop', arrival.arrival_time, stop_id=missed.stop_id.id)
         if line.status == 'late':
             self.env['bus.alert']._trip_event(
                 self, 'late_arrival', arrival.arrival_time,
