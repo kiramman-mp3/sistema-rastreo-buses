@@ -250,6 +250,10 @@ class BusAlert(models.Model):
             return
         push = self.env['bus.push.subscription']
         for alert in pending:
+            if alert.vehicle_id.simulated:
+                # A replayed trip is a test: nobody must be woken up for it.
+                alert.notified = True
+                continue
             kind = dict(alert._fields['kind']._description_selection(self.env))[alert.kind]
             payload = {
                 'title': '%s: %s' % (kind, alert.vehicle_id.name),
