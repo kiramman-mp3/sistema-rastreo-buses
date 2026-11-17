@@ -199,7 +199,7 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 ## Riesgos abiertos (auditoría del 17-nov-2026)
 
-La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 43 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Faltan la fase 44 (carga y purga), la 45 (build y dependencias) y, sobre todo, la 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 44 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes, carga y purga) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Faltan la fase 45 (build y dependencias) y, sobre todo, la 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
 
 ## Limitaciones conocidas
 
@@ -209,6 +209,7 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 - El segundo factor (2FA) es opcional para cada usuario: Odoo sólo sabe imponerlo por correo y el sistema no usa correo. Pide a cada administrador y manager que lo active (ver *Acceso al panel*).
 - Los contadores de intentos de login viven en la memoria de cada worker: se reinician al reiniciar Odoo.
 - El token de API de Traccar se guarda en la base y sólo lo leen los administradores. Quien tenga una copia de la base puede usarlo: revócalo en Traccar si se filtra. De las credenciales QR y de las sesiones de la tableta sólo se guarda la huella.
-- El token de Grafana viaja en la URL del iframe y dura 8 horas.
+- El token de Grafana viaja en la URL del iframe (queda en los logs del proxy y de Grafana) y dura lo que fije *Ajustes* (8 h por defecto). Al renovarlo, el panel se recarga y pierde filtros y zoom. Si los logs no son de confianza, acorta la duración.
+- Los conteos diarios de posiciones de Grafana se actualizan cada 30 minutos (cron *contar posiciones por día*): el día en curso puede ir hasta media hora atrasado.
 - El perfil `production` de `eas.json` tiene `ios.simulator: true`: no sirve para iPhone o iPad reales.
 - Los respaldos no se copian fuera del servidor automáticamente.

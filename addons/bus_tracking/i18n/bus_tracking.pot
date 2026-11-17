@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0-20250909\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-17 20:53+0000\n"
-"PO-Revision-Date: 2026-11-17 20:53+0000\n"
+"POT-Creation-Date: 2026-11-17 21:15+0000\n"
+"PO-Revision-Date: 2026-11-17 21:15+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -691,6 +691,12 @@ msgid "Bus Tracking: compare Traccar and Odoo positions"
 msgstr ""
 
 #. module: bus_tracking
+#: model:ir.actions.server,name:bus_tracking.cron_count_positions_ir_actions_server
+#: model:ir.cron,cron_name:bus_tracking.cron_count_positions
+msgid "Bus Tracking: count positions per day"
+msgstr ""
+
+#. module: bus_tracking
 #: model:ir.actions.server,name:bus_tracking.cron_generate_trips_ir_actions_server
 #: model:ir.cron,cron_name:bus_tracking.cron_generate_trips
 msgid "Bus Tracking: create the scheduled trips of the next days"
@@ -1042,6 +1048,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__create_uid
@@ -1077,6 +1084,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__create_date
@@ -1326,6 +1334,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_kpi_views__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__display_name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__display_name
@@ -1505,6 +1514,11 @@ msgstr ""
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_stop__status__early
 #, python-format
 msgid "Early"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_position_day__local_day
+msgid "Ecuador date (UTC-5)."
 msgstr ""
 
 #. module: bus_tracking
@@ -1930,6 +1944,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_kpi_views__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__id
@@ -2082,6 +2097,11 @@ msgid "Is a driver"
 msgstr ""
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_history_retention_days
+msgid "Keep history (days)"
+msgstr ""
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_position_retention_days
 msgid "Keep positions (days)"
 msgstr ""
@@ -2170,6 +2190,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_kpi_views____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position____last_update
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route____last_update
@@ -2204,6 +2225,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__write_uid
@@ -2232,6 +2254,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__write_date
@@ -2431,6 +2454,11 @@ msgstr ""
 #: code:addons/bus_tracking/static/src/xml/grafana.xml:0
 #, python-format
 msgid "Loading…"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__local_day
+msgid "Local Day"
 msgstr ""
 
 #. module: bus_tracking
@@ -2774,7 +2802,9 @@ msgstr ""
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_position_retention_days
-msgid "Older positions are deleted daily. 0 keeps everything."
+msgid ""
+"Older positions are deleted daily, with the rejected positions and the "
+"synchronisation audits. 0 keeps everything."
 msgstr ""
 
 #. module: bus_tracking
@@ -3107,12 +3137,18 @@ msgstr ""
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_position
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__positions
 msgid "Positions"
 msgstr ""
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_sync_audit__total
 msgid "Positions Traccar has that Odoo should have kept."
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_position_day
+msgid "Positions per day"
 msgstr ""
 
 #. module: bus_tracking
@@ -3439,6 +3475,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__route_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__route_id
@@ -3770,6 +3807,7 @@ msgid "Simulate trips"
 msgstr ""
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__simulated
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__simulated
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__simulated
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
@@ -3856,6 +3894,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__speed
 #, python-format
 msgid "Speed"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__speed_sum
+msgid "Speed Sum"
 msgstr ""
 
 #. module: bus_tracking
@@ -3948,6 +3991,14 @@ msgstr ""
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_stop_arrival
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_stop_arrival
 msgid "Stop arrivals"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_history_retention_days
+msgid ""
+"Stop arrivals, closed alerts, incidents already seen, finished trips and "
+"closed shifts older than this are deleted daily. Open alerts and unseen "
+"incidents are kept. 0 keeps everything."
 msgstr ""
 
 #. module: bus_tracking
@@ -4050,6 +4101,11 @@ msgstr ""
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
 msgid "Stops with the largest average delay (min)"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_position_day__speed_sum
+msgid "Sum of the speeds (km/h), for the daily average."
 msgstr ""
 
 #. module: bus_tracking

@@ -4,6 +4,7 @@ from datetime import timedelta
 from odoo import fields
 from odoo.tests import HttpCase, tagged
 
+from ..controllers.main import MAX_TRACK_POINTS, thin_out
 from .common import traccar_position
 
 WEBHOOK = '/bus_tracking/traccar/webhook'
@@ -200,6 +201,14 @@ class TestHttp(HttpCase):
         bad = self.track(vehicle_id='x')
         self.assertIn('error', bad)
         self.assertNotIn('Overflow', json.dumps(bad))
+
+    def test_a_long_track_is_thinned_out_and_ends_where_the_bus_is(self):
+        rows = [{'latitude': float(i), 'longitude': 0.0} for i in range(10000)]
+        thin = thin_out(rows, MAX_TRACK_POINTS)
+        self.assertEqual(len(thin), MAX_TRACK_POINTS)
+        self.assertEqual((thin[0], thin[-1]), (rows[0], rows[-1]))
+        self.assertEqual(len({row['latitude'] for row in thin}), MAX_TRACK_POINTS)
+        self.assertEqual(thin_out(rows[:5], MAX_TRACK_POINTS), rows[:5])
 
     def test_webhook_still_accepts_the_secret_in_the_url_for_now(self):
         self.assertEqual(self.post().status_code, 200)
