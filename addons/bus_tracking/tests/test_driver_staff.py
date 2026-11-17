@@ -88,3 +88,14 @@ class TestDriverStaff(TransactionCase):
         menu = self.env.ref('bus_tracking.menu_bus_driver')
         self.assertEqual(menu.groups_id, self.env.ref('bus_tracking.group_bus_manager'))
 
+    def test_a_new_password_signs_the_tablets_out_and_keeps_the_badge(self):
+        Token = self.env['bus.driver.token']
+        session = Token._issue(self.driver, 'tablet')
+        badge = Token._issue_badge(self.driver)
+        self.driver.write({'driver_password': 'clave-cambiada-9'})
+        self.assertFalse(Token._user_for(session))
+        self.assertEqual(Token._user_for_badge(badge), self.driver)
+        # Any other change keeps the session.
+        session = Token._issue(self.driver, 'tablet')
+        self.driver.write({'phone': '0999999999'})
+        self.assertEqual(Token._user_for(session), self.driver)

@@ -74,7 +74,14 @@ class ResUsers(models.Model):
     def write(self, vals):
         if vals.get('driver_password'):
             vals['password'] = vals.pop('driver_password')
-        return super(ResUsers, self.with_context(no_reset_password=True)).write(vals)
+        result = super(ResUsers, self.with_context(no_reset_password=True)).write(vals)
+        if vals.get('password'):
+            # A new password must lock out whoever had the old one: tablets signed in with it sign in again.
+            # The QR badge is a separate credential and is kept.
+            Token = self.env['bus.driver.token']
+            for user in self:
+                Token._revoke_sessions(user)
+        return result
 
     def _compute_is_bus_driver(self):
         driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
