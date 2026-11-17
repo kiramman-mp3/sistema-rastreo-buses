@@ -209,6 +209,7 @@ class BusVehicle(models.Model):
                 'arrival_time': when,
             })
             self.env['bus.trip']._on_arrival(arrival)
+            self.env['bus.alert']._on_stop_reached(arrival)
         if nearest != self.current_stop_id:
             self.current_stop_id = nearest
             self.env['bus.run']._on_stop_change(self, previous, nearest or self.env['bus.route.stop'], when)

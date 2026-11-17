@@ -57,6 +57,7 @@ const es = {
   alert_offline: 'sin señal',
   alert_long_stop: 'Parada larga',
   alert_off_route: 'Fuera de ruta',
+  alert_skipped_stop: 'Parada no pasada',
   update_error: 'No pudimos actualizar. Reintentando…',
   map_label: 'Mapa con los buses de la ruta',
   scanQr: 'Leer código QR',
@@ -199,6 +200,7 @@ const en: typeof es = {
   alert_offline: 'no signal',
   alert_long_stop: 'Long stop',
   alert_off_route: 'Off route',
+  alert_skipped_stop: 'Skipped stop',
   update_error: "We couldn't update. Retrying…",
   map_label: 'Map with the buses of the route',
   scanQr: 'Scan QR code',
@@ -341,6 +343,7 @@ const qu: typeof es = {
   alert_offline: 'mana rikurin',
   alert_long_stop: 'Unay sayashka',
   alert_off_route: 'Ñanmanta llukshishka',
+  alert_skipped_stop: 'Sayanata yallishka',
   update_error: 'Mana musuyachiy ushashkanchu. Kutin ruranchik…',
   map_label: 'Ñanpi bus kunapa mapa',
   scanQr: 'QR killkata ñawinchiy',
@@ -484,6 +487,7 @@ export function alertLabel(kind: string): string {
   if (kind === 'offline') return capitalize(t('alert_offline'));
   if (kind === 'long_stop') return capitalize(t('alert_long_stop'));
   if (kind === 'off_route') return capitalize(t('alert_off_route'));
+  if (kind === 'skipped_stop') return capitalize(t('alert_skipped_stop'));
   return kind;
 }
 

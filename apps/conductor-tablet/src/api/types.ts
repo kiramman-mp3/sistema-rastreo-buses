@@ -45,7 +45,7 @@ export type StopState = {
 
 export type Alert = {
   id: number;
-  kind: 'speeding' | 'offline' | 'long_stop' | 'off_route' | string;
+  kind: 'speeding' | 'offline' | 'long_stop' | 'off_route' | 'skipped_stop' | string;
   state: 'open' | 'closed' | string;
   detail: string;
   start: string;

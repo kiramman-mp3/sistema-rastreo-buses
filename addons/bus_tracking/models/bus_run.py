@@ -6,8 +6,8 @@ STALE_AFTER = timedelta(hours=12)
 
 
 class BusRun(models.Model):
-    """One trip between the two ends of a route, written by the system from the bus positions:
-    it starts when the bus leaves an end and finishes when it reaches the other one."""
+    """One trip towards an end of a route, written by the system from the bus positions: it starts when the bus
+    leaves a stop (an end, or any other when the bus did not start at an end) and finishes when it reaches an end."""
     _name = 'bus.run'
     _description = 'Bus Run'
     _order = 'departure desc, id desc'
@@ -46,7 +46,7 @@ class BusRun(models.Model):
             else:
                 run.write({'state': 'done', 'arrival': when, 'destination_stop_id': current.id})
             running = self.browse()
-        if previous in ends and current != previous and current not in ends and not running:
+        if previous in stops and current != previous and current not in ends and not running:
             self.create({
                 'vehicle_id': vehicle.id,
                 'route_id': vehicle.route_id.id,
