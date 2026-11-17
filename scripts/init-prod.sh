@@ -30,6 +30,9 @@ esac
 
 ODOO_DB="${ODOO_DB:-buses}"
 ODOO_LANG="${ODOO_LANG:-}"
+. scripts/db.sh
+# Odoo talks TLS to an external database (Supabase); the local container has no certificate.
+if is_external_db; then DB_SSLMODE=require; else DB_SSLMODE=prefer; fi
 
 if [ ! -f "$CONF" ]; then
   MASTER_PASSWORD=$(rand 28)
@@ -49,25 +52,26 @@ limit_memory_soft = 1073741824
 limit_memory_hard = 1342177280
 limit_time_cpu = 120
 limit_time_real = 240
+db_maxconn = 8
+db_sslmode = $DB_SSLMODE
 log_level = info
 EOF
   echo "Created $CONF. Odoo master password (shown once, store it in a password manager): $MASTER_PASSWORD"
 fi
 
-$DC up -d db
-echo "Waiting for Postgres..."
-until $DC exec -T db pg_isready -U odoo -d postgres >/dev/null 2>&1; do sleep 2; done
+echo "Waiting for Postgres ($DB_HOST)..."
+wait_for_db
 
-psql_admin() { $DC exec -T db psql -U odoo -d postgres -v ON_ERROR_STOP=1 "$@"; }
-
-if [ -z "$(psql_admin -tAc "SELECT 1 FROM pg_roles WHERE rolname='traccar'")" ]; then
+# Traccar has its own database. Locally it also has its own user; on Supabase it uses the account's user
+# (TRACCAR_DB_USER = DB_USER in .env.prod), since only that one can own databases there.
+if ! is_external_db && [ -z "$(psql_admin -tAc "SELECT 1 FROM pg_roles WHERE rolname='traccar'")" ]; then
   psql_admin -c "CREATE ROLE traccar LOGIN PASSWORD '$TRACCAR_DB_PASSWORD'"
 fi
-if [ -z "$(psql_admin -tAc "SELECT 1 FROM pg_database WHERE datname='traccar'")" ]; then
-  psql_admin -c "CREATE DATABASE traccar OWNER traccar"
+if ! db_exists traccar; then
+  create_db traccar traccar
 fi
 
-if [ -z "$(psql_admin -tAc "SELECT 1 FROM pg_database WHERE datname='$ODOO_DB'")" ]; then
+if ! db_exists "$ODOO_DB"; then
   INSTALL_ARGS="-d $ODOO_DB -i bus_tracking --stop-after-init --without-demo=all"
   if [ -n "$ODOO_LANG" ]; then INSTALL_ARGS="$INSTALL_ARGS --load-language=$ODOO_LANG"; fi
   $DC run --rm -T odoo odoo $INSTALL_ARGS
@@ -94,11 +98,7 @@ $DC up -d
 if [ "${COMPOSE_PROFILES:-}" != "${COMPOSE_PROFILES/bi/}" ] && [ -n "${GRAFANA_DOMAIN:-}" ]; then
   # The views of the indicators are created by the module: update it so they exist before the role reads them.
   $DC run --rm -T odoo odoo -d "$ODOO_DB" -u bus_tracking --stop-after-init
-  if [ "${DB_HOST:-db}" = "db" ]; then
-    GRAFANA_DB_PASSWORD="$GRAFANA_DB_PASSWORD" ODOO_DB="$ODOO_DB" COMPOSE="$DC" scripts/grafana-role.sh
-  else
-    echo "External database: run scripts/grafana-role.sh with PSQL set to a superuser connection (docs/guias/GRAFANA.md)."
-  fi
+  GRAFANA_DB_PASSWORD="$GRAFANA_DB_PASSWORD" ODOO_DB="$ODOO_DB" COMPOSE="$DC" scripts/grafana-role.sh
   $DC run --rm -T -e GRAFANA_URL="https://$GRAFANA_DOMAIN" -e GRAFANA_SECRET="$GRAFANA_JWT_SECRET" odoo odoo shell -d "$ODOO_DB" --log-level=error <<'EOF'
 import os
 icp = env['ir.config_parameter']
