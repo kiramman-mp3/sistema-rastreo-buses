@@ -9,7 +9,7 @@ Ocho características y sus subcaracterísticas.
 | Característica | Subcaracterística | Nivel | Evidencia |
 |---|---|---|---|
 | Adecuación funcional | Completitud funcional | Cumple | Mapa, portal, quejas, push, turnos y app del chofer, **horarios y asignación, recorridos programados, reglas de incumplimiento, 12 indicadores, tablero en Odoo y Grafana y Fleet** (`docs/calidad/19-matriz-de-trazabilidad.md`); el kichwa está sin revisión de una persona hablante |
-| | Corrección funcional | Cumple | 544 pruebas de Odoo, 167 de la app y 47 casos en vivo pasan; los 12 recorridos simulados dan lo esperado (12 de 12); 48 defectos, ninguno abierto |
+| | Corrección funcional | Parcial | 544 pruebas de Odoo, 167 de la app y 47 casos en vivo pasan; los 12 recorridos simulados dan lo esperado (12 de 12). La segunda auditoría (17-nov) abrió 12 defectos (DEF-051 a DEF-062), entre ellos pérdida de un SOS en cola, de posiciones al cerrar el turno y una falsa alerta tras cada turno; su corrección está en `docs/arquitectura/PLAN-AUDITORIA-2.md` |
 | | Pertinencia funcional | Parcial | Recorridos automáticos y pasajero sin login, como pidió el cliente; sin validar con personas usuarias |
 | Eficiencia de desempeño | Comportamiento temporal | Cumple | Media de 0,036 s en la auditoría; p95 de cada pantalla menor que 160 ms hasta 100 000 posiciones y 5 000 recorridos y de 704 ms con 1 000 000 y 50 000 (`17-rendimiento-por-volumen.md`); P7 (un bus, 20 hilos) está en el límite de 2 s |
 | | Uso de recursos | No evaluado | No se midió CPU ni memoria |
@@ -26,8 +26,8 @@ Ocho características y sus subcaracterísticas.
 | | Disponibilidad | No evaluado | Hay `/health` y healthchecks; no se midió en un servidor real |
 | | Tolerancia a fallos | Parcial | Cron de respaldo del webhook; sobrevive a errores de Traccar (`test_cron_survives_traccar_errors`); falla ante datos mal formados |
 | | Capacidad de recuperación | Cumple | Respaldo y restauración (en base paralela y completa) probados |
-| Seguridad | Confidencialidad | Parcial | Privacidad por diseño, contacto restringido y borrado a 90 días, límite de login de la tableta, choferes de portal sin acceso al panel, credencial QR legible sólo por administradores y token de la tableta sólo en el almacén seguro (auditoría del 2-nov). En contra: una contraseña de producción quedó en el historial público (DEF-013, abierto) y no hay 2FA |
-| | Integridad | Parcial | Restricciones únicas (también nombre del bus), `@api.constrains` en quejas, paradas, color y posiciones; duplicados concurrentes sin error (DEF-019); posiciones de buses sin turno descartadas (DEF-017). Falta repetir la auditoría en vivo con el código nuevo |
+| Seguridad | Confidencialidad | Parcial | Privacidad por diseño, contacto restringido y borrado a 90 días, límite de login de la tableta, choferes de portal sin acceso al panel, credencial QR legible sólo por administradores y token de la tableta sólo en el almacén seguro (auditoría del 2-nov). La contraseña que quedó en el historial se rotó y el historial se reescribió (DEF-013, cerrado). En contra (auditoría del 17-nov): XSS guardado en el portal con nombres de paradas (DEF-051), panel de Traccar público (DEF-055), login del panel sin límite ni 2FA (DEF-056) y credencial QR guardada en claro, legible por managers |
+| | Integridad | Parcial | Restricciones únicas (también nombre del bus), `@api.constrains` en quejas, paradas, color y posiciones; duplicados concurrentes sin error (DEF-019); posiciones de buses sin turno descartadas (DEF-017). En contra: la tableta pierde un SOS en cola por una carrera (DEF-052) y las posiciones guardadas sin señal al cerrar el turno (DEF-058); las posiciones no se purgan en una instalación nueva (DEF-053) |
 | | No repudio | No evaluado | |
 | | Responsabilidad (accountability) | No evaluado | Odoo guarda autor y fecha de cada registro; no se evaluó como control |
 | | Autenticidad | Parcial | Secreto del webhook en tiempo constante (por URL, obsoleto), login de Odoo, permisos comprobados en el método y no sólo en la vista (DEF-011), credencial QR separada de la sesión (DEF-015) y la app sólo acepta servidores https o confirma el cambio; el identificador del celular sigue siendo la única credencial del GPS |
@@ -37,7 +37,7 @@ Ocho características y sus subcaracterísticas.
 | | Modificabilidad | Cumple | Umbrales, marca, mapa y retención se cambian en Ajustes; cobertura de 95,9 % en Python (78,4 % en todo el código según SonarQube) protege los cambios |
 | | Capacidad de ser probado | Cumple | 544 + 167 pruebas, 47 casos en vivo, la auditoría y la prueba de humo de Grafana; los límites en memoria exigen reiniciar para medir |
 | Portabilidad | Adaptabilidad | Parcial | Configurable por Ajustes e idiomas por diccionario |
-| | Instalabilidad | Cumple | `docker compose up` y `scripts/init-prod.sh`, repetidos desde cero |
+| | Instalabilidad | Parcial | `docker compose up` y `scripts/init-prod.sh`, repetidos desde cero; pero en producción la base local no vuelve a arrancar tras un `down` y `up -d` (DEF-054) y nunca se instaló en un servidor Linux con Let's Encrypt |
 | | Capacidad de reemplazo | No evaluado | |
 
 **Resumen:** de 31 subcaracterísticas, 19 parcial, 7 cumple, 5 no evaluado.
