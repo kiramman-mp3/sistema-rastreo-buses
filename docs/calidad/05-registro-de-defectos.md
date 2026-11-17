@@ -70,8 +70,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-060 | 17-nov-2026 | Segunda auditoría integral (Z1, inferido) | Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes | views/bus_driver_views.xml, security/security.xml | Cerrado |
 | DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Cerrado |
 | DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Cerrado |
+| DEF-063 | 17-nov-2026 | Reporte del usuario tras el despliegue en Azure | Si el bus no pasa por la primera parada, la tableta la sigue mostrando como próxima y no avanza con las demás | models/bus_shift.py, models/bus_alert.py, models/bus_trip.py, models/bus_run.py | Cerrado |
 
-Resumen: 62 registrados, 62 cerrados (100 %), 0 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 63 registrados, 63 cerrados (100 %), 0 abiertos. Densidad: 12,5 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -446,6 +447,12 @@ Resumen: 62 registrados, 62 cerrados (100 %), 0 abiertos. Densidad: 12,3 defecto
 - **Causa raíz:** La validación de Ajustes admite http y la tableta completa con http:// sin comprobar el esquema.
 - **Categoría:** Validación de entrada
 - **Prueba que lo protege:** test_driver_shift: los ajustes rechazan http fuera de la red local y el inicio de turno no entrega el identificador a una dirección http; osmand.test.ts: la tableta no envía a http externo
+
+### DEF-063: Si el bus no pasa por la primera parada, la tableta la sigue mostrando como próxima y no avanza con las demás
+
+- **Causa raíz:** La próxima parada era la primera sin llegada en orden, no la que sigue a la más lejana alcanzada; las paradas saltadas sólo se avisaban al cerrar un viaje programado y nunca en un turno sin horario; un recorrido sólo empezaba en un extremo.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_driver_shift: empezar en la cuarta parada sigue con la quinta y avisa de las tres anteriores; test_trip_run: el viaje marca la primera parada saltada en cuanto llega a la segunda; test_runs: un recorrido empieza en una parada intermedia
 
 ## 3. Qué falta para cerrar los abiertos
 

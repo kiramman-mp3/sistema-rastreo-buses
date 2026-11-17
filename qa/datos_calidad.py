@@ -275,6 +275,9 @@ DEFECTOS = [
     ('DEF-062', '17-nov-2026', 'Segunda auditoría integral (Y3)', 'La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar',
      'models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts', 'La validación de Ajustes admite http y la tableta completa con http:// sin comprobar el esquema.',
      'Validación de entrada', 'Cerrado', 'test_driver_shift: los ajustes rechazan http fuera de la red local y el inicio de turno no entrega el identificador a una dirección http; osmand.test.ts: la tableta no envía a http externo'),
+    ('DEF-063', '17-nov-2026', 'Reporte del usuario tras el despliegue en Azure', 'Si el bus no pasa por la primera parada, la tableta la sigue mostrando como próxima y no avanza con las demás',
+     'models/bus_shift.py, models/bus_alert.py, models/bus_trip.py, models/bus_run.py', 'La próxima parada era la primera sin llegada en orden, no la que sigue a la más lejana alcanzada; las paradas saltadas sólo se avisaban al cerrar un viaje programado y nunca en un turno sin horario; un recorrido sólo empezaba en un extremo.',
+     'Lógica', 'Cerrado', 'test_driver_shift: empezar en la cuarta parada sigue con la quinta y avisa de las tres anteriores; test_trip_run: el viaje marca la primera parada saltada en cuanto llega a la segunda; test_runs: un recorrido empieza en una parada intermedia'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
