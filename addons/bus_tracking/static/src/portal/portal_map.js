@@ -45,9 +45,16 @@
         });
     }
 
+    // Leaflet inserts a string tooltip as HTML; stop names can come from an imported GPX, so pass text.
+    function textNode(text) {
+        var span = document.createElement("span");
+        span.textContent = String(text || "");
+        return span;
+    }
+
     var stopMarkers = stops.map(function (stop, index) {
         var marker = L.marker([stop.lat, stop.lon], { icon: stopIcon(false), title: stop.name, keyboard: true })
-            .bindTooltip(stop.name, { direction: "top", offset: [0, -12] })
+            .bindTooltip(textNode(stop.name), { direction: "top", offset: [0, -12] })
             .addTo(map);
         marker.on("click", function () {
             document.dispatchEvent(new CustomEvent("buses-uta:elegir", { detail: { code: code, index: index } }));

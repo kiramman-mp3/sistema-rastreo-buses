@@ -25,6 +25,31 @@ export function memoryKv(initial: Record<string, string> = {}): KeyValue {
   };
 }
 
+/** Runs the tasks given to it one after another, so two writers never save over each other. */
+export class Lock {
+  private chain: Promise<unknown> = Promise.resolve();
+
+  run<T>(task: () => Promise<T>): Promise<T> {
+    const run = this.chain.then(task, task);
+    this.chain = run.catch(() => undefined);
+    return run;
+  }
+}
+
+/** `current` without the items of `sent` (compared by content): what is left after a send, plus what arrived meanwhile. */
+export function withoutSent<T>(current: T[], sent: T[]): T[] {
+  const left = current.map((item) => JSON.stringify(item));
+  const keep = current.slice();
+  for (const item of sent) {
+    const index = left.indexOf(JSON.stringify(item));
+    if (index >= 0) {
+      left.splice(index, 1);
+      keep.splice(index, 1);
+    }
+  }
+  return keep;
+}
+
 export class LocationQueue {
   private chain: Promise<unknown> = Promise.resolve();
 
