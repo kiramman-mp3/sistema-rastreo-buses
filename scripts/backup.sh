@@ -10,6 +10,7 @@ set -a
 . "./$ENV_FILE"
 set +a
 ODOO_DB="${ODOO_DB:-buses}"
+. scripts/db.sh
 KEEP_DAYS="${BACKUP_KEEP_DAYS:-14}"
 
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
@@ -17,10 +18,10 @@ OUT="backups/$STAMP"
 mkdir -p "$OUT"
 
 echo "Dumping Odoo database $ODOO_DB..."
-$DC exec -T db pg_dump -U odoo -Fc "$ODOO_DB" > "$OUT/odoo.dump"
+pg_tool pg_dump -Fc -d "$ODOO_DB" > "$OUT/odoo.dump"
 
 echo "Dumping Traccar database..."
-$DC exec -T db pg_dump -U odoo -Fc traccar > "$OUT/traccar.dump"
+pg_tool pg_dump -Fc -d traccar > "$OUT/traccar.dump"
 
 echo "Archiving Odoo filestore..."
 $DC exec -T odoo sh -c "if [ -d /var/lib/odoo/filestore/$ODOO_DB ]; then tar czf - -C /var/lib/odoo/filestore/$ODOO_DB .; else tar czf - -T /dev/null; fi" > "$OUT/filestore.tgz"
