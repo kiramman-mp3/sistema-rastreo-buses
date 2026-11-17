@@ -9,6 +9,13 @@ import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl
 const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
 const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
 
+// Leaflet inserts a string tooltip as HTML; stop names can come from an imported GPX, so pass text.
+function textNode(text) {
+    const span = document.createElement("span");
+    span.textContent = String(text || "");
+    return span;
+}
+
 export class BusStopPicker extends Component {
     static template = "bus_tracking.StopPicker";
 
@@ -53,7 +60,7 @@ export class BusStopPicker extends Component {
                 return;
             }
             L.circleMarker([stop.lat, stop.lon], { radius: 6, color: "#555", fillColor: "#999", fillOpacity: 0.9 })
-                .bindTooltip(stop.name).addTo(this.map);
+                .bindTooltip(textNode(stop.name)).addTo(this.map);
         });
         if (data.stop) {
             this.state.name = data.stop.name;
