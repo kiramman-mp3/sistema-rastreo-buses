@@ -15,8 +15,12 @@ from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
 
-LOGIN_LIMIT = 10          # attempts per IP and per login, per minute and worker process
+LOGIN_LIMIT = 10          # attempts per IP, per minute and worker process
 login_limiter = RateLimiter(LOGIN_LIMIT, 60.0)
+# Attempts per login from any address. Higher than the IP limit, so someone elsewhere cannot lock a driver out
+# with a handful of wrong passwords, but still a ceiling for guesses spread over many addresses.
+ACCOUNT_LIMIT = 60
+account_limiter = RateLimiter(ACCOUNT_LIMIT, 60.0)
 CLIENT_ERROR_LIMIT = 20   # reports per driver and minute and worker process: a crash loop must not flood the log
 error_limiter = RateLimiter(CLIENT_ERROR_LIMIT, 60.0)
 MESSAGE_MAX, STACK_MAX, SHORT_MAX = 500, 3000, 60
@@ -93,7 +97,7 @@ class BusDriverApi(http.Controller):
         if not (isinstance(login, str) and isinstance(password, str) and login and password):
             return json_response({'error': 'bad_request'}, 400)
         ip = request.httprequest.remote_addr
-        if not (login_limiter.allow('ip:%s' % ip) and login_limiter.allow('login:%s' % login.lower())):
+        if not (login_limiter.allow('ip:%s' % ip) and account_limiter.allow('login:%s' % login.lower())):
             return Response(status=429, headers=[('Retry-After', '60')])
         try:
             uid = request.env['res.users'].authenticate(

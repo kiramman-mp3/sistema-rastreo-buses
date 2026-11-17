@@ -7,7 +7,7 @@ from odoo import fields
 from odoo.tests import HttpCase, TransactionCase, tagged
 from odoo.tools import mute_logger
 
-from ..controllers.driver_api import login_limiter
+from ..controllers.driver_api import ACCOUNT_LIMIT, LOGIN_LIMIT, account_limiter, login_limiter
 
 LOGIN = '/bus_tracking/driver/login'
 ME = '/bus_tracking/driver/me'
@@ -117,6 +117,7 @@ class TestDriverApi(HttpCase):
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        account_limiter.reset()
         # HttpCase tests share 127.0.0.1. Failed logins in one test would otherwise
         # trip Odoo's cooldown and 401 the later successful-login tests.
         self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
@@ -158,8 +159,22 @@ class TestDriverApi(HttpCase):
         self.assertEqual(raw.status_code, 400)
 
     def test_login_is_rate_limited(self):
-        for _ in range(10):
+        for _ in range(LOGIN_LIMIT):
             self.assertEqual(self.login(password='mal').status_code, 401)
+        self.assertEqual(self.login(password='mal').status_code, 429)
+
+    def test_failures_from_another_address_do_not_lock_the_driver_out(self):
+        for _ in range(LOGIN_LIMIT):
+            self.login(password='mal')
+        login_limiter.reset()                          # the driver's tablet: another address
+        self.assertEqual(self.login().status_code, 200)
+
+    def test_one_login_has_a_ceiling_across_addresses(self):
+        for attempt in range(ACCOUNT_LIMIT):
+            if attempt % LOGIN_LIMIT == 0:
+                login_limiter.reset()                  # a new address every ten attempts
+            self.assertEqual(self.login(password='mal').status_code, 401)
+        login_limiter.reset()
         self.assertEqual(self.login(password='mal').status_code, 429)
 
     def test_login_rejects_get(self):
