@@ -57,3 +57,19 @@ class BusDriverEdit(models.TransientModel):
             'views': [(self.env.ref('bus_tracking.view_bus_driver_form').id, 'form')],
             'target': 'current',
         }
+
+
+class BusDriverBadge(models.TransientModel):
+    """A QR badge, shown once right after it is issued. The raw token lives only in this row, which the manager
+    deletes by closing it with Done (otherwise the transient vacuum does)."""
+    _name = 'bus.driver.badge'
+    _description = 'QR badge shown once'
+    _transient_max_hours = 0.25
+
+    user_id = fields.Many2one('res.users', string="Driver", readonly=True)
+    qr = fields.Binary(string="QR badge", readonly=True, attachment=False)
+    link = fields.Char(readonly=True)
+
+    def action_done(self):
+        self.sudo().unlink()
+        return {'type': 'ir.actions.act_window_close'}

@@ -1,6 +1,6 @@
 {
     'name': 'Bus Tracking (Traccar)',
-    'version': '16.0.1.7.0',
+    'version': '16.0.1.8.0',
     'category': 'Operations',
     'summary': 'Track bus routes in real time with Traccar',
     'description': """
