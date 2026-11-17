@@ -64,7 +64,7 @@ Cada versión desplegada lleva una etiqueta de Git (`v<mayor>.<menor>`; `-previe
 2. `./scripts/backup.sh`.
 3. Fusiona `develop` en `main` con `--no-ff` y etiqueta: `git tag -a v0.9-preview -m "..."` y `git push origin main --tags`.
 4. Despliega siguiendo *Actualizar* de `PRODUCCION.md`.
-5. Comprueba `/bus_tracking/health`: la `version` es la esperada.
+5. Abre `/bus_tracking/health` con la sesión de Odoo iniciada: la `version` es la esperada (sin sesión sólo se ve el estado).
 6. Anota en la bitácora la etiqueta, la fecha y quién lo hizo.
 
 **Volver atrás.** Odoo no baja la versión de un módulo: si el despliegue ejecutó una migración, la reversión es **restaurar el respaldo del paso 2** y volver a la etiqueta anterior.

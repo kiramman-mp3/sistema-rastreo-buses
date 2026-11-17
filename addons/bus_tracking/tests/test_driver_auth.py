@@ -1,3 +1,4 @@
+import datetime
 import json
 from datetime import timedelta
 
@@ -7,7 +8,7 @@ from odoo import fields
 from odoo.tests import HttpCase, TransactionCase, tagged
 from odoo.tools import mute_logger
 
-from ..controllers.driver_api import login_limiter
+from ..controllers.driver_api import ACCOUNT_LIMIT, LOGIN_LIMIT, account_limiter, login_limiter
 
 LOGIN = '/bus_tracking/driver/login'
 ME = '/bus_tracking/driver/me'
@@ -117,6 +118,7 @@ class TestDriverApi(HttpCase):
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        account_limiter.reset()
         # HttpCase tests share 127.0.0.1. Failed logins in one test would otherwise
         # trip Odoo's cooldown and 401 the later successful-login tests.
         self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
@@ -158,8 +160,22 @@ class TestDriverApi(HttpCase):
         self.assertEqual(raw.status_code, 400)
 
     def test_login_is_rate_limited(self):
-        for _ in range(10):
+        for _ in range(LOGIN_LIMIT):
             self.assertEqual(self.login(password='mal').status_code, 401)
+        self.assertEqual(self.login(password='mal').status_code, 429)
+
+    def test_failures_from_another_address_do_not_lock_the_driver_out(self):
+        for _ in range(LOGIN_LIMIT):
+            self.login(password='mal')
+        login_limiter.reset()                          # the driver's tablet: another address
+        self.assertEqual(self.login().status_code, 200)
+
+    def test_one_login_has_a_ceiling_across_addresses(self):
+        for attempt in range(ACCOUNT_LIMIT):
+            if attempt % LOGIN_LIMIT == 0:
+                login_limiter.reset()                  # a new address every ten attempts
+            self.assertEqual(self.login(password='mal').status_code, 401)
+        login_limiter.reset()
         self.assertEqual(self.login(password='mal').status_code, 429)
 
     def test_login_rejects_get(self):
@@ -196,3 +212,33 @@ class TestDriverApi(HttpCase):
         self.assertEqual(self.post(ME, token=token).status_code, 200)
         self.assertEqual(self.post(LOGOUT, token=token).status_code, 200)
         self.assertEqual(self.post(ME, token=token).status_code, 401)
+
+
+@tagged('post_install', '-at_install')
+class TestPanelSignIn(TransactionCase):
+    """Sign-in to the Odoo panel: longer waits after repeated failures, and a second factor available."""
+
+    def wait(self, failures, seconds_ago):
+        previous = datetime.datetime.now() - timedelta(seconds=seconds_ago)
+        return self.env['res.users']._on_login_cooldown(failures, previous)
+
+    def test_the_wait_doubles_with_every_failure(self):
+        icp = self.env['ir.config_parameter'].sudo()
+        icp.set_param('base.login_cooldown_after', '5')
+        icp.set_param('base.login_cooldown_duration', '60')
+        self.assertFalse(self.wait(4, 0))              # below the threshold
+        self.assertTrue(self.wait(5, 59))
+        self.assertFalse(self.wait(5, 61))
+        self.assertTrue(self.wait(7, 239))             # 60 s x 4
+        self.assertFalse(self.wait(7, 241))
+        self.assertTrue(self.wait(50, 3599))           # capped at an hour
+        self.assertFalse(self.wait(50, 3601))
+
+    def test_zero_turns_the_wait_off(self):
+        self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
+        self.assertFalse(self.wait(100, 0))
+
+    def test_users_can_turn_on_a_second_factor(self):
+        totp = self.env['ir.module.module'].search([('name', '=', 'auth_totp')])
+        self.assertEqual(totp.state, 'installed')
+        self.assertIn('totp_enabled', self.env['res.users']._fields)

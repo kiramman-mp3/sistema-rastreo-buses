@@ -1,17 +1,32 @@
 import base64
+import datetime
 import logging
 from urllib.parse import urlencode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
-from .utils import pick_odoo_lang
+from .utils import int_param, pick_odoo_lang
 
 _logger = logging.getLogger(__name__)
+
+# Longest wait after many failed sign-ins from one address.
+MAX_LOGIN_COOLDOWN = 3600
 
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
+
+    def _on_login_cooldown(self, failures, previous):
+        """Odoo makes an address wait base.login_cooldown_duration seconds after each failure past
+        base.login_cooldown_after, so a password can still be guessed at a steady pace. Double the wait for every
+        further failure, up to an hour."""
+        min_failures = int_param(self.env, 'base.login_cooldown_after', 5)
+        if min_failures <= 0 or failures < min_failures:
+            return False
+        delay = int_param(self.env, 'base.login_cooldown_duration', 60)
+        delay = min(delay * 2 ** min(failures - min_failures, 12), MAX_LOGIN_COOLDOWN)
+        return datetime.datetime.now() - previous < datetime.timedelta(seconds=delay)
 
     # Both hold the raw badge token, which signs the driver in: only managers may read them.
     driver_badge_qr = fields.Binary(string="Driver badge QR", readonly=True, copy=False,

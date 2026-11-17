@@ -4,7 +4,7 @@ from datetime import timedelta
 from odoo import fields
 from odoo.tests import HttpCase, TransactionCase, tagged
 
-from ..controllers.driver_api import error_limiter, login_limiter
+from ..controllers.driver_api import account_limiter, error_limiter, login_limiter
 from ..models.utils import pick_odoo_lang
 from .test_driver_auth import make_driver
 
@@ -138,6 +138,7 @@ class TestDriverShiftApi(HttpCase):
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        account_limiter.reset()
         error_limiter.reset()
         self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
         self.env['ir.config_parameter'].sudo().set_param('bus_tracking.gps_url', 'https://gps.example.com/')

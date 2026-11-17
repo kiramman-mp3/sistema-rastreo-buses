@@ -140,7 +140,10 @@ Hecho: retención de 30 días por defecto en el código (sin migración: el valo
 - `chore: write db_maxconn in the generated production config`.
 - Pruebas: test del cron de purga sin parámetro; `init-prod.sh` desde cero contra un proyecto de Supabase vacío, `docker compose down && up -d`, `backup.sh` y `restore.sh --target-db` contra ese proyecto, en una VM Linux limpia.
 
-### Fase 40. `fix/acceso-panel` (B3, S3, O1) — S
+### Fase 40. `fix/acceso-panel` (B3, S3, O1) — S — hecha (2026-11-17)
+
+Hecho, con un desvío respecto de la decisión 2: Odoo 16 ya tenía un límite por dirección (5 fallos y 60 s por worker), que ahora duplica la espera con cada fallo hasta una hora. `auth_totp` queda instalado, pero el 2FA es opcional por usuario: imponerlo exige `auth_totp_mail_enforce`, que envía códigos por correo, y el sistema no tiene correo. `fail2ban` queda documentado como opcional (cadena `DOCKER-USER`). El login del chofer limita 10 por dirección y 60 por usuario. La versión del health sólo la ve el personal con sesión.
+
 
 - `feat: require two-factor sign-in for managers` según la decisión 2 (`auth_totp` en `depends` o instalado por `init-prod.sh`).
 - `docs: protect odoo sign-in with fail2ban` (filtro y jail de ejemplo en `docs/guias/PRODUCCION.md`).
