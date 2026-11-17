@@ -233,16 +233,23 @@ class BusVehicle(models.Model):
     def _expects_position(self, fix_time):
         """Whether Odoo should have kept a position of this bus at that time: it was on a shift, or the bus
         reports without one. Used to audit the synchronisation without counting what is dropped on purpose."""
+        return self._expects_positions_between(fix_time, fix_time)(fix_time)
+
+    def _expects_positions_between(self, since, until):
+        """`_expects_position` for every time between `since` and `until`, with one query for all of them."""
         self.ensure_one()
         icp = self.env['ir.config_parameter'].sudo()
         if icp.get_param('bus_tracking.accept_without_shift') in ('1', 'True', 'true'):
-            return True
-        until = self.demo_report_until
-        if until and until - timedelta(hours=DEMO_HOURS) <= fix_time <= until:
-            return True
-        return bool(self.env['bus.shift'].sudo().search_count([
-            ('vehicle_id', '=', self.id), ('start', '<=', fix_time),
-            '|', ('end', '=', False), ('end', '>=', fix_time)]))
+            return lambda when: True
+        demo_until = self.demo_report_until
+        shifts = [(s.start, s.end) for s in self.env['bus.shift'].sudo().search([
+            ('vehicle_id', '=', self.id), ('start', '<=', until), '|', ('end', '=', False), ('end', '>=', since)])]
+
+        def expects(when):
+            if demo_until and demo_until - timedelta(hours=DEMO_HOURS) <= when <= demo_until:
+                return True
+            return any(start <= when and (not end or end >= when) for start, end in shifts)
+        return expects
 
     def _accepts_positions(self):
         """A bus only reports while a driver has it on a shift: a tablet left on after the shift

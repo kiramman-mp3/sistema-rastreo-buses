@@ -10,7 +10,7 @@ from pywebpush import WebPushException
 
 from odoo.tests import HttpCase, TransactionCase, tagged
 
-from ..models.bus_push import b64url, endpoint_allowed
+from ..models.bus_push import PUSH_BUDGET_SECONDS, b64url, endpoint_allowed
 
 GOOD_ENDPOINT = 'https://fcm.googleapis.com/fcm/send/abc123'
 
@@ -223,3 +223,20 @@ class TestPushQueue(TransactionCase):
             self.env['bus.alert']._cron_push()
             self.assertEqual(sent.call_count, calls)
         self.assertTrue(self.Sub.search([('user_id', '=', self.manager.id)]))
+
+    def test_a_slow_push_service_leaves_the_rest_for_the_next_run_and_an_sos_goes_first(self):
+        self.env['bus.incident'].search([]).write({'notified': True})
+        user = self.env['res.users'].create({'name': 'Chofer Q', 'login': 'chofer_q'})
+        shift = self.env['bus.shift'].create({'user_id': user.id, 'vehicle_id': self.bus.id,
+                                              'route_id': self.env['bus.route'].create({'name': 'R', 'code': 'RQ'}).id})
+        Incident = self.env['bus.incident']
+        traffic = Incident.create({'shift_id': shift.id, 'vehicle_id': self.bus.id, 'kind': 'traffic'})
+        sos = Incident.create({'shift_id': shift.id, 'vehicle_id': self.bus.id, 'kind': 'sos'})
+        clock = iter([0, 0, PUSH_BUDGET_SECONDS + 1])      # the first push takes the whole budget
+        cron = self.env.ref('bus_tracking.cron_push_incidents')
+        before = self.env['ir.cron.trigger'].search_count([('cron_id', '=', cron.id)])
+        with patch('pywebpush.webpush'), patch('odoo.addons.bus_tracking.models.bus_push.time.monotonic',
+                                               side_effect=lambda: next(clock)):
+            Incident._cron_push()
+        self.assertEqual((sos.notified, traffic.notified), (True, False))
+        self.assertGreater(self.env['ir.cron.trigger'].search_count([('cron_id', '=', cron.id)]), before)
