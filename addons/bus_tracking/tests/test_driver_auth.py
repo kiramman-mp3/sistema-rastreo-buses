@@ -1,3 +1,4 @@
+import datetime
 import json
 from datetime import timedelta
 
@@ -211,3 +212,33 @@ class TestDriverApi(HttpCase):
         self.assertEqual(self.post(ME, token=token).status_code, 200)
         self.assertEqual(self.post(LOGOUT, token=token).status_code, 200)
         self.assertEqual(self.post(ME, token=token).status_code, 401)
+
+
+@tagged('post_install', '-at_install')
+class TestPanelSignIn(TransactionCase):
+    """Sign-in to the Odoo panel: longer waits after repeated failures, and a second factor available."""
+
+    def wait(self, failures, seconds_ago):
+        previous = datetime.datetime.now() - timedelta(seconds=seconds_ago)
+        return self.env['res.users']._on_login_cooldown(failures, previous)
+
+    def test_the_wait_doubles_with_every_failure(self):
+        icp = self.env['ir.config_parameter'].sudo()
+        icp.set_param('base.login_cooldown_after', '5')
+        icp.set_param('base.login_cooldown_duration', '60')
+        self.assertFalse(self.wait(4, 0))              # below the threshold
+        self.assertTrue(self.wait(5, 59))
+        self.assertFalse(self.wait(5, 61))
+        self.assertTrue(self.wait(7, 239))             # 60 s x 4
+        self.assertFalse(self.wait(7, 241))
+        self.assertTrue(self.wait(50, 3599))           # capped at an hour
+        self.assertFalse(self.wait(50, 3601))
+
+    def test_zero_turns_the_wait_off(self):
+        self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
+        self.assertFalse(self.wait(100, 0))
+
+    def test_users_can_turn_on_a_second_factor(self):
+        totp = self.env['ir.module.module'].search([('name', '=', 'auth_totp')])
+        self.assertEqual(totp.state, 'installed')
+        self.assertIn('totp_enabled', self.env['res.users']._fields)
