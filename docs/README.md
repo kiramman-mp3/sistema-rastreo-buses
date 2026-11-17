@@ -11,11 +11,13 @@ docs/
 ├── README.md                      # Este portal de documentación y mapa de navegación
 │
 ├── arquitectura/                  # Planes maestros, especificaciones y diseño técnico
+│   ├── ROADMAP.md                 # Vista única de lo hecho y lo pendiente, con hitos de versión
 │   ├── PLAN.md                    # Plan maestro del sistema (fases 0 a 15: backend, mapa y portal)
 │   ├── PLAN-APP-CHOFER.md         # Plan de implementación de la app móvil (fases 16 a 22, 25 e iOS)
 │   ├── PLAN-UX.md                 # Plan de rediseño de experiencia de usuario y cabina
 │   ├── PLAN-UI-MOVIL.md           # Plan de adaptabilidad responsiva y ergonomía móvil
-│   ├── PLAN-AUDITORIA.md          # Plan de remediación de auditoría integral ISO/IEC 25010
+│   ├── PLAN-AUDITORIA.md          # Primera auditoría integral (2-nov) y su remediación, cerrada
+│   ├── PLAN-AUDITORIA-2.md        # Segunda auditoría integral (17-nov) y plan de las fases 38 a 47
 │   ├── PLAN-RUBRICA.md            # Plan para cubrir la rúbrica del proyecto final (fases R1 a R12) y su estado final
 │   ├── REQUISITOS.md              # Análisis del problema y requisitos funcionales y no funcionales con criterio de aceptación
 │   ├── ARQUITECTURA-Y-DATOS.md    # Arquitectura, flujo de un dato y modelo de datos
@@ -25,6 +27,7 @@ docs/
 │   ├── GUIA-CHOFER.md             # Manual de usuario para choferes en tableta o teléfono (Android/iOS)
 │   ├── OPERACION.md               # Guía diaria de operación y despacho en consola de Odoo
 │   ├── PRODUCCION.md              # Guía de despliegue en servidor Azure VM, Caddy HTTPS y backups
+│   ├── GLOSARIO-KICHWA.md         # Términos en kichwa usados en la interfaz (borrador sin revisión)
 │   ├── GRAFANA.md                 # Grafana incrustado en Odoo: rol de solo lectura, token, despliegue y operación
 │   ├── DEMO-TRACCAR-CLIENT.md     # Demostración con un celular y Traccar Client, evidencias y Azure frente a Cloudflare
 │   └── PERSONALIZACION.md         # Parámetros institucionales UTA, mapa en Ambato y límites
@@ -39,7 +42,7 @@ docs/
 │   ├── 02-estandares-y-reglas.md  # Estándares de codificación, convenciones y buenas prácticas
 │   ├── 03-plan-y-casos-de-prueba.md # Plan maestro de pruebas y matriz de casos de verificación
 │   ├── 04-resultados-y-metricas.md # Resultados de ejecución, cobertura y métricas de complejidad
-│   ├── 05-registro-de-defectos.md # Catálogo histórico de defectos encontrados y cerrados (DEF-001 a DEF-038)
+│   ├── 05-registro-de-defectos.md # Defectos DEF-001 a DEF-062 con causa raíz y estado (12 abiertos)
 │   ├── 06-lluvia-de-ideas.md      # Lluvia de ideas estructurada y matriz de priorización
 │   ├── 07-pareto.md               # Diagramas y análisis de Pareto (80/20) para defectos y fallos
 │   ├── 08-ishikawa.md             # Diagramas de causa y efecto (espina de pescado)
@@ -69,6 +72,8 @@ docs/
 ## Rutas de Lectura por Rol
 
 Para optimizar la consulta según el perfil del lector, se recomiendan los siguientes itinerarios de lectura:
+
+Para saber en qué punto está el proyecto, empieza por [`arquitectura/ROADMAP.md`](arquitectura/ROADMAP.md).
 
 ### 1. Desarrollador Backend (Odoo / Traccar / Infraestructura)
 1. [`arquitectura/PLAN.md`](arquitectura/PLAN.md): Arquitectura base, modelos relacionales y crons.
@@ -104,12 +109,14 @@ Para optimizar la consulta según el perfil del lector, se recomiendan los sigui
 
 | Área | Documento | Propósito Principal | Audiencia Clave |
 |---|---|---|---|
-| **Arquitectura** | [`PLAN.md`](arquitectura/PLAN.md) | Roadmap general de fases 0 a 15 | Desarrolladores, Arquitectos |
+| **Arquitectura** | [`ROADMAP.md`](arquitectura/ROADMAP.md) | Lo hecho, lo pendiente y los hitos de versión | Todo el equipo |
+| **Arquitectura** | [`PLAN.md`](arquitectura/PLAN.md) | Plan maestro de fases 0 a 15 | Desarrolladores, Arquitectos |
 | **Arquitectura** | [`PLAN-APP-CHOFER.md`](arquitectura/PLAN-APP-CHOFER.md) | Diseño de la app del conductor | Desarrolladores móviles |
 | **Arquitectura** | [`PLAN-UX.md`](arquitectura/PLAN-UX.md) | Decisiones de interacción y flujo | Diseñadores, Frontend |
 | **Arquitectura** | [`PLAN-RUBRICA.md`](arquitectura/PLAN-RUBRICA.md) | Plan de implementación para cubrir la rúbrica del proyecto final | Equipo, docente |
 | **Arquitectura** | [`PLAN-UI-MOVIL.md`](arquitectura/PLAN-UI-MOVIL.md) | Accesibilidad y ergonomía táctil | Desarrolladores móviles |
-| **Arquitectura** | [`PLAN-AUDITORIA.md`](arquitectura/PLAN-AUDITORIA.md) | Plan de contingencia y hardening | Líderes técnicos, Seguridad |
+| **Arquitectura** | [`PLAN-AUDITORIA.md`](arquitectura/PLAN-AUDITORIA.md) | Primera auditoría y su remediación (cerrada) | Líderes técnicos, Seguridad |
+| **Arquitectura** | [`PLAN-AUDITORIA-2.md`](arquitectura/PLAN-AUDITORIA-2.md) | Segunda auditoría y plan de las fases 38 a 47 | Líderes técnicos, Seguridad, DevOps |
 | **Guías** | [`GUIA-CHOFER.md`](guias/GUIA-CHOFER.md) | Manual operativo de cabina | Choferes de autobús |
 | **Guías** | [`OPERACION.md`](guias/OPERACION.md) | Gestión de tráfico y alertas | Supervisores de flota |
 | **Guías** | [`PRODUCCION.md`](guias/PRODUCCION.md) | Manual de administración de servidores | Administradores de sistemas |
