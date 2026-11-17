@@ -82,3 +82,9 @@ class TestDriverStaff(TransactionCase):
         queue = self.env['bus.incident']._open_for_map()
         self.assertIn(sos, queue)
         self.assertNotIn(self.incident, queue)
+
+
+    def test_only_managers_see_the_drivers_menu(self):
+        menu = self.env.ref('bus_tracking.menu_bus_driver')
+        self.assertEqual(menu.groups_id, self.env.ref('bus_tracking.group_bus_manager'))
+

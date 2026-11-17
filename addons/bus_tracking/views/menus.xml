@@ -27,7 +27,7 @@
     <menuitem id="menu_bus_shift" name="Shifts" parent="menu_bus_operation"
               action="action_bus_shift" sequence="30"/>
     <menuitem id="menu_bus_driver" name="Drivers" parent="menu_bus_fleet"
-              action="action_bus_driver" sequence="45"/>
+              action="action_bus_driver" sequence="45" groups="bus_tracking.group_bus_manager"/>
     <menuitem id="menu_bus_trip_planned" name="Scheduled trips" parent="menu_bus_operation"
               action="action_bus_trip" sequence="5"/>
     <menuitem id="menu_bus_schedule" name="Schedules" parent="menu_bus_fleet"
