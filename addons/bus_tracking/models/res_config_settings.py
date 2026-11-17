@@ -3,7 +3,7 @@ import re
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from .bus_position import DEFAULT_RETENTION_DAYS
+from .bus_position import DEFAULT_HISTORY_DAYS, DEFAULT_RETENTION_DAYS
 from .utils import secure_gps_url
 
 
@@ -29,7 +29,13 @@ class ResConfigSettings(models.TransientModel):
     traccar_webhook_secret = fields.Char(string="Webhook secret", config_parameter='bus_tracking.webhook_secret')
     bus_position_retention_days = fields.Integer(
         string="Keep positions (days)", config_parameter='bus_tracking.retention_days', default=DEFAULT_RETENTION_DAYS,
-        help="Older positions are deleted daily. 0 keeps everything.")
+        help="Older positions are deleted daily, with the rejected positions and the synchronisation audits. "
+             "0 keeps everything.")
+    bus_history_retention_days = fields.Integer(
+        string="Keep history (days)", config_parameter='bus_tracking.history_retention_days',
+        default=DEFAULT_HISTORY_DAYS,
+        help="Stop arrivals, closed alerts, incidents already seen, finished trips and closed shifts older than "
+             "this are deleted daily. Open alerts and unseen incidents are kept. 0 keeps everything.")
     bus_stale_minutes = fields.Integer(
         string="Report as down after (minutes)", config_parameter='bus_tracking.stale_minutes', default=10,
         help="The health check at /bus_tracking/health fails when no bus has reported for this long. "
