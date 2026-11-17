@@ -2,7 +2,7 @@ import json
 from odoo.exceptions import AccessDenied, AccessError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
-from ..controllers.driver_api import login_limiter
+from ..controllers.driver_api import account_limiter, login_limiter
 from .test_driver_auth import make_driver
 
 
@@ -125,6 +125,7 @@ class TestDriverBadgeApi(HttpCase):
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        account_limiter.reset()
         self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
         self.driver = make_driver(self.env, login='chofer_qr_api')
         self.tokens = self.env['bus.driver.token']

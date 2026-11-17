@@ -14,7 +14,7 @@ Live bus tracking and route monitoring backed by a Traccar server.
     'author': 'Sistema Rastreo Buses',
     'license': 'LGPL-3',
     'application': True,
-    'depends': ['base', 'web', 'mail', 'fleet'],
+    'depends': ['base', 'web', 'mail', 'fleet', 'auth_totp'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
