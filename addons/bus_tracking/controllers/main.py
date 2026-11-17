@@ -13,9 +13,19 @@ from ..models.utils import int_param, map_center, tile_url
 from .portal import line_positions
 
 MAX_TRACK_HOURS = 24
+# The trail is drawn on a phone too: more points than this add nothing visible and cost a lot to send.
+MAX_TRACK_POINTS = 2000
 _warned_query_secret = False
 
 _logger = logging.getLogger(__name__)
+
+
+def thin_out(rows, limit):
+    """At most `limit` rows, evenly spread, always keeping the last one (where the bus is now)."""
+    if len(rows) <= limit:
+        return rows
+    step = len(rows) / (limit - 1)
+    return [rows[int(i * step)] for i in range(limit - 1)] + [rows[-1]]
 
 
 class BusTrackingController(http.Controller):
@@ -138,11 +148,11 @@ class BusTrackingController(http.Controller):
         if not 0 < hours <= MAX_TRACK_HOURS:
             hours = MAX_TRACK_HOURS if hours > MAX_TRACK_HOURS else 4
         since = fields.Datetime.now() - timedelta(hours=hours)
-        positions = request.env['bus.position'].search([
+        rows = request.env['bus.position'].search_read([
             ('vehicle_id', '=', vehicle_id),
             ('fix_time', '>=', since),
-        ], order='fix_time asc')
-        return [[p.latitude, p.longitude] for p in positions]
+        ], ['latitude', 'longitude'], order='fix_time asc')
+        return [[row['latitude'], row['longitude']] for row in thin_out(rows, MAX_TRACK_POINTS)]
 
     @http.route('/bus_tracking/traccar/webhook', type='http', auth='public',
                 methods=['POST'], csrf=False)
