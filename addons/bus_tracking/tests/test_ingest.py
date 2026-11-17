@@ -10,6 +10,7 @@ from odoo.tools import mute_logger
 
 from .common import STOPS, BusCase, traccar_position
 from .test_driver_auth import make_driver
+from .test_traccar_sync import fake_response
 
 
 @tagged('post_install', '-at_install')
@@ -157,6 +158,42 @@ class TestIngest(BusCase):
         Position._cron_cleanup()
         self.assertFalse(old.exists())
         self.assertTrue(fresh.exists())
+
+    def test_cleanup_without_the_setting_keeps_thirty_days(self):
+        self.env['ir.config_parameter'].search([('key', '=', 'bus_tracking.retention_days')]).unlink()
+        now = fields.Datetime.now()
+        Position = self.env['bus.position']
+        old = Position.create({'vehicle_id': self.bus.id, 'fix_time': now - timedelta(days=31),
+                               'latitude': -33.4, 'longitude': -70.6})
+        fresh = Position.create({'vehicle_id': self.bus.id, 'fix_time': now - timedelta(days=29),
+                                 'latitude': -33.4, 'longitude': -70.6})
+        Position._cron_cleanup()
+        self.assertFalse(old.exists())
+        self.assertTrue(fresh.exists())
+
+    def test_cleanup_asks_traccar_to_drop_the_same_span(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.retention_days', '30')
+        icp.set_param('bus_tracking.traccar_url', 'http://traccar:8082')
+        icp.set_param('bus_tracking.traccar_token', 'tok')
+        self.bus.traccar_device_id = 77
+        with patch('odoo.addons.bus_tracking.models.traccar_api.requests.delete',
+                   return_value=fake_response({}, 204)) as delete:
+            self.env['bus.position']._cron_cleanup()
+        urls = {call.args[0] for call in delete.call_args_list}
+        self.assertEqual(urls, {'http://traccar:8082/api/positions'})
+        params = [call.kwargs['params'] for call in delete.call_args_list if call.kwargs['params']['deviceId'] == 77][0]
+        until = fields.Datetime.now() - timedelta(days=30)
+        self.assertEqual(params['to'][:10], until.strftime('%Y-%m-%d'))
+
+    def test_cleanup_survives_traccar_errors(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.traccar_url', 'http://traccar:8082')
+        icp.set_param('bus_tracking.traccar_token', 'tok')
+        self.bus.traccar_device_id = 77
+        with patch('odoo.addons.bus_tracking.models.traccar_api.requests.delete',
+                   return_value=fake_response('boom', 500)):
+            self.env['bus.position']._cron_cleanup()                 # must not raise
 
     def test_cleanup_with_zero_days_keeps_everything(self):
         self.env['ir.config_parameter'].set_param('bus_tracking.retention_days', '0')
