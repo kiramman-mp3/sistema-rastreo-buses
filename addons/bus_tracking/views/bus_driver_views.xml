@@ -4,7 +4,7 @@
         <field name="name">bus.driver.tree</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <tree string="Drivers">
+            <tree string="Drivers" create="0" edit="0" delete="0">
                 <field name="name"/>
                 <field name="login"/>
                 <field name="email"/>
@@ -17,8 +17,10 @@
         <field name="name">bus.driver.form</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <form string="Driver">
+            <form string="Driver" create="0" edit="0" delete="0">
                 <header>
+                    <button name="action_edit_driver" type="object" string="Edit driver"
+                            groups="bus_tracking.group_bus_manager"/>
                     <button name="action_generate_driver_badge" type="object"
                             string="Generate QR badge" class="btn-primary"
                             groups="bus_tracking.group_bus_manager"/>
@@ -36,8 +38,6 @@
                     <group>
                         <group string="Sign-in">
                             <field name="login" string="User"/>
-                            <field name="driver_password" password="True" string="Password"
-                                   placeholder="Set or change the password"/>
                             <field name="email"/>
                             <field name="phone"/>
                             <field name="is_bus_driver" invisible="1"/>
@@ -64,6 +64,40 @@
         </field>
     </record>
 
+    <record id="view_bus_driver_edit_form" model="ir.ui.view">
+        <field name="name">bus.driver.edit.form</field>
+        <field name="model">bus.driver.edit</field>
+        <field name="arch" type="xml">
+            <form string="Driver">
+                <group>
+                    <group>
+                        <field name="user_id" invisible="1"/>
+                        <field name="name" placeholder="Driver's full name"/>
+                        <field name="login"/>
+                        <field name="password" password="True"
+                               placeholder="Set or change the password"/>
+                    </group>
+                    <group>
+                        <field name="phone"/>
+                        <field name="email"/>
+                        <field name="active" attrs="{'invisible': [('user_id', '=', False)]}"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_save" type="object" string="Save" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bus_driver_new" model="ir.actions.act_window">
+        <field name="name">New driver</field>
+        <field name="res_model">bus.driver.edit</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
     <record id="action_bus_driver" model="ir.actions.act_window">
         <field name="name">Drivers</field>
         <field name="res_model">res.users</field>
@@ -75,7 +109,7 @@
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_bus_driver_form')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a driver and generate their QR badge.
+                Create a driver with Fleet &gt; New driver, then generate their QR badge.
             </p>
         </field>
     </record>
