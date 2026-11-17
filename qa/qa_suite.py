@@ -739,7 +739,7 @@ def main():
     odoo.call('res.users', 'create', [{'name': 'QA viewer', 'login': 'qa_viewer', 'password': 'qa_viewer_pw',
                                        'groups_id': [(6, 0, [base_user, group_user])]}])
     odoo.call('ir.config_parameter', 'set_param', 'base.login_cooldown_after', '0')
-    odoo.call('ir.config_parameter', 'set_param', 'bus_tracking.gps_url', 'http://gps.qa.test')
+    odoo.call('ir.config_parameter', 'set_param', 'bus_tracking.gps_url', 'https://gps.qa.test')
     ids = odoo.call('res.users', 'search', [('login', '=', 'qa_driver')], context={'active_test': False})
     if ids:
         shifts = odoo.call('bus.shift', 'search', [('user_id', 'in', ids)])

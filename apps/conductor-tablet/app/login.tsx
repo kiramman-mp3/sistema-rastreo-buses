@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
@@ -19,6 +19,10 @@ export default function Login() {
   const { palette } = useTheme();
   const layout = useLayout();
   const session = useSession();
+  // Opened from a badge or setup QR read by the system camera (uta-buses://login?… or setup?…). The link is not
+  // acted on: any web page could open it, so the code is read again from inside the app.
+  const link = useLocalSearchParams<{ token?: string; odoo?: string; link?: string }>();
+  const fromLink = Boolean(link.token || link.odoo || link.link);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -82,6 +86,7 @@ export default function Login() {
       </View>
 
       <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? space[4] : space[6] }]}>
+        {fromLink ? <Notice item={{ key: 'link', tone: 'warn', title: t('scanFromApp'), live: 'polite' }} /> : null}
         <Action label={t('scanDriverBadge')} onPress={() => router.push('/scan')} kind="accent" />
         <Txt size="small" dim style={styles.or}>
           {t('orManualLogin')}

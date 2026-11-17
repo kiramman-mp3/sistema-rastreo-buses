@@ -99,6 +99,12 @@ export class Session {
   async setOdooUrl(raw: string) {
     const url = normalizeOdooUrl(raw);
     if (!url) throw new Error('bad_odoo_url');
+    // A session belongs to its server: its token is never sent to another one (DEF-061).
+    if (url !== this.snapshot.odooUrl) {
+      if (await this.store.get()) await this.signOutHere();
+      // An end of shift saved without signal belongs to the old server.
+      await this.endStore?.clear();
+    }
     await this.urlStore?.set(url);
     this.client = createClient({ baseUrl: url, store: this.store });
     this.set({ odooUrl: url });
@@ -187,12 +193,15 @@ export class Session {
   }
 
   async loginWithBadge(badgeToken: string, odooUrl?: string | null) {
-    if (odooUrl) {
-      await this.setOdooUrl(odooUrl);
-    }
+    let client = this.client;
+    const url = odooUrl ? normalizeOdooUrl(odooUrl) : null;
+    if (odooUrl && !url) throw new Error('bad_odoo_url');
+    // The tablet moves to the badge's server only once that server accepts the badge.
+    if (url && url !== this.snapshot.odooUrl) client = createClient({ baseUrl: url, store: this.store });
     // The badge only buys a session; it is never kept as one. An old server without
     // login_badge answers 404 and the error reaches the scan screen.
-    const { token, driver } = await this.client.loginBadge(badgeToken);
+    const { token, driver } = await client.loginBadge(badgeToken);
+    if (url) await this.setOdooUrl(url);
     await this.store.set(token);
     const me = await this.client.me();
     this.applyMe({ ...me, driver }, token);
@@ -207,6 +216,11 @@ export class Session {
     } catch {
       // The tablet still signs out locally even if the server is unreachable.
     }
+    await this.signOutHere();
+  }
+
+  /** Forget the session on this tablet only. */
+  private async signOutHere() {
     await this.stopGps();
     await this.store.clear();
     this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });

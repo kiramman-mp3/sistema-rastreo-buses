@@ -161,7 +161,7 @@ La tableta no usa API keys de Odoo. Tras `/bus_tracking/driver/login` guarda un 
 
 La **credencial QR** (365 días) sólo sirve para pedir una sesión en `/bus_tracking/driver/login_badge`; no abre la API por sí sola y una sesión no puede renovarse por ese camino. Sólo los administradores la generan, la revocan o ven su enlace. La app sólo acepta servidores `https://` (o de la red local en desarrollo) y pide confirmar si un QR cambia el servidor.
 
-El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`).
+El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`). Odoo no guarda una dirección `http://` salvo en la red local (laboratorio), y si encuentra una guardada antes no deja iniciar turnos (`no_gps_url`); la tableta tampoco envía a ella.
 
 Si se pierde una tableta o hay que echar a alguien del turno: en Turnos, acción **Cerrar sesión de la tableta**. Revoca las sesiones (no la credencial QR) y cierra el turno; la app apaga el GPS en la siguiente consulta y Odoo descarta cualquier posición de ese bus mientras no haya otro turno. Si se perdió también la credencial, revócala en *Choferes*.
 
@@ -199,13 +199,11 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 ## Riesgos abiertos (auditoría del 17-nov-2026)
 
-La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 41 (seguridad del portal, despliegue, acceso al panel, turnos y alertas) ya están hechas. Siguen abiertos:
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 42 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS) ya están hechas. Siguen abiertos:
 
 | Defecto | Riesgo | Medida provisional |
 |---|---|---|
 | DEF-060 | Un manager de buses que no es administrador de Odoo quizá no pueda gestionar choferes | Gestionar los choferes con un administrador |
-| DEF-061 | Al cambiar de servidor, la tableta envía su token al servidor nuevo | Cerrar sesión antes de cambiar de servidor |
-| DEF-062 | La dirección del GPS acepta `http` y el identificador del bus viajaría sin cifrar | Configurar siempre `https://` en la dirección del GPS |
 
 ## Limitaciones conocidas
 
