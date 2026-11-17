@@ -59,6 +59,14 @@ class TestGpsSetup(BusCase):
         self.assertFalse(self.new_bus.traccar_device_id)
         self.assertFalse(self.new_bus.traccar_unique_id)
 
+    def test_only_managers_register_a_device_and_traccar_is_not_called_otherwise(self):
+        viewer = self.env['res.users'].create({
+            'name': 'Viewer', 'login': 'viewer-gps', 'groups_id': [(6, 0, [
+                self.env.ref('base.group_user').id, self.env.ref('bus_tracking.group_bus_user').id])]})
+        with patch(API + 'post') as post, self.assertRaises(AccessError):
+            self.new_bus.with_user(viewer).action_register_gps()
+        post.assert_not_called()
+
     # -- link and QR ---------------------------------------------------------
     def test_tablet_qr_has_the_odoo_url_and_not_the_device_id(self):
         self.env['ir.config_parameter'].set_param(
