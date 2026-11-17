@@ -68,10 +68,10 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-058 | 17-nov-2026 | Segunda auditoría integral (X2) | Las posiciones guardadas sin señal se pierden al terminar el turno | apps/conductor-tablet/src/state/session.ts | Cerrado |
 | DEF-059 | 17-nov-2026 | Segunda auditoría integral (W2) | Un incidente o SOS guardado sin señal se borra si el turno ya cerró | controllers/driver_api.py, apps/conductor-tablet/src/state/session.ts | Cerrado |
 | DEF-060 | 17-nov-2026 | Segunda auditoría integral (Z1, inferido) | Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes | views/bus_driver_views.xml, security/security.xml | Abierto |
-| DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Abierto |
-| DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Abierto |
+| DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Cerrado |
+| DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Cerrado |
 
-Resumen: 62 registrados, 59 cerrados (95 %), 3 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 62 registrados, 61 cerrados (98 %), 1 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -439,18 +439,16 @@ Resumen: 62 registrados, 59 cerrados (95 %), 3 abiertos. Densidad: 12,3 defectos
 
 - **Causa raíz:** Cambiar la dirección del servidor no borra la sesión guardada.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Fase 42: session.test.ts (cambio de servidor sin token)
+- **Prueba que lo protege:** session.test.ts: un servidor nuevo cierra la sesión antes de cualquier consulta y la credencial de otro servidor sólo lo cambia si la acepta
 
 ### DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
 
 - **Causa raíz:** La validación de Ajustes admite http y la tableta completa con http:// sin comprobar el esquema.
 - **Categoría:** Validación de entrada
-- **Prueba que lo protege:** Fase 42: test_driver_shift.py y osmand.test.ts (http externo rechazado)
+- **Prueba que lo protege:** test_driver_shift: los ajustes rechazan http fuera de la red local y el inicio de turno no entrega el identificador a una dirección http; osmand.test.ts: la tableta no envía a http externo
 
 ## 3. Qué falta para cerrar los abiertos
 
 Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
 
 1. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
-2. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
-3. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar

@@ -51,7 +51,8 @@ No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seg
 | No entra | Usuario o clave; el administrador restablece la clave en Odoo. "Demasiados intentos": espera un minuto. "El servidor tuvo un problema": avisa al administrador. |
 | No puedo iniciar turno: "Falta la dirección del GPS" | El administrador debe llenar *Dirección del GPS para los teléfonos* en los Ajustes de Odoo. |
 | El bus sale como "Sin GPS" | Ese bus no está registrado en Traccar: el administrador pulsa *Register GPS in Traccar* en su ficha. |
-| El código QR pide confirmar otro servidor | No continúes salvo que el administrador te lo haya pedido: un QR falso podría llevarse tu clave. |
+| El código QR pide confirmar otro servidor | No continúes salvo que el administrador te lo haya pedido: un QR falso podría llevarse tu clave. Si continúas, la tableta cierra la sesión abierta. |
+| La cámara del teléfono abrió la app pero no entraste | Es normal: los códigos se leen desde la app. Pulsa **Escanear credencial QR** y apunta otra vez. |
 | El bus no aparece en el mapa | Estado del GPS, datos móviles, que el bus tenga GPS registrado en Odoo, y que el turno esté abierto. |
 | Aparece y desaparece | Quita el ahorro de batería a la app y deja la tableta cargando. |
 | La tableta no tiene GPS | Cámbiala o usa un celular Android con la misma app. |
