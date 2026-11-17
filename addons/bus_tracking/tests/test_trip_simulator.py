@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 from unittest.mock import patch
 
 from odoo import fields
@@ -53,6 +54,12 @@ class TestScenarios(TripCase):
         trip = simulator(self.env)._simulate(self.route, 'not_started')
         self.assertFalse(self.env['bus.position'].search([('vehicle_id', '=', trip.vehicle_id.id)]))
         self.assertEqual(sorted(trip.alert_ids.mapped('kind')), ['incomplete_trip', 'late_start'])
+
+    def test_simulating_leaves_the_real_trips_alone(self):
+        real = self.trip(day=fields.Date.today() - timedelta(days=3))
+        simulator(self.env)._simulate(self.route, 'punctual')
+        self.assertEqual(real.state, 'planned')
+        self.assertFalse(real.alert_ids)
 
     def test_a_wrong_expectation_is_not_hidden(self):
         trip = simulator(self.env)._simulate(self.route, 'punctual')

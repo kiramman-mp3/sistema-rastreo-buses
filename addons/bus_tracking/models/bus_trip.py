@@ -404,20 +404,22 @@ class BusTrip(models.Model):
             trip.write(values)
 
     @api.model
-    def _cron_close_trips(self):
-        """Late starts are reported; a trip whose window (and margin) is over is closed with what it has."""
+    def _cron_close_trips(self, only=None):
+        """Late starts are reported; a trip whose window (and margin) is over is closed with what it has.
+        `only` limits it to those trips (the simulator closes its own trip, never the real ones)."""
         now = fields.Datetime.now()
+        scope = [('id', 'in', only.ids)] if only is not None else []
         late = int_param(self.env, 'bus_tracking.late_start_minutes', 10)
         if late > 0:
-            for trip in self.search([('state', '=', 'planned'), ('late_start_alerted', '=', False),
-                                     ('planned_start', '<', now - timedelta(minutes=late))]):
+            for trip in self.search(scope + [('state', '=', 'planned'), ('late_start_alerted', '=', False),
+                                             ('planned_start', '<', now - timedelta(minutes=late))]):
                 self.env['bus.alert']._trip_event(
                     trip, 'late_start', trip.planned_start + timedelta(minutes=late),
                     delay_min=late, threshold=late)
                 trip.late_start_alerted = True
         margin = timedelta(minutes=int_param(self.env, 'bus_tracking.trip_margin_min', 30))
-        self.search([('state', 'in', ('planned', 'running')),
-                     ('planned_end', '<', fields.Datetime.now() - margin)])._finalize()
+        self.search(scope + [('state', 'in', ('planned', 'running')),
+                             ('planned_end', '<', fields.Datetime.now() - margin)])._finalize()
 
 
 class BusTripStop(models.Model):
