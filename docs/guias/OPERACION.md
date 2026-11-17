@@ -22,6 +22,7 @@ Un SOS solo sirve si alguien lo ve. El sistema lo deja en la cola **Atención** 
 - **Qué hacer**: abrir el SOS, **marcarlo como visto** (el chofer lo ve en su pantalla) y llamar al chofer. Si no contesta, llamar a la central y avisar a la autoridad que corresponda.
 - **Tiempo de respuesta** (propuesta): visto en menos de 5 minutos. Revisa una vez al mes cuántos SOS hubo y cuánto tardaron (la ficha guarda hora de envío y de acuse).
 - **Fuera de servicio**: si nadie vigila (noche, feriado), dilo a los choferes: el SOS queda guardado pero nadie lo atiende hasta que alguien entre.
+- **Defectos abiertos** (auditoría del 17-nov, `docs/arquitectura/PLAN-AUDITORIA-2.md`): un SOS guardado sin señal puede perderse en la tableta (DEF-052) o al terminar el turno (DEF-059). Hasta la fase 41, pide a los choferes que confirmen todo SOS por radio o teléfono.
 
 ## 3. Monitoreo
 
@@ -39,7 +40,7 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml logs --since 24h 
 
 Revísalo cada día mientras la app sea nueva, y siempre que un chofer diga que "se cerró sola". Si el mismo error se repite en varios choferes, es un defecto de la app. En la tableta, *Estado del GPS* muestra la última falla de la app de los últimos 7 días.
 
-**Lo que el monitor no ve.** Un bus que no envía no apaga `health` si otro sí envía; en el mapa del personal aparece como alerta de "sin señal".
+**Lo que el monitor no ve.** Un bus que no envía no apaga `health` si otro sí envía; en el mapa del personal aparece como alerta de "sin señal". Ojo: hoy, a los 10 minutos de terminar cada turno, el bus abre una alerta "No signal" falsa y llega un push (DEF-057). Si el bus no tiene turno activo, ciérrala sin más.
 
 ## 4. Respaldos
 
