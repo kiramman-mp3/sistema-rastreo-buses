@@ -54,6 +54,18 @@ class TestSyncAudit(BusCase):
         audit = self.run_audit(self.traccar([{'fixTime': stamp(long_ago), 'latitude': -33.4, 'longitude': -70.6}]))
         self.assertEqual(audit.total, 4)
 
+    def test_the_queries_do_not_grow_with_the_positions(self):
+        def count(rows):
+            self.env.flush_all()
+            before = self.env.cr.sql_log_count
+            self.run_audit(rows)
+            return self.env.cr.sql_log_count - before
+        def extra(n):
+            return self.traccar([{'fixTime': stamp(self.now - timedelta(minutes=60, seconds=5 * i)),
+                                  'latitude': -33.4, 'longitude': -70.6} for i in range(n)])
+        count(extra(1))                                  # warm the caches
+        self.assertEqual(count(extra(600)), count(extra(10)))
+
     def test_all_matching_is_a_perfect_score(self):
         rows = [{'fixTime': stamp(w), 'latitude': lat, 'longitude': -70.66}
                 for w, lat in zip(self.times[:3], (-33.45, -33.46, -33.47))]

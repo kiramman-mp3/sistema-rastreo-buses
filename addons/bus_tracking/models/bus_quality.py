@@ -73,17 +73,24 @@ class BusSyncAudit(models.Model):
         audits = self
         for bus in self.env['bus.vehicle'].search([('traccar_device_id', '!=', False), ('simulated', '=', False)]):
             theirs = api_client.get_positions(bus.traccar_device_id, since, until)
+            # Two queries per bus, not two per position: 6 h of a bus reporting every 5 s are 4 320 positions.
+            expects = bus._expects_positions_between(since, until)
+            kept = {row['fix_time']: (row['latitude'], row['longitude'])
+                    for row in self.env['bus.position'].search_read(
+                        [('vehicle_id', '=', bus.id), ('fix_time', '>=', since - timedelta(minutes=1)),
+                         ('fix_time', '<=', until + timedelta(minutes=1))],
+                        ['fix_time', 'latitude', 'longitude'], order='fix_time')}
             total = matched = missing = mismatched = 0
             for pos in theirs:
                 when = parse_traccar_dt(pos.get('fixTime'))
-                if not when or not bus._expects_position(when):
+                if not when or not expects(when):
                     continue
                 total += 1
-                mine = self.env['bus.position'].search([('vehicle_id', '=', bus.id), ('fix_time', '=', when)], limit=1)
+                mine = kept.get(when.replace(microsecond=0))
                 if not mine:
                     missing += 1
-                elif (abs(mine.latitude - float(pos.get('latitude', 0))) > SAME_PLACE_DEG
-                      or abs(mine.longitude - float(pos.get('longitude', 0))) > SAME_PLACE_DEG):
+                elif (abs(mine[0] - float(pos.get('latitude', 0))) > SAME_PLACE_DEG
+                      or abs(mine[1] - float(pos.get('longitude', 0))) > SAME_PLACE_DEG):
                     mismatched += 1
                 else:
                     matched += 1
