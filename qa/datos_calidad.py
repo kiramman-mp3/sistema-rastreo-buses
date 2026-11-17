@@ -256,7 +256,7 @@ DEFECTOS = [
      'Seguridad', 'Cerrado', 'caddy adapt: el sitio del panel responde 404 fuera de TRACCAR_PANEL_ALLOW (por defecto 127.0.0.1/32) y el compose ya no lleva la IP'),
     ('DEF-056', '17-nov-2026', 'Segunda auditoría integral (B3)', 'El login del panel de Odoo no tiene límite de intentos ni segundo factor',
      'proxy/Caddyfile, despliegue', 'Odoo Community no limita los intentos y el proxy tampoco; quedó como limitación conocida.',
-     'Seguridad', 'Abierto', 'Fase 40: auth_totp obligatorio para managers y fail2ban sobre el log de Odoo'),
+     'Seguridad', 'Cerrado', 'TestPanelSignIn: la espera tras fallos se duplica hasta una hora y auth_totp está instalado (2FA opcional por usuario: imponerlo exige correo); test_driver_auth: otra dirección no bloquea al chofer'),
     ('DEF-057', '17-nov-2026', 'Segunda auditoría integral (N1)', 'Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers',
      'models/bus_alert.py', 'La regla de sin señal no mira si el bus tiene turno; al cerrarlo Odoo descarta sus posiciones y la última hora queda fija.',
      'Lógica', 'Abierto', 'Fase 41: test_alerts.py (turno cerrado no abre «No signal»)'),

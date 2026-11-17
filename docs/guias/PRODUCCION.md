@@ -105,13 +105,20 @@ Restaura solo la base de Odoo con otro nombre, sin tocar producción. Revísala 
 
 Es destructivo: detiene Odoo y Traccar, reemplaza las bases `odoo` y `traccar` y el filestore por los del respaldo, y vuelve a levantar todo. Sin `--yes` solo muestra qué haría.
 
+## Acceso al panel
+
+- **Intentos fallidos.** Tras 5 fallos desde una misma dirección, Odoo la hace esperar 60 s, y la espera se duplica con cada fallo siguiente hasta una hora (`base.login_cooldown_after` y `base.login_cooldown_duration` en *Ajustes > Técnico > Parámetros del sistema*). El login de la tableta tiene su propio límite: 10 intentos por minuto por dirección y 60 por usuario desde cualquier dirección.
+- **Segundo factor.** Cada administrador y manager lo activa en *Mi perfil > Seguridad de la cuenta > Autenticación en dos pasos* con una app de códigos (Google Authenticator, Aegis). En *Ajustes > Usuarios*, la columna *Autenticación en dos pasos* muestra quién lo tiene.
+- **Bloqueo de direcciones (opcional).** Para cortar en el cortafuegos a quien insiste, `fail2ban` puede leer el log del contenedor de Odoo (`docker inspect --format '{{.LogPath}}' <contenedor de odoo>`), buscar `Login failed for db:.* from <HOST>` y bloquear en la cadena `DOCKER-USER`: los puertos publicados por Docker no pasan por `INPUT`.
+- **Versión.** `/bus_tracking/health` sólo muestra la versión del módulo a quien tiene sesión en Odoo.
+
 ## Notificaciones
 
 Las alertas llegan por push (notificaciones web), que funcionan solo sobre HTTPS y necesitan que el servidor pueda salir a internet hacia los servicios push. Cada administrador abre *Configuración > Notificaciones en este dispositivo* y las activa en cada navegador o celular. No se usa correo.
 
 ## Monitoreo
 
-`GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok", "version": "<versión del módulo>"}` con código 200, o `{"status": "stale", "version": "..."}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
+`GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok"}` con código 200, o `{"status": "stale"}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
 
 Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y que avise por correo o mensaje cuando falle. La operación diaria (quién vigila el SOS, el monitor, los errores de las tabletas, el ensayo de restauración, las etiquetas de versión y la reversión) está en `docs/guias/OPERACION.md`; los datos personales y sus plazos, en `docs/diseno/PRIVACIDAD.md`. Ojo: si tus buses no circulan de noche, el endpoint devolverá 503 en ese horario; sube el plazo o pausa el monitor.
 
@@ -198,7 +205,6 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 |---|---|---|
 | DEF-051 | XSS guardado en el portal público por el nombre de una parada | No importar GPX de origen desconocido; revisar los nombres de las paradas |
 | DEF-052 | La tableta puede perder un SOS guardado sin señal | Ante un SOS, confirmar por radio o teléfono |
-| DEF-056 | Login del panel sin límite ni 2FA | Contraseñas largas y `fail2ban` en el host |
 | DEF-057 | Falsa alerta "No signal" tras cada turno | Ignorarla si el bus no tiene turno |
 | DEF-058, DEF-059 | Se pierden posiciones e incidentes guardados sin señal al cerrar el turno | Terminar el turno con señal |
 
@@ -206,9 +212,9 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 
 - El identificador del dispositivo es la única credencial del protocolo OsmAnd: quien lo conozca puede enviar posiciones falsas de ese bus. Es aleatorio y solo lo ven los administradores; si se filtra, hay que registrar el bus de nuevo (hoy no hay un botón para rotarlo).
 - Solo se admite el protocolo OsmAnd (la app de tableta). Los GPS físicos con otros protocolos exigirían abrir su puerto en el servidor y en la red de Azure, y esos no van cifrados.
-- El login de choferes (`/bus_tracking/driver/login`) sí tiene límite de intentos; el login del panel de Odoo no.
 - El usuario de base de datos de Odoo es superusuario de Postgres (el patrón de la imagen oficial).
-- No hay límite de intentos de login, ni autenticación en dos pasos, ni bloqueo de IPs (por ejemplo con fail2ban). Plan: fase 40.
+- El segundo factor (2FA) es opcional para cada usuario: Odoo sólo sabe imponerlo por correo y el sistema no usa correo. Pide a cada administrador y manager que lo active (ver *Acceso al panel*).
+- Los contadores de intentos de login viven en la memoria de cada worker: se reinician al reiniciar Odoo.
 - El token de API de Traccar y el de la credencial QR del chofer (365 días) se guardan en la base; sólo los leen los administradores y los managers. Quien tenga una copia de la base puede usarlos: revócalos si se filtra.
 - El token de Grafana viaja en la URL del iframe y dura 8 horas.
 - El perfil `production` de `eas.json` tiene `ios.simulator: true`: no sirve para iPhone o iPad reales.
