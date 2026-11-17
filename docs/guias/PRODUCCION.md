@@ -169,10 +169,12 @@ APK (sin Play Store):
 
 ```bash
 cd apps/conductor-tablet
-# La URL de Odoo se congela al construir:
-# EXPO_PUBLIC_ODOO_URL=https://<DOMAIN> eas build --profile production --platform android
+# Una vez por proyecto de EAS: la dirección de Odoo que trae la app (se congela al construir).
+eas env:create --environment production --name EXPO_PUBLIC_ODOO_URL --value https://<DOMAIN> --visibility plaintext
 eas build --profile production --platform android
 ```
+
+Sin esa variable, la app trae la dirección por defecto del código (`PRODUCTION_ODOO_URL`); el chofer puede cambiarla con el QR de configuración. El perfil `production` construye también para iPhone o iPad reales (`--platform ios`, con cuenta de Apple Developer).
 
 Instala el APK a mano en cada tableta. Para actualizar, otro build y se instala encima. El perfil `development` es el que admite GPS de fondo en pruebas; Expo Go no.
 
@@ -199,7 +201,7 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 ## Riesgos abiertos (auditoría del 17-nov-2026)
 
-La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 44 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes, carga y purga) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Faltan la fase 45 (build y dependencias) y, sobre todo, la 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 45 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes, carga y purga, build y dependencias) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Falta, sobre todo, la fase 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
 
 ## Limitaciones conocidas
 
@@ -211,5 +213,4 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 - El token de API de Traccar se guarda en la base y sólo lo leen los administradores. Quien tenga una copia de la base puede usarlo: revócalo en Traccar si se filtra. De las credenciales QR y de las sesiones de la tableta sólo se guarda la huella.
 - El token de Grafana viaja en la URL del iframe (queda en los logs del proxy y de Grafana) y dura lo que fije *Ajustes* (8 h por defecto). Al renovarlo, el panel se recarga y pierde filtros y zoom. Si los logs no son de confianza, acorta la duración.
 - Los conteos diarios de posiciones de Grafana se actualizan cada 30 minutos (cron *contar posiciones por día*): el día en curso puede ir hasta media hora atrasado.
-- El perfil `production` de `eas.json` tiene `ios.simulator: true`: no sirve para iPhone o iPad reales.
 - Los respaldos no se copian fuera del servidor automáticamente.
