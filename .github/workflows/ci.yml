@@ -113,26 +113,42 @@ jobs:
 
       # Same image as development: odoo:16.0 plus pywebpush.
       - name: Build the Odoo image
-        run: docker build -t rastreo-odoo:ci docker/odoo
-
-      - name: Run the bus_tracking tests
         run: |
+          docker build -t rastreo-odoo:ci docker/odoo
+          # Coverage only for the CI run: the production image does not carry it.
+          printf 'FROM rastreo-odoo:ci\nUSER root\nRUN pip3 install --no-cache-dir "coverage==7.6.1"\nUSER odoo\n' \
+            | docker build -t rastreo-odoo:cov -
+
+      - name: Run the bus_tracking tests with coverage
+        run: |
+          mkdir -p coverage && chmod 777 coverage          # the container writes as the odoo user
           # The image's entrypoint waits for Postgres at $HOST (default "db") before reading --db_host.
           docker run --rm --network host \
-            -e HOST=127.0.0.1 -e USER=odoo -e PASSWORD=odoo \
+            -e HOST=127.0.0.1 -e USER=odoo -e PASSWORD=odoo -e COVERAGE_FILE=/out/.coverage \
             -v "$PWD/addons:/mnt/extra-addons:ro" \
             -v "$PWD/bi:/mnt/bi:ro" \
-            rastreo-odoo:ci \
-            odoo --db_host=127.0.0.1 --db_port=5432 --db_user=odoo --db_password=odoo \
+            -v "$PWD/coverage:/out" \
+            rastreo-odoo:cov \
+            coverage run --source=/mnt/extra-addons/bus_tracking --omit='*/tests/*,*/migrations/*' /usr/bin/odoo \
+              --db_host=127.0.0.1 --db_port=5432 --db_user=odoo --db_password=odoo \
               --addons-path=/mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons \
               -d buses_ci -i bus_tracking --test-enable --test-tags /bus_tracking \
               --stop-after-init --without-demo=all --no-http 2>&1 | tee odoo-tests.log
           # Odoo does not always exit with an error when a test fails: read its summary line.
           grep -E "odoo.tests.result: 0 failed, 0 error\(s\) of [0-9]+ tests" odoo-tests.log
 
-      - name: Keep the log
+      - name: Coverage report
+        if: always()
+        run: |
+          docker run --rm -e COVERAGE_FILE=/out/.coverage -v "$PWD/addons:/mnt/extra-addons:ro" \
+            -v "$PWD/coverage:/out" rastreo-odoo:cov \
+            sh -c 'coverage xml -o /out/coverage.xml && coverage report --skip-covered | tail -25'
+
+      - name: Keep the log and the coverage
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: odoo-tests-log
-          path: odoo-tests.log
+          path: |
+            odoo-tests.log
+            coverage/coverage.xml
