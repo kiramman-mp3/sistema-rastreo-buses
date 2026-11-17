@@ -150,7 +150,10 @@ Hecho, con un desvío respecto de la decisión 2: Odoo 16 ya tenía un límite p
 - `fix: rate-limit driver sign-in per address and login together` para que no se pueda bloquear a un chofer desde otra IP.
 - `fix: hide the module version from the public health check` (o dejarla sólo con un token).
 
-### Fase 41. `fix/turnos-y-alertas` (N1, X2, W2, N2, N3, N4, Y4) — M
+### Fase 41. `fix/turnos-y-alertas` (N1, X2, W2, N2, N3, N4, Y4) — M — hecha (2026-11-17)
+
+Hecho. El servidor acepta un incidente si su `reported_at` cae dentro de un turno del chofer cerrado hace menos de 2 h; la tableta ya no lo borra por falta de sesión. La alerta concurrente se resolvió en `bus.alert` con un savepoint, probado en `test_alerts.py` en vez de `test_ingest.py`. Del simulador: sin push para buses simulados y cierre sólo de su viaje. No hizo falta proteger las rutas reales: un viaje real exige minutos planificados (restricción de `bus.trip`) y el simulador no toca una ruta que ya los tiene.
+
 
 - `fix: only raise no-signal alerts for buses on a shift` y cerrar la alerta abierta al terminar el turno.
 - `fix: send queued positions before ending the shift` en la tableta: `stopGps()` (que vacía la cola) antes de `client.endShift()`.
