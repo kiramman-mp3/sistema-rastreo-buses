@@ -23,6 +23,7 @@ PURGES = [
     ('bus_incident', "state = 'seen' AND reported_at < %s", 'history'),
     ('bus_trip', "state IN ('done', 'incomplete', 'cancelled') AND planned_start < %s", 'history'),
     ('bus_run', "state = 'done' AND departure < %s", 'history'),
+    ('bus_position_day', "local_day < %s::date", 'history'),
     ('bus_shift', "state = 'done' AND \"end\" < %s AND NOT EXISTS ("
                   "SELECT 1 FROM bus_incident i WHERE i.shift_id = bus_shift.id)", 'history'),
 ]

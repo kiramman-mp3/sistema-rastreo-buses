@@ -82,11 +82,23 @@ class TestKpiViews(ViewCase):
         for ms in (100, 300):
             self.env['bus.perf.sample'].create({'name': 'live', 'ms': ms})
         self.env['bus.sync.audit'].create({'total': 10, 'matched': 9})
+        self.env['bus.position.day']._refresh(full=True)
         row = self.rows('SELECT SUM(positions_stored), SUM(audit_matched), SUM(audit_total), SUM(response_samples), '
                         'SUM(simulated_trips) FROM kpi_software')[0]
         self.assertEqual(row[0], self.rows('SELECT COUNT(*) FROM bus_position')[0][0])
         self.assertEqual(row[1:4], (9, 10, 2))
         self.assertEqual(row[4], 0)
+
+    def test_the_daily_counts_match_the_positions_and_outlive_them(self):
+        Day = self.env['bus.position.day']
+        Day._refresh(full=True)
+        total, = self.rows('SELECT COUNT(*) FROM bus_position')[0]
+        self.assertTrue(total)
+        self.assertEqual(self.rows('SELECT SUM(positions) FROM kpi_positions_daily')[0][0], total)
+        # A plain refresh counts only today and yesterday again: older days stay, even with their positions gone.
+        self.env.cr.execute("DELETE FROM bus_position WHERE fix_time < now() at time zone 'UTC' - interval '3 days'")
+        Day._refresh()
+        self.assertEqual(self.rows('SELECT SUM(positions) FROM kpi_positions_daily')[0][0], total)
 
     def test_they_are_rebuilt_when_the_module_updates(self):
         self.env.cr.execute('DROP VIEW kpi_software')
