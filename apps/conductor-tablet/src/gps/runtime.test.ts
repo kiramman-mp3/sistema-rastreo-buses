@@ -1,5 +1,5 @@
 import { LocationQueue, memoryKv } from './queue';
-import { ingestLocations, sendFix, type LastError, type LocationSample } from './runtime';
+import { heartbeatDue, ingestLocations, sendFix, type LastError, type LocationSample } from './runtime';
 
 const creds = { uniqueId: 'dev-1', url: 'https://gps.example.com' };
 
@@ -77,5 +77,15 @@ describe('gps runtime', () => {
     });
     expect(result.sent).toBe(1);
     expect(onError).not.toHaveBeenCalled();
+  });
+});
+
+describe('backup heartbeat', () => {
+  test('follows the last fix, so a tablet without signal does not pile up positions', () => {
+    const now = 1_000_000;
+    // Nothing was sent for a minute, but the GPS gave a fix 2 s ago: no extra position.
+    expect(heartbeatDue(now - 2_000, now, 5_000)).toBe(false);
+    expect(heartbeatDue(now - 5_000, now, 5_000)).toBe(true);
+    expect(heartbeatDue(null, now, 5_000)).toBe(true);
   });
 });
