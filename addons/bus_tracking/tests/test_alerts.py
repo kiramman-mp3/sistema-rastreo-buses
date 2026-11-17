@@ -7,6 +7,7 @@ from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 from .common import STOPS, BusCase, traccar_position
+from .test_driver_auth import make_driver
 
 KNOTS_90_KMH = 50.0   # 92.6 km/h, above the default 50 km/h limit
 KNOTS_20_KMH = 11.0   # 20.4 km/h
@@ -69,7 +70,12 @@ class TestAlerts(BusCase):
         self.assertFalse(self.alerts())
 
     # -- no signal -------------------------------------------------------
+    def on_shift(self):
+        return self.env['bus.shift'].create({
+            'user_id': make_driver(self.env).id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
+
     def test_silent_bus_raises_one_alert_and_new_report_closes_it(self):
+        self.on_shift()
         self.report(15, KNOTS_20_KMH)
         self.Alert._cron_check()
         self.Alert._cron_check()
@@ -78,6 +84,22 @@ class TestAlerts(BusCase):
         self.assertEqual(alert.start_time, self.now - timedelta(minutes=15))
         self.assertEqual(alert.threshold, 10)
         self.report(0, KNOTS_20_KMH)
+        self.assertEqual(alert.state, 'closed')
+
+    def test_a_bus_off_shift_is_silent_on_purpose(self):
+        shift = self.on_shift()
+        self.report(15, KNOTS_20_KMH)
+        shift._end()
+        self.Alert._cron_check()
+        self.assertFalse(self.alerts('offline'))
+
+    def test_ending_the_shift_closes_its_no_signal_alert(self):
+        shift = self.on_shift()
+        self.report(15, KNOTS_20_KMH)
+        self.Alert._cron_check()
+        alert = self.alerts('offline')
+        self.assertEqual(alert.state, 'open')
+        shift._end()
         self.assertEqual(alert.state, 'closed')
 
     def test_bus_parked_overnight_is_not_reported_as_offline(self):

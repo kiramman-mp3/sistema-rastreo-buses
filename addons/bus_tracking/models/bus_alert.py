@@ -199,7 +199,8 @@ class BusAlert(models.Model):
                 ('last_fix_time', '<', now - timedelta(minutes=offline_minutes)),
                 ('last_fix_time', '>', now - RECENTLY_ACTIVE),
             ])
-            for bus in silent:
+            # A bus off shift is silent on purpose: Odoo drops its positions (DEF-057).
+            for bus in silent.filtered(lambda b: b._accepts_positions()):
                 self._open_alert(bus, 'offline', bus.last_fix_time, threshold=offline_minutes)
 
         stop_minutes = self._param('long_stop_minutes', 15)
