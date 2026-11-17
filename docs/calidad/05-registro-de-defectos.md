@@ -67,11 +67,11 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-057 | 17-nov-2026 | Segunda auditoría integral (N1) | Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers | models/bus_alert.py | Cerrado |
 | DEF-058 | 17-nov-2026 | Segunda auditoría integral (X2) | Las posiciones guardadas sin señal se pierden al terminar el turno | apps/conductor-tablet/src/state/session.ts | Cerrado |
 | DEF-059 | 17-nov-2026 | Segunda auditoría integral (W2) | Un incidente o SOS guardado sin señal se borra si el turno ya cerró | controllers/driver_api.py, apps/conductor-tablet/src/state/session.ts | Cerrado |
-| DEF-060 | 17-nov-2026 | Segunda auditoría integral (Z1, inferido) | Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes | views/bus_driver_views.xml, security/security.xml | Abierto |
+| DEF-060 | 17-nov-2026 | Segunda auditoría integral (Z1, inferido) | Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes | views/bus_driver_views.xml, security/security.xml | Cerrado |
 | DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Cerrado |
 | DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Cerrado |
 
-Resumen: 62 registrados, 61 cerrados (98 %), 1 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 62 registrados, 62 cerrados (100 %), 0 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -433,7 +433,7 @@ Resumen: 62 registrados, 61 cerrados (98 %), 1 abiertos. Densidad: 12,3 defectos
 
 - **Causa raíz:** El menú Choferes abre res.users, que exige base.group_erp_manager; las pruebas usan admin.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Fase 43: test_driver_staff.py con un manager que no es administrador
+- **Prueba que lo protege:** test_driver_staff: el test confirmó el defecto; un manager sin derechos de administrador crea, edita y archiva choferes con el asistente, que rechaza al personal
 
 ### DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
 
@@ -449,6 +449,4 @@ Resumen: 62 registrados, 61 cerrados (98 %), 1 abiertos. Densidad: 12,3 defectos
 
 ## 3. Qué falta para cerrar los abiertos
 
-Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
-
-1. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
+No queda ningún defecto abierto. DEF-013 (una credencial en el historial de git) se cerró al reescribir el historial y rotar la contraseña; `gitleaks` corre en el CI (`.github/workflows/ci.yml`) para que no se repita.

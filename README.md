@@ -35,7 +35,7 @@ docker compose up -d
    - **Test connection**.
 3. Crea **Routes** con sus paradas (lat/lon y radio de llegada en metros).
 4. Crea un bus por tableta, asígnale su ruta y pulsa **Register GPS in Traccar** (Odoo crea el dispositivo). El id OsmAnd llega a la app al iniciar el turno, no se pega a mano.
-5. Crea el chofer en `Flota > Choferes` (queda como usuario de portal: entra sólo a la app de la tableta, nunca al panel) y, si quieres, pulsa **Generar credencial QR**: el chofer la escanea para entrar sin escribir clave. Sólo un administrador ve, genera o revoca credenciales. Sigue `docs/guias/GUIA-CHOFER.md`. App: `apps/conductor-tablet`. Para pruebas sin tableta (con *Aceptar posiciones sin turno* activado): `curl "http://localhost:5055/?id=<identificador>&lat=-33.45&lon=-70.66&speed=10"`.
+5. Crea el chofer en `Flota > Nuevo chofer` (queda como usuario de portal: entra sólo a la app de la tableta, nunca al panel) y, si quieres, pulsa **Generar credencial QR** en su ficha: el chofer la escanea para entrar sin escribir clave. Odoo la muestra una sola vez: imprímela entonces. Sólo los managers de buses gestionan choferes y credenciales. Sigue `docs/guias/GUIA-CHOFER.md`. App: `apps/conductor-tablet`. Para pruebas sin tableta (con *Aceptar posiciones sin turno* activado): `curl "http://localhost:5055/?id=<identificador>&lat=-33.45&lon=-70.66&speed=10"`.
 6. `Bus Tracking > Live Map`. Menús **Turnos** e **Incidentes** para el personal.
 
 En desarrollo el puerto 5055 (OsmAnd) va sin cifrar; en producción los celulares usan HTTPS (ver `docs/guias/PRODUCCION.md`).
