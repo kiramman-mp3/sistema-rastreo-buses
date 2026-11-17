@@ -102,8 +102,8 @@ class TestGpsSetup(BusCase):
         icp.set_param('bus_tracking.traccar_user', '')
         icp.set_param('bus_tracking.traccar_password', '')
         server = {'id': 1, 'registration': True, 'readonly': False}
-        token = fake_response('tok_ABC-123=')
-        token.text = 'tok_ABC-123=\n'                                 # Traccar answers plain text
+        token = fake_response('fake-token')
+        token.text = 'fake-token\n'                                 # Traccar answers plain text
         with patch(API + 'post', side_effect=[fake_response({'id': 1}), token]) as post, \
                 patch(API + 'get', return_value=fake_response(dict(server))) as get, \
                 patch(API + 'put', return_value=fake_response({})) as put:
@@ -119,7 +119,7 @@ class TestGpsSetup(BusCase):
         self.assertEqual(put.call_args.kwargs['json'], dict(server, registration=False))
         self.assertEqual(icp.get_param('bus_tracking.traccar_user'), 'boss@example.com')
         # The password is swapped for a long-lived token, so a database copy does not hold it (S5).
-        self.assertEqual(icp.get_param('bus_tracking.traccar_token'), 'tok_ABC-123=')
+        self.assertEqual(icp.get_param('bus_tracking.traccar_token'), 'fake-token')
         self.assertFalse(icp.get_param('bus_tracking.traccar_password'))
 
     def test_an_existing_install_swaps_its_password_for_a_token(self):
