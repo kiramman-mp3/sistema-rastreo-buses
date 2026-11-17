@@ -4,6 +4,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from .bus_position import DEFAULT_RETENTION_DAYS
+from .utils import secure_gps_url
 
 
 class ResConfigSettings(models.TransientModel):
@@ -100,7 +101,7 @@ class ResConfigSettings(models.TransientModel):
     def _check_gps_url(self):
         for settings in self:
             value = (settings.bus_gps_url or '').strip()
-            if value and not re.match(r'^https?://[^\s/]+(:\d+)?(/\S*)?$', value):
+            if value and not secure_gps_url(value):
                 raise ValidationError(_("The GPS address must look like https://gps.example.com."))
 
     @api.constrains('bus_grafana_url', 'bus_grafana_secret', 'bus_grafana_minutes')
