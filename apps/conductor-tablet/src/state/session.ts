@@ -319,6 +319,9 @@ export class Session {
     } catch {
       // Incidents stay queued; ending the shift must not wait for them.
     }
+    // Stopping the GPS sends the positions saved without signal. It goes first: once the shift is closed the
+    // server drops every position of the bus (DEF-058).
+    await this.stopGps();
     let result: 'ended' | 'queued' = 'ended';
     try {
       await this.client.endShift();
