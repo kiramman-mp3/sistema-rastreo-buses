@@ -1237,3 +1237,42 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 ### Pendiente o sin confirmar
 
 - Forzar recarga en navegadores clientes (`Ctrl + Shift + R`) para refrescar la caché local de vistas de Odoo.
+
+
+## 2026-11-17: segunda auditoría integral, plan de las fases 38 a 47 y roadmap
+
+### Qué se hizo
+
+- Auditoría de todo el código que corre en producción sobre `develop` en `512bab6`: módulo Odoo, app de tableta, despliegue, scripts y CI. Se revisó sobre todo lo construido después de la primera auditoría (fases R1 a R12 y Fleet).
+- Plan de corrección en `docs/arquitectura/PLAN-AUDITORIA-2.md`: hallazgos con archivo y línea, seis decisiones para el equipo y las fases 38 a 47, cada una con sus commits y pruebas.
+- `docs/arquitectura/ROADMAP.md`: vista única de lo hecho desde el 26-oct y de lo que falta, con hitos `v0.9.6-beta` (piloto), `v1.0.0-rc1` y `v1.0.0`.
+- Registro de defectos: DEF-049 y DEF-050 pasan a `qa/datos_calidad.py` (antes sólo estaban en el `.md` y se perdían al regenerar) y se registran abiertos DEF-051 a DEF-062. Se regeneraron `04`, `05`, `07` y la figura de Pareto.
+- Documentación al día con el estado real: `PRODUCCION.md` (panel de Traccar público, perfil `local-db`, retención y tabla de riesgos con medidas provisionales), `OPERACION.md`, `GUIA-CHOFER.md`, `PRIVACIDAD.md`, `09-cumplimiento-iso.md`, `19-matriz-de-trazabilidad.md`, `GUION_DEFENSA.md`, los índices y el `README.md`.
+- No se cambió código.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| App: `npm run lint` y `npm run typecheck` | Sin errores |
+| App: Jest | 167 de 167, 27 suites |
+| App: `npm audit --omit=dev` | 9 moderadas, ninguna alta |
+| Odoo: `python -m compileall` y XML bien formado | Sin errores |
+| `qa/traducciones.py` | 0 entradas sin traducir |
+| Suite de Odoo y flake8 | No ejecutadas: Docker apagado y flake8 no instalado. Vale la evidencia del 5-nov (544 de 544) |
+
+### Problemas encontrados
+
+- XSS guardado en el portal por el nombre de una parada, que puede venir de un GPX (DEF-051).
+- La cola de incidentes de la tableta no está serializada y puede perder un SOS (DEF-052).
+- Producción: posiciones sin purga en una instalación nueva (DEF-053), base local que no vuelve a arrancar tras `down` y `up` (DEF-054), panel de Traccar público con la IP en el dominio por defecto (DEF-055), login del panel sin límite ni 2FA (DEF-056).
+- Turnos: falsa alerta "No signal" tras cada turno (DEF-057); posiciones e incidentes guardados sin señal que se pierden al cerrar el turno (DEF-058, DEF-059).
+- Permisos y tableta: un manager no administrador probablemente no gestiona choferes (DEF-060, inferido); la tableta envía el token viejo al cambiar de servidor (DEF-061); la dirección del GPS admite `http` (DEF-062).
+- Los roles de `agy` no sirvieron: el de seguridad lo bloqueó el filtro de Gemini y el revisor agotó el tiempo.
+
+### Pendiente o sin confirmar
+
+- Fases 38 a 40 antes de cualquier piloto; luego 41 a 47 (`PLAN-AUDITORIA-2.md`).
+- Las seis decisiones de la sección 2 del plan: base por defecto, 2FA, panel de Traccar, gestión de choferes, incidentes tras el cierre y credencial QR.
+- Confirmar con una prueba DEF-060 y los hallazgos marcados como inferidos.
+- Correr la suite de Odoo y flake8 sobre esta base.

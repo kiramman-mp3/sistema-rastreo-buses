@@ -21,7 +21,7 @@ Entorno automatizado para pruebas unitarias, de integración, auditoría estáti
 | [`tablet_dispositivos.py`](tablet_dispositivos.py) | La app del chofer (versión web) en 16 tamaños y orientaciones: iPhone 16, Pixel Fold exterior, interior y pantalla dividida, tabletas, teléfonos pequeños. Avisa de lo que falte, quede cortado o fuera de alcance. | Informe en consola y capturas en `qa/salida/tablet/`. |
 | [`tablet_errores_humanos.py`](tablet_errores_humanos.py) | Errores humanos en la app del chofer: doble toque, clave mala, SOS sin querer, alertas, pérdida de señal. 34 comprobaciones. | PASS/FAIL por comprobación. |
 | [`tablet_datos_prueba.py`](tablet_datos_prueba.py) | Prepara y limpia en el Odoo de desarrollo lo que necesitan las dos pruebas anteriores (alertas abiertas, dirección GPS de prueba). | Se pasa a `odoo shell`. |
-| [`datos_calidad.py`](datos_calidad.py) | Datos históricos de defectos (DEF-001 a DEF-038) y causas raíz. | Fuente para Pareto e Ishikawa. |
+| [`datos_calidad.py`](datos_calidad.py) | Datos históricos de defectos (DEF-001 a DEF-062) y causas raíz. | Fuente para Pareto e Ishikawa. |
 | [`generar_docs.py`](generar_docs.py) | Regenera los documentos 03, 04, 05 y 07 de `docs/calidad/` y gráficos PNG. | Documentación y figuras en `docs/calidad/`. |
 | [`generar_informe.py`](generar_informe.py) | Compilador del PDF de la evaluación del 28-oct-2026 (histórico; ya no reproducible con las evidencias nuevas). | `docs/calidad/Informe_calidad_rastreo_buses.pdf` |
 | [`generar_informe_final.py`](generar_informe_final.py) | Informe final del proyecto con ReportLab: pruebas, indicadores, SonarQube, rendimiento y defectos, desde las evidencias actuales. | `docs/calidad/Informe_final_proyecto_rastreo_buses.pdf` |

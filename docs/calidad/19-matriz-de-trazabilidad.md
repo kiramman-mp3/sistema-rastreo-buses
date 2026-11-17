@@ -16,7 +16,7 @@ que no está en el repositorio (el celular real, la confirmación del docente) s
 | 7 | Métricas e indicadores (8 de transporte, 4 de software) | Doce indicadores con fórmula, fuente, unidad, consulta, umbrales, estado e interpretación | `docs/calidad/14-metricas-de-transporte.md` (generado del código), `tests/test_kpi.py` | Hecho |
 | 8 | Dashboard y reportes | Tablero dentro de Odoo (7 pestañas) y Grafana incrustado (6 tableros); reportes de alertas con pivote y gráfico | `docs/calidad/15-tablero-grafana.md`, `tests/test_dashboard.py`, `test_grafana_*.py`, `qa/grafana_smoke.py` | Hecho; **confirmar con el docente que Grafana sirve en lugar de Power BI** (el tablero de Odoo es la alternativa A completa) |
 | 9 | Pruebas y calidad (matriz, ISO/IEC 25010, SonarQube, rendimiento) | 544 pruebas de Odoo, 167 de Jest, suite en vivo, auditoría; SonarQube con Quality Gate; rendimiento por volumen | `docs/calidad/03`, `04`, `09`, `16-sonarqube.md`, `17-rendimiento-por-volumen.md` | Hecho |
-| 10 | Problemas y mejora continua | 48 defectos con causa raíz; Ishikawa, Pareto y cuatro ciclos PDCA con antes y después | `05`, `07`, `08`, `18-mejora-continua-pdca.md` | Hecho |
+| 10 | Problemas y mejora continua | 62 defectos con causa raíz (12 abiertos de la auditoría del 17-nov); Ishikawa, Pareto y cuatro ciclos PDCA con antes y después | `05`, `07`, `08`, `18-mejora-continua-pdca.md` | Hecho |
 
 ## 2. Entregables finales
 
@@ -58,7 +58,7 @@ Cada pregunta del PDF (§6) con su pantalla está en `docs/academico/GUION_DEFEN
 |---|---|
 | No basta instalar Odoo, Traccar y Cloudflare ni ver un vehículo en un mapa | Hay recorridos, reglas, indicadores, tableros, pruebas y análisis de calidad |
 | Administrar múltiples rutas, registrar historial, evaluar cumplimiento, métricas verificables | Cuatro rutas, `bus.trip` e historial, reglas §1.1, consulta SQL junto a cada indicador |
-| Aplicar pruebas, identificar defectos y demostrar mejoras | 544 + 167 pruebas, 48 defectos, PDCA con antes y después |
+| Aplicar pruebas, identificar defectos y demostrar mejoras | 544 + 167 pruebas, 62 defectos (50 cerrados), PDCA con antes y después |
 | **No dashboards estáticos, ni datos ficticios como reales, ni métricas incomprobables** | Cada cifra es una consulta; los simulados llevan `simulated` y se filtran; las pruebas comparan los dos tableros con las fórmulas |
 
 ## 6. Lo que queda pendiente
