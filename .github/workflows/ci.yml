@@ -38,6 +38,9 @@ jobs:
         working-directory: apps/conductor-tablet
         run: npm test
 
+      - name: Stop names show as text on the public map
+        run: node qa/xss_tooltips.js
+
   secret-scan:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
