@@ -240,6 +240,27 @@ describe('session', () => {
     expect(gps.started).toEqual([]);
   });
 
+  test('endShift sends the saved positions before closing the shift on the server', async () => {
+    const tokens = memoryStore('tok');
+    const order: string[] = [];
+    const gps = gpsMock();
+    const stop = gps.stop;
+    gps.stop = async () => {
+      order.push('gps.stop');
+      await stop();
+    };
+    const fetchMock = jest.fn(async (url: string) => {
+      if (String(url).endsWith('/shift/end')) order.push('shift/end');
+      return json(200, { ok: true });
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    session.snapshot.shift = { id: 3, vehicle_id: 1, route_id: 2, start: '2026-10-30T16:00:00Z' };
+    await session.endShift();
+    expect(order.indexOf('gps.stop')).toBeLessThan(order.indexOf('shift/end'));
+    expect(order.indexOf('gps.stop')).toBeGreaterThanOrEqual(0);
+  });
+
   test('loginWithBadge exchanges badge token for a session and populates driver state', async () => {
     const tokens = memoryStore(null);
     const fetchMock = jest.fn(async (url: string) => {
@@ -361,6 +382,9 @@ describe('session', () => {
     const pressed = bodies[0].reported_at;
     expect(pressed).toMatch(/Z$/);
 
+    await session.flushIncidents();
+    expect(await queue.size()).toBe(1);
+    status = 401;
     await session.flushIncidents();
     expect(await queue.size()).toBe(1);
     status = 200;

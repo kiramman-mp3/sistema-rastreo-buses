@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from psycopg2 import IntegrityError
 
@@ -7,6 +8,7 @@ from odoo.tests import tagged
 from odoo.tools import mute_logger
 
 from .common import STOPS, BusCase, traccar_position
+from .test_driver_auth import make_driver
 
 KNOTS_90_KMH = 50.0   # 92.6 km/h, above the default 50 km/h limit
 KNOTS_20_KMH = 11.0   # 20.4 km/h
@@ -69,7 +71,12 @@ class TestAlerts(BusCase):
         self.assertFalse(self.alerts())
 
     # -- no signal -------------------------------------------------------
+    def on_shift(self):
+        return self.env['bus.shift'].create({
+            'user_id': make_driver(self.env).id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
+
     def test_silent_bus_raises_one_alert_and_new_report_closes_it(self):
+        self.on_shift()
         self.report(15, KNOTS_20_KMH)
         self.Alert._cron_check()
         self.Alert._cron_check()
@@ -78,6 +85,22 @@ class TestAlerts(BusCase):
         self.assertEqual(alert.start_time, self.now - timedelta(minutes=15))
         self.assertEqual(alert.threshold, 10)
         self.report(0, KNOTS_20_KMH)
+        self.assertEqual(alert.state, 'closed')
+
+    def test_a_bus_off_shift_is_silent_on_purpose(self):
+        shift = self.on_shift()
+        self.report(15, KNOTS_20_KMH)
+        shift._end()
+        self.Alert._cron_check()
+        self.assertFalse(self.alerts('offline'))
+
+    def test_ending_the_shift_closes_its_no_signal_alert(self):
+        shift = self.on_shift()
+        self.report(15, KNOTS_20_KMH)
+        self.Alert._cron_check()
+        alert = self.alerts('offline')
+        self.assertEqual(alert.state, 'open')
+        shift._end()
         self.assertEqual(alert.state, 'closed')
 
     def test_bus_parked_overnight_is_not_reported_as_offline(self):
@@ -128,6 +151,34 @@ class TestAlerts(BusCase):
         self.assertFalse(self.alerts('long_stop'))
 
     # -- data integrity --------------------------------------------------
+    def test_an_alert_created_meanwhile_by_another_request_is_reused(self):
+        other = self.Alert.create({'vehicle_id': self.bus.id, 'kind': 'speeding', 'start_time': self.now})
+        Alert = type(self.Alert)
+        real_search = Alert.search
+        calls = []
+
+        def search(model, domain, *args, **kwargs):
+            # The first look finds nothing, as when the other request has not committed yet.
+            calls.append(domain)
+            return model.browse() if len(calls) == 1 else real_search(model, domain, *args, **kwargs)
+
+        with patch.object(Alert, 'search', search), mute_logger('odoo.sql_db'):
+            alert = self.Alert._open_alert(self.bus, 'speeding', self.now, max_speed=90.0)
+        self.assertEqual(alert, other)
+
+    def test_database_allows_a_single_event_per_trip_kind_and_stop(self):
+        stops = self.route.stop_ids
+        for i in reversed(range(len(stops))):    # last first: the minutes never go back
+            stops[i].planned_offset_min = i * 5
+        trip = self.env['bus.trip'].create({
+            'route_id': self.route.id, 'vehicle_id': self.bus.id, 'planned_start': self.now})
+        vals = {'vehicle_id': self.bus.id, 'kind': 'late_start', 'start_time': self.now, 'state': 'closed',
+                'trip_id': trip.id}
+        self.Alert.create(vals)
+        with mute_logger('odoo.sql_db'), self.assertRaises(IntegrityError), self.env.cr.savepoint():
+            self.Alert.create(vals)
+        self.assertEqual(self.Alert._trip_event(trip, 'late_start', self.now).kind, 'late_start')
+
     def test_database_allows_a_single_open_alert_per_bus_and_kind(self):
         vals = {'vehicle_id': self.bus.id, 'kind': 'offline', 'start_time': self.now}
         self.Alert.create(vals)

@@ -406,6 +406,32 @@ class TestDriverShiftApi(HttpCase):
         self.assertTrue(vehicles['Bus 1']['has_gps'])
         self.assertFalse(vehicles['Sin GPS']['has_gps'])
 
+    def test_an_sos_saved_without_signal_arrives_after_the_shift_ended(self):
+        token = self.token()
+        self.assertEqual(self.start(token).status_code, 200)
+        shift = self.env['bus.shift'].search([('user_id', '=', self.driver.id), ('state', '=', 'active')])
+        shift.start = fields.Datetime.now() - timedelta(hours=2)
+        pressed = (fields.Datetime.now() - timedelta(minutes=30)).replace(microsecond=0)
+        shift._end()
+        resp = self.post(INCIDENT, {'kind': 'sos', 'reported_at': pressed.isoformat() + 'Z'}, token=token)
+        self.assertEqual(resp.status_code, 200, resp.text)
+        incident = self.env['bus.incident'].browse(resp.json()['id'])
+        self.assertEqual((incident.shift_id, incident.reported_at, incident.kind), (shift, pressed, 'sos'))
+        # Without a time, or with one after the shift ended, there is no shift to put it in.
+        self.assertEqual(self.post(INCIDENT, {'kind': 'sos'}, token=token).status_code, 409)
+        later = (fields.Datetime.now() + timedelta(minutes=5)).isoformat() + 'Z'
+        self.assertEqual(self.post(INCIDENT, {'kind': 'sos', 'reported_at': later}, token=token).status_code, 409)
+
+    def test_an_incident_of_a_shift_ended_long_ago_is_refused(self):
+        token = self.token()
+        self.start(token)
+        shift = self.env['bus.shift'].search([('user_id', '=', self.driver.id), ('state', '=', 'active')])
+        shift._end()
+        now = fields.Datetime.now()
+        shift.write({'start': now - timedelta(hours=6), 'end': now - timedelta(hours=3)})
+        pressed = (fields.Datetime.now() - timedelta(hours=4)).isoformat() + 'Z'
+        self.assertEqual(self.post(INCIDENT, {'kind': 'sos', 'reported_at': pressed}, token=token).status_code, 409)
+
     def test_an_incident_keeps_the_time_it_was_reported(self):
         token = self.token()
         self.assertEqual(self.start(token).status_code, 200)

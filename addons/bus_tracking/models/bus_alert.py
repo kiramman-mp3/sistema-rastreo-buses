@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+from psycopg2 import IntegrityError
+
 from odoo import _, api, fields, models
 
 from .utils import MOVING_ABOVE_KMH, int_param
@@ -15,6 +17,7 @@ KINDS = [
     ('incomplete_trip', "Incomplete trip"),
     ('late_start', "Late start"),
 ]
+TRIP_EVENT_KINDS = ('late_arrival', 'skipped_stop', 'incomplete_trip', 'late_start')
 
 # A bus that never reported in this long is parked for the night, not "without signal".
 RECENTLY_ACTIVE = timedelta(hours=6)
@@ -48,6 +51,17 @@ class BusAlert(models.Model):
         self.env.cr.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS bus_alert_one_open_idx "
             "ON bus_alert (vehicle_id, kind) WHERE state = 'open'")
+        # One event per scheduled trip, kind and stop. Duplicates written before the index existed are dropped first.
+        kinds = tuple(TRIP_EVENT_KINDS)
+        self.env.cr.execute("""
+            DELETE FROM bus_alert a USING bus_alert b
+             WHERE a.trip_id = b.trip_id AND a.kind = b.kind AND COALESCE(a.stop_id, 0) = COALESCE(b.stop_id, 0)
+               AND a.kind IN %s AND a.id > b.id
+               AND NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'bus_alert_one_trip_event_idx')
+        """, (kinds,))
+        self.env.cr.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS bus_alert_one_trip_event_idx "
+            "ON bus_alert (trip_id, kind, COALESCE(stop_id, 0)) WHERE trip_id IS NOT NULL AND kind IN %s", (kinds,))
 
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
@@ -93,12 +107,12 @@ class BusAlert(models.Model):
         """A rule of a scheduled trip was broken. Written closed: it is a fact, there is nothing to wait for.
         One per trip, kind and stop."""
         stop = vals.get('stop_id')
-        existing = self.search(
-            [('trip_id', '=', trip.id), ('kind', '=', kind), ('stop_id', '=', stop or False)], limit=1)
+        domain = [('trip_id', '=', trip.id), ('kind', '=', kind), ('stop_id', '=', stop or False)]
+        existing = self.search(domain, limit=1)
         if existing:
             return existing
         bus = trip.vehicle_id
-        return self.create(dict(
+        return self._create_once(domain, dict(
             vals,
             vehicle_id=bus.id,
             route_id=trip.route_id.id,
@@ -111,6 +125,16 @@ class BusAlert(models.Model):
             longitude=bus.last_longitude,
         ))
 
+    @api.model
+    def _create_once(self, domain, vals):
+        """Create, or return the record another request created at the same moment (webhook and cron can handle
+        the same bus at once). Without this the unique index fails the whole request and the position is lost."""
+        try:
+            with self.env.cr.savepoint():
+                return self.create(vals)
+        except IntegrityError:
+            return self.search(domain, limit=1)
+
     # ------------------------------------------------------------------
     # Rules
     # ------------------------------------------------------------------
@@ -121,10 +145,11 @@ class BusAlert(models.Model):
     @api.model
     def _open_alert(self, vehicle, kind, start_time, **vals):
         """Open an alert unless one is already open for this bus and kind."""
-        existing = self.search([('vehicle_id', '=', vehicle.id), ('kind', '=', kind), ('state', '=', 'open')], limit=1)
+        domain = [('vehicle_id', '=', vehicle.id), ('kind', '=', kind), ('state', '=', 'open')]
+        existing = self.search(domain, limit=1)
         if existing:
             return existing
-        alert = self.create(dict(
+        alert = self._create_once(domain, dict(
             vals,
             vehicle_id=vehicle.id,
             route_id=vehicle.route_id.id,
@@ -199,7 +224,8 @@ class BusAlert(models.Model):
                 ('last_fix_time', '<', now - timedelta(minutes=offline_minutes)),
                 ('last_fix_time', '>', now - RECENTLY_ACTIVE),
             ])
-            for bus in silent:
+            # A bus off shift is silent on purpose: Odoo drops its positions (DEF-057).
+            for bus in silent.filtered(lambda b: b._accepts_positions()):
                 self._open_alert(bus, 'offline', bus.last_fix_time, threshold=offline_minutes)
 
         stop_minutes = self._param('long_stop_minutes', 15)
@@ -224,6 +250,10 @@ class BusAlert(models.Model):
             return
         push = self.env['bus.push.subscription']
         for alert in pending:
+            if alert.vehicle_id.simulated:
+                # A replayed trip is a test: nobody must be woken up for it.
+                alert.notified = True
+                continue
             kind = dict(alert._fields['kind']._description_selection(self.env))[alert.kind]
             payload = {
                 'title': '%s: %s' % (kind, alert.vehicle_id.name),

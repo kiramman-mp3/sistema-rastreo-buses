@@ -24,6 +24,8 @@ account_limiter = RateLimiter(ACCOUNT_LIMIT, 60.0)
 CLIENT_ERROR_LIMIT = 20   # reports per driver and minute and worker process: a crash loop must not flood the log
 error_limiter = RateLimiter(CLIENT_ERROR_LIMIT, 60.0)
 MESSAGE_MAX, STACK_MAX, SHORT_MAX = 500, 3000, 60
+# How long after a shift ends its incidents saved without signal are still accepted.
+LATE_INCIDENT = timedelta(hours=2)
 INCIDENT_KIND = {key for key, _label in INCIDENT_KINDS}
 
 
@@ -79,6 +81,20 @@ class BusDriverApi(http.Controller):
 
     def _active_shift(self, user):
         return request.env['bus.shift'].with_user(user).search([('state', '=', 'active')], limit=1)
+
+    def _just_ended_shift(self, user, reported_at):
+        """The shift, closed less than LATE_INCIDENT ago, during which an incident was reported. A tablet without
+        signal sends its saved incidents (an SOS among them) when the signal comes back, which can be after the
+        driver ended the shift (DEF-059)."""
+        if not reported_at:
+            return request.env['bus.shift']
+        now = fields.Datetime.now()
+        return request.env['bus.shift'].with_user(user).search([
+            ('state', '=', 'done'),
+            ('end', '>=', now - LATE_INCIDENT),
+            ('start', '<=', reported_at + timedelta(minutes=1)),
+            ('end', '>=', reported_at - timedelta(minutes=1)),
+        ], order='end desc', limit=1)
 
     def _shift_payload(self, shift):
         return {
@@ -338,9 +354,11 @@ class BusDriverApi(http.Controller):
         if err:
             return err
         shift = self._active_shift(user)
-        if not shift:
-            return json_response({'error': 'no_shift'}, 409)
         body = read_body()
+        if not shift:
+            shift = self._just_ended_shift(user, parse_traccar_dt((body or {}).get('reported_at')))
+            if not shift:
+                return json_response({'error': 'no_shift'}, 409)
         if body is None:
             return json_response({'error': 'bad_request'}, 400)
         kind = body.get('kind')
@@ -367,6 +385,8 @@ class BusDriverApi(http.Controller):
         reported_at = parse_traccar_dt(body.get('reported_at'))
         if not reported_at or not (shift.start - timedelta(minutes=1) <= reported_at <= now + timedelta(minutes=1)):
             reported_at = now
+        if shift.end:
+            reported_at = min(reported_at, shift.end)
         incident = request.env['bus.incident'].sudo().create({
             'reported_at': min(reported_at, now),
             'shift_id': shift.id,

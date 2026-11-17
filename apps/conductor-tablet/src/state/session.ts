@@ -302,9 +302,10 @@ export class Session {
         await this.client.incident(draft);
         return true;
       } catch (error) {
-        // Kept for later on no signal or a server error; only a request the server refuses
-        // for good (bad data, no shift) is dropped.
-        return !(error instanceof NetworkError || isServerError(error));
+        // Kept for later on no signal, a server error or no session: the server takes an incident up to two
+        // hours after its shift ended, so a driver signed out meanwhile can still send it. Only a request the
+        // server refuses for good (bad data, no shift) is dropped.
+        return !(error instanceof NetworkError || error instanceof AuthError || isServerError(error));
       }
     });
   }
@@ -319,6 +320,9 @@ export class Session {
     } catch {
       // Incidents stay queued; ending the shift must not wait for them.
     }
+    // Stopping the GPS sends the positions saved without signal. It goes first: once the shift is closed the
+    // server drops every position of the bus (DEF-058).
+    await this.stopGps();
     let result: 'ended' | 'queued' = 'ended';
     try {
       await this.client.endShift();

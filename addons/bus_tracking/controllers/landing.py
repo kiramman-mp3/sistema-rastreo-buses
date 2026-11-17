@@ -7,6 +7,12 @@ from odoo.http import request
 from .portal import SHOW_BUSES_FOR, portal_context, public_routes, render_portal, safe_color
 
 
+def live_buses(route, now):
+    """Buses of the route that reported in the last minutes. Simulated buses replay test trips: not service."""
+    return route.vehicle_ids.filtered(
+        lambda b: b.last_fix_time and now - b.last_fix_time <= SHOW_BUSES_FOR and not b.simulated)
+
+
 class BusLanding(Home):
 
     @http.route(['/', '/transporte'], type='http', auth='none')
@@ -28,7 +34,7 @@ class BusLanding(Home):
         now = fields.Datetime.now()
         lines = []
         for r in public_routes():
-            fresh = r.vehicle_ids.filtered(lambda b: b.last_fix_time and now - b.last_fix_time <= SHOW_BUSES_FOR)
+            fresh = live_buses(r, now)
             lines.append({
                 'code': r.code,
                 'name': r.name,
