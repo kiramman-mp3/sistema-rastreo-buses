@@ -68,7 +68,11 @@ class TestHttp(HttpCase):
         self.assertEqual(self.url_open('/bus_tracking/health').status_code, 503)
         stale = self.url_open('/bus_tracking/health').json()
         self.assertEqual(stale['status'], 'stale')
-        self.assertRegex(stale['version'], r'^16\.0\.\d+\.\d+\.\d+$')  # which release is running
+        self.assertNotIn('version', stale)                          # not for anonymous callers
+        self.authenticate('admin', 'admin')
+        self.assertRegex(self.url_open('/bus_tracking/health').json()['version'],
+                         r'^16\.0\.\d+\.\d+\.\d+$')               # staff sees which release runs
+        self.authenticate(None, None)
         self.env['ir.config_parameter'].set_param('bus_tracking.stale_minutes', '30')
         self.assertEqual(self.url_open('/bus_tracking/health').status_code, 200)
         self.env['ir.config_parameter'].set_param('bus_tracking.stale_minutes', '0')
