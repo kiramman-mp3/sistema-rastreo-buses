@@ -1,9 +1,15 @@
+import logging
 from datetime import timedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 from .utils import int_param
+
+_logger = logging.getLogger(__name__)
+
+# Used until someone saves Settings: a new install must not keep positions forever (DEF-053).
+DEFAULT_RETENTION_DAYS = 30
 
 
 class BusPosition(models.Model):
@@ -32,7 +38,7 @@ class BusPosition(models.Model):
 
     @api.model
     def _cron_cleanup(self, batch_size=5000):
-        days = int_param(self.env, 'bus_tracking.retention_days', 0)
+        days = int_param(self.env, 'bus_tracking.retention_days', DEFAULT_RETENTION_DAYS)
         if days <= 0:
             return
         limit = fields.Datetime.now() - timedelta(days=days)
@@ -49,3 +55,18 @@ class BusPosition(models.Model):
             if self.env.cr.rowcount < batch_size:
                 break
         self.env['bus.position'].invalidate_model()
+        self._cleanup_traccar(limit)
+
+    @api.model
+    def _cleanup_traccar(self, limit):
+        """Traccar keeps its own copy of every position and never deletes it: ask it to drop the same span."""
+        api_ = self.env['bus.traccar.api']
+        if not api_.is_configured():
+            return
+        buses = self.env['bus.vehicle'].sudo().with_context(active_test=False).search([('traccar_device_id', '!=', 0)])
+        for bus in buses:
+            try:
+                api_.delete_positions(bus.traccar_device_id, limit)
+            except UserError as error:
+                _logger.warning("Traccar kept the old positions of %s: %s", bus.name, error)
+                return

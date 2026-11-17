@@ -4565,6 +4565,13 @@ msgstr "El dispositivo de Traccar ya está vinculado a otro bus."
 #. odoo-python
 #: code:addons/bus_tracking/models/traccar_api.py:0
 #, python-format
+msgid "Traccar did not give an API token (error %s)."
+msgstr "Traccar no entregó un token de API (error %s)."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/traccar_api.py:0
+#, python-format
 msgid "Traccar did not answer with JSON: %s"
 msgstr "Traccar no respondió con JSON: %s"
 

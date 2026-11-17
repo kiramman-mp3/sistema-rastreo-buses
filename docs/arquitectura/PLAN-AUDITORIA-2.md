@@ -122,7 +122,10 @@ Hecho: tooltips con nodo de texto en el portal y el editor; `qa/xss_tooltips.js`
 - `fix: serialize the error report queue` (mismo patrón).
 - Pruebas: `incidents/queue.test.ts` y `diagnostics/queue.test.ts` (un `push` durante un vaciado lento no se pierde; dos vaciados a la vez no envían dos veces); `qa/` con Playwright: una parada llamada `<img src=x onerror=...>` no crea un `<img>` en el tooltip del portal.
 
-### Fase 39. `fix/despliegue-produccion` (B1, B2, B4, X4, X6, S5) — M
+### Fase 39. `fix/despliegue-produccion` (B1, B2, B4, X4, X6, S5) — M — hecha (2026-11-17)
+
+Hecho: retención de 30 días por defecto en el código (sin migración: el valor se lee al correr el cron) y purga de Traccar por `DELETE /api/positions` en el mismo cron, porque Traccar 6.16 no tiene opción de retención propia. Token de API de Traccar a 10 años en lugar de la contraseña, con la migración `16.0.1.7.0`. `scripts/db.sh` para Supabase, probado contra un Postgres con TLS. Panel de Traccar sólo para `TRACCAR_PANEL_ALLOW`. `db_maxconn = 8` y `db_sslmode`. Falta, para la fase 46: `init-prod.sh` completo contra un proyecto real de Supabase en una VM Linux.
+
 
 - `fix: purge positions after 30 days unless configured` (valor por defecto 30 en el cron) y migración `16.0.1.7.0` que fija `bus_tracking.retention_days` si no existe.
 - `feat: set up an external database from init-prod` (decisión 1): con `DB_HOST` distinto de `db`, no levantar `db`; crear el rol y la base `traccar` y comprobar la base de Odoo con `docker run --rm $POSTGRES_IMAGE psql` contra Supabase; escribir `db_sslmode = require` en `config/odoo.prod.conf`.
