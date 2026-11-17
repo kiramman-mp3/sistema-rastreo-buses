@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from psycopg2 import IntegrityError
 
@@ -150,6 +151,34 @@ class TestAlerts(BusCase):
         self.assertFalse(self.alerts('long_stop'))
 
     # -- data integrity --------------------------------------------------
+    def test_an_alert_created_meanwhile_by_another_request_is_reused(self):
+        other = self.Alert.create({'vehicle_id': self.bus.id, 'kind': 'speeding', 'start_time': self.now})
+        Alert = type(self.Alert)
+        real_search = Alert.search
+        calls = []
+
+        def search(model, domain, *args, **kwargs):
+            # The first look finds nothing, as when the other request has not committed yet.
+            calls.append(domain)
+            return model.browse() if len(calls) == 1 else real_search(model, domain, *args, **kwargs)
+
+        with patch.object(Alert, 'search', search), mute_logger('odoo.sql_db'):
+            alert = self.Alert._open_alert(self.bus, 'speeding', self.now, max_speed=90.0)
+        self.assertEqual(alert, other)
+
+    def test_database_allows_a_single_event_per_trip_kind_and_stop(self):
+        stops = self.route.stop_ids
+        for i in reversed(range(len(stops))):    # last first: the minutes never go back
+            stops[i].planned_offset_min = i * 5
+        trip = self.env['bus.trip'].create({
+            'route_id': self.route.id, 'vehicle_id': self.bus.id, 'planned_start': self.now})
+        vals = {'vehicle_id': self.bus.id, 'kind': 'late_start', 'start_time': self.now, 'state': 'closed',
+                'trip_id': trip.id}
+        self.Alert.create(vals)
+        with mute_logger('odoo.sql_db'), self.assertRaises(IntegrityError), self.env.cr.savepoint():
+            self.Alert.create(vals)
+        self.assertEqual(self.Alert._trip_event(trip, 'late_start', self.now).kind, 'late_start')
+
     def test_database_allows_a_single_open_alert_per_bus_and_kind(self):
         vals = {'vehicle_id': self.bus.id, 'kind': 'offline', 'start_time': self.now}
         self.Alert.create(vals)
