@@ -60,6 +60,7 @@ class TestSyncAudit(BusCase):
             before = self.env.cr.sql_log_count
             self.run_audit(rows)
             return self.env.cr.sql_log_count - before
+
         def extra(n):
             return self.traccar([{'fixTime': stamp(self.now - timedelta(minutes=60, seconds=5 * i)),
                                   'latitude': -33.4, 'longitude': -70.6} for i in range(n)])
