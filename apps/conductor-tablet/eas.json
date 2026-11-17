@@ -31,14 +31,9 @@
     },
     "production": {
       "distribution": "internal",
+      "environment": "production",
       "android": {
         "buildType": "apk"
-      },
-      "ios": {
-        "simulator": true
-      },
-      "env": {
-        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
       }
     },
     "ios-altstore": {
