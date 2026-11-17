@@ -38,6 +38,11 @@ jobs:
         working-directory: apps/conductor-tablet
         run: npm test
 
+      # Catches what typecheck and tests miss: a module Metro cannot resolve or a config that does not load.
+      - name: Export the Android bundle
+        working-directory: apps/conductor-tablet
+        run: npx expo export --platform android --output-dir dist
+
       - name: Stop names show as text on the public map
         run: node qa/xss_tooltips.js
 
