@@ -248,19 +248,15 @@ class BusAlert(models.Model):
         pending = self.search([('notified', '=', False)], limit=50)
         if not pending:
             return
-        push = self.env['bus.push.subscription']
-        for alert in pending:
+        labels = dict(self._fields['kind']._description_selection(self.env))
+
+        def payload_for(alert):
             if alert.vehicle_id.simulated:
-                # A replayed trip is a test: nobody must be woken up for it.
-                alert.notified = True
-                continue
-            kind = dict(alert._fields['kind']._description_selection(self.env))[alert.kind]
-            payload = {
-                'title': '%s: %s' % (kind, alert.vehicle_id.name),
+                return None             # a replayed trip is a test: nobody must be woken up for it
+            return {
+                'title': '%s: %s' % (labels[alert.kind], alert.vehicle_id.name),
                 'body': alert.detail or '',
                 'url': '/web#id=%d&model=bus.alert&view_type=form' % alert.id,
                 'tag': 'bus-alert',
             }
-            push._send_to_managers(payload)
-            # Marked one by one: whatever happens to the next one, this one is never sent twice.
-            alert.notified = True
+        self.env['bus.push.subscription']._notify_managers_of(pending, payload_for, 'bus_tracking.cron_push_alerts')

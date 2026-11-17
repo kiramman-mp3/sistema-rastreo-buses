@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import time
 from urllib.parse import urlparse
 
 from cryptography.hazmat.primitives import serialization
@@ -12,6 +13,11 @@ _logger = logging.getLogger(__name__)
 
 # Browsers hand out an endpoint on their vendor's push service. The server will POST to it, so only
 # those services are accepted: otherwise a registered "endpoint" could point at an internal address.
+# A push service that does not answer must not hold the cron worker: a short wait per device, and a time budget
+# per cron run after which the rest waits for the next run.
+PUSH_TIMEOUT = 5
+PUSH_BUDGET_SECONDS = 60
+
 ALLOWED_PUSH_HOSTS = (
     'fcm.googleapis.com',
     'android.googleapis.com',
@@ -93,7 +99,7 @@ class BusPushSubscription(models.Model):
                 vapid_private_key=Vapid.from_pem(private.encode()),
                 vapid_claims={'sub': self._claim_subject()},
                 ttl=3600,
-                timeout=10,
+                timeout=PUSH_TIMEOUT,
             )
             return True
         except WebPushException as error:
@@ -123,3 +129,18 @@ class BusPushSubscription(models.Model):
         """Push to every internal user in the manager group."""
         managers = self.env.ref('bus_tracking.group_bus_manager').users.filtered(lambda u: not u.share)
         return sum(self._send_to_user(user, payload) for user in managers)
+
+    @api.model
+    def _notify_managers_of(self, records, payload_for, cron_xmlid):
+        """Push each record to the managers and mark it notified, one by one, so none is ever sent twice.
+        `payload_for` returns None for a record nobody must hear about. Past the time budget the rest is left
+        for a new run of the cron, triggered right away."""
+        started = time.monotonic()
+        for record in records:
+            if time.monotonic() - started > PUSH_BUDGET_SECONDS:
+                self.env.ref(cron_xmlid)._trigger()
+                return
+            payload = payload_for(record)
+            if payload:
+                self._send_to_managers(payload)
+            record.notified = True

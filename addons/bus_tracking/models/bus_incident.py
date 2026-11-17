@@ -75,15 +75,16 @@ class BusIncident(models.Model):
         pending = self.search([('notified', '=', False)], limit=50)
         if not pending:
             return
-        push = self.env['bus.push.subscription']
         labels = dict(self._fields['kind']._description_selection(self.env))
-        for incident in pending:
-            payload = {
+
+        def payload_for(incident):
+            return {
                 'title': '%s: %s' % (labels.get(incident.kind, incident.kind), incident.vehicle_id.name),
                 'body': incident.note or '',
                 'url': '/web#id=%d&model=bus.incident&view_type=form' % incident.id,
                 'tag': 'bus-incident',
             }
-            push._send_to_managers(payload)
-            # Marked one by one: whatever happens to the next one, this one is never sent twice.
-            incident.notified = True
+        # An SOS goes out first, even if the time budget leaves the rest for the next run.
+        pending = pending.sorted(lambda incident: incident.kind != 'sos')
+        self.env['bus.push.subscription']._notify_managers_of(
+            pending, payload_for, 'bus_tracking.cron_push_incidents')
