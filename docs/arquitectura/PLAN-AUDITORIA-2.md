@@ -95,7 +95,13 @@ Tokens con hash y comparación del secreto en tiempo constante; webhook y `/web/
 
 ## 2. Decisiones que necesita el equipo
 
-1. **Base de datos por defecto (B2).** Recomendado: local en el contenedor, con Supabase como opción documentada. Alternativa: Supabase por defecto, y entonces `init-prod.sh`, `backup.sh` y `restore.sh` necesitan su variante externa.
+1. **Base de datos por defecto (B2). DECIDIDA el 2026-11-17: Supabase.** Odoo, Traccar y Grafana usan Postgres de Supabase; el contenedor `db` queda sólo para desarrollo y laboratorio (perfil `local-db`). Consecuencias:
+   - `init-prod.sh`, `backup.sh`, `restore.sh` y `grafana-role.sh` dejan de usar `exec db` y hablan con Supabase desde un contenedor cliente de Postgres.
+   - La conexión va por el *session pooler* (puerto 5432) o la conexión directa, nunca por el *transaction pooler* (6543): Odoo mantiene conexiones largas y usa `LISTEN/NOTIFY`. Todo con TLS (`sslmode=require`).
+   - La versión de `pg_dump` y `pg_restore` debe ser igual o mayor que la del servidor de Supabase (confirmarla en la consola del proyecto).
+   - El tamaño de la base pasa a ser un límite con costo: la retención (B1) es obligatoria y hay que purgar también las posiciones de Traccar, que viven en la misma cuenta. Elegir el plan de Supabase según la sección *Tamaño* de `docs/guias/PRODUCCION.md`.
+   - Los respaldos propios (`backup.sh`) siguen siendo necesarios aunque Supabase tenga los suyos: los del proveedor dependen del plan y no incluyen el filestore de Odoo, que vive en el servidor.
+   - S6 desaparece: el usuario `postgres` de Supabase no es superusuario.
 2. **Acceso al panel (B3).** Recomendado: instalar `auth_totp` (2FA de Odoo Community, obligatorio para managers) y `fail2ban` en el host leyendo los `Login failed` del log de Odoo. La imagen oficial de Caddy no trae limitador de tasa.
 3. **Panel de Traccar (B4).** Recomendado: quitarlo del proxy, porque Odoo lo administra por API. Alternativa: dejarlo con `remote_ip` restringido a la red de la universidad.
 4. **Gestión de choferes (Z1).** Primero confirmar con un test con un manager que no sea administrador. Si falla: un asistente propio que crea y edita choferes con `sudo()` tras comprobar el grupo, en vez de abrir `res.users` directamente.
@@ -116,14 +122,17 @@ Numeración a continuación de la fase 37 (`PLAN-UI-MOVIL.md`). Cada fase es una
 ### Fase 39. `fix/despliegue-produccion` (B1, B2, B4, X4, X6, S5) — M
 
 - `fix: purge positions after 30 days unless configured` (valor por defecto 30 en el cron) y migración `16.0.1.7.0` que fija `bus_tracking.retention_days` si no existe.
-- `fix: keep the local database running across restarts` según la decisión 1 (quitar el perfil o documentar `COMPOSE_PROFILES=local-db,bi`) y `.env.prod.example` coherente con los scripts.
+- `feat: set up an external database from init-prod` (decisión 1): con `DB_HOST` distinto de `db`, no levantar `db`; crear el rol y la base `traccar` y comprobar la base de Odoo con `docker run --rm $POSTGRES_IMAGE psql` contra Supabase; escribir `db_sslmode = require` en `config/odoo.prod.conf`.
+- `feat: back up and restore an external database` con `pg_dump` y `pg_restore` desde el mismo contenedor cliente; `restore.sh` sigue pidiendo `--yes` y comprueba antes que la versión del cliente sirva.
+- `fix: run grafana-role against the external database by default` (con `PSQL` armado desde `.env.prod`).
+- `chore: make the production env example match supabase` (session pooler, `GRAFANA_DB_SSLMODE=require`, `POSTGRES_IMAGE` con la versión del servidor, sin la IP en ningún dominio) y dejar claro en el compose que `db` es sólo para `local-db`.
 - `fix: stop publishing the traccar panel` según la decisión 3; quitar el dominio con la IP del compose.
 - `chore: purge traccar positions` con la opción de retención de Traccar (`database.historyDays`; confirmar la clave en la documentación de 6.16).
 - `fix: use the env file and odoo db in bootstrap-traccar`.
 - `fix: pass the grafana password to psql as a variable` en vez de `sed`.
 - `feat: keep a traccar api token instead of the admin password` (pedir el token tras crear el administrador y no guardar la contraseña).
 - `chore: write db_maxconn in the generated production config`.
-- Pruebas: test del cron de purga sin parámetro; `init-prod.sh` desde cero y `docker compose down && up -d` en una VM Linux limpia.
+- Pruebas: test del cron de purga sin parámetro; `init-prod.sh` desde cero contra un proyecto de Supabase vacío, `docker compose down && up -d`, `backup.sh` y `restore.sh --target-db` contra ese proyecto, en una VM Linux limpia.
 
 ### Fase 40. `fix/acceso-panel` (B3, S3, O1) — S
 

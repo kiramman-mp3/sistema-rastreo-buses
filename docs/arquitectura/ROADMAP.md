@@ -48,6 +48,8 @@ Hitos:
 - **Candidata** (`v1.0.0-rc1`): fases 41 a 45 integradas y suite completa en verde.
 - **Producción** (`v1.0.0`): fase 46 superada, es decir una jornada real sin defectos críticos y respaldos fuera del servidor.
 
+Decisiones ya tomadas: base de producción en **Supabase** (17-nov), que amplía la fase 39 con soporte de base externa en los scripts.
+
 ## 3. Pendientes que no son código
 
 - Confirmar con la universidad los días de cada recorrido, las coordenadas de los campus y las anomalías del documento de rutas.
