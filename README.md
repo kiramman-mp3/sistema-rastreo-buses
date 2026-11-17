@@ -106,7 +106,7 @@ sistema-rastreo-buses/
 
 ## Calidad
 
-Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/academico/GUION_DEFENSA.md`. Los hallazgos de la auditoría del 2026-11-02 y el plan para corregirlos están en `docs/arquitectura/PLAN-AUDITORIA.md`.
+Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/academico/GUION_DEFENSA.md`. Los hallazgos de la auditoría del 2026-11-02 y su corrección están en `docs/arquitectura/PLAN-AUDITORIA.md`. La auditoría del 2026-11-17 concluyó que el sistema **no está listo para producción general**: sus hallazgos y el plan de las fases 38 a 47 están en `docs/arquitectura/PLAN-AUDITORIA-2.md`, y el estado de todo el proyecto en `docs/arquitectura/ROADMAP.md`.
 
 ## Desarrollo local con datos y capturas
 
