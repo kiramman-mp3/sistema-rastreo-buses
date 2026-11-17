@@ -220,7 +220,10 @@ Hecho en parte. El perfil `production` construye para aparatos iOS reales y toma
 - Suite de Odoo completa, `qa/ejecutar_todo.sh`, SonarQube, y actualizar `docs/calidad/` con las evidencias nuevas.
 - `develop` → `main` con `merge --no-ff` y etiqueta `v1.0.0-rc1`; tras la jornada real sin defectos críticos, `v1.0.0`.
 
-### Fase 47. `docs/cierre-auditoria-2` — S
+### Fase 47. `docs/cierre-auditoria-2` — S — hecha (2026-11-17)
+
+Hecho: cada fase cerró sus defectos y actualizó las guías al integrarse; esta añade la bitácora, el roadmap y el plan general. La fase 46 sigue pendiente.
+
 
 - Cerrar DEF-051 a DEF-062 en `qa/datos_calidad.py` con su prueba, regenerar `docs/calidad` (`qa/generar_docs.py`) y actualizar `PRODUCCION.md` (limitaciones), `OPERACION.md`, `GUIA-CHOFER.md`, `BITACORA.md` y `ROADMAP.md`.
 

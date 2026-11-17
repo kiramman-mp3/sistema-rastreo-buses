@@ -2,7 +2,7 @@
 
 Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-17.
 
-Estado: versión del módulo `16.0.1.6.0`, app de tableta `1.0.0`, última etiqueta `v0.9.5-beta`. **No apto todavía para producción general**: faltan las fases 38 a 46 (segunda auditoría).
+Estado: versión del módulo `16.0.1.8.0`, app de tableta `1.0.0`, última etiqueta `v0.9.5-beta`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
 
 ## 1. Lo hecho
 
@@ -21,26 +21,29 @@ Estado: versión del módulo `16.0.1.6.0`, app de tableta `1.0.0`, última etiqu
 | Proyecto final (rúbrica) | 4 y 5-nov | R1 a R12 | Horarios y recorridos, reglas, simulador, 12 indicadores, tablero, Grafana, Fleet, SonarQube, pruebas de rendimiento, requisitos y trazabilidad; DEF-039 a DEF-048 | [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md) |
 | Integración con Fleet | 5-nov | — | Vehículos de Flota como única ficha del bus, pestaña de rastreo; DEF-049 y DEF-050 | [`FLEET.md`](FLEET.md) |
 | Licencia | 12-nov | — | LGPL-3.0 | `LICENSE` |
-| Segunda auditoría | 17-nov | — | 7 críticos, 14 medios, 7 de robustez y rendimiento y 15 menores; DEF-051 a DEF-062 abiertos | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
+| Segunda auditoría | 17-nov | — | 7 críticos, 14 medios, 7 de robustez y rendimiento y 15 menores; DEF-051 a DEF-062 | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
+| Correcciones de la segunda auditoría | 17-nov | 38 a 45 | Portal sin XSS, colas de la tableta seguras, despliegue sobre Supabase, acceso al panel, turnos y alertas, servidor y GPS de la tableta, permisos de choferes, carga y purga, build; DEF-051 a DEF-062 cerrados | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
 
 Cifras al cierre de la etapa de la rúbrica (5-nov): 544 pruebas de Odoo, 167 de Jest, 96 % de cobertura de Python según `odoo_test.log`, SonarQube con el Quality Gate aprobado, 50 defectos registrados y cerrados.
+
+Cifras tras la fase 45 (17-nov): 579 pruebas de Odoo, 179 de Jest, 97 % de cobertura de Python (medida ahora en el CI), 62 defectos registrados y cerrados.
 
 ## 2. Lo que falta
 
 Fases de [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md). Tamaño: S (horas), M (un día), L (varios días).
 
-| Orden | Fase | Rama | Corrige | Tamaño | Bloquea el piloto |
+| Orden | Fase | Rama | Corrige | Tamaño | Estado |
 |---|---|---|---|---|---|
-| 1 | 38 | `fix/xss-y-cola-sos` | X1, W1, W3 | S | Sí |
-| 2 | 39 | `fix/despliegue-produccion` | B1, B2, B4, X4, X6, S5 | M | Sí |
-| 3 | 40 | `fix/acceso-panel` | B3, S3, O1 | S | Sí |
-| 4 | 41 | `fix/turnos-y-alertas` | N1, X2, W2, N2, N3, N4, Y4 | M | No |
-| 5 | 42 | `fix/tableta-servidor-y-gps` | Y1, Y2, Y3, X3, Y5 | S | No |
-| 6 | 43 | `fix/permisos-choferes` | Z1, Z2, X5, S1, S2 | M | No |
-| 7 | 44 | `perf/carga-y-purga` | N5, N6, N7, X7, P1, W4 | M | No |
-| 8 | 45 | `chore/build-y-dependencias` | D1, D2, O3 | S | No |
-| 9 | 46 | Pruebas reales y salida | B5 | L | — |
-| 10 | 47 | `docs/cierre-auditoria-2` | Documentación | S | — |
+| 1 | 38 | `fix/xss-y-cola-sos` | X1, W1, W3 | S | Hecha |
+| 2 | 39 | `fix/despliegue-produccion` | B1, B2, B4, X4, X6, S5 | M | Hecha |
+| 3 | 40 | `fix/acceso-panel` | B3, S3, O1 | S | Hecha |
+| 4 | 41 | `fix/turnos-y-alertas` | N1, X2, W2, N2, N3, N4, Y4 | M | Hecha |
+| 5 | 42 | `fix/tableta-servidor-y-gps` | Y1, Y2, Y3, X3, Y5 | S | Hecha |
+| 6 | 43 | `fix/permisos-choferes` | Z1, Z2, X5, S1, S2 | M | Hecha |
+| 7 | 44 | `perf/carga-y-purga` | N5, N6, N7, X7, P1, W4 | M | Hecha (W4 documentado) |
+| 8 | 45 | `chore/build-y-dependencias` | D1, D2, O3 | S | Hecha (quedan 3 avisos de build) |
+| 9 | 46 | Pruebas reales y salida | B5 | L | **Pendiente**: necesita Supabase, VM Linux y tabletas |
+| 10 | 47 | `docs/cierre-auditoria-2` | Documentación | S | Hecha |
 
 Hitos:
 
