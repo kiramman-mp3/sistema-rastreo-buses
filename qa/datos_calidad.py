@@ -271,10 +271,10 @@ DEFECTOS = [
      'Seguridad', 'Abierto', 'Fase 43: test_driver_staff.py con un manager que no es administrador'),
     ('DEF-061', '17-nov-2026', 'Segunda auditoría integral (Y1)', 'Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo',
      'apps/conductor-tablet/src/state/session.ts, app/scan.tsx', 'Cambiar la dirección del servidor no borra la sesión guardada.',
-     'Seguridad', 'Abierto', 'Fase 42: session.test.ts (cambio de servidor sin token)'),
+     'Seguridad', 'Cerrado', 'session.test.ts: un servidor nuevo cierra la sesión antes de cualquier consulta y la credencial de otro servidor sólo lo cambia si la acepta'),
     ('DEF-062', '17-nov-2026', 'Segunda auditoría integral (Y3)', 'La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar',
      'models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts', 'La validación de Ajustes admite http y la tableta completa con http:// sin comprobar el esquema.',
-     'Validación de entrada', 'Abierto', 'Fase 42: test_driver_shift.py y osmand.test.ts (http externo rechazado)'),
+     'Validación de entrada', 'Cerrado', 'test_driver_shift: los ajustes rechazan http fuera de la red local y el inicio de turno no entrega el identificador a una dirección http; osmand.test.ts: la tableta no envía a http externo'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
