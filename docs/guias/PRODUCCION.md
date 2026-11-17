@@ -10,11 +10,20 @@ Guía para instalar y operar el sistema en un servidor. Todo lo de esta página 
 - Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza.
 - **Ojo:** hoy el proxy sí publica el panel de Traccar en `TRACCAR_DOMAIN`, y si esa variable falta el compose usa `traccar.20.119.213.192.nip.io`. Mientras no se cierre DEF-055 (fase 39 de `docs/arquitectura/PLAN-AUDITORIA-2.md`), define `TRACCAR_DOMAIN` con un nombre propio y protege ese dominio, o quita el bloque `{$TRACCAR_DOMAIN}` de `proxy/Caddyfile`.
 
-### Base de datos: local o Supabase
+### Base de datos: Supabase (decidido) o local
 
-- **Local (recomendado para empezar)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db,bi` (o `local-db` sin Grafana) en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
+Desde el 2026-11-17 la base de producción es **Supabase** (decisión 1 de `docs/arquitectura/PLAN-AUDITORIA-2.md`). La base local queda para desarrollo y laboratorio.
+
+**Ojo, hoy los scripts aún no soportan Supabase** (fase 39). `init-prod.sh` levanta un Postgres local y crea ahí el rol y la base `traccar`, y `backup.sh`, `restore.sh` y `reset-prod.sh` sólo trabajan con el contenedor `db`. Hasta cerrar la fase 39:
+
+- Crea la base `traccar`, su usuario y el rol de Grafana desde la consola SQL de Supabase.
+- Usa el *session pooler* (puerto 5432), nunca el *transaction pooler* (6543), y `sslmode=require`.
+- Respalda con `pg_dump` desde un cliente igual o más nuevo que el servidor. El filestore de Odoo se respalda aparte, porque vive en el volumen `odoo-data` del servidor.
+
+
+- **Local (desarrollo y laboratorio)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db,bi` (o `local-db` sin Grafana) en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
 - `.env.prod.example` trae hoy los valores de Supabase. Si usas la base local, deja `DB_HOST` vacío y quita `TRACCAR_DATABASE_URL`.
-- **Externa (Supabase u otra)**: pon `DB_HOST`, `DB_USER`, `TRACCAR_DATABASE_URL` y `TRACCAR_DB_USER` del proveedor (el ejemplo trae marcadores `TU_PROYECTO`). Las bases y los usuarios se crean en la consola del proveedor, los respaldos los hace el proveedor y `reset-prod.sh` se niega a correr.
+- **Externa (Supabase, la de producción)**: pon `DB_HOST`, `DB_USER`, `TRACCAR_DATABASE_URL` y `TRACCAR_DB_USER` del proveedor (el ejemplo trae marcadores `TU_PROYECTO`). Las bases y los usuarios se crean en la consola del proveedor, los respaldos los hace el proveedor y `reset-prod.sh` se niega a correr.
 
 ## Instalación
 
@@ -57,6 +66,10 @@ No hace falta tocar el panel de Traccar: el script crea su cuenta de administrad
 | Odoo | 2 workers, límites de memoria y de tiempo, código montado en solo lectura. |
 | Logs | Rotación de 10 MB x 5 archivos por servicio. |
 | Salud | Healthchecks en Postgres, Odoo y Traccar; `restart: unless-stopped`. |
+
+## Tamaño de la base
+
+Con Supabase el espacio tiene límite y costo, así que la retención es obligatoria. Cada bus guarda una posición en Odoo y otra en Traccar cada pocos segundos mientras tiene turno. Mide el tamaño real tras la primera semana con `SELECT pg_size_pretty(pg_database_size(current_database()));` en cada base. Con eso elige el plan y el plazo de *Conservar posiciones (días)*. Hasta la fase 39 Traccar no purga sus posiciones.
 
 ## Respaldos
 
@@ -184,7 +197,7 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 | DEF-051 | XSS guardado en el portal público por el nombre de una parada | No importar GPX de origen desconocido; revisar los nombres de las paradas |
 | DEF-052 | La tableta puede perder un SOS guardado sin señal | Ante un SOS, confirmar por radio o teléfono |
 | DEF-053 | Las posiciones no se purgan | Pulsar *Guardar* en Ajustes (ver Instalación) |
-| DEF-054 | La base local no arranca tras `down` y `up` | `COMPOSE_PROFILES=local-db,bi` |
+| DEF-054 | Los scripts asumen la base local y la de producción es Supabase | Crear `traccar` y respaldar a mano (ver *Base de datos*); con base local, `COMPOSE_PROFILES=local-db,bi` |
 | DEF-055 | Panel de Traccar público | Ver Requisitos |
 | DEF-056 | Login del panel sin límite ni 2FA | Contraseñas largas y `fail2ban` en el host |
 | DEF-057 | Falsa alerta "No signal" tras cada turno | Ignorarla si el bus no tiene turno |
