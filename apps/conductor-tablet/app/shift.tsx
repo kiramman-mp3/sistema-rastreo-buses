@@ -115,7 +115,8 @@ export default function ShiftScreen() {
         }
       : null,
     alerts: (shiftState?.alerts ?? [])
-      .filter((a) => a.state === 'open')
+      // A skipped stop is written closed (it is a fact, not a state): the driver still has to hear about it.
+      .filter((a) => a.state === 'open' || a.kind === 'skipped_stop')
       .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
     dismissed,
   });
