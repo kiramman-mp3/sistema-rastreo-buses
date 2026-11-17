@@ -189,7 +189,10 @@ Hecho. El test confirmó Z1 (`You are not allowed to create 'User'`). No se dio 
 - `fix: sign the tablets out when a driver's password changes`.
 - Pruebas: `test_driver_staff.py`, `test_driver_badge.py`, `test_gps_setup.py`.
 
-### Fase 44. `perf/carga-y-purga` (N5, N6, N7, X7, P1, W4) — M
+### Fase 44. `perf/carga-y-purga` (N5, N6, N7, X7, P1, W4) — M — hecha (2026-11-17)
+
+Hecho, salvo W4. La auditoría de sincronización hace dos consultas por bus (una prueba comprueba que el número de consultas no crece con las posiciones). La purga diaria usa dos plazos: el de las posiciones para rechazos y auditorías, y uno nuevo de historial (365 días) para llegadas, alertas cerradas, incidentes vistos, viajes, recorridos y turnos; lo abierto no se borra. El recorrido del mapa se limita a 2 000 puntos. Grafana lee la tabla `bus.position.day` (cron cada 30 min); con 1 000 000 de posiciones en Postgres, `kpi_positions_daily` pasó de 340 ms a 1,7 ms por consulta, con un refresco incremental de unos 40 ms. El push espera 5 s por dispositivo y cada ejecución tiene 60 s; los SOS salen primero. W4 queda como limitación documentada con S4: evitar la recarga depende de que Grafana mantenga la sesión tras el primer acceso con `auth_token`, y eso hay que comprobarlo con el Grafana real (fase 46). `qa/rendimiento_volumen.py` no se ejecutó: necesita la pila de desarrollo completa; la medición se hizo directamente en Postgres.
+
 
 - `perf: compare traccar and odoo positions in one query per bus` en la auditoría de sincronización.
 - `feat: purge old rejects, audits, arrivals and closed events` con plazos en Ajustes (y en `docs/diseno/PRIVACIDAD.md`).
