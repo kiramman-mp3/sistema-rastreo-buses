@@ -10,7 +10,7 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
-from ..models.utils import parse_traccar_dt, pick_odoo_lang, tile_url
+from ..models.utils import parse_traccar_dt, pick_odoo_lang, secure_gps_url, tile_url
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
@@ -205,7 +205,10 @@ class BusDriverApi(http.Controller):
             return json_response({'error': 'no_gps'}, 409)
         # Without it the tablet has nowhere to send positions: better refuse than a silent shift.
         gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').strip().rstrip('/')
-        if not gps_url:
+        # An address saved before https was required is treated as missing: never hand the identifier to it.
+        if not secure_gps_url(gps_url):
+            if gps_url:
+                _logger.warning("bus_tracking.gps_url is not https; shifts cannot start until it is fixed")
             return json_response({'error': 'no_gps_url'}, 409)
         Shift = env['bus.shift'].sudo()
         with mute_logger('odoo.sql_db'):
