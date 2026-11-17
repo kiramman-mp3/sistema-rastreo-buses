@@ -223,6 +223,7 @@ class TestSameFiguresAsTheIndicators(DashboardCase):
         for ms in (80, 120, 400, 900):
             self.env['bus.perf.sample'].create({'name': 'live', 'ms': ms, 'created': when})
         self.env['bus.sync.audit'].create({'total': 50, 'matched': 49, 'run_at': when})
+        self.env['bus.position.day']._refresh(full=True)      # what the 30-minute cron does
         self.metrics_ = by_code(self.kpi.compute(date_from=self.period['date_from'], date_to=self.period['date_to']))
         self.board = self.boards['01-resumen']
 
