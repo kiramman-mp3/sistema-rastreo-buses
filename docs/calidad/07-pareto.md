@@ -22,13 +22,15 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 18 | 37,5 % | 37,5 % |
-| Configuración | 10 | 20,8 % | 58,3 % |
-| Seguridad | 9 | 18,8 % | 77,1 % |
-| Accesibilidad y diseño | 7 | 14,6 % | 91,7 % |
-| Validación de entrada | 4 | 8,3 % | 100,0 % |
+| Lógica | 22 | 35,5 % | 35,5 % |
+| Seguridad | 14 | 22,6 % | 58,1 % |
+| Configuración | 11 | 17,7 % | 75,8 % |
+| Accesibilidad y diseño | 7 | 11,3 % | 87,1 % |
+| Validación de entrada | 5 | 8,1 % | 95,2 % |
+| Infraestructura y despliegue | 2 | 3,2 % | 98,4 % |
+| Interfaz y vistas | 1 | 1,6 % | 100,0 % |
 
-**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). No queda ningún defecto abierto.
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Quedan abiertos: DEF-051, DEF-052, DEF-053, DEF-054, DEF-055, DEF-056, DEF-057, DEF-058, DEF-059, DEF-060, DEF-061, DEF-062, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.
 
 ## 3. Problemas encontrados durante la construcción (57)
 

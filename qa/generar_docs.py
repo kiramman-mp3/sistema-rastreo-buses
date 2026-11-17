@@ -169,8 +169,10 @@ n_aud, f_aud = A['total'], A['fallos']
 cerrados = sum(1 for d in dq.DEFECTOS if d[7] == 'Cerrado')
 abiertos_lista = [d for d in dq.DEFECTOS if d[7] != 'Cerrado']
 if abiertos_lista:
-    pendiente = chr(10).join('%d. %s: %s' % (i, d[0], d[3]) for i, d in enumerate(abiertos_lista, start=1))
-    lectura_abiertos = 'Quedan abiertos: %s.' % ', '.join(d[0] for d in abiertos_lista)
+    pendiente = ('Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.'
+                 + chr(10) * 2 + chr(10).join('%d. %s: %s' % (i, d[0], d[3]) for i, d in enumerate(abiertos_lista, start=1)))
+    lectura_abiertos = ('Quedan abiertos: %s, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.'
+                        % ', '.join(d[0] for d in abiertos_lista))
 else:
     pendiente = ('No queda ningún defecto abierto. DEF-013 (una credencial en el historial de git) se cerró al reescribir el historial y rotar la '
                  'contraseña; `gitleaks` corre en el CI (`.github/workflows/ci.yml`) para que no se repita.')
@@ -261,7 +263,7 @@ causa_txt = '\n\n'.join('### %s: %s\n\n- **Causa raíz:** %s\n- **Categoría:** 
 write('05-registro-de-defectos.md', '''
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov); DEF-049 y DEF-050 de la actualización en Azure con Fleet (5-nov) y DEF-051 a DEF-062 de la segunda auditoría integral del 17-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA-2.md`, un defecto por hallazgo crítico o medio que es un fallo; su corrección está planificada en las fases 38 a 43). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
