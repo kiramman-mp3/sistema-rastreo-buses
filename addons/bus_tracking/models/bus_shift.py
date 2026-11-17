@@ -74,7 +74,11 @@ class BusShift(models.Model):
                 ('arrival_time', '>=', trip_start),
         ], order='arrival_time desc'):
             arrived.setdefault(arrival.stop_id.id, arrival.arrival_time)
-        next_stop = next((stop for stop in ordered if stop.id not in arrived), stops.browse())
+        # The stop after the furthest one reached: a stop the bus drove past without entering its radius
+        # (often the first one) stays behind instead of being the next stop for the rest of the trip.
+        reached = [i for i, stop in enumerate(ordered) if stop.id in arrived]
+        after = reached[-1] + 1 if reached else 0
+        next_stop = ordered[after] if after < len(ordered) else stops.browse()
         return {'stops': ordered, 'arrived': arrived, 'next_stop': next_stop, 'direction': direction}
 
     def action_revoke_tablet(self):

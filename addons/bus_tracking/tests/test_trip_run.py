@@ -113,6 +113,17 @@ class TestTripRun(RunCase):
         self.assertEqual(self.line('Plaza').status, 'skipped')
         self.assertEqual((trip.stops_visited, trip.stops_skipped), (2, 1))
 
+    def test_missing_the_first_stop_still_counts_the_others(self):
+        self.at(3, BETWEEN, 10)                         # starts on the road, never entered the Terminal
+        self.at(10, PLAZA)
+        self.at(25, HOSPITAL)
+        trip = self.trip_
+        self.assertEqual(trip.state, 'incomplete')
+        self.assertEqual(self.line('Terminal').status, 'skipped')
+        self.assertEqual((self.line('Plaza').status, self.line('Hospital').status), ('on_time', 'on_time'))
+        self.assertEqual((trip.stops_visited, trip.stops_skipped), (2, 1))
+        self.assertEqual(trip.real_start, trip.planned_start + timedelta(minutes=10))
+
     def test_an_arrival_outside_the_window_belongs_to_no_trip(self):
         self.at(180, TERMINAL)
         self.assertEqual(self.trip_.state, 'planned')
