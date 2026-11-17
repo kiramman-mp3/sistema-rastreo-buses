@@ -89,6 +89,16 @@ Programación diaria con cron (ajusta la ruta):
 
 **Los respaldos viven en el mismo servidor.** Si el servidor se pierde, se pierden con él. Copia `backups/` a otro lugar (otro servidor, almacenamiento en la nube) con la herramienta que ya uses; el proyecto no incluye ese paso.
 
+En la VM de demostración de Azure la copia va a la cuenta de almacenamiento privada `stbusesuta11900` (contenedor `backups`). Desde un equipo con la CLI de Azure:
+
+```bash
+az storage blob download-batch --account-name stbusesuta11900 -s backups -d ./backups-azure --auth-mode key
+```
+
+Para subir respaldos nuevos, genera una SAS de escritura de corta duración (`az storage container generate-sas --permissions cw`) y súbelos desde la VM con `curl -X PUT -H "x-ms-blob-type: BlockBlob"`. No dejes la SAS guardada en el servidor.
+
+**Supabase gratuito se pausa** tras unos 7 días sin uso. Entonces Odoo y Traccar no arrancan, el sitio da 502 y el log muestra `(ENOTFOUND) tenant/user postgres.<ref> not found`. Reanuda el proyecto en la consola de Supabase; Odoo se reconecta solo en uno o dos minutos.
+
 ### Comprobar que un respaldo sirve
 
 ```bash
