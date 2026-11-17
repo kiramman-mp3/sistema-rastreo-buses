@@ -202,7 +202,10 @@ Hecho, salvo W4. La auditoría de sincronización hace dos consultas por bus (un
 - `fix: renew the grafana token without reloading the dashboard` si Grafana lo permite; si no, documentar W4 y S4 como limitaciones.
 - Prueba: `qa/rendimiento_volumen.py` con 1 000 000 de posiciones antes y después.
 
-### Fase 45. `chore/build-y-dependencias` (D1, D2, O3) — S
+### Fase 45. `chore/build-y-dependencias` (D1, D2, O3) — S — hecha (2026-11-17)
+
+Hecho en parte. El perfil `production` construye para aparatos iOS reales y toma `EXPO_PUBLIC_ODOO_URL` del entorno `production` de EAS. `npm audit fix` reescribía 2 000 líneas del lockfile y subía el total, así que sólo se fijó `node-forge` 1.4.3 con `overrides`; quedan `glob`, `minimatch` y `picomatch` (este último sin versión corregida publicada), todas de herramientas de build, no del código de la app. El CI exporta el bundle de Android y corre las pruebas de Odoo bajo `coverage` (97 % de las líneas del módulo, sin contar pruebas ni migraciones). `origin/main` sigue detrás: no se hizo push.
+
 
 - `fix: build real ios devices in the production profile` y leer `EXPO_PUBLIC_ODOO_URL` del entorno de EAS en vez de fijarla en `eas.json`.
 - `chore: update dependencies flagged by npm audit` sin cambiar la versión mayor de Expo.

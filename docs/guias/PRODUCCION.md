@@ -201,7 +201,7 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 ## Riesgos abiertos (auditoría del 17-nov-2026)
 
-La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 44 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes, carga y purga) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Faltan la fase 45 (build y dependencias) y, sobre todo, la 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 45 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes, carga y purga, build y dependencias) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Falta, sobre todo, la fase 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
 
 ## Limitaciones conocidas
 
