@@ -268,7 +268,7 @@ DEFECTOS = [
      'Lógica', 'Cerrado', 'test_driver_shift: un SOS del turno llega hasta 2 h después del cierre y uno más viejo se rechaza; session.test.ts: sin sesión el incidente se conserva'),
     ('DEF-060', '17-nov-2026', 'Segunda auditoría integral (Z1, inferido)', 'Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes',
      'views/bus_driver_views.xml, security/security.xml', 'El menú Choferes abre res.users, que exige base.group_erp_manager; las pruebas usan admin.',
-     'Seguridad', 'Abierto', 'Fase 43: test_driver_staff.py con un manager que no es administrador'),
+     'Seguridad', 'Cerrado', 'test_driver_staff: el test confirmó el defecto; un manager sin derechos de administrador crea, edita y archiva choferes con el asistente, que rechaza al personal'),
     ('DEF-061', '17-nov-2026', 'Segunda auditoría integral (Y1)', 'Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo',
      'apps/conductor-tablet/src/state/session.ts, app/scan.tsx', 'Cambiar la dirección del servidor no borra la sesión guardada.',
      'Seguridad', 'Cerrado', 'session.test.ts: un servidor nuevo cierra la sesión antes de cualquier consulta y la credencial de otro servidor sólo lo cambia si la acepta'),
