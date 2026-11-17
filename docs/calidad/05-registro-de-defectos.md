@@ -58,8 +58,8 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-048 | 05-nov-2026 | Análisis estático con SonarQube (R10) | 16 bugs: promesas sin manejar que perdían errores; un hash SHA-1; una función muerta con pytz; una comparación de NaN consigo mismo | apps/conductor-tablet, static/src/js, controllers/main.py, models/ | Cerrado |
 | DEF-049 | 05-nov-2026 | Actualización del módulo en Azure | Fallo de serialización concurrente en PostgreSQL al actualizar vistas en producción | docker-compose.prod.yml (procedimiento) | Cerrado |
 | DEF-050 | 05-nov-2026 | Actualización del módulo en Azure | Error de validación XML en Odoo por uso de atributo `@string` en selector XPath | views/bus_fleet_views.xml | Cerrado |
-| DEF-051 | 17-nov-2026 | Segunda auditoría integral (X1) | XSS guardado en el portal público: el nombre de una parada se inserta como HTML en el tooltip del mapa | static/src/portal/portal_map.js, static/src/js/stop_picker.js | Abierto |
-| DEF-052 | 17-nov-2026 | Segunda auditoría integral (W1) | Un SOS guardado sin señal puede desaparecer de la cola de la tableta | apps/conductor-tablet/src/incidents/queue.ts | Abierto |
+| DEF-051 | 17-nov-2026 | Segunda auditoría integral (X1) | XSS guardado en el portal público: el nombre de una parada se inserta como HTML en el tooltip del mapa | static/src/portal/portal_map.js, static/src/js/stop_picker.js | Cerrado |
+| DEF-052 | 17-nov-2026 | Segunda auditoría integral (W1) | Un SOS guardado sin señal puede desaparecer de la cola de la tableta | apps/conductor-tablet/src/incidents/queue.ts | Cerrado |
 | DEF-053 | 17-nov-2026 | Segunda auditoría integral (B1) | Las posiciones nunca se purgan en una instalación nueva | models/bus_position.py, scripts/init-prod.sh | Abierto |
 | DEF-054 | 17-nov-2026 | Segunda auditoría integral (B2) | La base de datos de producción no arranca tras un down y up del compose | docker-compose.prod.yml, .env.prod.example | Abierto |
 | DEF-055 | 17-nov-2026 | Segunda auditoría integral (B4) | El panel de Traccar es público y su dominio por defecto publica la IP del servidor | docker-compose.prod.yml, proxy/Caddyfile | Abierto |
@@ -71,7 +71,7 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Abierto |
 | DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Abierto |
 
-Resumen: 62 registrados, 50 cerrados (81 %), 12 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 62 registrados, 52 cerrados (84 %), 10 abiertos. Densidad: 12,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -379,13 +379,13 @@ Resumen: 62 registrados, 50 cerrados (81 %), 12 abiertos. Densidad: 12,3 defecto
 
 - **Causa raíz:** Leaflet trata como HTML el texto de bindTooltip y los nombres de paradas, que pueden venir de un GPX importado, no se escapan.
 - **Categoría:** Seguridad
-- **Prueba que lo protege:** Fase 38: prueba de Playwright con una parada llamada <img onerror> en el portal y el editor
+- **Prueba que lo protege:** qa/xss_tooltips.js (en el CI): el mapa público real en jsdom muestra como texto una parada llamada <img onerror>; el editor de paradas usa el mismo nodo de texto
 
 ### DEF-052: Un SOS guardado sin señal puede desaparecer de la cola de la tableta
 
 - **Causa raíz:** La cola de incidentes no se serializa: un vaciado en curso guarda su copia antigua y sobrescribe el SOS recién añadido.
 - **Categoría:** Lógica
-- **Prueba que lo protege:** Fase 38: incidents/queue.test.ts (push durante un vaciado lento; vaciados concurrentes)
+- **Prueba que lo protege:** incidents/queue.test.ts y diagnostics/queue.test.ts: un SOS añadido durante un envío lento se conserva y dos vaciados a la vez envían una sola vez
 
 ### DEF-053: Las posiciones nunca se purgan en una instalación nueva
 
@@ -451,15 +451,13 @@ Resumen: 62 registrados, 50 cerrados (81 %), 12 abiertos. Densidad: 12,3 defecto
 
 Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
 
-1. DEF-051: XSS guardado en el portal público: el nombre de una parada se inserta como HTML en el tooltip del mapa
-2. DEF-052: Un SOS guardado sin señal puede desaparecer de la cola de la tableta
-3. DEF-053: Las posiciones nunca se purgan en una instalación nueva
-4. DEF-054: La base de datos de producción no arranca tras un down y up del compose
-5. DEF-055: El panel de Traccar es público y su dominio por defecto publica la IP del servidor
-6. DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
-7. DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
-8. DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
-9. DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
-10. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
-11. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
-12. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
+1. DEF-053: Las posiciones nunca se purgan en una instalación nueva
+2. DEF-054: La base de datos de producción no arranca tras un down y up del compose
+3. DEF-055: El panel de Traccar es público y su dominio por defecto publica la IP del servidor
+4. DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
+5. DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
+6. DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
+7. DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
+8. DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
+9. DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
+10. DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar

@@ -112,7 +112,10 @@ Tokens con hash y comparación del secreto en tiempo constante; webhook y `/web/
 
 Numeración a continuación de la fase 37 (`PLAN-UI-MOVIL.md`). Cada fase es una rama desde `develop`, commits pequeños con Conventional Commits, pruebas en el mismo commit que el arreglo y `merge --no-ff`. Tamaño: S (horas), M (un día), L (varios días).
 
-### Fase 38. `fix/xss-y-cola-sos` (X1, W1, W3) — S
+### Fase 38. `fix/xss-y-cola-sos` (X1, W1, W3) — S — hecha (2026-11-17)
+
+Hecho: tooltips con nodo de texto en el portal y el editor; `qa/xss_tooltips.js` en el CI en lugar de Playwright (no hace falta Odoo: carga el `portal_map.js` real en jsdom). Las colas de incidentes y de errores escriben bajo un cerrojo (`Lock` en `src/gps/queue.ts`), el vaciado quita sólo lo enviado y un segundo vaciado simultáneo comparte el resultado del primero, en vez de esperar con el cerrojo tomado durante el envío (un SOS nuevo no espera a la red).
+
 
 - `fix: escape stop names in map tooltips` en el portal y el editor de paradas: pasar un nodo de texto (`document.createTextNode`) o escapar con la misma función que usa `live_map.js`.
 - `fix: serialize the incident queue` con un `exclusive()` como el de `LocationQueue`; `push`, `flushIncidents` y `clear` pasan por él.
