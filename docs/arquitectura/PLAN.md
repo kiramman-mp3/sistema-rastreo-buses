@@ -277,3 +277,7 @@ Análisis, hallazgos y plan en `docs/arquitectura/PLAN-UX.md`; identidad en `doc
 | 29 | Panel: cola de atención, banda de SOS, acuse de incidentes que ve la tableta, filtros con contador, kanban de incidentes y mensajes, menús Operación y Flota, login con foto de Ambato | HECHO |
 | 30 | Tableta: tema día y noche, próxima parada en grande, estado real del GPS, bloqueo en marcha salvo SOS, hoja de incidentes, textos de 20 px o más | HECHO; falta tableta física |
 | 31 | Validación: inspector de diseño, axe, contraste, capturas antes y después, protocolo con personas | Medición automática HECHA; pruebas con personas PENDIENTES |
+
+## Segunda auditoría y salida a producción (fases 38 a 47) **[PENDIENTE]**
+
+La auditoría del 2026-11-17 revisó lo construido después de la primera (fases R1 a R12 y Fleet) y concluyó que el sistema no está listo para producción general: XSS en el portal, pérdida de un SOS en cola, posiciones sin purga, base de producción que no vuelve a arrancar, panel de Traccar público y login del panel sin límite ni 2FA, entre otros. Los hallazgos, las decisiones pendientes y las fases 38 a 47 están en [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md); los defectos, en `docs/calidad/05-registro-de-defectos.md` (DEF-051 a DEF-062). La vista de conjunto de lo hecho y lo pendiente está en [`ROADMAP.md`](ROADMAP.md).
