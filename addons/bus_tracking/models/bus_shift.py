@@ -42,6 +42,9 @@ class BusShift(models.Model):
             shift.write({'state': 'done', 'end': now})
             if bus.driver_id == shift.user_id.partner_id:
                 bus.driver_id = False
+            # Without a shift the bus is silent on purpose: a lost signal of this shift is over.
+            self.env['bus.alert'].sudo().search([
+                ('vehicle_id', '=', bus.id), ('kind', '=', 'offline'), ('state', '=', 'open')])._close(now)
 
     def _trip_progress(self):
         """Where the bus is on its current trip: the stops in the order it travels them, the time it

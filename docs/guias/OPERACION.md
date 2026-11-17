@@ -40,7 +40,7 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml logs --since 24h 
 
 Revísalo cada día mientras la app sea nueva, y siempre que un chofer diga que "se cerró sola". Si el mismo error se repite en varios choferes, es un defecto de la app. En la tableta, *Estado del GPS* muestra la última falla de la app de los últimos 7 días.
 
-**Lo que el monitor no ve.** Un bus que no envía no apaga `health` si otro sí envía; en el mapa del personal aparece como alerta de "sin señal". Ojo: hoy, a los 10 minutos de terminar cada turno, el bus abre una alerta "No signal" falsa y llega un push (DEF-057). Si el bus no tiene turno activo, ciérrala sin más.
+**Lo que el monitor no ve.** Un bus que no envía no apaga `health` si otro sí envía; en el mapa del personal aparece como alerta de "sin señal". Sólo un bus con turno activo (o en modo demo) abre esa alerta; al terminar el turno se cierra sola.
 
 ## 4. Respaldos
 

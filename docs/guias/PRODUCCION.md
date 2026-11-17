@@ -199,14 +199,13 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 
 ## Riesgos abiertos (auditoría del 17-nov-2026)
 
-La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Antes de un piloto deben cerrarse las fases 38 a 40:
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 41 (seguridad del portal, despliegue, acceso al panel, turnos y alertas) ya están hechas. Siguen abiertos:
 
 | Defecto | Riesgo | Medida provisional |
 |---|---|---|
-| DEF-051 | XSS guardado en el portal público por el nombre de una parada | No importar GPX de origen desconocido; revisar los nombres de las paradas |
-| DEF-052 | La tableta puede perder un SOS guardado sin señal | Ante un SOS, confirmar por radio o teléfono |
-| DEF-057 | Falsa alerta "No signal" tras cada turno | Ignorarla si el bus no tiene turno |
-| DEF-058, DEF-059 | Se pierden posiciones e incidentes guardados sin señal al cerrar el turno | Terminar el turno con señal |
+| DEF-060 | Un manager de buses que no es administrador de Odoo quizá no pueda gestionar choferes | Gestionar los choferes con un administrador |
+| DEF-061 | Al cambiar de servidor, la tableta envía su token al servidor nuevo | Cerrar sesión antes de cambiar de servidor |
+| DEF-062 | La dirección del GPS acepta `http` y el identificador del bus viajaría sin cifrar | Configurar siempre `https://` en la dirección del GPS |
 
 ## Limitaciones conocidas
 
