@@ -46,22 +46,23 @@ class BusShift(models.Model):
             self.env['bus.alert'].sudo().search([
                 ('vehicle_id', '=', bus.id), ('kind', '=', 'offline'), ('state', '=', 'open')])._close(now)
 
-    def _trip_progress(self):
+    def _trip_progress(self, before=None):
         """Where the bus is on its current trip: the stops in the order it travels them, the time it
         reached each one on this trip, and the next stop. A trip starts at the shift start or at the
         last time the bus reached an end of the route; after reaching the last stop the bus heads
-        back, so the stops are walked in reverse."""
+        back, so the stops are walked in reverse. With `before`, only the arrivals earlier than that time count."""
         self.ensure_one()
         stops = self.route_id.sudo().stop_ids
         Arrival = self.env['bus.stop.arrival'].sudo()
         trip_start, direction = self.start, 'forward'
+        until = [('arrival_time', '<', before)] if before else []
         if stops:
             ends = stops[0] | stops[-1]
             last_end = Arrival.search([
                 ('vehicle_id', '=', self.vehicle_id.id),
                 ('stop_id', 'in', ends.ids),
                 ('arrival_time', '>=', self.start),
-            ], order='arrival_time desc, id desc', limit=1)
+            ] + until, order='arrival_time desc, id desc', limit=1)
             if last_end:
                 trip_start = last_end.arrival_time
                 if len(stops) > 1 and last_end.stop_id == stops[-1]:
@@ -72,10 +73,15 @@ class BusShift(models.Model):
                 ('vehicle_id', '=', self.vehicle_id.id),
                 ('stop_id', 'in', stops.ids),
                 ('arrival_time', '>=', trip_start),
-        ], order='arrival_time desc'):
+        ] + until, order='arrival_time desc'):
             arrived.setdefault(arrival.stop_id.id, arrival.arrival_time)
-        next_stop = next((stop for stop in ordered if stop.id not in arrived), stops.browse())
-        return {'stops': ordered, 'arrived': arrived, 'next_stop': next_stop, 'direction': direction}
+        # The stop after the furthest one reached: a stop the bus drove past without entering its radius
+        # (often the first one) stays behind instead of being the next stop for the rest of the trip.
+        reached = [i for i, stop in enumerate(ordered) if stop.id in arrived]
+        after = reached[-1] + 1 if reached else 0
+        next_stop = ordered[after] if after < len(ordered) else stops.browse()
+        return {'stops': ordered, 'arrived': arrived, 'next_stop': next_stop, 'direction': direction,
+                'start': trip_start}
 
     def action_revoke_tablet(self):
         """Drop the driver's tablet sessions so the tablet must log in again; the QR badge is kept."""
