@@ -245,11 +245,20 @@ class TestPanelSignIn(TransactionCase):
 
 
 @tagged('post_install', '-at_install')
-class TestDriverUpcomingTrips(TestDriverApi):
+class TestDriverUpcomingTrips(HttpCase):
     """The tablet reminds the driver of their next trips: /driver/me lists them."""
+
+    post = TestDriverApi.post
+    login = TestDriverApi.login
 
     def setUp(self):
         super().setUp()
+        login_limiter.reset()
+        account_limiter.reset()
+        self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
+        self.driver = make_driver(self.env)
+        self.route = self.env['bus.route'].create({'name': 'Linea Centro', 'code': 'L1'})
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus 1', 'plate': 'ABC-123', 'route_id': self.route.id})
         for sequence, (name, minutes) in enumerate((('Terminal', 0), ('Hospital', 20))):
             self.env['bus.route.stop'].create({'route_id': self.route.id, 'name': name, 'sequence': sequence,
                                                'latitude': -1.24 - sequence / 100, 'longitude': -78.62,
