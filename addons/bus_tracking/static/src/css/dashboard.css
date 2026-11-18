@@ -335,6 +335,23 @@
 }
 
 .o_dash_link,
+.o_dash_btn.o_dash_pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-color: #7A1A22;
+    background: #7A1A22;
+    color: #FFFFFF;
+}
+
+.o_dash_btn.o_dash_pdf:hover {
+    background: #5E141A;
+}
+
+.o_dash_btn.o_dash_pdf:disabled {
+    opacity: 0.7;
+}
+
 .o_dash_btn {
     min-height: 36px;
     padding: 0 14px;

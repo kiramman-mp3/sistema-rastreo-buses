@@ -168,21 +168,6 @@ msgid "%s stops created."
 msgstr "%s paradas creadas."
 
 #. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "(CC BY 3.0),"
-msgstr "(CC BY 3.0),"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "(CC BY-SA 3.0)."
-msgstr "(CC BY-SA 3.0)."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "(CC BY-SA 4.0),"
-msgstr "(CC BY-SA 4.0),"
-
-#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
@@ -307,11 +292,6 @@ msgid "Accept positions without a shift"
 msgstr "Aceptar posiciones sin turno"
 
 #. module: bus_tracking
-#: model:ir.model,name:bus_tracking.model_bus_grafana
-msgid "Access to the Grafana dashboards"
-msgstr "Acceso a los tableros de Grafana"
-
-#. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__accident
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 msgid "Accident"
@@ -346,17 +326,6 @@ msgstr "Agregar parada"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__address
 msgid "Address"
 msgstr "Dirección"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_grafana_url
-msgid ""
-"Address of Grafana as the browser reaches it, e.g. "
-"https://grafana.example.com. Empty hides the Grafana dashboards. It must be "
-"a subdomain of the address of Odoo."
-msgstr ""
-"Dirección de Grafana tal como la alcanza el navegador, por ejemplo "
-"https://grafana.example.com. Vacía oculta los tableros de Grafana. Debe ser "
-"un subdominio de la dirección de Odoo."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__alert_count
@@ -403,6 +372,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__alert_ids
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_graph
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_pivot
@@ -523,13 +493,6 @@ msgid "Arrived"
 msgstr "Llegados"
 
 #. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
-#, python-format
-msgid "Ask a manager to set up Grafana."
-msgstr "Pide a un administrador que configure Grafana."
-
-#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_assign_form
 msgid "Assign"
 msgstr "Asignar"
@@ -574,6 +537,7 @@ msgstr "Autenticación"
 #. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Average delay"
 msgstr "Retraso promedio"
@@ -728,12 +692,6 @@ msgid "Bus Tracking: compare Traccar and Odoo positions"
 msgstr "Bus Tracking: comparar las posiciones de Traccar y de Odoo"
 
 #. module: bus_tracking
-#: model:ir.actions.server,name:bus_tracking.cron_count_positions_ir_actions_server
-#: model:ir.cron,cron_name:bus_tracking.cron_count_positions
-msgid "Bus Tracking: count positions per day"
-msgstr "Rastreo de buses: contar posiciones por día"
-
-#. module: bus_tracking
 #: model:ir.actions.server,name:bus_tracking.cron_generate_trips_ir_actions_server
 #: model:ir.cron,cron_name:bus_tracking.cron_generate_trips
 msgid "Bus Tracking: create the scheduled trips of the next days"
@@ -791,13 +749,6 @@ msgstr ""
 "Bus Tracking: avisar por push los incidentes nuevos a los administradores"
 
 #. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_grafana.py:0
-#, python-format
-msgid "Bus tracking access required."
-msgstr "Se necesita acceso a Bus Tracking."
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #, python-format
@@ -817,6 +768,7 @@ msgstr "Buses"
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/stop_picker.xml:0
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_gpx_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_record_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_assign_form
@@ -1042,6 +994,7 @@ msgstr "No se pudo actualizar. Reintentando en unos segundos."
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Count"
 msgstr "Cantidad"
@@ -1091,9 +1044,9 @@ msgstr "Creado"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_uid
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__create_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__create_uid
@@ -1129,9 +1082,9 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_date
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__create_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__create_date
@@ -1176,14 +1129,8 @@ msgstr "DIOHER_PAVAL"
 
 #. module: bus_tracking
 #. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
-#, python-format
-msgid "Dashboards"
-msgstr "Tableros"
-
-#. module: bus_tracking
-#. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__scope
 #, python-format
 msgid "Data"
 msgstr "Datos"
@@ -1208,11 +1155,7 @@ msgid "Date To"
 msgstr "Fecha hasta"
 
 #. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "David Torres Costales"
-msgstr "David Torres Costales"
-
-#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
@@ -1378,12 +1321,11 @@ msgstr "No se detuvo en %(stop)s"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__display_name
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_kpi_views__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__display_name
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__display_name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__display_name
@@ -1439,6 +1381,7 @@ msgstr "Distribución de los retrasos"
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_shift__state__done
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip__state__done
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_badge_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_shift_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
@@ -1565,11 +1508,6 @@ msgstr ""
 #, python-format
 msgid "Early"
 msgstr "Adelantado"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_bus_position_day__local_day
-msgid "Ecuador date (UTC-5)."
-msgstr "Fecha de Ecuador (UTC-5)."
 
 #. module: bus_tracking
 #. odoo-python
@@ -1769,6 +1707,7 @@ msgstr "Viernes"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__date_from
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__origin_stop_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__date_from
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__origin_stop_id
@@ -1849,49 +1788,6 @@ msgstr "Buenos días."
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__gpx_filename
 msgid "Gpx Filename"
 msgstr "Nombre del archivo GPX"
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
-#: model:ir.actions.client,name:bus_tracking.action_grafana
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_grafana
-#, python-format
-msgid "Grafana"
-msgstr "Grafana"
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_grafana_minutes
-msgid "Grafana access lasts (minutes)"
-msgstr "Duración del acceso a Grafana (minutos)"
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/res_config_settings.py:0
-#, python-format
-msgid "Grafana access must last between 5 and 1440 minutes."
-msgstr "El acceso a Grafana debe durar entre 5 y 1440 minutos."
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_grafana_url
-msgid "Grafana address"
-msgstr "Dirección de Grafana"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid "Grafana dashboards"
-msgstr "Tableros de Grafana"
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
-#, python-format
-msgid "Grafana is not set up yet"
-msgstr "Grafana todavía no está configurado"
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_grafana_secret
-msgid "Grafana shared secret"
-msgstr "Secreto compartido de Grafana"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_vehicle__connection
@@ -1977,15 +1873,6 @@ msgid "How late or early the buses arrive"
 msgstr "Qué tan tarde o temprano llegan los buses"
 
 #. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_grafana_minutes
-msgid ""
-"How long a person can keep a Grafana dashboard open before Odoo gives it a "
-"new token (5 to 1440)."
-msgstr ""
-"Cuánto tiempo puede una persona dejar abierto un tablero de Grafana antes de"
-" que Odoo le dé un token nuevo (de 5 a 1440)."
-
-#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
@@ -2014,12 +1901,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__id
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_kpi_views__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__id
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__id
@@ -2109,6 +1995,7 @@ msgstr "Incidentes por tipo"
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip__state__incomplete
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
 #, python-format
 msgid "Incomplete"
@@ -2128,17 +2015,13 @@ msgstr "Recorridos incompletos"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Indicator"
 msgstr "Indicador"
 
 #. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
-#: model:ir.actions.client,name:bus_tracking.action_live_dashboard
 #: model:ir.model,name:bus_tracking.model_bus_kpi
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_indicators
-#, python-format
 msgid "Indicators"
 msgstr "Indicadores"
 
@@ -2185,6 +2068,7 @@ msgstr "Conservar posiciones (días)"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__kind
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__kind
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__kind
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
@@ -2262,12 +2146,11 @@ msgstr "Última longitud"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident____last_update
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_kpi_views____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position____last_update
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription____last_update
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record____last_update
@@ -2300,9 +2183,9 @@ msgstr "Última velocidad"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_uid
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__write_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__write_uid
@@ -2329,9 +2212,9 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_date
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__write_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__write_date
@@ -2364,6 +2247,7 @@ msgstr "Última posición"
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_simulate__scenario__late
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_stop__status__late
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Late"
 msgstr "Tarde"
@@ -2468,6 +2352,7 @@ msgstr "Límite que se superó al abrirse la alerta (km/h o minutos)."
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Line"
 msgstr "Línea"
@@ -2475,6 +2360,8 @@ msgstr "Línea"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__route_ids
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Lines"
 msgstr "Líneas"
@@ -2528,15 +2415,9 @@ msgstr "Cargar el trazado de una ruta desde un archivo GPX"
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
 #, python-format
 msgid "Loading…"
 msgstr "Cargando…"
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__local_day
-msgid "Local Day"
-msgstr "Día local"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_trip__date
@@ -2776,6 +2657,7 @@ msgstr "Sin señal"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "No trips in this period."
 msgstr "No hay recorridos en este periodo."
@@ -2835,11 +2717,6 @@ msgstr "Notificaciones en este dispositivo"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__notified
 msgid "Notified"
 msgstr "Avisado"
-
-#. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_dashboard
-msgid "Odoo dashboard"
-msgstr "Tablero de Odoo"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__off_route_since
@@ -3232,7 +3109,6 @@ msgstr "Puntos del trazado grabado"
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_position
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__positions
 msgid "Positions"
 msgstr "Posiciones"
 
@@ -3240,11 +3116,6 @@ msgstr "Posiciones"
 #: model:ir.model.fields,help:bus_tracking.field_bus_sync_audit__total
 msgid "Positions Traccar has that Odoo should have kept."
 msgstr "Posiciones que Traccar tiene y que Odoo debería haber guardado."
-
-#. module: bus_tracking
-#: model:ir.model,name:bus_tracking.model_bus_position_day
-msgid "Positions per day"
-msgstr "Posiciones por día"
 
 #. module: bus_tracking
 #. odoo-python
@@ -3282,6 +3153,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Punctuality"
 msgstr "Puntualidad"
@@ -3398,6 +3270,7 @@ msgstr "Reales y simulados"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_report_wizard__scope__all
 #, python-format
 msgid "Real and simulated data"
 msgstr "Datos reales y simulados"
@@ -3405,6 +3278,7 @@ msgstr "Datos reales y simulados"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_report_wizard__scope__real
 #, python-format
 msgid "Real data only"
 msgstr "Solo datos reales"
@@ -3497,8 +3371,12 @@ msgid "Reported at"
 msgstr "Reportado a las"
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_alert
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_reports
+#: model:ir.actions.client,name:bus_tracking.action_live_dashboard
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_indicators
+#, python-format
 msgid "Reports"
 msgstr "Reportes"
 
@@ -3576,7 +3454,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__route_id
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__route_id
@@ -3662,11 +3539,6 @@ msgstr "Ejecutado el"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 msgid "SOS"
 msgstr "SOS"
-
-#. module: bus_tracking
-#: model:ir.model,name:bus_tracking.model_bus_kpi_views
-msgid "SQL views for the business-intelligence tool"
-msgstr "Vistas SQL para la herramienta de inteligencia de negocios"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__kind__safety
@@ -3785,17 +3657,6 @@ msgstr "Secuencia"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
 msgid "Set or change the password"
 msgstr "Asignar o cambiar contraseña"
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
-#, python-format
-msgid ""
-"Set the Grafana address and the shared secret in Settings, under Buses, and "
-"come back."
-msgstr ""
-"Configura la dirección de Grafana y el secreto compartido en Ajustes, en "
-"Buses, y vuelve."
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_settings
@@ -3923,7 +3784,6 @@ msgid "Simulate trips"
 msgstr "Simular recorridos"
 
 #. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__simulated
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__simulated
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__simulated
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
@@ -3933,6 +3793,7 @@ msgstr "Simulado"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_report_wizard__scope__simulated
 #, python-format
 msgid "Simulated data only"
 msgstr "Solo datos simulados"
@@ -3965,6 +3826,7 @@ msgstr "Desde"
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_stop__status__skipped
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Skipped"
 msgstr "Omitida"
@@ -4011,11 +3873,6 @@ msgstr "Fuente"
 #, python-format
 msgid "Speed"
 msgstr "Velocidad"
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_position_day__speed_sum
-msgid "Speed Sum"
-msgstr "Suma de velocidades"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_speed_limit
@@ -4069,6 +3926,7 @@ msgstr "Iniciar revisión"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__state
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
 #, python-format
@@ -4087,6 +3945,7 @@ msgstr "Estado"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__stop_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_stop_arrival__stop_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_stop__stop_id
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "Stop"
 msgstr "Parada"
 
@@ -4166,6 +4025,7 @@ msgstr "Detenido %(minutes)d min lejos de cualquier parada"
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__stop_ids
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__stop_line_ids
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_form
 msgid "Stops"
@@ -4220,11 +4080,6 @@ msgid "Stops with the largest average delay (min)"
 msgstr "Paradas con mayor retraso promedio (min)"
 
 #. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_bus_position_day__speed_sum
-msgid "Sum of the speeds (km/h), for the daily average."
-msgstr "Suma de las velocidades (km/h), para el promedio diario."
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #, python-format
@@ -4245,6 +4100,7 @@ msgstr "Sincronizar ahora"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "System quality"
 msgstr "Calidad del sistema"
@@ -4321,20 +4177,6 @@ msgstr "La dirección del GPS debe ser como https://gps.example.com."
 
 #. module: bus_tracking
 #. odoo-python
-#: code:addons/bus_tracking/models/res_config_settings.py:0
-#, python-format
-msgid "The Grafana address must look like https://grafana.example.com."
-msgstr "La dirección de Grafana debe verse como https://grafana.example.com."
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/res_config_settings.py:0
-#, python-format
-msgid "The Grafana secret needs at least 16 characters."
-msgstr "El secreto de Grafana necesita al menos 16 caracteres."
-
-#. module: bus_tracking
-#. odoo-python
 #: code:addons/bus_tracking/models/bus_route.py:0
 #: code:addons/bus_tracking/models/bus_route.py:0
 #, python-format
@@ -4389,18 +4231,6 @@ msgstr ""
 #, python-format
 msgid "The color must look like #1e5560."
 msgstr "El color debe ser como #1e5560."
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/grafana.xml:0
-#, python-format
-msgid "The dashboards could not be loaded. Trying again in a minute."
-msgstr "No se pudieron cargar los tableros. Se reintenta en un minuto."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid "The dashboards of the Indicators menu are embedded from here."
-msgstr "Los tableros del menú Indicadores se incrustan desde aquí."
 
 #. module: bus_tracking
 #. odoo-python
@@ -4547,20 +4377,6 @@ msgstr "La ruta volverá a dibujarse como línea recta entre sus paradas."
 #: model:ir.model.fields,help:bus_tracking.field_bus_sync_audit__matched
 msgid "The same position (device, time, place) is in Odoo."
 msgstr "La misma posición (dispositivo, hora, lugar) está en Odoo."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid "The same value as GRAFANA_JWT_SECRET of the Grafana service."
-msgstr "El mismo valor que GRAFANA_JWT_SECRET del servicio de Grafana."
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_grafana_secret
-msgid ""
-"The secret Odoo signs the access tokens with; Grafana has the same one "
-"(GRAFANA_JWT_SECRET). At least 16 characters."
-msgstr ""
-"El secreto con que Odoo firma los tokens de acceso; Grafana tiene el mismo "
-"(GRAFANA_JWT_SECRET). Al menos 16 caracteres."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -4713,6 +4529,7 @@ msgid "Time Flag"
 msgstr "Marca de duración"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__date_to
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__destination_stop_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__destination_stop_id
 msgid "To"
@@ -4897,6 +4714,7 @@ msgstr "Servicio de transporte"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__trip_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__trip_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_stop__trip_id
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "Trip"
 msgstr "Recorrido"
 
@@ -4916,6 +4734,7 @@ msgstr "Margen de la ventana del recorrido (minutos)"
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_run
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_run
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #, python-format
 msgid "Trips"
 msgstr "Recorridos"
@@ -5350,11 +5169,6 @@ msgstr "https://gps.example.com"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid "https://grafana.example.com"
-msgstr "https://grafana.example.com"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid "https://{s}.example.com/{z}/{x}/{y}.png"
 msgstr "https://{s}.example.com/{z}/{x}/{y}.png"
 
@@ -5516,3 +5330,303 @@ msgstr "🔴 Sin conexión"
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__connection__online
 msgid "🟢 Connected"
 msgstr "🟢 Conectado"
+
+#. module: bus_tracking
+#: model:ir.actions.report,print_report_name:bus_tracking.action_report_operation
+msgid "'Reporte-buses-%s-%s' % (object.date_from, object.date_to)"
+msgstr "'Reporte-buses-%s-%s' % (object.date_from, object.date_to)"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "(simulated)"
+msgstr "(simulado)"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<span class=\"bt-brand-mark\">BUS</span>"
+msgstr "<span class=\"bt-brand-mark\">BUS</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid ""
+"<span class=\"bt-dot bt-good\"/>within the goal <span class=\"bt-dot bt-warn\"/>watch <span class=\"bt-dot bt-bad\"/>out of range\n"
+"                        <span class=\"bt-dot\"/>no goal or no data"
+msgstr "<span class=\"bt-dot bt-good\"/>dentro de la meta <span class=\"bt-dot bt-warn\"/>vigilar <span class=\"bt-dot bt-bad\"/>fuera de rango\n                        <span class=\"bt-dot\"/>sin meta o sin datos"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"cifra-icono\" aria-hidden=\"true\">📍</span>"
+msgstr "<span class=\"cifra-icono\" aria-hidden=\"true\">📍</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"cifra-icono\" aria-hidden=\"true\">🗺️</span>"
+msgstr "<span class=\"cifra-icono\" aria-hidden=\"true\">🗺️</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"cifra-icono\" aria-hidden=\"true\">🚌</span>"
+msgstr "<span class=\"cifra-icono\" aria-hidden=\"true\">🚌</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num\">1</span>"
+msgstr "<span class=\"paso-num\">1</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num\">2</span>"
+msgstr "<span class=\"paso-num\">2</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num\">3</span>"
+msgstr "<span class=\"paso-num\">3</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num-badge\">01</span>"
+msgstr "<span class=\"paso-num-badge\">01</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num-badge\">02</span>"
+msgstr "<span class=\"paso-num-badge\">02</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num-badge\">03</span>"
+msgstr "<span class=\"paso-num-badge\">03</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
+msgid ""
+"<span>Huachi</span>\n"
+"                            <span>Ingahurco</span>\n"
+"                            <span>Querochaca</span>"
+msgstr "<span>Huachi</span>\n                            <span>Ingahurco</span>\n                            <span>Querochaca</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<strong>Data:</strong>"
+msgstr "<strong>Datos:</strong>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<strong>Lines:</strong>"
+msgstr "<strong>Líneas:</strong>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<strong>Period:</strong>"
+msgstr "<strong>Periodo:</strong>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
+msgid ""
+"A PDF with the indicators, the lines, each day, the delays, the incidents "
+"and the latest trips of the period."
+msgstr "Un PDF con los indicadores, las líneas, cada día, los retrasos, las incidencias y los últimos recorridos del periodo."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Arrivals"
+msgstr "Llegadas"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Arrivals by delay"
+msgstr "Llegadas según el retraso"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Avg. delay"
+msgstr "Retraso prom."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Change"
+msgstr "Cambio"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "Choose the period of the report again."
+msgstr "Vuelve a elegir el periodo del reporte."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__compare
+msgid "Compare with the previous period"
+msgstr "Comparar con el periodo anterior"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Compliance"
+msgstr "Cumplimiento"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Cumulative"
+msgstr "Acumulado"
+
+#. module: bus_tracking
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_dashboard
+msgid "Dashboard"
+msgstr "Tablero"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Day by day"
+msgstr "Día por día"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Delay at the end"
+msgstr "Retraso al final"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
+#, python-format
+msgid "Download PDF"
+msgstr "Descargar PDF"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_wizard
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_pdf
+msgid "Download report"
+msgstr "Descargar reporte"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_report_wizard
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
+msgid "Download the operation report"
+msgstr "Descargar el reporte de operación"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_report_wizard__route_ids
+msgid "Empty: every line."
+msgstr "Vacío: todas las líneas."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "Estudiantes universitarios en Ambato"
+msgstr "Estudiantes universitarios en Ambato"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "Every line"
+msgstr "Todas las líneas"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Incidents and alerts by kind"
+msgstr "Incidencias y alertas por tipo"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Km driven"
+msgstr "Km recorridos"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Km planned"
+msgstr "Km previstos"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Latest trips"
+msgstr "Últimos recorridos"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "No incidents or alerts in this period."
+msgstr "No hubo incidencias ni alertas en este periodo."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "No late arrivals in this period."
+msgstr "No hubo llegadas tarde en este periodo."
+
+#. module: bus_tracking
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_reports
+msgid "Notifications"
+msgstr "Notificaciones"
+
+#. module: bus_tracking
+#: model:ir.actions.report,name:bus_tracking.action_report_operation
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Operation report"
+msgstr "Reporte de operación"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_report_bus_tracking_report_operation
+msgid "Operation report (PDF)"
+msgstr "Reporte de operación (PDF)"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Preparing the PDF…"
+msgstr "Preparando el PDF…"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Previous period"
+msgstr "Periodo anterior"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Printed"
+msgstr "Impreso el"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Stops with the most delay"
+msgstr "Paradas con más retraso"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#, python-format
+msgid "The PDF could not be prepared. Try again in a moment."
+msgstr "No se pudo preparar el PDF. Inténtalo de nuevo en un momento."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "The report covers at most one year."
+msgstr "El reporte abarca como máximo un año."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "The start of the period must come before its end."
+msgstr "El inicio del periodo debe ser anterior a su fin."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Transport indicators"
+msgstr "Indicadores de transporte"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Value"
+msgstr "Valor"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "by"
+msgstr "por"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "min"
+msgstr "min"

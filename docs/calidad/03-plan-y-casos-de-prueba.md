@@ -34,9 +34,9 @@ Documento de pruebas en el sentido de ISO/IEC/IEEE 29119-3: estrategia, diseño 
 | `test_driver_staff.py` | Permisos del personal sobre turnos y choferes | 8 | 1,3348 | 1,3570 |
 | `test_fleet.py` | Enlace con Odoo Fleet en los dos sentidos y migración (R8) | 22 | 0,0563 | 0,1860 |
 | `test_gps_setup.py` | Registro del GPS del celular y QR | 8 | 0,0435 | 0,0980 |
-| `test_grafana_access.py` | Token de acceso a Grafana, ajustes y menú (R7) | 21 | 0,1251 | 0,8920 |
-| `test_grafana_dashboards.py` | Los seis tableros: archivos, cada consulta y las mismas cifras que los indicadores (R7) | 20 | 0,1413 | 0,1760 |
-| `test_grafana_views.py` | Vistas SQL kpi_* y rol de solo lectura de la base (R7) | 14 | 0,1601 | 0,2120 |
+| `test_grafana_access.py` | Grafana: token de acceso (retirado el 17-nov-2026) | 21 | 0,1251 | 0,8920 |
+| `test_grafana_dashboards.py` | Grafana: tableros (retirado el 17-nov-2026) | 20 | 0,1413 | 0,1760 |
+| `test_grafana_views.py` | Grafana: vistas SQL kpi_* (retirado el 17-nov-2026) | 14 | 0,1601 | 0,2120 |
 | `test_http.py` | Webhook, salud, mapa en vivo y landing | 22 | 0,2687 | 1,3560 |
 | `test_ingest.py` | Ingesta de posiciones, llegadas y purga | 25 | 0,0338 | 0,4840 |
 | `test_kpi.py` | Los 12 indicadores contra recorridos hechos a mano con resultado conocido (R5) | 24 | 0,1864 | 0,7480 |
