@@ -95,25 +95,77 @@ class BusRoute(models.Model):
         return _MEASURES[key]
 
     def _stop_minutes(self):
-        """Minutes from the first stop to each stop, for the passengers' estimate. The planned minutes when the
-        line has them; otherwise the distance along the line at the average speed of a city bus."""
+        """Minutes from the first stop to each stop, for the passengers' estimate: the planned minutes when the
+        line has them, otherwise the ones estimated from the distance."""
         self.ensure_one()
-        stops = self.stop_ids
-        planned = stops.mapped('planned_offset_min')
-        measure = self._path_measure() if not any(planned) else None
-        if not measure:
+        planned = self.stop_ids.mapped('planned_offset_min')
+        if any(planned):
             return planned
+        return self._distance_minutes() or planned
+
+    def _distance_minutes(self):
+        """Minutes from the first stop to each stop along the line at the average speed of a city bus, or an
+        empty list when the line has no path to measure."""
+        self.ensure_one()
+        measure = self._path_measure()
+        if not measure:
+            return []
         try:
             speed = float(self.env['ir.config_parameter'].sudo().get_param('bus_tracking.eta_speed_kmh') or 0)
         except ValueError:
             speed = 0
         speed = speed if speed > 0 else ETA_SPEED_KMH
         minutes, along = [], 0.0
-        for stop in stops:
+        for stop in self.stop_ids:
             # a recorded track that loops could place a stop behind the previous one: never go back
             along = max(along, measure.locate(stop.latitude, stop.longitude)[0])
             minutes.append(round(along / 1000.0 / speed * 60.0, 1))
         return minutes
+
+    def _trip_minutes(self):
+        """The average minutes the buses took from the first stop to each stop in the finished real trips of the
+        line, or None for a stop no trip reached."""
+        self.ensure_one()
+        arrivals = self.env['bus.trip.stop'].search([
+            ('trip_id.route_id', '=', self.id), ('trip_id.simulated', '=', False),
+            ('trip_id.state', 'in', ('done', 'incomplete')), ('trip_id.real_start', '!=', False),
+            ('actual_time', '!=', False)])
+        spent = {}
+        for arrival in arrivals:
+            minutes = (arrival.actual_time - arrival.trip_id.real_start).total_seconds() / 60.0
+            if minutes >= 0:
+                spent.setdefault(arrival.stop_id.id, []).append(minutes)
+        return [sum(spent[stop.id]) / len(spent[stop.id]) if stop.id in spent else None for stop in self.stop_ids]
+
+    def _set_planned_minutes(self, minutes):
+        """Write the planned minutes: 0 at the first stop and never going back along the line."""
+        stops = self.stop_ids
+        values, last = [], 0
+        for index, value in enumerate(minutes):
+            last = 0 if index == 0 else max(last, int(round(value)))
+            values.append(last)
+        # zero first and fill from the end, so the order rule holds after every single write
+        stops.write({'planned_offset_min': 0})
+        for stop, value in reversed(list(zip(stops, values))):
+            stop.planned_offset_min = value
+
+    def action_plan_minutes_distance(self):
+        self.ensure_one()
+        minutes = self._distance_minutes()
+        if len(minutes) < 2:
+            raise UserError(_("The line needs at least two stops to measure the distance."))
+        self._set_planned_minutes(minutes)
+        return True
+
+    def action_plan_minutes_trips(self):
+        self.ensure_one()
+        real = self._trip_minutes()
+        if not any(value is not None for value in real[1:]):
+            raise UserError(_("This line has no finished trips with arrivals yet. Use the minutes by distance."))
+        # a stop no bus reached yet takes the distance estimate, so the line still gets a full timetable
+        distance = self._distance_minutes() or [0.0] * len(real)
+        self._set_planned_minutes([r if r is not None else d for r, d in zip(real, distance)])
+        return True
 
     def action_record_track(self):
         self.ensure_one()
