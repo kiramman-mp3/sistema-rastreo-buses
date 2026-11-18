@@ -306,19 +306,16 @@
                     <div class="cifras-contenedor">
                         <dl class="cifras">
                             <div class="cifra-card">
-                                <span class="cifra-icono">🚌</span>
-                                <dd t-esc="total_buses"/>
                                 <dt t-esc="s['stat_buses']"/>
+                                <dd><span class="cifra-icono" aria-hidden="true">🚌</span><t t-esc="total_buses"/></dd>
                             </div>
                             <div class="cifra-card">
-                                <span class="cifra-icono">🗺️</span>
-                                <dd t-esc="len(lines)"/>
                                 <dt t-esc="s['stat_lines']"/>
+                                <dd><span class="cifra-icono" aria-hidden="true">🗺️</span><t t-esc="len(lines)"/></dd>
                             </div>
                             <div class="cifra-card">
-                                <span class="cifra-icono">📍</span>
-                                <dd t-esc="len(stop_names)"/>
                                 <dt t-esc="s['stat_stops']"/>
+                                <dd><span class="cifra-icono" aria-hidden="true">📍</span><t t-esc="len(stop_names)"/></dd>
                             </div>
                         </dl>
                     </div>

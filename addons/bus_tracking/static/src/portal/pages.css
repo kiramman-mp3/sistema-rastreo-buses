@@ -1451,6 +1451,7 @@ a.fragmento-nombre:hover {
 }
 
 .cifra-card dt {
+    order: 1;
     margin-top: 0.35rem;
     color: var(--tinta-2);
     font-size: 0.8125rem;
@@ -1681,7 +1682,7 @@ a.fragmento-nombre:hover {
 
 .paso-card:nth-child(1) .paso-num-badge {
     background: #FFFBEB;
-    color: #D97706;
+    color: #B45309;
     border: 1px solid #FEF3C7;
 }
 
@@ -1693,7 +1694,7 @@ a.fragmento-nombre:hover {
 
 .paso-card:nth-child(3) .paso-num-badge {
     background: #F0FDF4;
-    color: #16A34A;
+    color: #15803D;
     border: 1px solid #DCFCE7;
 }
 
@@ -2068,7 +2069,7 @@ a.fragmento-nombre:hover {
 }
 
 .pie-copyright {
-    color: #64748B;
+    color: #94A3B8;
 }
 
 /* =====================================================================================================
@@ -2325,4 +2326,9 @@ a.fragmento-nombre:hover {
     .pagina-lineas .fila:hover {
         transform: none;
     }
+}
+
+/* The photo credits sit on the dark footer: light enough to read there. */
+.pie .pie-inferior .creditos a {
+    color: #CBD5E1;
 }
