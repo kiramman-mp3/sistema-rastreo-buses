@@ -126,4 +126,64 @@
             </xpath>
         </field>
     </record>
+
+    <!-- The fleet of the bus app: one column per service state, the same three always, not draggable (they follow
+         the shifts and the Fleet state). Archived vehicles are shown, in Decommissioned. -->
+    <record id="view_fleet_vehicle_kanban_service" model="ir.ui.view">
+        <field name="name">fleet.vehicle.kanban.service</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_kanban"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="default_group_by">bus_service</attribute>
+                <attribute name="records_draggable">0</attribute>
+                <attribute name="group_create">0</attribute>
+                <attribute name="quick_create">0</attribute>
+                <attribute name="sample">0</attribute>
+            </xpath>
+            <xpath expr="//kanban" position="inside">
+                <field name="bus_service"/>
+                <field name="bus_route_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_tree_service" model="ir.ui.view">
+        <field name="name">fleet.vehicle.tree.service</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='license_plate']" position="after">
+                <field name="bus_service" widget="badge" decoration-success="bus_service == 'route'"
+                       decoration-info="bus_service == 'parked'" decoration-muted="bus_service == 'retired'"/>
+                <field name="bus_route_id" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_fleet_vehicle_search_service" model="ir.ui.view">
+        <field name="name">fleet.vehicle.search.service</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter name="service_route" string="On route" domain="[('bus_service', '=', 'route')]"/>
+                <filter name="service_parked" string="Parked (not on route)" domain="[('bus_service', '=', 'parked')]"/>
+                <filter name="service_retired" string="Decommissioned" domain="[('bus_service', '=', 'retired')]"/>
+                <filter name="group_service" string="Service" context="{'group_by': 'bus_service'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_bus_fleet_service" model="ir.actions.act_window">
+        <field name="name">Fleet</field>
+        <field name="res_model">fleet.vehicle</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_fleet_vehicle_kanban_service')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_fleet_vehicle_tree_service')})]"/>
+        <field name="context">{'active_test': False}</field>
+    </record>
 </odoo>
