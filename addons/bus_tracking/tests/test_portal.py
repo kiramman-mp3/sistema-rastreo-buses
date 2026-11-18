@@ -225,10 +225,32 @@ class TestPassengerPortal(HttpCase):
         for invented in ('8 buses', 'Frecuencia', 'min</span>', 'Accesible'):
             self.assertNotIn(invented, html)
 
-    def test_route_page_promises_no_arrival_times(self):
+    def test_route_page_gives_the_minutes_only_as_an_estimate(self):
+        """The minutes come from the timetable of the line: always said as approximate, never as a promise."""
         html = self.url_open('/rutas/L1').text
-        self.assertNotIn('Llega en', html)
+        self.assertIn('data-minutes="[0.0, ', html)
+        self.assertIn('Llega en unos {m} minutos aproximadamente.', html)
         self.assertNotIn('probabil', html)
+
+    def test_the_minutes_of_the_line_come_from_its_timetable(self):
+        stops = self.route.stop_ids.sorted('sequence')
+        stops[-1:].planned_offset_min = 7
+        html = self.url_open('/rutas/L1').text
+        self.assertIn('data-minutes="[0, 7]"', html)
+
+    def test_a_line_without_timetable_estimates_the_minutes_from_the_distance(self):
+        """About 1.4 km between the two stops: 4.3 minutes at 20 km/h, 2.2 at 40 km/h."""
+        self.assertEqual(self.route._stop_minutes(), [0.0, 4.3])
+        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.eta_speed_kmh', '40')
+        self.assertEqual(self.route._stop_minutes(), [0.0, 2.2])
+        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.eta_speed_kmh', 'rápido')
+        self.assertEqual(self.route._stop_minutes(), [0.0, 4.3])
+
+    def test_the_arrival_message_does_not_name_the_bus(self):
+        from odoo.addons.bus_tracking.models.portal_i18n import STRINGS
+        for lang, strings in STRINGS.items():
+            for key in ('bus_at_mine', 'bus_one_stop', 'bus_n_stops', 'eta_one', 'eta_n'):
+                self.assertNotIn('{bus}', strings[key], (lang, key))
 
     def test_routes_can_be_searched_by_stop_without_accents(self):
         self.env['bus.route.stop'].create({'route_id': self.route.id, 'name': 'Píllaro centro',

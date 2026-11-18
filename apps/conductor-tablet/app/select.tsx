@@ -41,6 +41,7 @@ function OptionList<T extends { id: number }>({ items, flow, extraData, empty, r
   }
   return (
     <FlatList
+      nestedScrollEnabled
       data={items}
       keyExtractor={(item) => String(item.id)}
       renderItem={({ item }) => renderRow(item)}
@@ -97,6 +98,16 @@ export default function Select() {
     }, 10_000);
     return () => clearInterval(id);
   }, [offline, actions]);
+
+  async function refresh() {
+    setError('');
+    try {
+      await actions.refreshAll();
+      if (actions.snapshot.shift) router.replace('/shift');
+    } catch (err) {
+      if (err instanceof NetworkError) setError(t('network'));
+    }
+  }
 
   async function start() {
     if (!vehicleId || !routeId) return;
@@ -228,9 +239,10 @@ export default function Select() {
   );
 
   return (
-    <Screen>
+    <Screen onRefresh={refresh}>
       {layout.largeText ? (
         <ScrollView
+          nestedScrollEnabled
           style={styles.flowScroll}
           contentContainerStyle={{ gap: layout.gap }}
           showsVerticalScrollIndicator={false}
