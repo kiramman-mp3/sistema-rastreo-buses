@@ -1,8 +1,8 @@
 # Roadmap del proyecto
 
-Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-17.
+Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-18.
 
-Estado: versión del módulo `16.0.1.8.0`, app de tableta `1.0.0`, última etiqueta `v0.9.5-beta`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
+Estado: versión del módulo `16.0.1.9.0`, app de tableta `1.1.1`, última etiqueta `v0.9.5-beta`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
 
 ## 1. Lo hecho
 
@@ -22,11 +22,14 @@ Estado: versión del módulo `16.0.1.8.0`, app de tableta `1.0.0`, última etiqu
 | Integración con Fleet | 5-nov | — | Vehículos de Flota como única ficha del bus, pestaña de rastreo; DEF-049 y DEF-050 | [`FLEET.md`](FLEET.md) |
 | Licencia | 12-nov | — | LGPL-3.0 | `LICENSE` |
 | Segunda auditoría | 17-nov | — | 7 críticos, 14 medios, 7 de robustez y rendimiento y 15 menores; DEF-051 a DEF-062 | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
+| Pedidos del usuario tras la auditoría | 17 y 18-nov | — | Estado Resuelta en mensajes, gráficos sin repetir animación, Grafana retirado, reportes propios con PDF, menús Reportes y Notificaciones, flota en tablero, Conversaciones oculto, push del administrador en Windows, recordatorios de recorridos en la tableta; DEF-064 a DEF-075 | [`../academico/BITACORA.md`](../academico/BITACORA.md) |
 | Correcciones de la segunda auditoría | 17-nov | 38 a 45 | Portal sin XSS, colas de la tableta seguras, despliegue sobre Supabase, acceso al panel, turnos y alertas, servidor y GPS de la tableta, permisos de choferes, carga y purga, build; DEF-051 a DEF-062 cerrados | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
 
 Cifras al cierre de la etapa de la rúbrica (5-nov): 544 pruebas de Odoo, 167 de Jest, 96 % de cobertura de Python según `odoo_test.log`, SonarQube con el Quality Gate aprobado, 50 defectos registrados y cerrados.
 
 Cifras tras la fase 45 (17-nov): 579 pruebas de Odoo, 179 de Jest, 97 % de cobertura de Python (medida ahora en el CI), 62 defectos registrados y cerrados.
+
+Cifras al 18-nov: 555 pruebas de Odoo (bajan al retirar las de Grafana), 186 de Jest, 75 defectos registrados y cerrados.
 
 ## 2. Lo que falta
 
@@ -58,5 +61,5 @@ Decisiones ya tomadas: base de producción en **Supabase** (17-nov), que amplía
 - Confirmar con la universidad los días de cada recorrido, las coordenadas de los campus y las anomalías del documento de rutas.
 - Revisión del kichwa por una persona hablante.
 - Pruebas de usabilidad con personas (fase 31).
-- Confirmar con el docente que Grafana sirve en lugar de Power BI.
+- Confirmar con el docente que los reportes de Odoo sirven en lugar de Power BI (Grafana se retiró el 17-nov).
 - Dominio institucional, correo real y suscripción de Azure definitiva.
