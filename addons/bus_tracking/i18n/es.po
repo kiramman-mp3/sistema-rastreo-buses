@@ -1123,11 +1123,6 @@ msgid "Current Stop"
 msgstr "Parada actual"
 
 #. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "DIOHER_PAVAL"
-msgstr "DIOHER_PAVAL"
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__scope
@@ -2492,11 +2487,6 @@ msgstr ""
 #, python-format
 msgid "Mark as seen"
 msgstr "Marcar como atendido"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "Martín Vasco"
-msgstr "Martín Vasco"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_sync_audit__matched
@@ -5007,11 +4997,6 @@ msgid "With alert"
 msgstr "Con alerta"
 
 #. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid "Ymblanter"
-msgstr "Ymblanter"
-
-#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
@@ -5360,21 +5345,6 @@ msgstr "<span class=\"bt-dot bt-good\"/>dentro de la meta <span class=\"bt-dot b
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"cifra-icono\" aria-hidden=\"true\">📍</span>"
-msgstr "<span class=\"cifra-icono\" aria-hidden=\"true\">📍</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"cifra-icono\" aria-hidden=\"true\">🗺️</span>"
-msgstr "<span class=\"cifra-icono\" aria-hidden=\"true\">🗺️</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"cifra-icono\" aria-hidden=\"true\">🚌</span>"
-msgstr "<span class=\"cifra-icono\" aria-hidden=\"true\">🚌</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
 msgid "<span class=\"paso-num\">1</span>"
 msgstr "<span class=\"paso-num\">1</span>"
 
@@ -5679,3 +5649,43 @@ msgid ""
 "The driver of this trip. Their tablet reminds them 10 minutes before and at "
 "the planned start."
 msgstr "El chofer de este recorrido. Su tableta le avisa 10 minutos antes y a la hora prevista de salida."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid "Minutes by distance"
+msgstr "Minutos por distancia"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid "Minutes from real trips"
+msgstr "Minutos por recorridos reales"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route.py:0
+#, python-format
+msgid "The line needs at least two stops to measure the distance."
+msgstr "La línea necesita al menos dos paradas para medir la distancia."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid ""
+"The planned minutes will be calculated from the distance and the speed. "
+"Continue?"
+msgstr "Se asignarán los minutos calculados con la distancia y la velocidad. ¿Continuar?"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid ""
+"The planned minutes will be the average time the bus takes to reach each "
+"stop. Continue?"
+msgstr "Se asignará la media de los minutos que tarda el bus en llegar a cada parada. ¿Continuar?"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route.py:0
+#, python-format
+msgid ""
+"This line has no finished trips with arrivals yet. Use the minutes by "
+"distance."
+msgstr "Esta línea todavía no tiene recorridos terminados con llegadas. Usa los minutos por distancia."
