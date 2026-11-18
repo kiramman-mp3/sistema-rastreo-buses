@@ -67,7 +67,7 @@ describe('location queue', () => {
       ],
       {
         queue,
-        creds: { uniqueId: 'bus-1', url: 'http://gps.example:5055' },
+        creds: { uniqueId: 'bus-1', url: 'https://gps.example:5055' },
         battery: async () => 80,
         http: async (url) => {
           urls.push(String(url));
@@ -100,7 +100,7 @@ describe('location queue', () => {
       ],
       {
         queue,
-        creds: { uniqueId: 'id', url: 'http://gps.example' },
+        creds: { uniqueId: 'id', url: 'https://gps.example' },
         battery: async () => null,
         http: async () => {
           throw new Error('offline');

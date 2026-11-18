@@ -92,6 +92,9 @@ type TxtProps = {
  */
 export const MAX_FONT_SCALE: Record<keyof typeof sizes, number> = { small: 2, body: 2, data: 1.6, title: 1.3, stop: 1.3 };
 
+/** Sizes whose bold text is set in the display face. */
+const DISPLAY = new Set<keyof typeof sizes>(['data', 'title', 'stop']);
+
 export function Txt({ children, size = 'body', bold, dim, color, style, lines, fit }: TxtProps) {
   const { palette } = useTheme();
   const px = useLayout().sizes[size];
@@ -104,10 +107,11 @@ export function Txt({ children, size = 'body', bold, dim, color, style, lines, f
       style={[
         {
           color: color ?? (dim ? palette.ink2 : palette.ink),
-          fontFamily: bold ? fonts.bold : fonts.text,
+          fontFamily: bold ? (DISPLAY.has(size) ? fonts.display : fonts.bold) : fonts.text,
           fontWeight: bold ? '700' : '400',
           fontSize: px,
-          lineHeight: Math.round(px * (size === 'stop' || size === 'title' ? 1.05 : 1.3)),
+          letterSpacing: bold && DISPLAY.has(size) ? -0.02 * px : 0,
+          lineHeight: Math.round(px * (size === 'stop' || size === 'title' ? 1.08 : 1.3)),
         },
         style,
       ]}
@@ -136,7 +140,7 @@ export function Field({ style, ...rest }: TextInputProps) {
           fontSize: text.body,
           color: palette.ink,
           backgroundColor: palette.field,
-          borderColor: palette.ink2,
+          borderColor: palette.mode === 'day' ? '#9AA5A3' : palette.ink2,
         },
         style,
       ]}
@@ -175,6 +179,7 @@ export function Action({ label, sub, onPress, kind = 'neutral', disabled, style,
   const { hit, phone } = useLayout();
   const bg = kind === 'accent' ? palette.accent : kind === 'quiet' ? 'transparent' : palette.panel;
   const fg = kind === 'accent' ? palette.onAccent : palette.ink;
+  const edge = kind === 'quiet' ? palette.ink2 : kind === 'neutral' ? palette.edge : bg;
   return (
     <Pressable
       onPress={onPress}
@@ -186,7 +191,8 @@ export function Action({ label, sub, onPress, kind = 'neutral', disabled, style,
       style={({ pressed }) => [
         styles.action,
         { minHeight: hit, paddingHorizontal: phone ? 14 : 20 },
-        { backgroundColor: bg, borderColor: kind === 'quiet' ? palette.ink2 : bg, opacity: disabled ? 0.35 : 1 },
+        { backgroundColor: bg, borderColor: edge, opacity: disabled ? 0.35 : 1 },
+        kind === 'accent' && !disabled && palette.mode === 'day' && styles.raised,
         pressed && !disabled && { transform: [{ scale: 0.97 }] },
         style,
       ]}
@@ -320,6 +326,7 @@ export function SosButton({ onFire, title, hint, holding, status, inline }: SosP
         styles.sos,
         inline && styles.sosInline,
         { minHeight: hit, backgroundColor: palette.danger, borderColor: palette.danger },
+        palette.mode === 'day' && styles.raised,
       ]}
     >
       <Animated.View
@@ -357,6 +364,13 @@ const styles = StyleSheet.create({
     borderWidth: border.thin,
     justifyContent: 'center',
   },
+  raised: {
+    shadowColor: '#172025',
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -368,6 +382,7 @@ const styles = StyleSheet.create({
     height: 18,
   },
   sos: {
+    // no `overflow: hidden` on iOS would let the fill spill past the corners; the shadow survives on the outer view
     overflow: 'hidden',
   },
   sosInline: {

@@ -57,10 +57,18 @@ class TestRuns(BusCase):
         self.go(8, TERMINAL)
         self.assertFalse(self.runs())
 
-    def test_a_bus_that_starts_in_the_middle_makes_no_trip_until_it_reaches_an_end(self):
+    def test_a_bus_that_starts_in_the_middle_makes_a_trip_from_that_stop(self):
+        self.go(0, PLAZA)
+        left = self.go(2, BETWEEN)
+        arrived = self.go(10, HOSPITAL)
+        run = self.runs()
+        self.assertEqual((run.state, run.origin_stop_id, run.destination_stop_id),
+                         ('done', self.stop['Plaza'], self.stop['Hospital']))
+        self.assertEqual((run.departure, run.arrival), (left, arrived))
+
+    def test_no_trip_before_the_bus_has_been_at_a_stop(self):
         self.go(0, BETWEEN)
-        self.go(5, PLAZA)
-        self.go(10, HOSPITAL)
+        self.go(5, BETWEEN)
         self.assertFalse(self.runs())
 
     def test_a_route_with_one_stop_makes_no_trips(self):

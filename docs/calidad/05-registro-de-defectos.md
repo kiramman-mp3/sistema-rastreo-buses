@@ -1,6 +1,6 @@
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov); DEF-049 y DEF-050 de la actualización en Azure con Fleet (5-nov) y DEF-051 a DEF-062 de la segunda auditoría integral del 17-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA-2.md`, un defecto por hallazgo crítico o medio que es un fallo; su corrección está planificada en las fases 38 a 43). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -56,8 +56,35 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-046 | 04-nov-2026 | Prueba de Grafana en el navegador (R7) | Con un token de 5 minutos, Grafana se quedaba sin datos al vencer | models/bus_grafana.py, static/src/js/grafana.js | Cerrado |
 | DEF-047 | 04-nov-2026 | Pruebas de la integración con Fleet (R8) | Los gestores de buses no veían los vehículos de Fleet | security/security.xml | Cerrado |
 | DEF-048 | 05-nov-2026 | Análisis estático con SonarQube (R10) | 16 bugs: promesas sin manejar que perdían errores; un hash SHA-1; una función muerta con pytz; una comparación de NaN consigo mismo | apps/conductor-tablet, static/src/js, controllers/main.py, models/ | Cerrado |
+| DEF-049 | 05-nov-2026 | Actualización del módulo en Azure | Fallo de serialización concurrente en PostgreSQL al actualizar vistas en producción | docker-compose.prod.yml (procedimiento) | Cerrado |
+| DEF-050 | 05-nov-2026 | Actualización del módulo en Azure | Error de validación XML en Odoo por uso de atributo `@string` en selector XPath | views/bus_fleet_views.xml | Cerrado |
+| DEF-051 | 17-nov-2026 | Segunda auditoría integral (X1) | XSS guardado en el portal público: el nombre de una parada se inserta como HTML en el tooltip del mapa | static/src/portal/portal_map.js, static/src/js/stop_picker.js | Cerrado |
+| DEF-052 | 17-nov-2026 | Segunda auditoría integral (W1) | Un SOS guardado sin señal puede desaparecer de la cola de la tableta | apps/conductor-tablet/src/incidents/queue.ts | Cerrado |
+| DEF-053 | 17-nov-2026 | Segunda auditoría integral (B1) | Las posiciones nunca se purgan en una instalación nueva | models/bus_position.py, scripts/init-prod.sh | Cerrado |
+| DEF-054 | 17-nov-2026 | Segunda auditoría integral (B2) | La base de datos de producción no arranca tras un down y up del compose | docker-compose.prod.yml, .env.prod.example | Cerrado |
+| DEF-055 | 17-nov-2026 | Segunda auditoría integral (B4) | El panel de Traccar es público y su dominio por defecto publica la IP del servidor | docker-compose.prod.yml, proxy/Caddyfile | Cerrado |
+| DEF-056 | 17-nov-2026 | Segunda auditoría integral (B3) | El login del panel de Odoo no tiene límite de intentos ni segundo factor | proxy/Caddyfile, despliegue | Cerrado |
+| DEF-057 | 17-nov-2026 | Segunda auditoría integral (N1) | Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers | models/bus_alert.py | Cerrado |
+| DEF-058 | 17-nov-2026 | Segunda auditoría integral (X2) | Las posiciones guardadas sin señal se pierden al terminar el turno | apps/conductor-tablet/src/state/session.ts | Cerrado |
+| DEF-059 | 17-nov-2026 | Segunda auditoría integral (W2) | Un incidente o SOS guardado sin señal se borra si el turno ya cerró | controllers/driver_api.py, apps/conductor-tablet/src/state/session.ts | Cerrado |
+| DEF-060 | 17-nov-2026 | Segunda auditoría integral (Z1, inferido) | Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes | views/bus_driver_views.xml, security/security.xml | Cerrado |
+| DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Cerrado |
+| DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Cerrado |
+| DEF-063 | 17-nov-2026 | Reporte del usuario tras el despliegue en Azure | Si el bus no pasa por la primera parada, la tableta la sigue mostrando como próxima y no avanza con las demás | models/bus_shift.py, models/bus_alert.py, models/bus_trip.py, models/bus_run.py | Cerrado |
+| DEF-064 | 17-nov-2026 | Revisión del rediseño del portal | Esquinas cuadradas en la barra del mapa y en tarjetas del portal | static/src/css/live_map.css, static/src/portal/pages.css, static/src/css/brand.css | Cerrado |
+| DEF-065 | 17-nov-2026 | Revisión del rediseño del portal | La portada salía en español aunque el visitante eligiera inglés o kichwa | views/landing_templates.xml, models/portal_i18n.py | Cerrado |
+| DEF-066 | 17-nov-2026 | Revisión del rediseño del portal | La portada mostraba cifras y estados que ningún dato respalda | views/landing_templates.xml | Cerrado |
+| DEF-067 | 17-nov-2026 | Revisión del rediseño del portal | Contraste insuficiente en el pie y en los números de los pasos; lista de cifras mal formada | static/src/portal/pages.css, views/landing_templates.xml | Cerrado |
+| DEF-068 | 17-nov-2026 | Suite de pruebas de Odoo | Las pruebas HTTP fallaban al azar con «Session expired» (1 a 3 de 590 por corrida) | volumen /var/lib/odoo (entorno Docker) | Cerrado |
+| DEF-069 | 17-nov-2026 | Reporte del usuario | Los gráficos del tablero de Odoo repetían su animación sin parar | static/src/js/dashboard.js | Cerrado |
+| DEF-070 | 17-nov-2026 | Reporte del usuario | Mensajes de pasajeros: no aparecía la columna «Resuelta» | models/bus_complaint.py, views/bus_complaint_views.xml | Cerrado |
+| DEF-071 | 17-nov-2026 | Retiro de Grafana | Al borrar un modelo, su tabla queda en la base | migrations/16.0.1.9.0/pre-migrate.py | Cerrado |
+| DEF-072 | 17-nov-2026 | Reporte en PDF | Las traducciones nuevas del módulo no se cargaban | i18n/bus_tracking.pot | Cerrado |
+| DEF-073 | 17-nov-2026 | Reporte en PDF | Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF | models/bus_report.py | Cerrado |
+| DEF-074 | 18-nov-2026 | Prueba del tablero de flota | Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom | static/src/js/live_map.js | Cerrado |
+| DEF-075 | 18-nov-2026 | Reporte del usuario | El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando | static/src/js/push_setup.js | Cerrado |
 
-Resumen: 48 registrados, 48 cerrados (100 %), 0 abiertos. Densidad: 9,5 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 75 registrados, 75 cerrados (100 %), 0 abiertos. Densidad: 14,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -351,15 +378,165 @@ Resumen: 48 registrados, 48 cerrados (100 %), 0 abiertos. Densidad: 9,5 defectos
 
 ### DEF-049: Fallo de serialización concurrente en PostgreSQL al actualizar vistas en producción
 
-- **Causa raíz:** Ejecución de `odoo -u bus_tracking` con el contenedor de producción en marcha ejecutando tareas cron en segundo plano (`SerializationFailure: concurrent update`).
+- **Causa raíz:** Se ejecutó `odoo -u bus_tracking` con el contenedor de producción en marcha y sus crons escribiendo (`SerializationFailure: concurrent update`).
 - **Categoría:** Infraestructura y despliegue
 - **Prueba que lo protege:** Procedimiento de actualización con parada limpia del servicio web antes de la inicialización de esquemas.
 
 ### DEF-050: Error de validación XML en Odoo por uso de atributo `@string` en selector XPath
 
-- **Causa raíz:** Odoo 16 prohíbe el uso de `@string` en selectores XPath por ser un atributo traducible sujeto a localización (`View inheritance may not use attribute 'string' as a selector`).
+- **Causa raíz:** Odoo 16 prohíbe `@string` en selectores XPath por ser un atributo traducible (`View inheritance may not use attribute 'string' as a selector`).
 - **Categoría:** Interfaz y vistas
 - **Prueba que lo protege:** Selector por elemento de campo hijo `//group[field[@name='driver_id']]` validado por `ir.ui.view._check_xml()`.
+
+### DEF-051: XSS guardado en el portal público: el nombre de una parada se inserta como HTML en el tooltip del mapa
+
+- **Causa raíz:** Leaflet trata como HTML el texto de bindTooltip y los nombres de paradas, que pueden venir de un GPX importado, no se escapan.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** qa/xss_tooltips.js (en el CI): el mapa público real en jsdom muestra como texto una parada llamada <img onerror>; el editor de paradas usa el mismo nodo de texto
+
+### DEF-052: Un SOS guardado sin señal puede desaparecer de la cola de la tableta
+
+- **Causa raíz:** La cola de incidentes no se serializa: un vaciado en curso guarda su copia antigua y sobrescribe el SOS recién añadido.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** incidents/queue.test.ts y diagnostics/queue.test.ts: un SOS añadido durante un envío lento se conserva y dos vaciados a la vez envían una sola vez
+
+### DEF-053: Las posiciones nunca se purgan en una instalación nueva
+
+- **Causa raíz:** El cron usa 0 (conservar todo) si el parámetro no existe y Ajustes sólo guarda los 30 días al pulsar Guardar.
+- **Categoría:** Configuración
+- **Prueba que lo protege:** test_ingest.py: sin el parámetro se borran las posiciones de más de 30 días y se pide a Traccar borrar las suyas
+
+### DEF-054: La base de datos de producción no arranca tras un down y up del compose
+
+- **Causa raíz:** El servicio db está en el perfil local-db, que el ejemplo no activa; el ejemplo apunta a Supabase y los scripts asumen la base local.
+- **Categoría:** Infraestructura y despliegue
+- **Prueba que lo protege:** scripts/db.sh probado contra un Postgres con TLS (crear base, pg_dump y pg_restore); falta init-prod.sh completo contra un proyecto de Supabase (fase 46)
+
+### DEF-055: El panel de Traccar es público y su dominio por defecto publica la IP del servidor
+
+- **Causa raíz:** Se publicó el panel para la demostración y quedó como valor por defecto del compose.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** caddy adapt: el sitio del panel responde 404 fuera de TRACCAR_PANEL_ALLOW (por defecto 127.0.0.1/32) y el compose ya no lleva la IP
+
+### DEF-056: El login del panel de Odoo no tiene límite de intentos ni segundo factor
+
+- **Causa raíz:** Odoo Community no limita los intentos y el proxy tampoco; quedó como limitación conocida.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** TestPanelSignIn: la espera tras fallos se duplica hasta una hora y auth_totp está instalado (2FA opcional por usuario: imponerlo exige correo); test_driver_auth: otra dirección no bloquea al chofer
+
+### DEF-057: Tras cada fin de turno se abre una falsa alerta «No signal» con push a los managers
+
+- **Causa raíz:** La regla de sin señal no mira si el bus tiene turno; al cerrarlo Odoo descarta sus posiciones y la última hora queda fija.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_alerts: un bus sin turno no abre «No signal» y cerrar el turno cierra la alerta abierta
+
+### DEF-058: Las posiciones guardadas sin señal se pierden al terminar el turno
+
+- **Causa raíz:** La tableta cierra el turno en el servidor antes de vaciar la cola GPS, y Odoo descarta posiciones sin turno.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** session.test.ts: endShift detiene el GPS (que envía la cola) antes de cerrar el turno en el servidor
+
+### DEF-059: Un incidente o SOS guardado sin señal se borra si el turno ya cerró
+
+- **Causa raíz:** El servidor exige turno activo (409 no_shift) y la tableta trata ese rechazo como definitivo.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_driver_shift: un SOS del turno llega hasta 2 h después del cierre y uno más viejo se rechaza; session.test.ts: sin sesión el incidente se conserva
+
+### DEF-060: Un manager de buses que no es administrador de Odoo no puede crear ni editar choferes
+
+- **Causa raíz:** El menú Choferes abre res.users, que exige base.group_erp_manager; las pruebas usan admin.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** test_driver_staff: el test confirmó el defecto; un manager sin derechos de administrador crea, edita y archiva choferes con el asistente, que rechaza al personal
+
+### DEF-061: Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo
+
+- **Causa raíz:** Cambiar la dirección del servidor no borra la sesión guardada.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** session.test.ts: un servidor nuevo cierra la sesión antes de cualquier consulta y la credencial de otro servidor sólo lo cambia si la acepta
+
+### DEF-062: La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar
+
+- **Causa raíz:** La validación de Ajustes admite http y la tableta completa con http:// sin comprobar el esquema.
+- **Categoría:** Validación de entrada
+- **Prueba que lo protege:** test_driver_shift: los ajustes rechazan http fuera de la red local y el inicio de turno no entrega el identificador a una dirección http; osmand.test.ts: la tableta no envía a http externo
+
+### DEF-063: Si el bus no pasa por la primera parada, la tableta la sigue mostrando como próxima y no avanza con las demás
+
+- **Causa raíz:** La próxima parada era la primera sin llegada en orden, no la que sigue a la más lejana alcanzada; las paradas saltadas sólo se avisaban al cerrar un viaje programado y nunca en un turno sin horario; un recorrido sólo empezaba en un extremo.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_driver_shift: empezar en la cuarta parada sigue con la quinta y avisa de las tres anteriores; test_trip_run: el viaje marca la primera parada saltada en cuanto llega a la segunda; test_runs: un recorrido empieza en una parada intermedia
+
+### DEF-064: Esquinas cuadradas en la barra del mapa y en tarjetas del portal
+
+- **Causa raíz:** Las hojas usaban --radio-md y --radio-lg, que brand.css no definía; una variable inexistente deja el radio en 0.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** Búsqueda de variables usadas y no definidas: ninguna
+
+### DEF-065: La portada salía en español aunque el visitante eligiera inglés o kichwa
+
+- **Causa raíz:** Unos veinte textos (etiquetas de sección, pie, insignias) estaban escritos en la plantilla y no en las cadenas del portal.
+- **Categoría:** Internacionalización
+- **Prueba que lo protege:** test_portal: las tres lenguas tienen las mismas claves; revisión de la plantilla sin textos fijos
+
+### DEF-066: La portada mostraba cifras y estados que ningún dato respalda
+
+- **Causa raíz:** El rediseño añadió «100 % servicio universitario» y «sistema activo y conectado en tiempo real» fijos, aun con cero buses con señal.
+- **Categoría:** Contenido
+- **Prueba que lo protege:** Las cifras salen de total_buses, las líneas y las paradas; test_no_invented_numbers_when_no_bus_reports
+
+### DEF-067: Contraste insuficiente en el pie y en los números de los pasos; lista de cifras mal formada
+
+- **Causa raíz:** Colores gris y ámbar sobre fondos claros u oscuros por debajo de 4,5:1; el <dl> tenía un <span> entre <dt> y <dd>.
+- **Categoría:** Accesibilidad
+- **Prueba que lo protege:** qa/accesibilidad.py (axe): 0 problemas en escritorio y móvil
+
+### DEF-068: Las pruebas HTTP fallaban al azar con «Session expired» (1 a 3 de 590 por corrida)
+
+- **Causa raíz:** 13 de las 256 carpetas de sesiones eran de root; Odoo corre como odoo, no podía guardar ahí la sesión y werkzeug oculta el error.
+- **Categoría:** Entorno
+- **Prueba que lo protege:** chown -R odoo:odoo /var/lib/odoo; dos corridas completas seguidas sin fallos
+
+### DEF-069: Los gráficos del tablero de Odoo repetían su animación sin parar
+
+- **Causa raíz:** Un reloj actualiza el estado cada segundo; onPatched destruía y volvía a crear todos los gráficos en cada repintado.
+- **Categoría:** Rendimiento
+- **Prueba que lo protege:** Prueba en el navegador: los gráficos sólo se crean al cargar y al cambiar de pestaña (antes, dos por segundo)
+
+### DEF-070: Mensajes de pasajeros: no aparecía la columna «Resuelta»
+
+- **Causa raíz:** El tablero agrupaba por estado sólo con los estados presentes y la acción filtraba por defecto los no resueltos.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** test_complaints: el tablero siempre muestra Nueva, En revisión y Resuelta
+
+### DEF-071: Al borrar un modelo, su tabla queda en la base
+
+- **Causa raíz:** Odoo borra los registros de un modelo que ya no existe pero no su tabla (bus_position_day) ni las vistas SQL kpi_*.
+- **Categoría:** Migración
+- **Prueba que lo protege:** Actualización de la base de desarrollo: sin vistas kpi_*, sin tabla ni parámetros de Grafana
+
+### DEF-072: Las traducciones nuevas del módulo no se cargaban
+
+- **Causa raíz:** Odoo combina cada .po con el .pot del módulo; el .pot era del 5-nov y descartaba las entradas posteriores.
+- **Categoría:** Internacionalización
+- **Prueba que lo protege:** Plantilla .pot regenerada; menús y textos en español y kichwa tras actualizar
+
+### DEF-073: Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF
+
+- **Causa raíz:** report_action pide el diseño de la compañía si no está configurado, aunque el reporte tiene su propia cabecera.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_report: imprimir devuelve directamente la acción del reporte; descarga probada desde el tablero
+
+### DEF-074: Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom
+
+- **Causa raíz:** Leaflet 1.9.4 termina la animación de zoom 250 ms después aunque el mapa ya se haya quitado, y falla sobre los paneles borrados.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** Prueba en el navegador: entrar y salir del mapa en vivo de inmediato no muestra errores
+
+### DEF-075: El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando
+
+- **Causa raíz:** La página esperaba navigator.serviceWorker.ready, que sólo se cumple con un service worker que controle la página; /web queda fuera del alcance /bus_tracking/ del nuestro y la espera no terminaba.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** Chrome (FCM) y Edge (WNS) en Windows: activar, registrar el dispositivo y enviar la prueba; test_push comprueba que no se espera a ready
 
 ## 3. Qué falta para cerrar los abiertos
 

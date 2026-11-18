@@ -18,10 +18,11 @@ curl -s https://<DOMAIN>/bus_tracking/health
 Un SOS solo sirve si alguien lo ve. El sistema lo deja en la cola **Atención** del mapa del personal, avisa por notificación a los dispositivos suscritos y, cuando alguien lo marca como visto, la tableta del chofer muestra quién y a qué hora.
 
 - **Responsable de turno** (propuesta): una persona nombrada por cada franja en que haya buses en ruta, con la cola de Atención abierta o las notificaciones activas en su celular.
-- **Notificaciones**: cada responsable abre *Configuración > Notificaciones en este dispositivo* y las activa en su celular y en su PC. Mínimo dos dispositivos distintos, para que un celular sin batería no deje el SOS sin ver.
+- **Notificaciones**: cada responsable abre *Configuración > Notificaciones en este dispositivo* y las activa en su celular y en su PC. Mínimo dos dispositivos distintos, para que un celular sin batería no deje el SOS sin ver. En Windows, el aviso sale en el centro de notificaciones: *Configuración de Windows > Sistema > Notificaciones* debe tenerlas activas para Chrome o Edge, y *No molestar* apagado. Usa *Enviar una prueba* para comprobarlo.
 - **Qué hacer**: abrir el SOS, **marcarlo como visto** (el chofer lo ve en su pantalla) y llamar al chofer. Si no contesta, llamar a la central y avisar a la autoridad que corresponda.
 - **Tiempo de respuesta** (propuesta): visto en menos de 5 minutos. Revisa una vez al mes cuántos SOS hubo y cuánto tardaron (la ficha guarda hora de envío y de acuse).
 - **Fuera de servicio**: si nadie vigila (noche, feriado), dilo a los choferes: el SOS queda guardado pero nadie lo atiende hasta que alguien entre.
+- **Defectos abiertos** (auditoría del 17-nov, `docs/arquitectura/PLAN-AUDITORIA-2.md`): un SOS guardado sin señal puede perderse en la tableta (DEF-052) o al terminar el turno (DEF-059). Hasta la fase 41, pide a los choferes que confirmen todo SOS por radio o teléfono.
 
 ## 3. Monitoreo
 
@@ -39,7 +40,7 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml logs --since 24h 
 
 Revísalo cada día mientras la app sea nueva, y siempre que un chofer diga que "se cerró sola". Si el mismo error se repite en varios choferes, es un defecto de la app. En la tableta, *Estado del GPS* muestra la última falla de la app de los últimos 7 días.
 
-**Lo que el monitor no ve.** Un bus que no envía no apaga `health` si otro sí envía; en el mapa del personal aparece como alerta de "sin señal".
+**Lo que el monitor no ve.** Un bus que no envía no apaga `health` si otro sí envía; en el mapa del personal aparece como alerta de "sin señal". Sólo un bus con turno activo (o en modo demo) abre esa alerta; al terminar el turno se cierra sola.
 
 ## 4. Respaldos
 
@@ -63,7 +64,7 @@ Cada versión desplegada lleva una etiqueta de Git (`v<mayor>.<menor>`; `-previe
 2. `./scripts/backup.sh`.
 3. Fusiona `develop` en `main` con `--no-ff` y etiqueta: `git tag -a v0.9-preview -m "..."` y `git push origin main --tags`.
 4. Despliega siguiendo *Actualizar* de `PRODUCCION.md`.
-5. Comprueba `/bus_tracking/health`: la `version` es la esperada.
+5. Abre `/bus_tracking/health` con la sesión de Odoo iniciada: la `version` es la esperada (sin sesión sólo se ve el estado).
 6. Anota en la bitácora la etiqueta, la fecha y quién lo hizo.
 
 **Volver atrás.** Odoo no baja la versión de un módulo: si el despliegue ejecutó una migración, la reversión es **restaurar el respaldo del paso 2** y volver a la etiqueta anterior.
@@ -96,7 +97,15 @@ Una vez al mes (30 minutos):
 | Datos personales | Revisa los plazos de *Ajustes* contra `docs/diseno/PRIVACIDAD.md`. |
 | Respaldo | Ensayo de restauración (sección 4). |
 
-## 8. Pruebas en el equipo de desarrollo
+## 8. Reportes, flota y notificaciones en Odoo
+
+- **Reportes > Tablero**: indicadores de transporte y de calidad del sistema, por línea y por día. **Descargar PDF** baja el reporte de operación del periodo y la línea que muestra el tablero.
+- **Reportes > Descargar reporte**: el mismo PDF con otro periodo (hasta un año), otras líneas o sólo datos simulados. Compara cada indicador con el periodo anterior de igual duración.
+- **Notificaciones**: alertas, incidencias y mensajes de pasajeros (antes se llamaba *Reportes*).
+- **Flota**: tres columnas fijas. *En ruta* mientras el bus tiene un turno abierto en la tableta; *Estacionados (no en ruta)* el resto; *Dados de baja* si el vehículo está archivado o en el estado *Dado de baja* de Flota. Las columnas no se arrastran: siguen a los turnos.
+- Grafana se retiró el 17-nov-2026 (versión 16.0.1.9.0); los reportes de Odoo lo reemplazan. La app *Conversaciones* de Odoo está oculta: el sistema no la usa.
+
+## 9. Pruebas en el equipo de desarrollo
 
 La suite de Odoo se corre como el CI: con `docker run` y una base nueva, no con `docker compose run`. Con `compose run`, `TestHttp` falló de forma intermitente (`Session expired` tras `authenticate('admin')`, o el inicio sin redirección): 2 de 4 corridas sobre nuestra rama y 2 de 4 sobre `develop` sin ningún cambio nuestro. Con el comando del CI pasó 5 de 5.
 

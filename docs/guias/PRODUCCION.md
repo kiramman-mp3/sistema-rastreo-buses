@@ -7,12 +7,25 @@ Guía para instalar y operar el sistema en un servidor. Todo lo de esta página 
 - Un servidor Linux con Docker y Docker Compose v2.
 - Dos nombres DNS que apunten al servidor, por ejemplo `buses.tuempresa.cl` (Odoo) y `gps.tuempresa.cl` (a donde la tableta envía la posición OsmAnd).
 - Puertos abiertos hacia internet: solo 80 y 443. Los celulares también entran por HTTPS (443).
-- Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza. El panel de Traccar no se expone.
+- Postgres, Odoo, la API de Traccar y su puerto de dispositivos no se publican: solo el proxy los alcanza.
+- El panel de Traccar no hace falta: Odoo lo administra por su API. Si quieres abrirlo, define `TRACCAR_DOMAIN` y en `TRACCAR_PANEL_ALLOW` las redes que pueden verlo (por ejemplo la de la universidad, `200.0.0.0/24`; separadas por espacio). Al resto el proxy le responde 404. Por defecto sólo lo ve la propia máquina.
 
-### Base de datos: local o Supabase
+### Base de datos: Supabase (decidido) o local
 
-- **Local (recomendado para empezar)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual.
-- **Externa (Supabase u otra)**: pon `DB_HOST`, `DB_USER`, `TRACCAR_DATABASE_URL` y `TRACCAR_DB_USER` del proveedor (el ejemplo trae marcadores `TU_PROYECTO`). Las bases y los usuarios se crean en la consola del proveedor, los respaldos los hace el proveedor y `reset-prod.sh` se niega a correr.
+Desde el 2026-11-17 la base de producción es **Supabase** (decisión 1 de `docs/arquitectura/PLAN-AUDITORIA-2.md`). La base local queda para desarrollo y laboratorio.
+
+Los scripts hablan con Supabase desde un contenedor cliente de Postgres (`scripts/db.sh`), siempre con TLS:
+
+- `init-prod.sh` crea en Supabase la base `traccar` (con el mismo usuario del proyecto), instala Odoo en su base y escribe `db_sslmode = require` en `config/odoo.prod.conf`.
+- `backup.sh` y `restore.sh` vuelcan y restauran las dos bases de Supabase. El filestore de Odoo vive en el volumen `odoo-data` del servidor y va en el mismo respaldo.
+- Usa el *session pooler* (puerto 5432) o la conexión directa, nunca el *transaction pooler* (6543): Odoo mantiene conexiones largas y usa `LISTEN/NOTIFY`.
+- `POSTGRES_IMAGE` es también el cliente: debe ser de la misma versión mayor que el servidor de Supabase o más nueva, o `pg_dump` se niega a correr.
+- `reset-prod.sh` sólo trabaja con la base local; en Supabase las bases se borran desde su consola.
+
+
+- **Local (desarrollo y laboratorio)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db,bi` (o `local-db` sin Grafana) en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
+- `.env.prod.example` trae los valores de Supabase. Si usas la base local, pon `DB_HOST=db` y quita `TRACCAR_DATABASE_URL`.
+- **Supabase (producción)**: pon `DB_HOST`, `DB_USER` y `DB_PASSWORD` de *Supabase > Connect* (session pooler), y en `TRACCAR_DATABASE_URL`, `TRACCAR_DB_USER` y `TRACCAR_DB_PASSWORD` el mismo host, usuario y contraseña (el ejemplo trae marcadores `TU_PROYECTO`).
 
 ## Instalación
 
@@ -33,13 +46,15 @@ La segunda ejecución:
 
 Es seguro repetirla: no sobrescribe `.env.prod`, la configuración ni las bases existentes.
 
+**Retención de posiciones:** el cron diario borra las posiciones de más de 30 días en Odoo y pide a Traccar que borre las suyas del mismo periodo. El plazo se cambia en *Ajustes > Rastreo de buses > Conservar posiciones (días)*; 0 conserva todo.
+
 Después, a mano:
 
 1. Entra a `https://<DOMAIN>` como `admin` con la contraseña que mostró el script y cámbiala.
 2. Crea las rutas y sus paradas, y un bus por cada tableta (o celular de respaldo).
 3. En cada bus pulsa **Register GPS in Traccar**. El identificador OsmAnd lo recibe la app al **iniciar el turno**, no se teclea en la tableta. Sigue `docs/guias/GUIA-CHOFER.md`.
 
-No hace falta tocar el panel de Traccar: el script crea su cuenta de administrador (contraseña aleatoria guardada en Odoo), cierra el registro abierto, y Odoo crea los dispositivos por su API.
+No hace falta tocar el panel de Traccar: el script crea su cuenta de administrador, cierra el registro abierto y guarda en Odoo un token de API de 10 años en lugar de la contraseña. Odoo crea los dispositivos por esa API.
 
 ## Qué cambia respecto al entorno de desarrollo
 
@@ -49,10 +64,14 @@ No hace falta tocar el panel de Traccar: el script crea su cuenta de administrad
 | Secretos | Aleatorios, en `.env.prod` (no se versiona). Contraseña maestra de Odoo guardada como hash. |
 | Webhook | Traccar lo llama por la red interna de Docker con el secreto en la cabecera `X-Webhook-Secret`, para que no quede en los logs. El proxy devuelve 404 si alguien lo pide desde internet. |
 | Base de datos de Odoo | `list_db = False`, `dbfilter` fijo, y `/web/database/*` bloqueado en el proxy. |
-| Traccar | Usa Postgres (no la base H2 de pruebas), con un usuario propio. El panel solo se ve por el proxy. |
+| Traccar | Usa Postgres (no la base H2 de pruebas), con un usuario propio. El panel se publica por el proxy en `TRACCAR_DOMAIN` (ver Requisitos). |
 | Odoo | 2 workers, límites de memoria y de tiempo, código montado en solo lectura. |
 | Logs | Rotación de 10 MB x 5 archivos por servicio. |
 | Salud | Healthchecks en Postgres, Odoo y Traccar; `restart: unless-stopped`. |
+
+## Tamaño de la base
+
+Con Supabase el espacio tiene límite y costo, así que la retención es obligatoria. Cada bus guarda una posición en Odoo y otra en Traccar cada pocos segundos mientras tiene turno. Mide el tamaño real tras la primera semana con `SELECT pg_size_pretty(pg_database_size(current_database()));` en cada base. Con eso elige el plan y el plazo de *Conservar posiciones (días)*, que vale para Odoo y para Traccar.
 
 ## Respaldos
 
@@ -70,6 +89,16 @@ Programación diaria con cron (ajusta la ruta):
 
 **Los respaldos viven en el mismo servidor.** Si el servidor se pierde, se pierden con él. Copia `backups/` a otro lugar (otro servidor, almacenamiento en la nube) con la herramienta que ya uses; el proyecto no incluye ese paso.
 
+En la VM de demostración de Azure la copia va a la cuenta de almacenamiento privada `stbusesuta11900` (contenedor `backups`). Desde un equipo con la CLI de Azure:
+
+```bash
+az storage blob download-batch --account-name stbusesuta11900 -s backups -d ./backups-azure --auth-mode key
+```
+
+Para subir respaldos nuevos, genera una SAS de escritura de corta duración (`az storage container generate-sas --permissions cw`) y súbelos desde la VM con `curl -X PUT -H "x-ms-blob-type: BlockBlob"`. No dejes la SAS guardada en el servidor.
+
+**Supabase gratuito se pausa** tras unos 7 días sin uso. Entonces Odoo y Traccar no arrancan, el sitio da 502 y el log muestra `(ENOTFOUND) tenant/user postgres.<ref> not found`. Reanuda el proyecto en la consola de Supabase; Odoo se reconecta solo en uno o dos minutos.
+
 ### Comprobar que un respaldo sirve
 
 ```bash
@@ -86,13 +115,20 @@ Restaura solo la base de Odoo con otro nombre, sin tocar producción. Revísala 
 
 Es destructivo: detiene Odoo y Traccar, reemplaza las bases `odoo` y `traccar` y el filestore por los del respaldo, y vuelve a levantar todo. Sin `--yes` solo muestra qué haría.
 
+## Acceso al panel
+
+- **Intentos fallidos.** Tras 5 fallos desde una misma dirección, Odoo la hace esperar 60 s, y la espera se duplica con cada fallo siguiente hasta una hora (`base.login_cooldown_after` y `base.login_cooldown_duration` en *Ajustes > Técnico > Parámetros del sistema*). El login de la tableta tiene su propio límite: 10 intentos por minuto por dirección y 60 por usuario desde cualquier dirección.
+- **Segundo factor.** Cada administrador y manager lo activa en *Mi perfil > Seguridad de la cuenta > Autenticación de dos factores* con una app de códigos (Google Authenticator, Aegis). En *Ajustes > Usuarios*, los filtros de *Autenticación de dos factores* muestran quién lo tiene y quién no.
+- **Bloqueo de direcciones (opcional).** Para cortar en el cortafuegos a quien insiste, `fail2ban` puede leer el log del contenedor de Odoo (`docker inspect --format '{{.LogPath}}' <contenedor de odoo>`), buscar `Login failed for db:.* from <HOST>` y bloquear en la cadena `DOCKER-USER`: los puertos publicados por Docker no pasan por `INPUT`.
+- **Versión.** `/bus_tracking/health` sólo muestra la versión del módulo a quien tiene sesión en Odoo.
+
 ## Notificaciones
 
 Las alertas llegan por push (notificaciones web), que funcionan solo sobre HTTPS y necesitan que el servidor pueda salir a internet hacia los servicios push. Cada administrador abre *Configuración > Notificaciones en este dispositivo* y las activa en cada navegador o celular. No se usa correo.
 
 ## Monitoreo
 
-`GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok", "version": "<versión del módulo>"}` con código 200, o `{"status": "stale", "version": "..."}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
+`GET https://<DOMAIN>/bus_tracking/health` responde `{"status": "ok"}` con código 200, o `{"status": "stale"}` con 503 cuando ningún bus ha reportado en los últimos minutos configurados en `Settings > Report as down after (minutes)` (10 por defecto; 0 desactiva el control). Si no hay ningún bus con Traccar vinculado, responde 200.
 
 Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y que avise por correo o mensaje cuando falle. La operación diaria (quién vigila el SOS, el monitor, los errores de las tabletas, el ensayo de restauración, las etiquetas de versión y la reversión) está en `docs/guias/OPERACION.md`; los datos personales y sus plazos, en `docs/diseno/PRIVACIDAD.md`. Ojo: si tus buses no circulan de noche, el endpoint devolverá 503 en ese horario; sube el plazo o pausa el monitor.
 
@@ -106,7 +142,7 @@ Apunta un servicio de monitoreo de disponibilidad (el que prefieras) a esa URL y
 
 Antes de la primera puesta en marcha real, fija las versiones de `ODOO_IMAGE` y `POSTGRES_IMAGE` en `.env.prod`. Traccar ya viene fijado en `traccar/traccar:6.16.0` (la versión con la que se verificó el reenvío); prueba una nueva en desarrollo antes de cambiar `TRACCAR_IMAGE`.
 
-La versión 16.0.1.2.0 del módulo convierte a los choferes existentes en usuarios de portal y la 16.0.1.3.0 rellena la hora de los incidentes viejos; las dos corren solas en el paso 4.
+La versión 16.0.1.2.0 del módulo convierte a los choferes existentes en usuarios de portal y la 16.0.1.3.0 rellena la hora de los incidentes viejos; las dos corren solas en el paso 4. La 16.0.1.8.0 borra las credenciales QR guardadas y las revoca, porque las copias de seguridad anteriores las contienen: **genera e imprime una credencial nueva para cada chofer** después de actualizar (mientras tanto entran con usuario y contraseña).
 
 ## Empezar de cero
 
@@ -124,18 +160,18 @@ Si un secreto se filtra (por ejemplo, quedó en un commit), cámbialo; borrarlo 
 | Contraseña maestra de Odoo | Genera otro hash como lo hace `init-prod.sh` y reemplaza `admin_passwd` en `config/odoo.prod.conf`; reinicia Odoo. |
 | `WEBHOOK_SECRET` | Cámbialo en `.env.prod` y en *Ajustes > Webhook secret* de Odoo al mismo valor; `docker compose ... up -d traccar odoo`. |
 | `DB_PASSWORD` / `TRACCAR_DB_PASSWORD` | `ALTER ROLE ... PASSWORD` en Postgres, luego el mismo valor en `.env.prod`, y `up -d`. |
-| Administrador de Traccar | `bootstrap-traccar.sh` no lo cambia si ya existe: cámbialo en el panel de Traccar por el proxy y guárdalo en los Ajustes de Odoo. |
+| Token de Traccar | Revócalo en el panel de Traccar (abriéndolo con `TRACCAR_PANEL_ALLOW`), genera otro desde la cuenta del administrador y pégalo en *Ajustes > Traccar API token* de Odoo. |
 | Credencial QR de un chofer | *Choferes > chofer > Revocar credencial* y *Generar credencial QR*. |
 
 ## Choferes: usuarios, tokens y tabletas
 
-Cada chofer es un **usuario de portal** de Odoo (`base.group_portal` + `group_bus_driver`), creado desde *Flota > Choferes*: entra a la API de la tableta, pero no al panel de Odoo, ni ve contactos o usuarios. La contraseña la restablece un gestor en Odoo.
+Cada chofer es un **usuario de portal** de Odoo (`base.group_portal` + `group_bus_driver`), creado desde *Flota > Nuevo chofer*: entra a la API de la tableta, pero no al panel de Odoo, ni ve contactos o usuarios. Un manager de buses lo crea y lo edita (botón *Editar chofer* en su ficha) sin ser administrador de Odoo: el asistente sólo toca choferes y sólo sus datos, nunca sus grupos. Cambiar la contraseña cierra las sesiones de sus tabletas (la credencial QR sigue valiendo). El menú *Choferes* sólo lo ven los managers.
 
 La tableta no usa API keys de Odoo. Tras `/bus_tracking/driver/login` guarda un token (en Odoo sólo su huella; `bus.driver.token`, 30 días, cron de purga) en el almacén seguro de Android. Un 401 en la app borra el token local.
 
-La **credencial QR** (365 días) sólo sirve para pedir una sesión en `/bus_tracking/driver/login_badge`; no abre la API por sí sola y una sesión no puede renovarse por ese camino. Sólo los administradores la generan, la revocan o ven su enlace. La app sólo acepta servidores `https://` (o de la red local en desarrollo) y pide confirmar si un QR cambia el servidor.
+La **credencial QR** (365 días) sólo sirve para pedir una sesión en `/bus_tracking/driver/login_badge`; no abre la API por sí sola y una sesión no puede renovarse por ese camino. Sólo los managers la generan o la revocan. Odoo la muestra una sola vez, al generarla, y guarda sólo su huella: hay que imprimirla en ese momento; si se pierde, se genera otra. La app sólo acepta servidores `https://` (o de la red local en desarrollo) y pide confirmar si un QR cambia el servidor.
 
-El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`).
+El identificador OsmAnd (`traccar_unique_id`) **solo** viaja en `POST /bus_tracking/driver/shift/start`, con turno activo. `/me` no lo incluye. `bus_tracking.gps_url` debe ser `https://<GPS_DOMAIN>` (el mismo host que Caddy reenvía a Traccar `:5055`). Odoo no guarda una dirección `http://` salvo en la red local (laboratorio), y si encuentra una guardada antes no deja iniciar turnos (`no_gps_url`); la tableta tampoco envía a ella.
 
 Si se pierde una tableta o hay que echar a alguien del turno: en Turnos, acción **Cerrar sesión de la tableta**. Revoca las sesiones (no la credencial QR) y cierra el turno; la app apaga el GPS en la siguiente consulta y Odoo descarta cualquier posición de ese bus mientras no haya otro turno. Si se perdió también la credencial, revócala en *Choferes*.
 
@@ -143,10 +179,12 @@ APK (sin Play Store):
 
 ```bash
 cd apps/conductor-tablet
-# La URL de Odoo se congela al construir:
-# EXPO_PUBLIC_ODOO_URL=https://<DOMAIN> eas build --profile production --platform android
+# Una vez por proyecto de EAS: la dirección de Odoo que trae la app (se congela al construir).
+eas env:create --environment production --name EXPO_PUBLIC_ODOO_URL --value https://<DOMAIN> --visibility plaintext
 eas build --profile production --platform android
 ```
+
+Sin esa variable, la app trae la dirección por defecto del código (`PRODUCTION_ODOO_URL`); el chofer puede cambiarla con el QR de configuración. El perfil `production` construye también para iPhone o iPad reales (`--platform ios`, con cuenta de Apple Developer).
 
 Instala el APK a mano en cada tableta. Para actualizar, otro build y se instala encima. El perfil `development` es el que admite GPS de fondo en pruebas; Expo Go no.
 
@@ -171,11 +209,16 @@ Probado en una máquina local con Docker, con los dominios `localhost` y `gps.lo
 - Carga con muchos buses.
 - `eas build` de producción (hace falta cuenta Expo y firmar el APK).
 
+## Riesgos abiertos (auditoría del 17-nov-2026)
+
+La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md)) concluyó que el sistema **no está listo para producción general**. Las fases 38 a 45 (seguridad del portal, despliegue, acceso al panel, turnos y alertas, tableta y GPS, permisos de choferes, carga y purga, build y dependencias) ya están hechas y no queda abierto ningún defecto registrado de esa auditoría. Falta, sobre todo, la fase 46: las pruebas reales con Supabase, una VM Linux y tabletas, sin las que no hay versión 1.0.
+
 ## Limitaciones conocidas
 
 - El identificador del dispositivo es la única credencial del protocolo OsmAnd: quien lo conozca puede enviar posiciones falsas de ese bus. Es aleatorio y solo lo ven los administradores; si se filtra, hay que registrar el bus de nuevo (hoy no hay un botón para rotarlo).
 - Solo se admite el protocolo OsmAnd (la app de tableta). Los GPS físicos con otros protocolos exigirían abrir su puerto en el servidor y en la red de Azure, y esos no van cifrados.
-- El login de choferes (`/bus_tracking/driver/login`) sí tiene límite de intentos; el login del panel de Odoo no.
 - El usuario de base de datos de Odoo es superusuario de Postgres (el patrón de la imagen oficial).
-- No hay límite de intentos de login, ni autenticación en dos pasos, ni bloqueo de IPs (por ejemplo con fail2ban).
+- El segundo factor (2FA) es opcional para cada usuario: Odoo sólo sabe imponerlo por correo y el sistema no usa correo. Pide a cada administrador y manager que lo active (ver *Acceso al panel*).
+- Los contadores de intentos de login viven en la memoria de cada worker: se reinician al reiniciar Odoo.
+- El token de API de Traccar se guarda en la base y sólo lo leen los administradores. Quien tenga una copia de la base puede usarlo: revócalo en Traccar si se filtra. De las credenciales QR y de las sesiones de la tableta sólo se guarda la huella.
 - Los respaldos no se copian fuera del servidor automáticamente.

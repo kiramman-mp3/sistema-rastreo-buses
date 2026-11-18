@@ -12,8 +12,16 @@ const fix = {
 };
 
 describe('OsmAnd URL', () => {
+  test('sends the identifier over https only, except on the local network', () => {
+    expect(() => buildOsmAndUrl('http://gps.example.com', 'bus-7', fix)).toThrow('insecure_gps_url');
+    expect(() => buildOsmAndUrl('ftp://gps.example.com', 'bus-7', fix)).toThrow('insecure_gps_url');
+    expect(buildOsmAndUrl('gps.example.com', 'bus-7', fix)).toMatch(/^https:\/\/gps\.example\.com\//);
+    expect(buildOsmAndUrl('http://192.168.1.20:5055', 'bus-7', fix)).toMatch(/^http:\/\/192\.168\.1\.20:5055\//);
+    expect(buildOsmAndUrl('http://localhost:5055', 'bus-7', fix)).toMatch(/^http:\/\/localhost:5055\//);
+  });
+
   test('converts m/s to knots and timestamp to seconds', () => {
-    const url = new URL(buildOsmAndUrl('http://gps.example:5055', 'bus-7', fix));
+    const url = new URL(buildOsmAndUrl('https://gps.example:5055', 'bus-7', fix));
     expect(url.searchParams.get('id')).toBe('bus-7');
     expect(url.searchParams.get('lat')).toBe('-1.241230');
     expect(url.searchParams.get('lon')).toBe('-78.619870');

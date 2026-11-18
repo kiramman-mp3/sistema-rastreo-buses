@@ -8,12 +8,13 @@ Qué datos trata el sistema, por qué, cuánto tiempo y cómo atender a quien pi
 
 | Dato | De quién | Para qué | Dónde | Cuánto tiempo | Quién lo ve |
 |---|---|---|---|---|---|
-| Posición, hora y velocidad del bus | Choferes (indirecto: es del bus) | Mapa en vivo, alertas, historial | `bus.position`, Traccar | `bus_tracking.retention_days` (Ajustes: *Conservar posiciones (días)*, 30 por defecto; **0 = no se borra**) | Personal autorizado; el pasajero ve solo posición y línea, sin chofer ni placa |
-| Turnos (inicio, fin, bus, ruta, chofer) | Choferes | Operación, auditoría | `bus.shift` | **No se borran solos** | Personal |
-| Incidentes y SOS (tipo, nota, hora, posición, quién lo atendió) | Choferes | Atender emergencias | `bus.incident` | **No se borran solos** | Personal |
+| Posición, hora y velocidad del bus | Choferes (indirecto: es del bus) | Mapa en vivo, alertas, historial | `bus.position`, Traccar | `bus_tracking.retention_days` (Ajustes: *Conservar posiciones (días)*, 30 por defecto; **0 = no se borra**). El mismo cron pide a Traccar que borre su copia del mismo periodo, y borra con el mismo plazo las posiciones rechazadas y las auditorías de sincronización. El conteo diario de posiciones (`bus.position.day`, sin coordenadas) sigue el plazo del historial | Personal autorizado; el pasajero ve solo posición y línea, sin chofer ni placa |
+| Turnos (inicio, fin, bus, ruta, chofer) | Choferes | Operación, auditoría | `bus.shift` | `bus_tracking.history_retention_days` (Ajustes: *Conservar historial (días)*, 365 por defecto; **0 = no se borra**). Un turno con incidentes sigue mientras existan sus incidentes | Personal |
+| Incidentes y SOS (tipo, nota, hora, posición, quién lo atendió) | Choferes | Atender emergencias | `bus.incident` | Los ya vistos, el plazo del historial; uno sin ver no se borra nunca | Personal |
+| Llegadas a paradas, alertas cerradas, viajes y recorridos terminados | Buses (indirecto: el chofer del turno) | Reportes | `bus.stop.arrival`, `bus.alert`, `bus.trip`, `bus.run` | El plazo del historial; una alerta abierta no se borra | Personal; Grafana sin datos personales |
 | Usuario, nombre, contraseña (con hash) | Choferes | Entrar a la app | `res.users` | Mientras exista el usuario | Administradores |
 | Sesiones de la app | Choferes | Mantener la sesión | `bus.driver.token` (solo la huella) | 30 días; cron de purga | Nadie (solo huella) |
-| Credencial QR (365 días) | Choferes | Iniciar sesión | `res.users` (solo administradores) | Hasta que se revoque | Administradores |
+| Credencial QR (365 días) | Choferes | Iniciar sesión | `bus.driver.token` (solo la huella). Odoo la muestra una vez al generarla y no la guarda | Hasta que se revoque o venza | Nadie (solo huella); el manager la ve una vez para imprimirla |
 | Reporte (texto, línea, bus, tipo) | Pasajeros | Atender y mejorar el servicio | `bus.complaint` | **El texto no se borra solo** | Personal |
 | Correo y teléfono del reporte (opcionales) | Pasajeros | Responder | `bus.complaint` | `bus_tracking.complaint_retention_days` días después de resolver (90 por defecto); cron diario | Personal |
 | "Mi parada" | Pasajeros | Comodidad | Navegador (`localStorage`) | Hasta que se borre el navegador | Solo la persona |

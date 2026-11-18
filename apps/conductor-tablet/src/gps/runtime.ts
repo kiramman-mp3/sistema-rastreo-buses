@@ -57,7 +57,14 @@ export async function sendFix(
       resolve('timeout');
     }, timeoutMs);
   });
-  const request = http(buildOsmAndUrl(creds.url, creds.uniqueId, fix), { method: 'GET', signal: controller?.signal })
+  let target: string;
+  try {
+    target = buildOsmAndUrl(creds.url, creds.uniqueId, fix);
+  } catch {
+    // Kept in the queue: the office has to fix the address, the positions are not lost meanwhile.
+    return 'insecure_gps_url';
+  }
+  const request = http(target, { method: 'GET', signal: controller?.signal })
     .then((response) => (response.ok ? null : `http ${response.status}`))
     .catch(() => 'network');
   try {
@@ -79,6 +86,14 @@ export async function flushFixes(
     return error === null;
   });
   return { sent, error };
+}
+
+/**
+ * Whether the backup heartbeat must ask for a position. It looks at the last fix, not the last send: without
+ * signal nothing is sent, and judging by the send added an extra position to the queue every few seconds.
+ */
+export function heartbeatDue(lastFixAt: number | null, now: number, intervalMs: number): boolean {
+  return lastFixAt === null || now - lastFixAt >= intervalMs - 500;
 }
 
 export async function ingestLocations(

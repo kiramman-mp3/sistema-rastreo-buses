@@ -57,10 +57,12 @@ const es = {
   alert_offline: 'sin señal',
   alert_long_stop: 'Parada larga',
   alert_off_route: 'Fuera de ruta',
+  alert_skipped_stop: 'Parada no pasada',
   update_error: 'No pudimos actualizar. Reintentando…',
   map_label: 'Mapa con los buses de la ruta',
   scanQr: 'Leer código QR',
   scanDriverBadge: 'Escanear credencial QR',
+  scanFromApp: 'Ese código se lee desde esta app: pulsa «Escanear credencial QR» y apunta al código otra vez.',
   badgeLoggingIn: 'Identificando chofer…',
   badgeError: 'Credencial no válida o revocada.',
   orManualLogin: 'O ingresar manualmente',
@@ -134,12 +136,17 @@ const es = {
   tooMany: 'Demasiados intentos. Espera un minuto y vuelve a probar.',
   noGpsUrl: 'Falta la dirección del GPS en Odoo. Avisa al administrador.',
   busNoGps: 'Sin GPS',
-  serverChange: 'Este código cambia el servidor a {url}. ¿Continuar?',
+  serverChange: 'Este código cambia el servidor a {url} y cierra la sesión abierta en esta tableta. ¿Continuar?',
   serverHttps: 'El servidor debe empezar con https://',
   gpsLastAppError: 'Última falla de la app',
   gpsLastError: 'Último error',
   gpsServiceTitle: 'Buses UTA: GPS activo',
   gpsServiceBody: 'Enviando la posición del bus',
+  reminderChannel: 'Recorridos programados',
+  reminderSoonTitle: 'En 10 minutos tienes un recorrido',
+  reminderSoonBody: 'Línea {route} a las {time} en {bus}. Prepárate.',
+  reminderStartTitle: 'Inicia tu recorrido programado',
+  reminderStartBody: 'Línea {route} de las {time} en {bus}. Empieza el turno en la tableta.',
 };
 
 const en: typeof es = {
@@ -198,10 +205,12 @@ const en: typeof es = {
   alert_offline: 'no signal',
   alert_long_stop: 'Long stop',
   alert_off_route: 'Off route',
+  alert_skipped_stop: 'Skipped stop',
   update_error: "We couldn't update. Retrying…",
   map_label: 'Map with the buses of the route',
   scanQr: 'Scan QR code',
   scanDriverBadge: 'Scan driver badge',
+  scanFromApp: 'That code is read from this app: tap “Scan driver badge” and point at the code again.',
   badgeLoggingIn: 'Identifying driver…',
   badgeError: 'Driver badge invalid or revoked.',
   orManualLogin: 'Or sign in manually',
@@ -275,12 +284,17 @@ const en: typeof es = {
   tooMany: 'Too many attempts. Wait a minute and try again.',
   noGpsUrl: 'The GPS address is missing in Odoo. Tell the administrator.',
   busNoGps: 'No GPS',
-  serverChange: 'This code changes the server to {url}. Continue?',
+  serverChange: 'This code changes the server to {url} and signs out the session open on this tablet. Continue?',
   serverHttps: 'The server must start with https://',
   gpsLastAppError: 'Last app failure',
   gpsLastError: 'Last error',
   gpsServiceTitle: 'Buses UTA: GPS on',
   gpsServiceBody: 'Sending the bus position',
+  reminderChannel: 'Scheduled trips',
+  reminderSoonTitle: 'You have a trip in 10 minutes',
+  reminderSoonBody: 'Line {route} at {time} on {bus}. Get ready.',
+  reminderStartTitle: 'Start your scheduled trip',
+  reminderStartBody: 'Line {route} of {time} on {bus}. Start the shift on the tablet.',
 };
 
 const qu: typeof es = {
@@ -339,10 +353,12 @@ const qu: typeof es = {
   alert_offline: 'mana rikurin',
   alert_long_stop: 'Unay sayashka',
   alert_off_route: 'Ñanmanta llukshishka',
+  alert_skipped_stop: 'Sayanata yallishka',
   update_error: 'Mana musuyachiy ushashkanchu. Kutin ruranchik…',
   map_label: 'Ñanpi bus kunapa mapa',
   scanQr: 'QR killkata ñawinchiy',
   scanDriverBadge: 'Pushakpa credencial QRta ñawinchiy',
+  scanFromApp: 'Chay killkataqa kay appmanta ñawinchina: «Pushakpa credencial QRta ñawinchiy» nisqata llapiy, killkatataq kutin rikuchiy.',
   badgeLoggingIn: 'Pushakta riksishpa…',
   badgeError: 'Credencial mana allichu o hurkushka.',
   orManualLogin: 'Shuk shinapash makiwan yaykuy',
@@ -416,12 +432,17 @@ const qu: typeof es = {
   tooMany: 'Sinchi kutin ruraykuna. Shuk minututa shuyashpa kutin ruray.',
   noGpsUrl: 'Odoopi GPS direccion illan. Administradorman willay.',
   busNoGps: 'GPS illak',
-  serverChange: 'Kay killka servidorta {url}man tikrachin. Katinkichu?',
+  serverChange: 'Kay killka servidorta {url}man tikrachin, kay tabletapi kichasqa sesiontapas wichqan. Katinkichu?',
   serverHttps: 'Servidorka https://wan kallarina kan',
   gpsLastAppError: 'Tukuri app pantay',
   gpsLastError: 'Tukuri pantay',
   gpsServiceTitle: 'Buses UTA: GPS purin',
   gpsServiceBody: 'Busmanta maypi kashkata kachashpa',
+  reminderChannel: 'Yuyashka purikuna',
+  reminderSoonTitle: 'Chunka minutopi shuk purinata charinki',
+  reminderSoonBody: '{route} ñan, {time} pachapi, {bus}pi. Allichiri.',
+  reminderStartTitle: 'Yuyashka purinata kallari',
+  reminderStartBody: '{route} ñan, {time} pacha, {bus}pi. Tabletapi turnota kallari.',
 };
 
 export const messages: Record<Lang, typeof es> = { es, en, qu };
@@ -481,6 +502,7 @@ export function alertLabel(kind: string): string {
   if (kind === 'offline') return capitalize(t('alert_offline'));
   if (kind === 'long_stop') return capitalize(t('alert_long_stop'));
   if (kind === 'off_route') return capitalize(t('alert_off_route'));
+  if (kind === 'skipped_stop') return capitalize(t('alert_skipped_stop'));
   return kind;
 }
 

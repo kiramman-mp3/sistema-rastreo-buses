@@ -53,7 +53,7 @@ Fuente: `docs/calidad/02-estandares-y-reglas.md` §1.1 (reglas R17 a R24) y las 
 | ¿Qué porcentaje de recorridos se ha cumplido correctamente? | Cumplimiento de ruta (T1) | Recorridos que llegaron a todas las paradas entre los cerrados |
 | ¿Cuáles son las incidencias más frecuentes? | Pestaña Incidents (Pareto) y Grafana › Incidencias | Pocos tipos explican la mayoría; en los datos de prueba, sin señal y llegada tarde |
 | ¿Qué tan confiable es el sistema implementado? | System quality: S1 a S4 y `docs/calidad/17-rendimiento-por-volumen.md` | Integridad de posiciones, exactitud de la sincronización, tiempo de respuesta (p95 menor que 2 s hasta 1 000 000 de posiciones) y detección correcta (12 de 12) |
-| ¿Qué mejoras se realizaron para incrementar la calidad? | `docs/calidad/18-mejora-continua-pdca.md` y `16-sonarqube.md` | 16 bugs y 12 vulnerabilidades de SonarQube a 0; 48 defectos cerrados; 544 + 167 pruebas |
+| ¿Qué mejoras se realizaron para incrementar la calidad? | `docs/calidad/18-mejora-continua-pdca.md` y `16-sonarqube.md` | 16 bugs y 12 vulnerabilidades de SonarQube a 0; 50 defectos cerrados y 12 abiertos con plan (`PLAN-AUDITORIA-2.md`); 544 + 167 pruebas |
 
 ## A.5. Calidad, diseño y mejoras (≈ 4 min)
 

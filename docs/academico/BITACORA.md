@@ -1237,3 +1237,114 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 ### Pendiente o sin confirmar
 
 - Forzar recarga en navegadores clientes (`Ctrl + Shift + R`) para refrescar la caché local de vistas de Odoo.
+
+
+## 2026-11-17: segunda auditoría integral, plan de las fases 38 a 47 y roadmap
+
+### Qué se hizo
+
+- Auditoría de todo el código que corre en producción sobre `develop` en `512bab6`: módulo Odoo, app de tableta, despliegue, scripts y CI. Se revisó sobre todo lo construido después de la primera auditoría (fases R1 a R12 y Fleet).
+- Plan de corrección en `docs/arquitectura/PLAN-AUDITORIA-2.md`: hallazgos con archivo y línea, seis decisiones para el equipo y las fases 38 a 47, cada una con sus commits y pruebas.
+- `docs/arquitectura/ROADMAP.md`: vista única de lo hecho desde el 26-oct y de lo que falta, con hitos `v0.9.6-beta` (piloto), `v1.0.0-rc1` y `v1.0.0`.
+- Registro de defectos: DEF-049 y DEF-050 pasan a `qa/datos_calidad.py` (antes sólo estaban en el `.md` y se perdían al regenerar) y se registran abiertos DEF-051 a DEF-062. Se regeneraron `04`, `05`, `07` y la figura de Pareto.
+- Documentación al día con el estado real: `PRODUCCION.md` (panel de Traccar público, perfil `local-db`, retención y tabla de riesgos con medidas provisionales), `OPERACION.md`, `GUIA-CHOFER.md`, `PRIVACIDAD.md`, `09-cumplimiento-iso.md`, `19-matriz-de-trazabilidad.md`, `GUION_DEFENSA.md`, los índices y el `README.md`.
+- No se cambió código.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| App: `npm run lint` y `npm run typecheck` | Sin errores |
+| App: Jest | 167 de 167, 27 suites |
+| App: `npm audit --omit=dev` | 9 moderadas, ninguna alta |
+| Odoo: `python -m compileall` y XML bien formado | Sin errores |
+| `qa/traducciones.py` | 0 entradas sin traducir |
+| Suite de Odoo y flake8 | No ejecutadas: Docker apagado y flake8 no instalado. Vale la evidencia del 5-nov (544 de 544) |
+
+### Problemas encontrados
+
+- XSS guardado en el portal por el nombre de una parada, que puede venir de un GPX (DEF-051).
+- La cola de incidentes de la tableta no está serializada y puede perder un SOS (DEF-052).
+- Producción: posiciones sin purga en una instalación nueva (DEF-053), base local que no vuelve a arrancar tras `down` y `up` (DEF-054), panel de Traccar público con la IP en el dominio por defecto (DEF-055), login del panel sin límite ni 2FA (DEF-056).
+- Turnos: falsa alerta "No signal" tras cada turno (DEF-057); posiciones e incidentes guardados sin señal que se pierden al cerrar el turno (DEF-058, DEF-059).
+- Permisos y tableta: un manager no administrador probablemente no gestiona choferes (DEF-060, inferido); la tableta envía el token viejo al cambiar de servidor (DEF-061); la dirección del GPS admite `http` (DEF-062).
+- Los roles de `agy` no sirvieron: el de seguridad lo bloqueó el filtro de Gemini y el revisor agotó el tiempo.
+
+### Pendiente o sin confirmar
+
+- Fases 38 a 40 antes de cualquier piloto; luego 41 a 47 (`PLAN-AUDITORIA-2.md`).
+- Las seis decisiones de la sección 2 del plan: base por defecto, 2FA, panel de Traccar, gestión de choferes, incidentes tras el cierre y credencial QR.
+- Confirmar con una prueba DEF-060 y los hallazgos marcados como inferidos.
+- Correr la suite de Odoo y flake8 sobre esta base.
+
+## 2026-11-17: fases 38 a 45 de la segunda auditoría
+
+### Qué se hizo
+
+- Base de producción decidida: **Supabase** (pooler de sesión en el puerto 5432, `sslmode=require`). Las otras cinco decisiones del plan se tomaron con la opción recomendada.
+- Fase 38: nombres de parada como texto en los mapas (DEF-051) y colas de incidentes y errores de la tableta serializadas (DEF-052).
+- Fase 39: purga de 30 días por defecto y también en Traccar (DEF-053); scripts para base externa con TLS (`scripts/db.sh`) y `db_maxconn` dentro del límite del pooler (DEF-054); panel de Traccar sólo desde las IP permitidas (DEF-055); Odoo guarda un token de Traccar en lugar de la contraseña.
+- Fase 40: espera tras fallos de login que se duplica hasta una hora, `auth_totp` instalado, límite por usuario en la tableta y versión del health sólo para el personal (DEF-056).
+- Fase 41: "No signal" sólo con turno (DEF-057), la tableta envía las posiciones guardadas antes de cerrar el turno (DEF-058), incidentes aceptados hasta 2 h después del cierre (DEF-059), alertas concurrentes sin error, un evento por viaje, parada y tipo, y el simulador aislado de los datos reales.
+- Fase 42: cambiar de servidor cierra la sesión (DEF-061), la credencial de otro servidor sólo lo cambia si la acepta, el GPS sólo por `https` fuera de la red local (DEF-062), latido basado en la última posición y aviso cuando la cámara del sistema abre la app.
+- Fase 43: asistente para que un manager no administrador gestione choferes (DEF-060, confirmado con un test), menú de choferes sólo para managers, registro de GPS sólo para managers, sesiones revocadas al cambiar la contraseña y credencial QR mostrada una vez sin guardarse (migración 16.0.1.8.0).
+- Fase 44: auditoría de sincronización con dos consultas por bus, purga del historial (365 días), recorrido del mapa limitado a 2 000 puntos, conteo diario de posiciones para Grafana y push con presupuesto de tiempo.
+- Fase 45: perfil `production` para iOS real y URL desde el entorno de EAS, `node-forge` 1.4.3, exportación del bundle y cobertura en el CI.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo (como el CI, Postgres 15) | 579 de 579 |
+| Cobertura de Python bajo la suite | 97 % de las líneas del módulo (sin pruebas ni migraciones) |
+| flake8 del módulo | 0 avisos |
+| App: Jest, `tsc` y ESLint | 179 de 179, sin errores |
+| App: `npx expo export --platform android` | Bundle generado |
+| `qa/traducciones.py` | 0 entradas sin traducir |
+| `scripts/db.sh` contra un Postgres con TLS que imita Supabase | Crea, respalda y restaura |
+| `kpi_positions_daily` con 1 000 000 de posiciones | 340 ms antes, 1,7 ms después |
+
+### Problemas encontrados
+
+- El hallazgo B3 era en parte falso: Odoo 16 ya limitaba los intentos por dirección. Se endureció en vez de crearlo.
+- Imponer el 2FA exige correo, y el sistema no lo usa: queda opcional por usuario.
+- `npm audit fix` reescribía el lockfile y subía el total de avisos. Quedan `glob`, `minimatch` y `picomatch`, de herramientas de build; `picomatch` no tiene versión corregida.
+- Evitar que Grafana se recargue al renovar el token (W4) depende de cómo trate Grafana la sesión del `auth_token`: queda documentado como limitación.
+
+### Pendiente o sin confirmar
+
+- Fase 46: VM Linux con dominios y Let's Encrypt, proyecto real de Supabase, jornada con dos tabletas, carga de 50 buses y `qa/ejecutar_todo.sh`. Sin ella no hay `v1.0.0-rc1`.
+- Generar e imprimir una credencial QR nueva para cada chofer después de actualizar a 16.0.1.8.0.
+- Nada se subió a `origin` ese día (se subió después, en la entrada siguiente).
+
+## 2026-11-17: despliegue de la versión 16.0.1.8.0 en la VM de Azure
+
+### Qué se hizo
+
+- `develop` se subió a GitHub. El primer CI falló en gitleaks por un token inventado en `test_gps_setup.py`; se cambió por `fake-token`.
+- La VM `vm-buses` (Ubuntu 22.04, `Standard_B1ms`, 2 GB de RAM y 2 GB de swap) estaba apagada desde el 8-nov. Al encenderla, el sitio daba 502: Supabase había pausado el proyecto por inactividad y el pooler respondía `(ENOTFOUND) tenant/user ... not found`. Se reanudó desde la consola de Supabase y Odoo se conectó solo.
+- Despliegue con el procedimiento de `PRODUCCION.md` > *Actualizar*: la VM pasó de `main` a `develop`, el módulo de `16.0.1.6.0` a `16.0.1.8.0` (migraciones 16.0.1.7.0 y 16.0.1.8.0; se revocaron las 2 credenciales QR) y `odoo.prod.conf` a la plantilla nueva (`list_db = False`, `db_maxconn = 8`). Traccar quedó fijado en `traccar/traccar:6.16.0`, la versión que ya corría con `latest`. Se recreó el rol `grafana_reader`.
+- El despliegue encontró dos defectos de los scripts, corregidos en `develop`: no tenían permiso de ejecución (se commitearon desde Windows) y el cliente de Postgres era 15 mientras Supabase corre 17.11, así que `pg_dump` se negaba a respaldar. `.env.prod.example` trae ahora `POSTGRES_IMAGE=postgres:17`.
+- Respaldo fuera de la VM: cuenta de almacenamiento privada `stbusesuta11900` (contenedor `backups`, sin acceso público), con los respaldos del 3-nov y del 17-nov. Se descargaron y se comprobaron con `SHA256SUMS`.
+- SSH (puerto 22) sólo desde `192.188.46.70/32`. Las consultas a la VM se hacen con `az vm run-command`, que no usa SSH.
+- Se borraron los contenedores `buses-db-1` y `rastreo-prod-db-1`, bases locales de antes de Supabase. Sus volúmenes (`buses_db-data`, `rastreo-prod_db-data`) se conservan.
+- App de la tableta 1.1.0: variable `EXPO_PUBLIC_ODOO_URL` creada en el entorno `production` de EAS; builds de Android (`production`) y de iOS (`ios-altstore`).
+- Se quitó del historial de Git la coautoría de herramientas de IA (`Co-Authored-By`, `Claude-Session`) con `git filter-repo`. El contenido de cada rama y etiqueta es idéntico, pero cambiaron todos los identificadores de commit: los que cita esta bitácora antes de esta entrada ya no existen.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| CI en GitHub (gitleaks, Odoo, lint y traducciones, tableta) | En verde en los cinco pushes después de la corrección de gitleaks |
+| `https://busesuta2340.eastus2.cloudapp.azure.com` | 200 |
+| `/bus_tracking/health` | `stale`: ningún bus transmite |
+| Memoria de la VM con todo arrancado | Unos 760 MB usados, 893 MB disponibles, swap sin usar |
+| Respaldo descargado | `sha256sum -c` correcto en los tres archivos |
+
+### Pendiente o sin confirmar
+
+- Instalar la app 1.1.0 y generar e imprimir una credencial QR nueva para cada chofer.
+- Supabase gratuito vuelve a pausarse tras unos 7 días sin uso: reanudarlo antes de cada demo. En producción hace falta un plan que no se pause.
+- Si cambia la IP de quien administra, actualizar la regla `default-allow-ssh` del grupo `vm-busesNSG`.
+- Los respaldos nuevos no se copian solos a la cuenta de almacenamiento: falta programarlo.
+- Fase 46 sin hacer: jornada real con tabletas y prueba de carga.

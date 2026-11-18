@@ -10,6 +10,7 @@ from odoo.tools import mute_logger
 
 from .common import STOPS, BusCase, traccar_position
 from .test_driver_auth import make_driver
+from .test_traccar_sync import fake_response
 
 
 @tagged('post_install', '-at_install')
@@ -158,6 +159,42 @@ class TestIngest(BusCase):
         self.assertFalse(old.exists())
         self.assertTrue(fresh.exists())
 
+    def test_cleanup_without_the_setting_keeps_thirty_days(self):
+        self.env['ir.config_parameter'].search([('key', '=', 'bus_tracking.retention_days')]).unlink()
+        now = fields.Datetime.now()
+        Position = self.env['bus.position']
+        old = Position.create({'vehicle_id': self.bus.id, 'fix_time': now - timedelta(days=31),
+                               'latitude': -33.4, 'longitude': -70.6})
+        fresh = Position.create({'vehicle_id': self.bus.id, 'fix_time': now - timedelta(days=29),
+                                 'latitude': -33.4, 'longitude': -70.6})
+        Position._cron_cleanup()
+        self.assertFalse(old.exists())
+        self.assertTrue(fresh.exists())
+
+    def test_cleanup_asks_traccar_to_drop_the_same_span(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.retention_days', '30')
+        icp.set_param('bus_tracking.traccar_url', 'http://traccar:8082')
+        icp.set_param('bus_tracking.traccar_token', 'tok')
+        self.bus.traccar_device_id = 77
+        with patch('odoo.addons.bus_tracking.models.traccar_api.requests.delete',
+                   return_value=fake_response({}, 204)) as delete:
+            self.env['bus.position']._cron_cleanup()
+        urls = {call.args[0] for call in delete.call_args_list}
+        self.assertEqual(urls, {'http://traccar:8082/api/positions'})
+        params = [call.kwargs['params'] for call in delete.call_args_list if call.kwargs['params']['deviceId'] == 77][0]
+        until = fields.Datetime.now() - timedelta(days=30)
+        self.assertEqual(params['to'][:10], until.strftime('%Y-%m-%d'))
+
+    def test_cleanup_survives_traccar_errors(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.traccar_url', 'http://traccar:8082')
+        icp.set_param('bus_tracking.traccar_token', 'tok')
+        self.bus.traccar_device_id = 77
+        with patch('odoo.addons.bus_tracking.models.traccar_api.requests.delete',
+                   return_value=fake_response('boom', 500)):
+            self.env['bus.position']._cron_cleanup()                 # must not raise
+
     def test_cleanup_with_zero_days_keeps_everything(self):
         self.env['ir.config_parameter'].set_param('bus_tracking.retention_days', '0')
         old = self.env['bus.position'].create({
@@ -165,6 +202,55 @@ class TestIngest(BusCase):
             'latitude': -33.4, 'longitude': -70.6})
         self.env['bus.position']._cron_cleanup()
         self.assertTrue(old.exists())
+
+    def test_cleanup_purges_the_history_that_is_over_and_keeps_what_is_open(self):
+        icp = self.env['ir.config_parameter']
+        icp.set_param('bus_tracking.retention_days', '30')
+        icp.set_param('bus_tracking.history_retention_days', '365')
+        now = fields.Datetime.now()
+        old, recent = now - timedelta(days=400), now - timedelta(days=10)
+        stops = self.route.stop_ids
+        for i in reversed(range(len(stops))):
+            stops[i].planned_offset_min = i * 5
+        stop = stops[0]
+        env = self.env
+
+        def shift_at(when, login):
+            shift = env['bus.shift'].create({'user_id': make_driver(env, login=login).id,
+                                             'vehicle_id': self.bus.id, 'route_id': self.route.id})
+            shift._end()
+            shift.write({'start': when, 'end': when + timedelta(hours=8)})
+            env.flush_all()                     # one active shift per bus, checked by the database
+            return shift
+        records = {
+            'old reject': (env['bus.position.reject'].create({'reason': 'x'}), False),
+            'old arrival': (env['bus.stop.arrival'].create(
+                {'vehicle_id': self.bus.id, 'stop_id': stop.id, 'arrival_time': old}), False),
+            'recent arrival': (env['bus.stop.arrival'].create(
+                {'vehicle_id': self.bus.id, 'stop_id': stop.id, 'arrival_time': recent}), True),
+            'old closed alert': (env['bus.alert'].create(
+                {'vehicle_id': self.bus.id, 'kind': 'speeding', 'state': 'closed', 'start_time': old,
+                 'end_time': old}), False),
+            'old open alert': (env['bus.alert'].create(
+                {'vehicle_id': self.bus.id, 'kind': 'offline', 'start_time': old}), True),
+            'old finished trip': (env['bus.trip'].create(
+                {'vehicle_id': self.bus.id, 'route_id': self.route.id, 'planned_start': old, 'state': 'done'}), False),
+            'old run': (env['bus.run'].create({'vehicle_id': self.bus.id, 'route_id': self.route.id,
+                                               'origin_stop_id': stop.id, 'departure': old, 'state': 'done'}), False),
+        }
+        quiet = shift_at(old, 'purga1')
+        busy = shift_at(old, 'purga2')
+        seen = env['bus.incident'].create({'shift_id': quiet.id, 'vehicle_id': self.bus.id, 'kind': 'traffic',
+                                           'reported_at': old, 'acknowledged_at': old})
+        unseen = env['bus.incident'].create({'shift_id': busy.id, 'vehicle_id': self.bus.id, 'kind': 'sos',
+                                             'reported_at': old})
+        env.cr.execute("UPDATE bus_position_reject SET create_date = %s WHERE id = %s",
+                       (now - timedelta(days=31), records['old reject'][0].id))
+        records.update({'seen incident': (seen, False), 'its shift': (quiet, False),
+                        'unseen sos': (unseen, True), 'the shift of the sos': (busy, True)})
+        env['bus.position']._cron_cleanup()
+        for name, (record, kept) in records.items():
+            self.assertEqual(bool(record.exists()), kept, name)
 
     def test_a_concurrent_duplicate_is_skipped_without_error(self):
         pos = traccar_position(7, '2026-10-26T12:00:00.000+00:00', -33.47, -70.62)

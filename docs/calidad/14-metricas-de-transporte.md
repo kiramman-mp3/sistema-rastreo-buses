@@ -3,7 +3,7 @@
 Evidencia de la Actividad 7 del proyecto final (criterio 6, métricas y tablero): **8 métricas de transporte y 4 de calidad del software**, cada una con su fórmula, su fuente de datos, su unidad,
 su resultado, su estado y su interpretación. Este documento **se genera desde el código** (`scripts/doc_metricas.py` lee `models/bus_kpi.py` y calcula cada cifra al momento): no hay ningún valor escrito a mano.
 
-Las mismas cifras se ven en el menú **Buses › Indicators › Odoo dashboard** (pestaña «Formulas», con la consulta de cada una) y en **Grafana** (`docs/calidad/15-tablero-grafana.md`);
+Las mismas cifras se ven en el menú **Buses › Indicators › Odoo dashboard** (pestaña «Formulas», con la consulta de cada una);
 las pruebas comprueban que los dos tableros dan las mismas cifras que estas consultas (`TestSameFiguresAsTheIndicators`).
 
 ## 1. Cómo se calculan
@@ -366,8 +366,7 @@ WITH f AS (
 SELECT COUNT(*) FILTER (WHERE state = 'done'), COUNT(*) FROM f
 ```
 
-3. En Grafana, cada panel de «Resumen» tiene su consulta en el menú del panel › Inspect › Query, sobre las vistas `kpi_*` (`docs/guias/GRAFANA.md`).
-4. Las pruebas automáticas (`tests/test_kpi.py`, `tests/test_dashboard.py`, `tests/test_grafana_dashboards.py`) construyen recorridos a mano con resultado conocido y comprueban cada fórmula.
+4. Las pruebas automáticas (`tests/test_kpi.py`, `tests/test_dashboard.py`) construyen recorridos a mano con resultado conocido y comprueban cada fórmula.
 
 ## 5. Lectura de los resultados
 

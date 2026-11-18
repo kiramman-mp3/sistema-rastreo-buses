@@ -1,9 +1,12 @@
 import json
+from datetime import timedelta
+from unittest.mock import patch
 
 from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
+from ..controllers.landing import live_buses
 from ..controllers.portal import BusPortal
 from ..models.trip_simulator import DEMO_SET, SCENARIOS, plan_minutes
 from .test_trips import TripCase
@@ -52,6 +55,12 @@ class TestScenarios(TripCase):
         self.assertFalse(self.env['bus.position'].search([('vehicle_id', '=', trip.vehicle_id.id)]))
         self.assertEqual(sorted(trip.alert_ids.mapped('kind')), ['incomplete_trip', 'late_start'])
 
+    def test_simulating_leaves_the_real_trips_alone(self):
+        real = self.trip(day=fields.Date.today() - timedelta(days=3))
+        simulator(self.env)._simulate(self.route, 'punctual')
+        self.assertEqual(real.state, 'planned')
+        self.assertFalse(real.alert_ids)
+
     def test_a_wrong_expectation_is_not_hidden(self):
         trip = simulator(self.env)._simulate(self.route, 'punctual')
         trip.expected_flags = 'late'
@@ -96,6 +105,23 @@ class TestPlan(TransactionCase):
         route = self.make('P3')
         simulator(self.env)._ensure_plan(route)
         self.assertGreater(route.stop_ids[-1].planned_offset_min, 0)
+
+    def test_alerts_of_simulated_buses_wake_nobody(self):
+        bus = self.env['bus.vehicle'].create({'name': 'Sim X', 'simulated': True})
+        alert = self.env['bus.alert'].create({'vehicle_id': bus.id, 'kind': 'speeding',
+                                              'start_time': fields.Datetime.now()})
+        with patch.object(type(self.env['bus.push.subscription']), '_send_to_managers') as send:
+            self.env['bus.alert']._cron_push()
+        send.assert_not_called()
+        self.assertTrue(alert.notified)
+
+    def test_the_landing_counts_only_buses_in_service(self):
+        route = self.make('P5')
+        now = fields.Datetime.now()
+        real = self.env['bus.vehicle'].create({'name': 'Real P5', 'route_id': route.id, 'last_fix_time': now})
+        self.env['bus.vehicle'].create({'name': 'Sim P5', 'route_id': route.id, 'last_fix_time': now,
+                                        'simulated': True})
+        self.assertEqual(live_buses(route, now), real)
 
 
 @tagged('post_install', '-at_install')

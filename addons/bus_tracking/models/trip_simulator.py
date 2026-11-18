@@ -145,7 +145,7 @@ class BusTripSimulator(models.AbstractModel):
         if not spec.get('no_positions'):
             self._replay(trip, spec)
         # Close what the replay left open and report the late start, as the cron does for real trips.
-        self.env['bus.trip']._cron_close_trips()
+        self.env['bus.trip']._cron_close_trips(only=trip)
         return trip
 
     @api.model

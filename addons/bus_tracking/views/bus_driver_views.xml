@@ -4,7 +4,7 @@
         <field name="name">bus.driver.tree</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <tree string="Drivers">
+            <tree string="Drivers" create="0" edit="0" delete="0">
                 <field name="name"/>
                 <field name="login"/>
                 <field name="email"/>
@@ -17,8 +17,10 @@
         <field name="name">bus.driver.form</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
-            <form string="Driver">
+            <form string="Driver" create="0" edit="0" delete="0">
                 <header>
+                    <button name="action_edit_driver" type="object" string="Edit driver"
+                            groups="bus_tracking.group_bus_manager"/>
                     <button name="action_generate_driver_badge" type="object"
                             string="Generate QR badge" class="btn-primary"
                             groups="bus_tracking.group_bus_manager"/>
@@ -36,8 +38,6 @@
                     <group>
                         <group string="Sign-in">
                             <field name="login" string="User"/>
-                            <field name="driver_password" password="True" string="Password"
-                                   placeholder="Set or change the password"/>
                             <field name="email"/>
                             <field name="phone"/>
                             <field name="is_bus_driver" invisible="1"/>
@@ -47,21 +47,72 @@
                             <field name="driver_badge_active" readonly="1" string="Badge active"/>
                         </group>
                     </group>
-                    <group string="QR badge for the driver tablet" groups="bus_tracking.group_bus_manager">
-                        <group>
-                            <field name="driver_badge_link" readonly="1" string="QR link"/>
-                            <div colspan="2" class="text-muted">
-                                The driver scans this QR code with the tablet camera to sign in without typing a user or password.
-                            </div>
-                        </group>
-                        <group>
-                            <field name="driver_badge_qr" widget="image" options="{'size': [280, 280]}" nolabel="1"
-                                   attrs="{'invisible': [('driver_badge_qr', '=', False)]}"/>
-                        </group>
-                    </group>
+                    <p class="text-muted" groups="bus_tracking.group_bus_manager">
+                        The driver scans the QR badge with the tablet to sign in without typing a user or password.
+                        Odoo shows a badge only once, when it is generated, and does not keep it: print it then.
+                        If it is lost, generate a new one; the old one stops working.
+                    </p>
                 </sheet>
             </form>
         </field>
+    </record>
+
+    <record id="view_bus_driver_badge_form" model="ir.ui.view">
+        <field name="name">bus.driver.badge.form</field>
+        <field name="model">bus.driver.badge</field>
+        <field name="arch" type="xml">
+            <form string="QR badge">
+                <div class="alert alert-warning" role="alert">
+                    Print or save this badge now: Odoo shows it only once and does not keep it.
+                </div>
+                <group>
+                    <field name="user_id"/>
+                </group>
+                <div class="text-center">
+                    <field name="qr" widget="image" options="{'size': [280, 280]}" nolabel="1"/>
+                </div>
+                <group>
+                    <field name="link" string="QR link"/>
+                </group>
+                <footer>
+                    <button name="action_done" type="object" string="Done" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bus_driver_edit_form" model="ir.ui.view">
+        <field name="name">bus.driver.edit.form</field>
+        <field name="model">bus.driver.edit</field>
+        <field name="arch" type="xml">
+            <form string="Driver">
+                <group>
+                    <group>
+                        <field name="user_id" invisible="1"/>
+                        <field name="name" placeholder="Driver's full name"/>
+                        <field name="login"/>
+                        <field name="password" password="True"
+                               placeholder="Set or change the password"/>
+                    </group>
+                    <group>
+                        <field name="phone"/>
+                        <field name="email"/>
+                        <field name="active" attrs="{'invisible': [('user_id', '=', False)]}"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_save" type="object" string="Save" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bus_driver_new" model="ir.actions.act_window">
+        <field name="name">New driver</field>
+        <field name="res_model">bus.driver.edit</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
     </record>
 
     <record id="action_bus_driver" model="ir.actions.act_window">
@@ -75,7 +126,7 @@
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_bus_driver_form')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a driver and generate their QR badge.
+                Create a driver with Fleet &gt; New driver, then generate their QR badge.
             </p>
         </field>
     </record>

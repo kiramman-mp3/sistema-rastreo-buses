@@ -58,6 +58,7 @@ export class BusDashboard extends Component {
             error: null,
             lastSync: null,
             now: Date.now(),
+            printing: false,
         });
 
         onMounted(async () => {
@@ -72,7 +73,10 @@ export class BusDashboard extends Component {
                 this.state.now = Date.now();
             }, 1000);
         });
-        onPatched(() => this.drawCharts());
+        // The clock re-renders the page every second: charts are redrawn only when their data or the tab changed,
+        // otherwise they would restart their animation in a loop.
+        this.drawn = { data: null, tab: null };
+        onPatched(() => this.drawChartsIfChanged());
         onWillUnmount(() => {
             clearInterval(this.poll);
             clearInterval(this.clock);
@@ -228,6 +232,31 @@ export class BusDashboard extends Component {
         await this.load();
     }
 
+    // The PDF of what is on screen: same period, line and data.
+    async downloadPdf() {
+        const data = this.state.data;
+        if (!data || this.state.printing) {
+            return;
+        }
+        this.state.printing = true;
+        try {
+            const created = await this.orm.create("bus.report.wizard", [{
+                date_from: data.period.from,
+                date_to: data.period.to,
+                route_ids: this.state.routeId ? [[6, 0, [Number.parseInt(this.state.routeId, 10)]]] : [],
+                scope: this.state.scope,
+                compare: true,
+            }]);
+            const id = Array.isArray(created) ? created[0] : created;
+            const action = await this.orm.call("bus.report.wizard", "action_print", [[id]]);
+            await this.action.doAction(action);
+        } catch {
+            this.notification.add(_t("The PDF could not be prepared. Try again in a moment."), { type: "danger" });
+        } finally {
+            this.state.printing = false;
+        }
+    }
+
     openTrip(id) {
         this.action.doAction({ type: "ir.actions.act_window", res_model: "bus.trip", res_id: id, views: [[false, "form"]] });
     }
@@ -257,18 +286,34 @@ export class BusDashboard extends Component {
         this.charts = {};
     }
 
-    drawCharts() {
-        if (!window.Chart || !this.state.data) {
+    drawChartsIfChanged() {
+        const { data, tab } = this.state;
+        if (data === this.drawn.data && tab === this.drawn.tab) {
             return;
+        }
+        // A new tab animates in; the 30-second refresh of the same tab swaps the figures without a replay.
+        const animate = tab !== this.drawn.tab;
+        if (this.drawCharts(animate)) {
+            this.drawn = { data, tab };
+        }
+    }
+
+    drawCharts(animate = true) {
+        if (!window.Chart || !this.state.data) {
+            return false;
         }
         this.destroyCharts();
         const specs = this.chartSpecs();
         for (const [name, config] of Object.entries(specs)) {
             const canvas = this.refs[name] && this.refs[name].el;
             if (canvas) {
+                if (!animate) {
+                    config.options = Object.assign({}, config.options, { animation: { duration: 0 } });
+                }
                 this.charts[name] = new window.Chart(canvas.getContext("2d"), config);
             }
         }
+        return true;
     }
 
     kindLabel(kind) {

@@ -5,6 +5,7 @@ import { errorQueue } from '../diagnostics';
 import { gpsKv, gpsStore } from '../gps/store';
 import { liveGps } from '../gps/tracker';
 import { IncidentQueue } from '../incidents/queue';
+import { createTripReminders } from '../shift/reminders';
 import { odooUrlStore, pendingEndStore, secureStore } from './secureStore';
 import { Session, type SessionSnapshot } from './session';
 
@@ -23,6 +24,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         odooUrlStore,
         pendingEndStore,
         errorQueue,
+        createTripReminders(),
       ),
     [],
   );

@@ -13,9 +13,19 @@ from ..models.utils import int_param, map_center, tile_url
 from .portal import line_positions
 
 MAX_TRACK_HOURS = 24
+# The trail is drawn on a phone too: more points than this add nothing visible and cost a lot to send.
+MAX_TRACK_POINTS = 2000
 _warned_query_secret = False
 
 _logger = logging.getLogger(__name__)
+
+
+def thin_out(rows, limit):
+    """At most `limit` rows, evenly spread, always keeping the last one (where the bus is now)."""
+    if len(rows) <= limit:
+        return rows
+    step = len(rows) / (limit - 1)
+    return [rows[int(i * step)] for i in range(limit - 1)] + [rows[-1]]
 
 
 class BusTrackingController(http.Controller):
@@ -111,12 +121,6 @@ class BusTrackingController(http.Controller):
             date_from = date_to - timedelta(days=days - 1)
         return request.env['bus.kpi'].dashboard(date_from, date_to, route_ids, scope, bool(compare))
 
-    @http.route('/bus_tracking/grafana/token', type='json', auth='user')
-    def grafana_token(self):
-        """The address of Grafana and a short-lived token for the person who is signed in (bus users only)."""
-        self._check_user()
-        return request.env['bus.grafana'].access()
-
     @http.route('/bus_tracking/incident/ack', type='json', auth='user')
     def acknowledge_incident(self, incident_id):
         self._check_user()
@@ -138,11 +142,11 @@ class BusTrackingController(http.Controller):
         if not 0 < hours <= MAX_TRACK_HOURS:
             hours = MAX_TRACK_HOURS if hours > MAX_TRACK_HOURS else 4
         since = fields.Datetime.now() - timedelta(hours=hours)
-        positions = request.env['bus.position'].search([
+        rows = request.env['bus.position'].search_read([
             ('vehicle_id', '=', vehicle_id),
             ('fix_time', '>=', since),
-        ], order='fix_time asc')
-        return [[p.latitude, p.longitude] for p in positions]
+        ], ['latitude', 'longitude'], order='fix_time asc')
+        return [[row['latitude'], row['longitude']] for row in thin_out(rows, MAX_TRACK_POINTS)]
 
     @http.route('/bus_tracking/traccar/webhook', type='http', auth='public',
                 methods=['POST'], csrf=False)
@@ -183,7 +187,10 @@ class BusTrackingController(http.Controller):
             last = env['bus.vehicle'].search([('last_fix_time', '!=', False)], order='last_fix_time desc', limit=1)
             if not last or fields.Datetime.now() - last.last_fix_time > timedelta(minutes=stale_minutes):
                 status, code = 'stale', 503
-        # The installed version tells which release is running (rollbacks, support, "is the fix deployed?").
-        module = env['ir.module.module'].search([('name', '=', 'bus_tracking')], limit=1)
-        body = {'status': status, 'version': module.installed_version or module.latest_version or ''}
+        body = {'status': status}
+        # The installed version tells staff which release is running ("is the fix deployed?"); anonymous callers
+        # do not get it, so the internet cannot tell which known flaws a release has.
+        if not request.env.user._is_public() and not request.env.user.share:
+            module = env['ir.module.module'].search([('name', '=', 'bus_tracking')], limit=1)
+            body['version'] = module.installed_version or module.latest_version or ''
         return Response(json.dumps(body), status=code, content_type='application/json')

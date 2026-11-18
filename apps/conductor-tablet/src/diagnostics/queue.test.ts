@@ -66,4 +66,35 @@ describe('error queue', () => {
     expect(seen).toEqual(['a', 'b']);
     expect((await queue.load()).map((r) => r.message)).toEqual(['b', 'c']);
   });
+
+  test('a failure reported while a send is on its way is kept', async () => {
+    const { queue } = make();
+    await queue.push(report('a'));
+    let release!: () => void;
+    const slow = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const flushing = flushErrors(queue, async () => {
+      await slow;
+      return true;
+    });
+    await queue.push(report('b'));
+    release();
+    expect(await flushing).toBe(1);
+    expect((await queue.load()).map((r) => r.message)).toEqual(['b']);
+  });
+
+  test('two flushes at once send each report only once', async () => {
+    const { queue } = make();
+    await queue.push(report('a'));
+    const seen: string[] = [];
+    const send = async (r: ErrorReport) => {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      seen.push(r.message);
+      return true;
+    };
+    await Promise.all([flushErrors(queue, send), flushErrors(queue, send)]);
+    expect(seen).toEqual(['a']);
+    expect(await queue.size()).toBe(0);
+  });
 });

@@ -15,6 +15,7 @@ import type { GpsController, GpsStore } from '../gps/types';
 import { flushErrors, type ErrorQueue } from '../diagnostics/queue';
 import { getLang } from '../i18n';
 import { flushIncidents, IncidentQueue } from '../incidents/queue';
+import type { TripReminders } from '../shift/reminders';
 
 export type SessionSnapshot = {
   ready: boolean;
@@ -66,6 +67,8 @@ export class Session {
     private endStore?: TokenStore,
     /** Failures of the app itself, waiting to be told to the office. */
     private errors?: ErrorQueue,
+    /** Local notifications before the driver's next trips. */
+    private reminders?: TripReminders,
   ) {}
 
   subscribe(listener: () => void) {
@@ -94,11 +97,18 @@ export class Session {
       shift: me.shift,
       offline: false,
     });
+    void this.reminders?.sync(me.upcoming ?? []);
   }
 
   async setOdooUrl(raw: string) {
     const url = normalizeOdooUrl(raw);
     if (!url) throw new Error('bad_odoo_url');
+    // A session belongs to its server: its token is never sent to another one (DEF-061).
+    if (url !== this.snapshot.odooUrl) {
+      if (await this.store.get()) await this.signOutHere();
+      // An end of shift saved without signal belongs to the old server.
+      await this.endStore?.clear();
+    }
     await this.urlStore?.set(url);
     this.client = createClient({ baseUrl: url, store: this.store });
     this.set({ odooUrl: url });
@@ -187,12 +197,15 @@ export class Session {
   }
 
   async loginWithBadge(badgeToken: string, odooUrl?: string | null) {
-    if (odooUrl) {
-      await this.setOdooUrl(odooUrl);
-    }
+    let client = this.client;
+    const url = odooUrl ? normalizeOdooUrl(odooUrl) : null;
+    if (odooUrl && !url) throw new Error('bad_odoo_url');
+    // The tablet moves to the badge's server only once that server accepts the badge.
+    if (url && url !== this.snapshot.odooUrl) client = createClient({ baseUrl: url, store: this.store });
     // The badge only buys a session; it is never kept as one. An old server without
     // login_badge answers 404 and the error reaches the scan screen.
-    const { token, driver } = await this.client.loginBadge(badgeToken);
+    const { token, driver } = await client.loginBadge(badgeToken);
+    if (url) await this.setOdooUrl(url);
     await this.store.set(token);
     const me = await this.client.me();
     this.applyMe({ ...me, driver }, token);
@@ -207,7 +220,14 @@ export class Session {
     } catch {
       // The tablet still signs out locally even if the server is unreachable.
     }
+    await this.signOutHere();
+  }
+
+  /** Forget the session on this tablet only. */
+  private async signOutHere() {
     await this.stopGps();
+    // The next driver of this tablet must not hear about the trips of this one.
+    await this.reminders?.clear();
     await this.store.clear();
     this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
   }
@@ -302,9 +322,10 @@ export class Session {
         await this.client.incident(draft);
         return true;
       } catch (error) {
-        // Kept for later on no signal or a server error; only a request the server refuses
-        // for good (bad data, no shift) is dropped.
-        return !(error instanceof NetworkError || isServerError(error));
+        // Kept for later on no signal, a server error or no session: the server takes an incident up to two
+        // hours after its shift ended, so a driver signed out meanwhile can still send it. Only a request the
+        // server refuses for good (bad data, no shift) is dropped.
+        return !(error instanceof NetworkError || error instanceof AuthError || isServerError(error));
       }
     });
   }
@@ -319,6 +340,9 @@ export class Session {
     } catch {
       // Incidents stay queued; ending the shift must not wait for them.
     }
+    // Stopping the GPS sends the positions saved without signal. It goes first: once the shift is closed the
+    // server drops every position of the bus (DEF-058).
+    await this.stopGps();
     let result: 'ended' | 'queued' = 'ended';
     try {
       await this.client.endShift();

@@ -1,6 +1,6 @@
 {
     'name': 'Bus Tracking (Traccar)',
-    'version': '16.0.1.6.0',
+    'version': '16.0.1.9.0',
     'category': 'Operations',
     'summary': 'Track bus routes in real time with Traccar',
     'description': """
@@ -14,7 +14,7 @@ Live bus tracking and route monitoring backed by a Traccar server.
     'author': 'Sistema Rastreo Buses',
     'license': 'LGPL-3',
     'application': True,
-    'depends': ['base', 'web', 'mail', 'fleet'],
+    'depends': ['base', 'web', 'mail', 'fleet', 'auth_totp'],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -32,6 +32,8 @@ Live bus tracking and route monitoring backed by a Traccar server.
         'views/bus_driver_views.xml',
         'views/bus_incident_views.xml',
         'views/bus_complaint_views.xml',
+        'views/bus_report_views.xml',
+        'report/bus_report_templates.xml',
         'views/notification_views.xml',
         'views/res_config_settings_views.xml',
         'views/menus.xml',
@@ -55,11 +57,10 @@ Live bus tracking and route monitoring backed by a Traccar server.
             'bus_tracking/static/src/css/live_map.css',
             'bus_tracking/static/src/js/live_map.js',
             'bus_tracking/static/src/js/dashboard.js',
-            'bus_tracking/static/src/js/grafana.js',
             'bus_tracking/static/src/css/dashboard.css',
             'bus_tracking/static/src/xml/dashboard.xml',
-            'bus_tracking/static/src/xml/grafana.xml',
             'bus_tracking/static/src/js/push_setup.js',
+            'bus_tracking/static/src/js/no_discuss.js',
             'bus_tracking/static/src/js/stop_picker.js',
             'bus_tracking/static/src/xml/stop_picker.xml',
             'bus_tracking/static/src/xml/live_map.xml',

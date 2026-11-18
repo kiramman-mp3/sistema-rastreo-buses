@@ -99,13 +99,8 @@
     </record>
 
     <record id="action_live_dashboard" model="ir.actions.client">
-        <field name="name">Indicators</field>
+        <field name="name">Reports</field>
         <field name="tag">bus_tracking.dashboard</field>
-    </record>
-
-    <record id="action_grafana" model="ir.actions.client">
-        <field name="name">Grafana</field>
-        <field name="tag">bus_tracking.grafana</field>
     </record>
 
     <record id="action_bus_report_late_arrival" model="ir.actions.act_window">
