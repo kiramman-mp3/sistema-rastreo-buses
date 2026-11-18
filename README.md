@@ -347,7 +347,7 @@ El estado detallado está en `docs/arquitectura/ROADMAP.md`.
 |---|---|
 | JoseM151 | 388 |
 | kiramman-mp3 | 242 |
-| Johan Rodríguez | 158 |
+| Johan Rodríguez | 162 |
 
 ---
 
