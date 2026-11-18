@@ -16,6 +16,9 @@ también comercial, sin permiso previo. No son imágenes generadas por IA. Se gu
 | celular-*.webp | Akinyemi Gbadamosi | https://unsplash.com/photos/nBiJoRbVHmA |
 | interior-*.webp | Tomi Vadász | https://unsplash.com/photos/7YoJUCGKDL4 |
 | companeras-*.webp | Bhong Bahala | https://unsplash.com/photos/gXAJxOFRCEI |
+| bus-andes-*.webp | Juan Encalada | https://unsplash.com/photos/6mcVaoGNz1w |
+| amarilla-*.webp | Vitaly Gariev | https://unsplash.com/photos/C0pfsO4ILfY |
+| pareja-*.webp | Vitaly Gariev | https://unsplash.com/photos/2yM4ooIsdh4 |
 
 ## Ilustraciones
 
