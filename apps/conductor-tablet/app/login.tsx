@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
@@ -11,7 +11,7 @@ import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
 import { Notice } from '../src/ui/Notice';
-import { shape, space } from '../src/ui/theme';
+import { lift, shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Login() {
@@ -63,29 +63,48 @@ export default function Login() {
   const side = layout.wide;
 
   return (
-    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[12] : layout.gap * 2 }]}>
-      <View style={[styles.intro, !side && styles.introStack]}>
-        <Pressable onLongPress={() => setShowServer((v) => !v)} accessibilityLabel="Buses UTA" style={styles.brand}>
-          <LineMark />
-          <Txt bold size="data">
-            Buses UTA
-          </Txt>
-        </Pressable>
-        <Txt bold size="title">
-          {t('loginTitle')}
-        </Txt>
-        <Txt size="body" dim>
-          {t('loginHelp')}
-        </Txt>
-        <Txt size="small" dim>
-          {t('trackingNoticeLogin')}
-        </Txt>
-        <View style={styles.langs}>
-          <LangSwitch />
+    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[8] : layout.gap * 2 }]}>
+      {/* A real person at the wheel: the app is theirs. Hidden when height is short (keyboard up on a phone). */}
+      {side || !layout.short ? (
+        <View style={[styles.photo, side ? styles.photoSide : styles.photoStack]}>
+          <Image
+            source={require('../assets/img/chofer.jpg')}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+            accessibilityElementsHidden
+          />
+          <Pressable
+            onLongPress={() => setShowServer((v) => !v)}
+            accessibilityLabel="Buses UTA"
+            style={[styles.brand, { backgroundColor: palette.panel }]}
+          >
+            <LineMark scale={0.7} />
+            <Txt bold size="body" color={palette.ink}>
+              Buses UTA
+            </Txt>
+          </Pressable>
+          <View style={[styles.caption, { backgroundColor: palette.accent }]}>
+            <Txt bold size="title" color={palette.onAccent}>
+              {t('loginTitle')}
+            </Txt>
+          </View>
         </View>
-      </View>
+      ) : null}
 
-      <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? space[4] : space[6] }]}>
+      <View style={[styles.side, side ? styles.sideWide : styles.cardStack]}>
+        <View style={styles.intro}>
+          <Txt size="body">{t('loginHelp')}</Txt>
+          <Txt size="small" dim>
+            {t('trackingNoticeLogin')}
+          </Txt>
+        </View>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: palette.panel, borderColor: palette.edge, padding: layout.phone ? space[4] : space[6] },
+          palette.mode === 'day' && lift,
+        ]}
+      >
         {fromLink ? <Notice item={{ key: 'link', tone: 'warn', title: t('scanFromApp'), live: 'polite' }} /> : null}
         <Action label={t('scanDriverBadge')} onPress={() => router.push('/scan')} kind="accent" />
         <Txt size="small" dim style={styles.or}>
@@ -151,6 +170,8 @@ export default function Login() {
           disabled={busy || !login || !password}
         />
       </View>
+        <LangSwitch />
+      </View>
     </Screen>
   );
 }
@@ -161,37 +182,59 @@ const styles = StyleSheet.create({
   },
   pageSide: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
   },
   pageStack: {
     flexDirection: 'column',
   },
-  intro: {
-    flex: 1,
-    gap: space[3],
+  photo: {
+    ...shape.card,
+    overflow: 'hidden',
+    justifyContent: 'space-between',
+    padding: space[4],
   },
-  introStack: {
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: 'auto',
+  photoSide: {
+    flex: 1,
+    minHeight: 420,
+  },
+  photoStack: {
+    height: 220,
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
   },
   brand: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space[3],
-    marginBottom: space[6],
+    gap: space[2],
     alignSelf: 'flex-start',
+    paddingVertical: space[1],
+    paddingLeft: space[2],
+    paddingRight: space[4],
+    borderRadius: 999,
   },
-  langs: {
-    marginTop: space[5],
-  },
-  card: {
+  // A solid band, not a gradient: the title stays readable over any part of the photo.
+  caption: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
     ...shape.control,
-    gap: space[3],
   },
-  cardSide: {
+  side: {
+    gap: space[5],
+    justifyContent: 'center',
+  },
+  sideWide: {
     flex: 1,
     maxWidth: 560,
+  },
+  intro: {
+    gap: space[2],
+  },
+  card: {
+    ...shape.card,
+    borderWidth: 1,
+    gap: space[3],
   },
   cardStack: {
     width: '100%',
