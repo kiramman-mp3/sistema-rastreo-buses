@@ -138,6 +138,15 @@ class TestPushEndpoints(HttpCase):
         self.assertEqual(resp.headers['Cache-Control'], 'no-cache')
         self.assertIn('addEventListener("push"', resp.text)
 
+    def test_enabling_does_not_wait_for_a_worker_that_controls_the_page(self):
+        """The settings page lives under /web, outside the scope of the worker: navigator.serviceWorker.ready never
+        settles there and the Enable button hung (DEF-075). It waits for its own registration instead."""
+        path = os.path.join(os.path.dirname(__file__), os.pardir, 'static', 'src', 'js', 'push_setup.js')
+        with open(path, encoding='utf-8') as handle:
+            source = handle.read()
+        self.assertNotIn('await navigator.serviceWorker.ready', source)
+        self.assertIn('whenActive(', source)
+
     def test_only_managers_can_use_the_push_endpoints(self):
         self.authenticate('viewer5', 'viewer5-pass')
         for path in ('state', 'subscribe', 'unsubscribe', 'test'):

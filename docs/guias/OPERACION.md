@@ -18,7 +18,7 @@ curl -s https://<DOMAIN>/bus_tracking/health
 Un SOS solo sirve si alguien lo ve. El sistema lo deja en la cola **Atención** del mapa del personal, avisa por notificación a los dispositivos suscritos y, cuando alguien lo marca como visto, la tableta del chofer muestra quién y a qué hora.
 
 - **Responsable de turno** (propuesta): una persona nombrada por cada franja en que haya buses en ruta, con la cola de Atención abierta o las notificaciones activas en su celular.
-- **Notificaciones**: cada responsable abre *Configuración > Notificaciones en este dispositivo* y las activa en su celular y en su PC. Mínimo dos dispositivos distintos, para que un celular sin batería no deje el SOS sin ver.
+- **Notificaciones**: cada responsable abre *Configuración > Notificaciones en este dispositivo* y las activa en su celular y en su PC. Mínimo dos dispositivos distintos, para que un celular sin batería no deje el SOS sin ver. En Windows, el aviso sale en el centro de notificaciones: *Configuración de Windows > Sistema > Notificaciones* debe tenerlas activas para Chrome o Edge, y *No molestar* apagado. Usa *Enviar una prueba* para comprobarlo.
 - **Qué hacer**: abrir el SOS, **marcarlo como visto** (el chofer lo ve en su pantalla) y llamar al chofer. Si no contesta, llamar a la central y avisar a la autoridad que corresponda.
 - **Tiempo de respuesta** (propuesta): visto en menos de 5 minutos. Revisa una vez al mes cuántos SOS hubo y cuánto tardaron (la ficha guarda hora de envío y de acuse).
 - **Fuera de servicio**: si nadie vigila (noche, feriado), dilo a los choferes: el SOS queda guardado pero nadie lo atiende hasta que alguien entre.
