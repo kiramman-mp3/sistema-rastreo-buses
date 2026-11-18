@@ -179,14 +179,34 @@
                     </ul>
                 </section>
 
+                <!-- The people the buses are for: three photographs, each with what the page does for them. -->
+                <section class="marco inicio-gente" aria-labelledby="titulo-gente">
+                    <div class="gente-texto">
+                        <h2 id="titulo-gente" class="entra" t-esc="s['people_title']"/>
+                        <p class="entra" style="--i: 1" t-esc="s['people_lead']"/>
+                    </div>
+                    <ul class="gente">
+                        <t t-foreach="[('estudiantes', 'people_1'), ('parada', 'people_2'), ('celular', 'people_3')]" t-as="photo">
+                            <li class="entra" t-attf-style="--i: #{photo_index}">
+                                <figure>
+                                    <img t-attf-src="/bus_tracking/static/img/gente/#{photo[0]}-800.webp"
+                                         t-attf-srcset="/bus_tracking/static/img/gente/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/gente/#{photo[0]}-1200.webp 1200w"
+                                         sizes="(min-width: 900px) 33vw, 90vw" loading="lazy" decoding="async" alt=""/>
+                                    <figcaption t-esc="s[photo[1]]"/>
+                                </figure>
+                            </li>
+                        </t>
+                    </ul>
+                </section>
+
                 <!-- How it works: three statements; the fragment beside them changes with each one. -->
                 <section t-if="featured" class="marco inicio-como" aria-labelledby="titulo-como">
                     <h2 id="titulo-como" t-esc="s['how_title']"/>
                     <div class="como">
                         <ol class="como-pasos">
-                            <li data-paso="1"><p class="frase" t-esc="s['how_1']"/><p t-esc="s['how_1b']"/></li>
-                            <li data-paso="2"><p class="frase" t-esc="s['how_2']"/><p t-esc="s['how_2b']"/></li>
-                            <li data-paso="3"><p class="frase" t-esc="s['how_3']"/><p t-esc="s['how_3b']"/></li>
+                            <li data-paso="1"><img class="paso-arte" src="/bus_tracking/static/img/gente/mapa-celular.png" alt="" loading="lazy" width="120" height="120"/><p class="frase" t-esc="s['how_1']"/><p t-esc="s['how_1b']"/></li>
+                            <li data-paso="2"><img class="paso-arte" src="/bus_tracking/static/img/gente/ruta-pin.png" alt="" loading="lazy" width="120" height="120"/><p class="frase" t-esc="s['how_2']"/><p t-esc="s['how_2b']"/></li>
+                            <li data-paso="3"><img class="paso-arte" src="/bus_tracking/static/img/gente/espera.png" alt="" loading="lazy" width="120" height="120"/><p class="frase" t-esc="s['how_3']"/><p t-esc="s['how_3b']"/></li>
                         </ol>
                         <div class="como-escenario" data-ui="" data-estado="1" aria-hidden="true">
                             <div class="fragmento-cabeza">
@@ -245,6 +265,7 @@
                         <p id="escribir-nota" class="nota" t-esc="s['write_note']"/>
                     </form>
                     <div class="despues">
+                        <img class="despues-arte" src="/bus_tracking/static/img/gente/mapa-personas.png" alt="" loading="lazy" width="160" height="160"/>
                         <h3 t-esc="s['next_title']"/>
                         <ol class="linea">
                             <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_1']"/></span></li>
