@@ -52,7 +52,7 @@ add([p('<b>Proyecto final integrador: Gestión de Calidad del Software</b>', H1)
 
 add([p('<b>1. Resumen</b>', H2),
      p('El sistema no se limita a mostrar un bus en un mapa: registra recorridos con horario previsto y real, evalúa cada parada y cada recorrido con reglas explícitas, calcula '
-       '<b>12 indicadores</b> (8 de transporte y 4 de calidad del software) con consultas SQL que se pueden comprobar, los muestra en un tablero dentro de Odoo y en Grafana, '
+       '<b>12 indicadores</b> (8 de transporte y 4 de calidad del software) con consultas SQL que se pueden comprobar, los muestra en un tablero dentro de Odoo, '
        'y se mide a sí mismo: sincronización con Traccar, tiempo de respuesta y detección correcta de incidencias. Se probó con %s pruebas automáticas de Odoo, %s de la app y una suite en vivo de %s casos, '
        'se analizó con SonarQube y se midió su rendimiento hasta un millón de posiciones.' % (thousands(UNIT['total']), '167', SUITE['total']))])
 
@@ -63,7 +63,6 @@ add(table([
     ['Pruebas de la app del chofer (Jest)', '167', '0', 'Cobertura de sentencias 86,9 %'],
     ['Suite en vivo contra un servidor real', str(SUITE['total']), str(SUITE['fallos']), 'P7 (60 posiciones de un mismo bus con 20 hilos) está en el límite: p95 entre 1,8 s y 2,2 s en cuatro corridas'],
     ['Auditoría aleatoria de peticiones', thousands(AUD['total']), str(AUD['fallos']), 'Sin respuestas 5xx'],
-    ['Grafana: prueba de humo', '19', '0', 'Salud, fuente de datos, token, rol de solo lectura, cabeceras'],
 ], [0.34, 0.12, 0.1, 0.44], align_center=(1, 2), caption='Pruebas ejecutadas'))
 
 add([p('<b>3. Los doce indicadores</b>', H2),
@@ -114,7 +113,6 @@ add([p('<b>Ciclos PDCA.</b> (1) Análisis estático: 16 bugs y 12 vulnerabilidad
 add([p('<b>7. Qué falta</b>', H2)])
 add(bullets([
     'Capturas y ensayo con un celular real con Traccar Client por datos móviles (la guía y la lista de evidencias están en <i>DEMO-TRACCAR-CLIENT.md</i>).',
-    'Confirmar con el docente que Grafana sirve en lugar de Power BI; el tablero de Odoo cubre el criterio por sí solo.',
     'Desplegar la versión 16.0.1.6.0 en el servidor de Azure, con respaldo y migración previa.',
     'Pruebas unitarias del JavaScript del módulo (hoy sin cobertura medida), análisis de dependencias y una prueba de concurrencia.',
     'Revisión del kichwa por una persona hablante: la traducción la hizo una IA.',

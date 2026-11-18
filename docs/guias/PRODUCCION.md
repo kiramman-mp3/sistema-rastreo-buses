@@ -16,7 +16,7 @@ Desde el 2026-11-17 la base de producción es **Supabase** (decisión 1 de `docs
 
 Los scripts hablan con Supabase desde un contenedor cliente de Postgres (`scripts/db.sh`), siempre con TLS:
 
-- `init-prod.sh` crea en Supabase la base `traccar` (con el mismo usuario del proyecto), instala Odoo en su base, crea el rol de Grafana y escribe `db_sslmode = require` en `config/odoo.prod.conf`.
+- `init-prod.sh` crea en Supabase la base `traccar` (con el mismo usuario del proyecto), instala Odoo en su base y escribe `db_sslmode = require` en `config/odoo.prod.conf`.
 - `backup.sh` y `restore.sh` vuelcan y restauran las dos bases de Supabase. El filestore de Odoo vive en el volumen `odoo-data` del servidor y va en el mismo respaldo.
 - Usa el *session pooler* (puerto 5432) o la conexión directa, nunca el *transaction pooler* (6543): Odoo mantiene conexiones largas y usa `LISTEN/NOTIFY`.
 - `POSTGRES_IMAGE` es también el cliente: debe ser de la misma versión mayor que el servidor de Supabase o más nueva, o `pg_dump` se niega a correr.
@@ -221,6 +221,4 @@ La segunda auditoría ([`docs/arquitectura/PLAN-AUDITORIA-2.md`](../arquitectura
 - El segundo factor (2FA) es opcional para cada usuario: Odoo sólo sabe imponerlo por correo y el sistema no usa correo. Pide a cada administrador y manager que lo active (ver *Acceso al panel*).
 - Los contadores de intentos de login viven en la memoria de cada worker: se reinician al reiniciar Odoo.
 - El token de API de Traccar se guarda en la base y sólo lo leen los administradores. Quien tenga una copia de la base puede usarlo: revócalo en Traccar si se filtra. De las credenciales QR y de las sesiones de la tableta sólo se guarda la huella.
-- El token de Grafana viaja en la URL del iframe (queda en los logs del proxy y de Grafana) y dura lo que fije *Ajustes* (8 h por defecto). Al renovarlo, el panel se recarga y pierde filtros y zoom. Si los logs no son de confianza, acorta la duración.
-- Los conteos diarios de posiciones de Grafana se actualizan cada 30 minutos (cron *contar posiciones por día*): el día en curso puede ir hasta media hora atrasado.
 - Los respaldos no se copian fuera del servidor automáticamente.

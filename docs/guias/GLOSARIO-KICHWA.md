@@ -32,7 +32,7 @@ Vocabulario de los recorridos, los indicadores y el tablero (R1 a R11):
 | horario | ruray pacha | alerta | yuyachik |
 | incidente | pasashka | día | punchay |
 
-Los días de la semana, Grafana, Fleet, SQL, p95 y los nombres de campos técnicos se dejaron como en español o en inglés.
+Los días de la semana, Fleet, SQL, p95 y los nombres de campos técnicos se dejaron como en español o en inglés.
 Las frases largas (ayudas y explicaciones de los indicadores) son las que más necesitan la revisión de una persona hablante.
 
 Se dejaron como en español las palabras que ya se dicen así: bus, GPS, QR, SOS, correo, telefono, servidor,

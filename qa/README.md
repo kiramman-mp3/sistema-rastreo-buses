@@ -26,7 +26,6 @@ Entorno automatizado para pruebas unitarias, de integración, auditoría estáti
 | [`generar_informe.py`](generar_informe.py) | Compilador del PDF de la evaluación del 28-oct-2026 (histórico; ya no reproducible con las evidencias nuevas). | `docs/calidad/Informe_calidad_rastreo_buses.pdf` |
 | [`generar_informe_final.py`](generar_informe_final.py) | Informe final del proyecto con ReportLab: pruebas, indicadores, SonarQube, rendimiento y defectos, desde las evidencias actuales. | `docs/calidad/Informe_final_proyecto_rastreo_buses.pdf` |
 | [`rendimiento_volumen.py`](rendimiento_volumen.py) | Mide cada pantalla con 1 000 a 1 000 000 de posiciones y hasta 50 000 recorridos (p50 y p95). | `docs/calidad/evidencias/rendimiento*.json` |
-| [`grafana_smoke.py`](grafana_smoke.py) | Prueba de humo de un Grafana en marcha: salud, fuente de datos, token, rol de solo lectura y cabeceras. | PASS/FAIL por comprobación |
 | [`mock_driver_api.py`](mock_driver_api.py) | Servidor mock de Odoo para pruebas de interfaz de la app del chofer. | Emula endpoints `/driver/*`. |
 | [`traducciones.py`](traducciones.py) | Verifica que no existan cadenas sin traducir en el archivo `i18n/es.po`. | Validación de internacionalización. |
 
