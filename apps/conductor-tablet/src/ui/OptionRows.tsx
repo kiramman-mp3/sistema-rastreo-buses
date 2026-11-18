@@ -68,6 +68,9 @@ type RouteOptionProps = {
 export const RouteOption = memo(function RouteOption({ route, selected, hit, onPick }: RouteOptionProps) {
   const { palette } = useTheme();
   const chip = route.color || palette.accent;
+  // Picked: the whole card takes the line's colour, so the choice reads from across the cab.
+  const fill = selected ? chip : palette.panel;
+  const ink = selected ? readableOn(chip) : palette.ink;
   return (
     <Press
       onPress={() => onPick(route)}
@@ -76,25 +79,27 @@ export const RouteOption = memo(function RouteOption({ route, selected, hit, onP
       style={[
         styles.option,
         styles.row,
-        { minHeight: hit + 8, backgroundColor: selected ? palette.ink : palette.panel, borderColor: selected ? palette.ink : palette.edge },
+        { minHeight: hit + 16, backgroundColor: fill, borderColor: selected ? chip : palette.edge },
         selected && palette.mode === 'day' && lift,
       ]}
     >
-      <View style={[styles.chip, { backgroundColor: chip }]}>
-        <Txt bold size="body" color={readableOn(chip)}>
+      <View style={[styles.chip, selected ? { backgroundColor: 'rgba(255,255,255,0.22)' } : { backgroundColor: chip }]}>
+        <Txt bold size="body" color={selected ? ink : readableOn(chip)}>
           {route.code}
         </Txt>
       </View>
-      <Txt bold size="body" color={selected ? palette.ground : palette.ink} lines={2} style={styles.grow}>
-        {route.name}
-      </Txt>
-      <Pick on={selected} />
+      <View style={styles.grow}>
+        <Txt bold size="body" color={ink} lines={2}>
+          {route.name}
+        </Txt>
+      </View>
+      <Pick on={selected} light={selected} />
     </Press>
   );
 });
 
 /** The radio mark: a ring when free, a yellow stop with a dark core when picked (shape, not only colour). */
-function Pick({ on }: { on: boolean }) {
+function Pick({ on, light }: { on: boolean; light?: boolean }) {
   const { palette } = useTheme();
   return (
     <View
@@ -102,7 +107,7 @@ function Pick({ on }: { on: boolean }) {
       style={[
         styles.pick,
         on
-          ? { backgroundColor: palette.signal, borderColor: palette.signal }
+          ? { backgroundColor: palette.signal, borderColor: light ? '#FFFFFF' : palette.signal }
           : { borderColor: palette.mode === 'day' ? '#9AA5A3' : palette.ink2 },
       ]}
     >
