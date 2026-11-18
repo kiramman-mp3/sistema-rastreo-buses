@@ -42,6 +42,7 @@ export default function Layout() {
   const [loaded, failed] = useFonts({
     [fonts.text]: require('../assets/fonts/AtkinsonHyperlegible-Regular.ttf'),
     [fonts.bold]: require('../assets/fonts/AtkinsonHyperlegible-Bold.ttf'),
+    [fonts.display]: require('../assets/fonts/BricolageGrotesque-Bold.ttf'),
   });
 
   return (

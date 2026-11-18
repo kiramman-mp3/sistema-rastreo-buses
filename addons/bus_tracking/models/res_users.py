@@ -1,23 +1,33 @@
 import base64
+import datetime
 import logging
 from urllib.parse import urlencode
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
-from .utils import pick_odoo_lang
+from .utils import int_param, pick_odoo_lang
 
 _logger = logging.getLogger(__name__)
+
+# Longest wait after many failed sign-ins from one address.
+MAX_LOGIN_COOLDOWN = 3600
 
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
-    # Both hold the raw badge token, which signs the driver in: only managers may read them.
-    driver_badge_qr = fields.Binary(string="Driver badge QR", readonly=True, copy=False,
-                                    groups='bus_tracking.group_bus_manager')
-    driver_badge_link = fields.Char(string="Badge link", readonly=True, copy=False,
-                                    groups='bus_tracking.group_bus_manager')
+    def _on_login_cooldown(self, failures, previous):
+        """Odoo makes an address wait base.login_cooldown_duration seconds after each failure past
+        base.login_cooldown_after, so a password can still be guessed at a steady pace. Double the wait for every
+        further failure, up to an hour."""
+        min_failures = int_param(self.env, 'base.login_cooldown_after', 5)
+        if min_failures <= 0 or failures < min_failures:
+            return False
+        delay = int_param(self.env, 'base.login_cooldown_duration', 60)
+        delay = min(delay * 2 ** min(failures - min_failures, 12), MAX_LOGIN_COOLDOWN)
+        return datetime.datetime.now() - previous < datetime.timedelta(seconds=delay)
+
     driver_badge_active = fields.Boolean(
         string="Badge active",
         compute='_compute_driver_badge_active',
@@ -59,7 +69,14 @@ class ResUsers(models.Model):
     def write(self, vals):
         if vals.get('driver_password'):
             vals['password'] = vals.pop('driver_password')
-        return super(ResUsers, self.with_context(no_reset_password=True)).write(vals)
+        result = super(ResUsers, self.with_context(no_reset_password=True)).write(vals)
+        if vals.get('password'):
+            # A new password must lock out whoever had the old one: tablets signed in with it sign in again.
+            # The QR badge is a separate credential and is kept.
+            Token = self.env['bus.driver.token']
+            for user in self:
+                Token._revoke_sessions(user)
+        return result
 
     def _compute_is_bus_driver(self):
         driver_group = self.env.ref('bus_tracking.group_bus_driver', raise_if_not_found=False)
@@ -86,7 +103,6 @@ class ResUsers(models.Model):
         for user in self:
             user.write({'groups_id': [(4 if user.is_bus_driver else 3, driver_group.id)]})
 
-    @api.depends('driver_badge_qr')
     def _compute_driver_badge_active(self):
         now = fields.Datetime.now()
         active_tokens = self.env['bus.driver.token'].sudo().search([
@@ -96,7 +112,18 @@ class ResUsers(models.Model):
         ])
         users_with_token = set(active_tokens.mapped('user_id.id'))
         for user in self:
-            user.driver_badge_active = user.id in users_with_token and bool(user.driver_badge_qr)
+            user.driver_badge_active = user.id in users_with_token
+
+    def action_edit_driver(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Edit driver"),
+            'res_model': 'bus.driver.edit',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_user_id': self.id},
+        }
 
     def _check_badge_manager(self):
         # The buttons are hidden in the view, but the methods can be called over RPC.
@@ -110,6 +137,7 @@ class ResUsers(models.Model):
             raise UserError(_("The user must be in the Driver group to have a QR badge."))
 
         raw = self.env['bus.driver.token']._issue_badge(self)
+        self.invalidate_recordset(['driver_badge_active'])
         base = (self.env['ir.config_parameter'].sudo().get_param('web.base.url') or '').rstrip('/')
         if base.endswith('/web'):
             base = base[:-4].rstrip('/')
@@ -118,18 +146,21 @@ class ResUsers(models.Model):
         link = f"uta-buses://login?{query}"
 
         png = self.env['ir.actions.report'].barcode('QR', link, width=280, height=280)
-        self.sudo().write({
-            'driver_badge_qr': base64.b64encode(png),
-            'driver_badge_link': link,
-        })
-        return True
+        # The badge is shown once and never stored: only the hash of its token is kept (DEF-012, S1).
+        shown = self.env['bus.driver.badge'].sudo().create({
+            'user_id': self.id, 'qr': base64.b64encode(png), 'link': link})
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("QR badge of %s", self.name),
+            'res_model': 'bus.driver.badge',
+            'res_id': shown.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
 
     def action_revoke_driver_badge(self):
         self._check_badge_manager()
         for user in self:
             self.env['bus.driver.token']._revoke_badge(user)
-            user.sudo().write({
-                'driver_badge_qr': False,
-                'driver_badge_link': False,
-            })
+        self.invalidate_recordset(['driver_badge_active'])
         return True

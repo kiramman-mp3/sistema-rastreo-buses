@@ -3,7 +3,7 @@
     "name": "Buses UTA",
     "slug": "conductor-tablet",
     "scheme": "uta-buses",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -29,7 +29,8 @@
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.SCHEDULE_EXACT_ALARM"
       ],
       "blockedPermissions": ["android.permission.RECORD_AUDIO"],
       "adaptiveIcon": {
@@ -60,6 +61,13 @@
         }
       ],
       "expo-task-manager",
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "trip-reminders",
+          "enableRemoteNotifications": false
+        }
+      ],
       [
         "expo-location",
         {

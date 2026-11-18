@@ -1,7 +1,7 @@
 /* Modern, executive backend styling for Buses UTA in Odoo 16 */
 
 .o_web_client {
-    --bus-radius: 8px;
+    --bus-radius: var(--radio-g, 22px);
 }
 
 /* ---------- Navbar ---------- */
@@ -39,13 +39,13 @@
 /* ---------- Forms: Executive Card Sheet ---------- */
 
 .o_web_client .o_form_view .o_form_sheet_bg {
-    background: #F8FAFC;
+    background: var(--papel);
 }
 
 .o_web_client .o_form_view .o_form_sheet {
     border-radius: var(--bus-radius);
     border: 1px solid var(--bus-line);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    box-shadow: var(--sombra);
 }
 
 .o_web_client .o_form_view .o_group .o_horizontal_separator {
@@ -186,4 +186,20 @@
     justify-content: space-between;
     gap: 0.5rem;
     margin-top: 0.35rem;
+}
+
+/* ---------- Kanban: the same soft cards as the live map ---------- */
+
+.o_web_client .o_kanban_renderer {
+    background: var(--papel);
+}
+
+.o_web_client .o_kanban_renderer .o_kanban_record {
+    border: 1px solid var(--papel-2);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+}
+
+.o_web_client .o_kanban_renderer .o_kanban_record .btn {
+    border-radius: var(--radio);
 }

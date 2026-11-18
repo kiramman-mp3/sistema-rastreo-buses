@@ -1,3 +1,5 @@
+import { isLocalHost } from '../config/odooUrl';
+
 export const MS_TO_KNOTS = 1.94384;
 
 export type Fix = {
@@ -17,8 +19,15 @@ function param(url: URL, key: string, value: number | string | null, digits?: nu
   url.searchParams.set(key, typeof value === 'number' && digits !== undefined ? value.toFixed(digits) : String(value));
 }
 
+/**
+ * The device identifier, the only credential of the bus, travels in this address: it is sent over https only,
+ * except to a host on the local network (DEF-062).
+ */
 export function buildOsmAndUrl(gpsUrl: string, uniqueId: string, fix: Fix): string {
-  const url = new URL(gpsUrl.includes('://') ? gpsUrl : `http://${gpsUrl}`);
+  const url = new URL(gpsUrl.includes('://') ? gpsUrl : `https://${gpsUrl}`);
+  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLocalHost(url.hostname))) {
+    throw new Error('insecure_gps_url');
+  }
   url.searchParams.set('id', uniqueId);
   param(url, 'lat', fix.lat, 6);
   param(url, 'lon', fix.lon, 6);

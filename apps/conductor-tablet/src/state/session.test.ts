@@ -61,6 +61,23 @@ function gpsMemory(): GpsStore {
 }
 
 describe('session', () => {
+  test('the next trips of the driver become reminders, and signing out forgets them', async () => {
+    const tokens = memoryStore('saved');
+    const upcoming = [{ id: 4, planned_start: '2026-11-18T13:00:00Z', route_id: 2, route_code: 'L1',
+      route_name: 'Centro', vehicle_id: 1, vehicle_name: 'Bus 1' }];
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: (url) => (String(url).endsWith('/logout') ? json(200, { ok: true }) : json(200, { ...me, upcoming })),
+    });
+    const reminders = { sync: jest.fn(async () => undefined), clear: jest.fn(async () => undefined) };
+    const session = new Session(tokens, client, undefined, undefined, undefined, undefined, undefined, undefined, reminders);
+    await session.boot();
+    expect(reminders.sync).toHaveBeenCalledWith(upcoming);
+    await session.logout();
+    expect(reminders.clear).toHaveBeenCalled();
+  });
+
   test('boot restores an active shift from /me', async () => {
     const tokens = memoryStore('saved');
     const client = createClient({
@@ -240,6 +257,86 @@ describe('session', () => {
     expect(gps.started).toEqual([]);
   });
 
+  test('endShift sends the saved positions before closing the shift on the server', async () => {
+    const tokens = memoryStore('tok');
+    const order: string[] = [];
+    const gps = gpsMock();
+    const stop = gps.stop;
+    gps.stop = async () => {
+      order.push('gps.stop');
+      await stop();
+    };
+    const fetchMock = jest.fn(async (url: string) => {
+      if (String(url).endsWith('/shift/end')) order.push('shift/end');
+      return json(200, { ok: true });
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gps, gpsMemory());
+    session.snapshot.shift = { id: 3, vehicle_id: 1, route_id: 2, start: '2026-10-30T16:00:00Z' };
+    await session.endShift();
+    expect(order.indexOf('gps.stop')).toBeLessThan(order.indexOf('shift/end'));
+    expect(order.indexOf('gps.stop')).toBeGreaterThanOrEqual(0);
+  });
+
+  describe('changing server', () => {
+    const realFetch = globalThis.fetch;
+    afterEach(() => {
+      globalThis.fetch = realFetch;
+    });
+
+    test('a new server signs out first and never gets the old token', async () => {
+      const tokens = memoryStore('old-token');
+      const gps = gpsMock();
+      gps.started.push('running');
+      const ends = memoryStore('12');
+      const seen: (string | undefined)[] = [];
+      globalThis.fetch = jest.fn(async (_url: string, init?: RequestInit) => {
+        seen.push((init?.headers as Record<string, string>)?.Authorization);
+        return json(200, me);
+      }) as unknown as typeof fetch;
+      const session = new Session(tokens, undefined, gps, gpsMemory(), undefined, memoryStore(), ends);
+      session.snapshot.odooUrl = 'https://old.example.com';
+      session.snapshot.token = 'old-token';
+      await session.setOdooUrl('https://new.example.com');
+      expect(await tokens.get()).toBeNull();
+      expect(await ends.get()).toBeNull();
+      expect(gps.started).toEqual([]);
+      expect(session.snapshot.token).toBeNull();
+      expect(session.snapshot.odooUrl).toBe('https://new.example.com');
+      await session.boot();
+      expect(seen.every((auth) => auth === undefined)).toBe(true);
+    });
+
+    test('the same server keeps the session', async () => {
+      const tokens = memoryStore('tok');
+      const session = new Session(tokens, undefined, undefined, undefined, undefined, memoryStore());
+      session.snapshot.odooUrl = 'https://same.example.com';
+      await session.setOdooUrl('https://same.example.com/');
+      expect(await tokens.get()).toBe('tok');
+    });
+
+    test('a badge from another server moves the tablet only when accepted', async () => {
+      const urls = memoryStore('https://old.example.com');
+      const tokens = memoryStore(null);
+      let accept = false;
+      globalThis.fetch = jest.fn(async (url: string) => {
+        if (String(url).endsWith('/login_badge')) {
+          return accept ? json(200, { token: 'new-tok', driver: me.driver }) : json(401, { error: 'invalid_badge' });
+        }
+        return json(200, me);
+      }) as unknown as typeof fetch;
+      const session = new Session(tokens, undefined, undefined, undefined, undefined, urls);
+      await session.boot();
+      await expect(session.loginWithBadge('bad', 'https://new.example.com')).rejects.toBeTruthy();
+      expect(await urls.get()).toBe('https://old.example.com');
+      expect(session.snapshot.odooUrl).toBe('https://old.example.com');
+      accept = true;
+      await session.loginWithBadge('good', 'https://new.example.com');
+      expect(await urls.get()).toBe('https://new.example.com');
+      expect(session.snapshot.token).toBe('new-tok');
+    });
+  });
+
   test('loginWithBadge exchanges badge token for a session and populates driver state', async () => {
     const tokens = memoryStore(null);
     const fetchMock = jest.fn(async (url: string) => {
@@ -361,6 +458,9 @@ describe('session', () => {
     const pressed = bodies[0].reported_at;
     expect(pressed).toMatch(/Z$/);
 
+    await session.flushIncidents();
+    expect(await queue.size()).toBe(1);
+    status = 401;
     await session.flushIncidents();
     expect(await queue.size()).toBe(1);
     status = 200;

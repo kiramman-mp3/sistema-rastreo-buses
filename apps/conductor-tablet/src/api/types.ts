@@ -19,11 +19,24 @@ export type Shift = {
   start: string;
 };
 
+/** A planned trip of this driver in the next hours: the tablet reminds them before it starts. */
+export type UpcomingTrip = {
+  id: number;
+  planned_start: string;
+  route_id: number;
+  route_code: string;
+  route_name: string;
+  vehicle_id: number;
+  vehicle_name: string;
+};
+
 export type MeResponse = {
   driver: Driver;
   vehicles: Vehicle[];
   routes: Route[];
   shift: Shift | null;
+  /** Missing on servers older than the trip reminders. */
+  upcoming?: UpcomingTrip[];
 };
 
 export type StartResponse = {
@@ -45,7 +58,7 @@ export type StopState = {
 
 export type Alert = {
   id: number;
-  kind: 'speeding' | 'offline' | 'long_stop' | 'off_route' | string;
+  kind: 'speeding' | 'offline' | 'long_stop' | 'off_route' | 'skipped_stop' | string;
   state: 'open' | 'closed' | string;
   detail: string;
   start: string;

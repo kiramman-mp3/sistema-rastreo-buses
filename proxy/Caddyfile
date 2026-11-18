@@ -14,19 +14,6 @@
 	}
 }
 
-# Grafana is shown inside an iframe of the Odoo site, so it must be allowed to be framed by that site and no other.
-(grafana_headers) {
-	encode zstd gzip
-	header {
-		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-		X-Content-Type-Options nosniff
-		Referrer-Policy strict-origin-when-cross-origin
-		Content-Security-Policy "frame-ancestors https://{$DOMAIN}"
-		-X-Frame-Options
-		-Server
-	}
-}
-
 {$DOMAIN} {
 	import security_headers
 
@@ -55,14 +42,13 @@
 	reverse_proxy traccar:5055
 }
 
-# Traccar web and admin interface
-{$TRACCAR_DOMAIN} {
+# Traccar's own panel. Odoo manages Traccar through its API, so nobody needs it day to day: it answers only to the
+# addresses in TRACCAR_PANEL_ALLOW (by default this machine, i.e. nobody on the internet). Without TRACCAR_DOMAIN
+# this is a local name nobody reaches.
+{$TRACCAR_DOMAIN:traccar.localhost} {
 	import security_headers
+	@outside not remote_ip {$TRACCAR_PANEL_ALLOW:127.0.0.1/32}
+	respond @outside 404
 	reverse_proxy traccar:8082
 }
 
-# Grafana dashboards (profile "bi"). Without GRAFANA_DOMAIN this is a local name nobody reaches.
-{$GRAFANA_DOMAIN:grafana.localhost} {
-	import grafana_headers
-	reverse_proxy grafana:3000
-}

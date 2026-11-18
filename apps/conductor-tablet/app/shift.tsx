@@ -24,7 +24,7 @@ import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
 import { useStopCue } from '../src/ui/useStopCue';
-import { border, shape, space } from '../src/ui/theme';
+import { border, lift, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
   sending: 'gpsSending',
@@ -115,7 +115,8 @@ export default function ShiftScreen() {
         }
       : null,
     alerts: (shiftState?.alerts ?? [])
-      .filter((a) => a.state === 'open')
+      // A skipped stop is written closed (it is a fact, not a state): the driver still has to hear about it.
+      .filter((a) => a.state === 'open' || a.kind === 'skipped_stop')
       .map((a) => ({ id: a.id, title: alertLabel(a.kind), detail: a.detail })),
     dismissed,
   });
@@ -320,20 +321,36 @@ export default function ShiftScreen() {
   return (
     <Screen scroll={pageScroll}>
       {/* Header: bus and line, real GPS state, time, day or night */}
-      <View style={[styles.header, layout.compact && styles.headerPhone, { backgroundColor: palette.panel }]}>
-        <View style={[styles.identity, tallHeader && styles.identityTall, layout.short && styles.identityShort]}>
-          <View style={[styles.chip, { backgroundColor: color }]}>
+      <View
+        style={[
+          styles.header,
+          layout.compact && styles.headerPhone,
+          { backgroundColor: palette.panel, borderColor: palette.edge },
+          palette.mode === 'day' && lift,
+        ]}
+      >
+        {/* The line as a block of its own colour: which bus and which line, readable from across the cab. */}
+        <View
+          style={[
+            styles.identity,
+            styles.identityBlock,
+            tallHeader && styles.identityTall,
+            layout.short && styles.identityShort,
+            { backgroundColor: color },
+          ]}
+        >
+          <View style={[styles.chip, styles.chipOnColor]}>
             <Txt bold size="body" color={readableOn(color)}>
               {route?.code ?? ''}
             </Txt>
           </View>
           <View style={styles.identityText}>
-            <Txt bold size="body" lines={1}>
+            <Txt bold size="body" lines={1} color={readableOn(color)}>
               {bus?.name ?? ''}
             </Txt>
             {/* On a phone on its side the line code already says which line it is: one row for the whole header. */}
             {layout.short && layout.width < 760 ? null : (
-              <Txt size="small" dim lines={1}>
+              <Txt size="small" lines={1} color={readableOn(color)}>
                 {route?.name ?? ''}
               </Txt>
             )}
@@ -379,7 +396,7 @@ export default function ShiftScreen() {
             pageScroll ? styles.mapFixed : side ? (layout.short ? styles.mapSideShort : styles.mapSide) : styles.mapStack,
             // The stop strip comes before the map: on a screen with little height the map gives way first.
             !pageScroll && !side && layout.height < 700 && styles.mapStackLow,
-            { backgroundColor: palette.panel },
+            { backgroundColor: palette.panel, borderColor: palette.edge },
           ]}
         >
           <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
@@ -423,12 +440,25 @@ const styles = StyleSheet.create({
     paddingVertical: space[3],
     columnGap: space[4],
     rowGap: space[2],
-    ...shape.control,
+    ...shape.card,
+    borderWidth: 1,
   },
   // On a phone every pixel counts: tighter sides so the GPS state and the clock fit one row of a 360 dp screen.
   headerPhone: {
     paddingHorizontal: space[3],
     paddingVertical: space[2],
+  },
+  identityBlock: {
+    // hugs its words instead of stretching across the header
+    flexGrow: 0,
+    flexBasis: 'auto',
+    paddingVertical: space[2],
+    paddingLeft: space[2],
+    paddingRight: space[5],
+    ...shape.control,
+  },
+  chipOnColor: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   identity: {
     flexDirection: 'row',
@@ -530,7 +560,8 @@ const styles = StyleSheet.create({
     marginTop: space[1],
   },
   map: {
-    ...shape.control,
+    ...shape.card,
+    borderWidth: 1,
     overflow: 'hidden',
   },
   mapSide: {

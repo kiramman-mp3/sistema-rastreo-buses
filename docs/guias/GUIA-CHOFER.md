@@ -24,17 +24,27 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 1. Abre **Buses UTA** y pulsa **Escanear credencial QR** para entrar en 1 segundo con tu carnet de chofer (o ingresa manualmente con usuario y clave).
 2. Elige el bus (los que están en uso salen atenuados) y la línea, y pulsa **Iniciar turno**. Concede ubicación *todo el tiempo* y la exclusión de ahorro de batería si Android la pide.
 3. Arriba a la derecha está el estado del GPS, en palabras: **GPS enviando**, **Sin red: N puntos guardados** (se envían solos al volver la señal), **Esperando señal del GPS** o **GPS sin permiso**. Tócalo para ver el detalle.
-4. Mientras manejas, la pantalla muestra en grande la **próxima parada**, cuánto falta y la franja con las paradas siguientes. Las paradas avanzan solas: no hay que confirmar nada. Al llegar a la última parada empieza la vuelta y la franja se recorre al revés; cada vuelta empieza de cero.
+4. Mientras manejas, la pantalla muestra en grande la **próxima parada**, cuánto falta y la franja con las paradas siguientes. Las paradas avanzan solas: no hay que confirmar nada. Puedes empezar en cualquier parada: la próxima es siempre la que sigue a la última por la que pasaste. Al llegar a la última parada empieza la vuelta y la franja se recorre al revés; cada vuelta empieza de cero.
+   - Si pasas una parada sin entrar en su radio (o empiezas el turno más adelante, por ejemplo en la cuarta), al llegar a la siguiente aparece la alerta **Parada no pasada** con el nombre de cada parada que faltó, y la oficina recibe el mismo aviso. Si te desvías de la ruta más de 150 m durante 3 minutos aparece **Fuera de ruta**. Las dos son avisos, no bloquean nada: sigue el recorrido.
 5. **En marcha la pantalla se bloquea** (más de 10 km/h por 5 segundos): solo responde el **SOS**. Para avisar un problema o terminar el turno, detén el bus.
 6. **Avisar un problema**: eliges tráfico, avería, accidente u otro, y una nota si quieres. Si no hay red (o el servidor falla), el aviso se guarda y sale solo, con la hora en que lo pulsaste. Al enviarlo (o guardarlo sin red) la pantalla vuelve sola al turno, y no se puede enviar dos veces el mismo aviso.
-7. **SOS**: mantén presionado un segundo y medio (así un bache no lo dispara). Sin red dice "SOS guardado"; en cuanto llega a la oficina cambia a "SOS enviado. Esperando a la central." y, cuando alguien lo ve, muestra quién y a qué hora. Un SOS sin atender no desaparece del mapa de la oficina.
+7. **SOS**: mantén presionado un segundo y medio (así un bache no lo dispara). Sin red dice "SOS guardado"; en cuanto llega a la oficina cambia a "SOS enviado. Esperando a la central." y, cuando alguien lo ve, muestra quién y a qué hora. Un SOS sin atender no desaparece del mapa de la oficina. **Mientras diga "SOS guardado", llama también por radio o teléfono**: la oficina no lo ve hasta que vuelva la señal. Si terminas el turno antes, la tableta lo sigue intentando y la oficina lo acepta hasta 2 horas después del cierre.
 8. El botón **Día / Noche** cambia los colores (el modo día se lee mejor al sol). Si lo dejas presionado, vuelve al cambio automático por la hora.
-9. Al terminar, pulsa **Terminar turno** y confirma. Ahí se corta el GPS, **aunque no haya señal**: la app avisa a la oficina apenas vuelva la red (y si nunca vuelve, Odoo cierra el turno solo a las 14 horas). Antes de apagarse, el GPS intenta enviar los puntos guardados. **Cerrar sesión** también detiene el GPS en esa tableta.
+9. Al terminar, pulsa **Terminar turno** y confirma. Ahí se corta el GPS, **aunque no haya señal**: la app avisa a la oficina apenas vuelva la red (y si nunca vuelve, Odoo cierra el turno solo a las 14 horas). Antes de cerrar el turno, el GPS envía los puntos guardados; los que no salgan porque no hay señal se pierden, así que **si puedes, termina el turno con señal**. **Cerrar sesión** también detiene el GPS en esa tableta.
 10. Si usas letra grande en Android, la pantalla del turno se desplaza hacia abajo: los avisos importantes siempre están arriba y los botones **Avisar un problema**, **SOS** y **Terminar turno** quedan al final. La pantalla se puede girar: vale de pie o acostada, en celular o tableta.
 11. Cada alerta tiene un botón **Cerrar**: la quita de tu pantalla durante ese turno (la oficina la sigue viendo hasta resolverla). Si hay más de una, el **+1** junto al título dice cuántas esperan. El mensaje del SOS también se puede cerrar, pero solo cuando la central ya lo recibió: mientras dice «Enviando» o «guardado» se queda a la vista.
 11. Si abres la app sin señal, tu sesión sigue abierta y el GPS sigue guardando; la app vuelve a intentar sola.
 
 Si cierras la app sin terminar el turno, el servicio en primer plano sigue enviando posición hasta que termines el turno. Si la oficina cierra tu turno o revoca la tableta, la app apaga el GPS en cuanto se entera (en unos segundos con señal) y vuelve a *Elegir bus*; Odoo, además, descarta cualquier posición de un bus sin turno abierto.
+
+### Recordatorios de recorridos
+
+Si la oficina te asigna un recorrido (campo **Chofer** del horario o del recorrido programado en Odoo), la tableta avisa dos veces aunque esté sin señal o con la app cerrada:
+
+- **10 minutos antes**: «En 10 minutos tienes un recorrido», con la línea, la hora y el bus.
+- **A la hora de salida**: «Inicia tu recorrido programado».
+
+La tableta toma los recorridos de las próximas 24 horas cada vez que entras o la app se reconecta; si la oficina cambia o quita uno, el aviso se actualiza la próxima vez. Al cerrar sesión se borran, para que el siguiente chofer no reciba los tuyos. La primera vez, Android pide permiso para notificaciones: acéptalo. En Android 14, para que el aviso salga al minuto exacto, activa *Alarmas y recordatorios* para Buses UTA en los ajustes de la app; sin eso puede llegar unos minutos tarde.
 
 ## Qué ve el sistema de ti
 
@@ -51,7 +61,8 @@ No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seg
 | No entra | Usuario o clave; el administrador restablece la clave en Odoo. "Demasiados intentos": espera un minuto. "El servidor tuvo un problema": avisa al administrador. |
 | No puedo iniciar turno: "Falta la dirección del GPS" | El administrador debe llenar *Dirección del GPS para los teléfonos* en los Ajustes de Odoo. |
 | El bus sale como "Sin GPS" | Ese bus no está registrado en Traccar: el administrador pulsa *Register GPS in Traccar* en su ficha. |
-| El código QR pide confirmar otro servidor | No continúes salvo que el administrador te lo haya pedido: un QR falso podría llevarse tu clave. |
+| El código QR pide confirmar otro servidor | No continúes salvo que el administrador te lo haya pedido: un QR falso podría llevarse tu clave. Si continúas, la tableta cierra la sesión abierta. |
+| La cámara del teléfono abrió la app pero no entraste | Es normal: los códigos se leen desde la app. Pulsa **Escanear credencial QR** y apunta otra vez. |
 | El bus no aparece en el mapa | Estado del GPS, datos móviles, que el bus tenga GPS registrado en Odoo, y que el turno esté abierto. |
 | Aparece y desaparece | Quita el ahorro de batería a la app y deja la tableta cargando. |
 | La tableta no tiene GPS | Cámbiala o usa un celular Android con la misma app. |

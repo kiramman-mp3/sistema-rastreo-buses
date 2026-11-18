@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useState, type ReactElement, type ReactNode } from 'react';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../src/api/client';
@@ -136,6 +136,11 @@ export default function Select() {
   const content = (
     <>
       <View style={[styles.head, layout.largeText && styles.headStack]}>
+        {layout.wide && !layout.short && !layout.largeText ? (
+          <View style={[styles.artTile, { backgroundColor: palette.panel, borderColor: palette.edge }]}>
+            <Image source={require('../assets/img/ruta-pin.png')} style={styles.art} resizeMode="contain" accessibilityElementsHidden />
+          </View>
+        ) : null}
         <View style={styles.headText}>
           <Txt size="body" dim>
             {tf('selectHello', { name: driver?.name ?? '' })}
@@ -164,7 +169,7 @@ export default function Select() {
         ]}
       >
         <View style={[styles.column, layout.largeText && styles.unfilled]}>
-          <Txt size="small" dim>
+          <Txt size="small" bold color={palette.ink2}>
             {t('chooseBus')}
           </Txt>
           <OptionList
@@ -183,7 +188,7 @@ export default function Select() {
         </View>
 
         <View style={[styles.column, layout.largeText && styles.unfilled]}>
-          <Txt size="small" dim>
+          <Txt size="small" bold color={palette.ink2}>
             {t('chooseRoute')}
           </Txt>
           <OptionList
@@ -246,6 +251,20 @@ export default function Select() {
 const styles = StyleSheet.create({
   headText: {
     flexShrink: 1,
+    flexGrow: 1,
+  },
+  artTile: {
+    width: 88,
+    height: 88,
+    borderRadius: 999,
+    borderWidth: 1,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  art: {
+    width: 112,
+    height: 112,
   },
   // With a large system font the title and its button no longer fit side by side: the button goes below.
   // Large system font: the page scrolls as a whole, so nothing here may claim the leftover height.

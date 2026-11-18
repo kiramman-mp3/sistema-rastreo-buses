@@ -45,14 +45,23 @@
     <template id="portal_header" name="Public site header">
         <a class="saltar" href="#contenido" t-esc="s['skip']"/>
         <header class="cabecera">
-            <div class="marco">
+            <div class="marco cabecera-contenedor">
                 <a class="marca" href="/" t-att-aria-label="brand">
                     <t t-call="bus_tracking.brand_mark"/>
-                    <span t-esc="brand"/>
+                    <div class="marca-info">
+                        <span class="marca-nombre" t-esc="brand"/>
+                        <span class="marca-sub" t-esc="s.get('brand_sub', 'Universidad Técnica de Ambato')"/>
+                    </div>
                 </a>
-                <nav t-att-aria-label="s['nav_lines']">
-                    <a href="/rutas" t-att-aria-current="'page' if active_nav == 'rutas' else None" t-esc="s['nav_lines']"/>
-                    <a href="/quejas" t-att-aria-current="'page' if active_nav == 'quejas' else None" t-esc="s['nav_write']"/>
+                <nav class="cabecera-nav" t-att-aria-label="s['nav_lines']">
+                    <a href="/rutas" t-att-aria-current="'page' if active_nav == 'rutas' else None">
+                        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false" class="nav-icono"><path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v5h8V4H6zm0 7v3h8v-3H6z"/></svg>
+                        <span t-esc="s['nav_lines']"/>
+                    </a>
+                    <a href="/quejas" t-att-aria-current="'page' if active_nav == 'quejas' else None">
+                        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false" class="nav-icono"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"/></svg>
+                        <span t-esc="s['nav_write']"/>
+                    </a>
                 </nav>
                 <div class="cabecera-acciones">
                     <form t-if="languages and len(languages) &gt; 1" method="get" class="idiomas">
@@ -77,27 +86,55 @@
     <template id="portal_footer" name="Public site footer">
         <footer class="pie">
             <div class="marco">
-                <div class="fila">
-                    <span t-esc="s['footer_what']"/>
-                    <nav t-att-aria-label="s['footer_what']">
-                        <a href="/rutas" t-esc="s['nav_lines']"/>
-                        <a href="/quejas" t-esc="s['nav_write']"/>
-                        <a t-att-href="privacy_link or '/privacidad'" t-esc="s['privacy_more']"/>
-                        <a t-if="contact and contact['phone']" t-attf-href="tel:#{contact['phone_href']}" t-esc="contact['phone']"/>
-                        <a t-if="contact and contact['email']" t-attf-href="mailto:#{contact['email']}" t-esc="contact['email']"/>
-                        <a href="/web/login" t-esc="s['staff']"/>
-                    </nav>
-                    <span class="fin"><t t-esc="datetime.date.today().year"/> · <t t-esc="brand"/></span>
+                <div class="pie-grid">
+                    <div class="pie-col pie-marca-col">
+                        <div class="pie-marca">
+                            <t t-call="bus_tracking.brand_mark"/>
+                            <div>
+                                <strong class="pie-marca-titulo" t-esc="brand"/>
+                                <span class="pie-marca-sub" t-esc="s.get('brand_sub', 'Universidad Técnica de Ambato')"/>
+                            </div>
+                        </div>
+                        <p class="pie-desc" t-esc="s['footer_what']"/>
+                    </div>
+                    <div class="pie-col">
+                        <h4 class="pie-titulo" t-esc="s['foot_services']"/>
+                        <nav t-att-aria-label="s['foot_services']">
+                            <a href="/rutas" t-esc="s['nav_lines']"/>
+                            <a href="/rutas" t-esc="s['q_live']"/>
+                            <a href="/quejas" t-esc="s['nav_write']"/>
+                        </nav>
+                    </div>
+                    <div class="pie-col">
+                        <h4 class="pie-titulo" t-esc="s['foot_info']"/>
+                        <nav t-att-aria-label="s['foot_info']">
+                            <a t-att-href="privacy_link or '/privacidad'" t-esc="s['privacy_more']"/>
+                            <a t-if="contact and contact['phone']" t-attf-href="tel:#{contact['phone_href']}" t-esc="contact['phone']"/>
+                            <a t-if="contact and contact['email']" t-attf-href="mailto:#{contact['email']}" t-esc="contact['email']"/>
+                            <a href="/web/login" t-esc="s['staff']"/>
+                        </nav>
+                    </div>
+                    <div class="pie-col">
+                        <h4 class="pie-titulo" t-esc="s['foot_campus']"/>
+                        <p class="pie-campus-lista">
+                            <span>Huachi</span>
+                            <span>Ingahurco</span>
+                            <span>Querochaca</span>
+                        </p>
+                    </div>
                 </div>
-                <p class="creditos">
-                    <t t-esc="s['photos_credit']"/>
-                    <a href="https://commons.wikimedia.org/wiki/File:Ambato_Avenida_Atahualpa_seen_from_the_entrance_to_Mall_de_los_Andes.jpg" rel="noopener">Ymblanter</a> (CC BY-SA 4.0),
-                    <a href="https://commons.wikimedia.org/wiki/File:VIENDO_AL_INTERCAMBIADOR_HUACHI_GRANDE_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a> (CC BY 3.0),
-                    <a href="https://commons.wikimedia.org/wiki/File:Fachada_nocturna_del_Terminal_Terrestre_Sur_de_Ambato.jpg" rel="noopener">Martín Vasco</a> (CC BY-SA 4.0),
-                    <a href="https://commons.wikimedia.org/wiki/File:COLISEO_UNIVERSITARIO_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a> (CC BY 3.0),
-                    <a href="https://commons.wikimedia.org/wiki/File:Vista_panor%C3%A1mica_de_la_ciudad_de_Ambato,_Tungurahua,_Ecuador.jpg" rel="noopener">Martín Vasco</a> (CC BY-SA 4.0),
-                    <a href="https://commons.wikimedia.org/wiki/File:Volc%C3%A1n_Tungurahua_Riobamba_-_Ecuador.jpg" rel="noopener">David Torres Costales</a> (CC BY-SA 3.0).
-                </p>
+
+                <div class="pie-inferior">
+                    <p class="creditos">
+                        <t t-esc="s['photos_credit']"/>
+                        <a href="https://commons.wikimedia.org/wiki/File:Ambato_Avenida_Atahualpa_seen_from_the_entrance_to_Mall_de_los_Andes.jpg" rel="noopener">Ymblanter</a>,
+                        <a href="https://commons.wikimedia.org/wiki/File:VIENDO_AL_INTERCAMBIADOR_HUACHI_GRANDE_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a>,
+                        <a href="https://commons.wikimedia.org/wiki/File:Fachada_nocturna_del_Terminal_Terrestre_Sur_de_Ambato.jpg" rel="noopener">Martín Vasco</a>.
+                    </p>
+                    <div class="pie-copyright">
+                        <span>© <t t-esc="datetime.date.today().year"/> <t t-esc="brand"/> · <t t-esc="s.get('brand_sub', 'Universidad Técnica de Ambato')"/></span>
+                    </div>
+                </div>
             </div>
         </footer>
     </template>
@@ -122,135 +159,318 @@
             <t t-call="bus_tracking.portal_header"/>
 
             <main id="contenido">
-                <!-- First screen: the question, the stop search, and the busiest line working. -->
-                <section class="marco inicio-hero">
-                    <div class="hero-texto">
-                        <h1 class="entra" t-esc="s['home_title']"/>
-                        <p class="lead entra" style="--i: 1" t-esc="s['home_lead']"/>
-                        <form action="/rutas" method="get" role="search" class="buscador entra" style="--i: 2">
-                            <label class="sr-only" for="buscar-parada" t-esc="s['search_label']"/>
-                            <input type="search" id="buscar-parada" name="q" list="paradas" autocomplete="off"
-                                   t-att-placeholder="s['search_placeholder']"/>
-                            <button class="boton" type="submit" t-esc="s['search_go']"/>
-                        </form>
-                        <datalist id="paradas">
-                            <option t-foreach="stop_names" t-as="name" t-att-value="name"/>
-                        </datalist>
-                        <p class="total entra" style="--i: 3">
-                            <t t-if="total_buses == 1" t-esc="s['buses_now_one']"/>
-                            <t t-elif="total_buses" t-esc="s['buses_now_total'].format(n=total_buses)"/>
-                            <t t-else="" t-esc="s['buses_now_none']"/>
-                        </p>
+                <!-- Hero section: Scenic bus photography with modern gradient scrim and bold transit typography -->
+                <section class="portada">
+                    <div class="portada-foto">
+                        <img src="/bus_tracking/static/img/gente/bus-andes-1200.webp"
+                             srcset="/bus_tracking/static/img/gente/bus-andes-800.webp 800w, /bus_tracking/static/img/gente/bus-andes-1200.webp 1200w, /bus_tracking/static/img/gente/bus-andes-1920.webp 1920w"
+                             sizes="100vw" alt="" fetchpriority="high" decoding="async"/>
+                        <div class="portada-texto marco">
+                            <div class="hero-insignia entra">
+                                <span class="punto-vivo"></span>
+                                <span t-esc="s.get('brand_sub', 'Universidad Técnica de Ambato')"/>
+                            </div>
+                            <h1 class="entra" t-esc="s['home_title']"/>
+                            <p class="lead entra" style="--i: 1" t-esc="s['home_lead']"/>
+                            <div class="portada-botones entra" style="--i: 2">
+                                <a class="boton boton-senal" href="/rutas">
+                                    <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                                    <span t-esc="s['hero_cta_lines']"/>
+                                </a>
+                                <a class="boton boton-claro" href="/quejas">
+                                    <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clip-rule="evenodd"/></svg>
+                                    <span t-esc="s['nav_write']"/>
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
-                    <div t-if="featured" class="fragmento entra" style="--i: 2" data-ui="">
-                        <div class="fragmento-cabeza">
-                            <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
-                            <a class="fragmento-nombre" t-attf-href="/rutas/#{featured['code']}" t-esc="featured['name']"/>
-                            <span class="vivo" data-vivo="" t-esc="s['searching']"/>
+                    <!-- Floating Search & Route Ticker Card (Inspired by CasaBus & Wander) -->
+                    <div class="marco">
+                        <div class="buscar-panel entra" style="--i: 3">
+                            <div class="buscar-cabecera">
+                                <div class="buscar-titulo-bloque">
+                                    <span class="buscar-icono-badge">
+                                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                                    </span>
+                                    <div>
+                                        <h2 class="buscar-titulo" t-esc="s['find_title']"/>
+                                        <span class="buscar-sub" t-esc="s['find_sub']"/>
+                                    </div>
+                                </div>
+                                <div class="buscar-estado-badge">
+                                    <span class="punto-vivo"></span>
+                                    <strong t-if="total_buses == 1" t-esc="s['buses_now_one']"/>
+                                    <strong t-elif="total_buses" t-esc="s['buses_now_total'].format(n=total_buses)"/>
+                                    <strong t-else="" t-esc="s['buses_now_none']"/>
+                                </div>
+                            </div>
+
+                            <form action="/rutas" method="get" role="search" class="buscar-formulario">
+                                <div class="buscador-grande">
+                                    <svg class="buscador-lupa" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                                    <input type="search" id="buscar-parada" name="q" list="paradas" autocomplete="off"
+                                           t-att-placeholder="s['search_placeholder']"/>
+                                    <button class="boton boton-buscar" type="submit">
+                                        <span t-esc="s['search_go']"/>
+                                        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                    </button>
+                                </div>
+                            </form>
+                            <datalist id="paradas">
+                                <option t-foreach="stop_names" t-as="name" t-att-value="name"/>
+                            </datalist>
+
+                            <!-- Live Route Ticker: status of every line -->
+                            <div class="ticker-rutas-bloque">
+                                <span class="ticker-etiqueta" t-esc="s['lines_title']"/>
+                                <ul t-if="lines" class="ticker-rutas" id="lineas" t-att-aria-label="s['lines_title']">
+                                    <li t-foreach="lines" t-as="l">
+                                        <a class="ticker-item" t-attf-href="/rutas/#{l['code']}">
+                                            <span class="chip-linea" t-attf-style="background: #{l['color']}" t-esc="l['code']"/>
+                                            <span class="ticker-texto">
+                                                <strong t-esc="l['name']"/>
+                                                <span t-attf-class="ticker-estado #{'con-buses' if l['buses'] else ''}">
+                                                    <span t-attf-class="punto-mini #{'vivo' if l['buses'] else ''}"></span>
+                                                    <t t-esc="s['buses_in_service'].format(n=l['buses']) if l['buses'] else s['no_service']"/>
+                                                </span>
+                                            </span>
+                                            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" class="ticker-flecha" aria-hidden="true"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <p t-else="" class="aviso"><strong t-esc="s['no_routes']"/></p>
+                            </div>
                         </div>
-                        <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['featured_hint']"/>
-                        <t t-set="line" t-value="featured"/>
-                        <t t-call="bus_tracking.stop_line"/>
-                    </div>
-                    <div t-else="" class="aviso">
-                        <strong t-esc="s['no_routes']"/>
                     </div>
                 </section>
 
-                <!-- Every line, as two-ended rows: name on the left, buses now on the right. -->
-                <section class="marco inicio-lineas" id="lineas" aria-labelledby="titulo-lineas">
-                    <h2 id="titulo-lineas" class="entra" t-esc="s['lines_title']"/>
-                    <ul class="filas">
-                        <li t-foreach="lines" t-as="l" class="entra" t-attf-style="--i: #{l_index}">
-                            <a class="fila" t-attf-href="/rutas/#{l['code']}">
-                                <span class="chip-linea" t-attf-style="background: #{l['color']}" t-esc="l['code']"/>
-                                <span class="fila-nombre">
-                                    <strong t-esc="l['name']"/>
-                                    <span t-if="l['stops']" class="fila-sub">
-                                        <t t-esc="s['line_from_to'].format(a=l['stops'][0], b=l['stops'][-1])"/> ·
-                                        <t t-esc="s['line_stops_n'].format(n=len(l['stops']))"/>
-                                    </span>
+                <!-- Quick Services Grid (CasaBus 4-Card Action Row) & Live KPIs -->
+                <section class="marco inicio-accesos" t-att-aria-label="s['nav_lines']">
+                    <div class="seccion-encabezado">
+                        <span class="seccion-subtitulo" t-esc="s['kicker_services']"/>
+                        <h2 class="seccion-titulo" t-esc="s['services_title']"/>
+                    </div>
+                    <ul class="accesos">
+                        <li class="entra">
+                            <a class="acceso" href="/rutas">
+                                <span class="acceso-icono acceso-icono-lineas">
+                                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4v16M5 7h9a3 3 0 010 6H8a3 3 0 000 6h11"/><circle cx="5" cy="4" r="1.6"/><circle cx="19" cy="19" r="1.6"/></svg>
                                 </span>
-                                <span t-attf-class="fila-valor #{'con-buses' if l['buses'] else ''}"
-                                      t-esc="s['buses_in_service'].format(n=l['buses']) if l['buses'] else s['no_service']"/>
+                                <strong t-esc="s['q_lines']"/>
+                                <span t-esc="s['q_lines_sub']"/>
+                                <span class="acceso-boton-flecha">
+                                    <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </a>
+                        </li>
+                        <li class="entra" style="--i: 1">
+                            <a class="acceso" t-attf-href="/rutas/#{featured['code'] if featured else ''}">
+                                <span class="acceso-icono acceso-icono-vivo">
+                                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="15" rx="3"/><path d="M5 11h14M8 21v-3M16 21v-3"/><circle cx="9" cy="14.5" r="0.8"/><circle cx="15" cy="14.5" r="0.8"/></svg>
+                                </span>
+                                <strong t-esc="s['q_live']"/>
+                                <span t-esc="s['q_live_sub']"/>
+                                <span class="acceso-boton-flecha">
+                                    <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </a>
+                        </li>
+                        <li class="entra" style="--i: 2">
+                            <a class="acceso" href="/quejas">
+                                <span class="acceso-icono acceso-icono-escribir">
+                                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>
+                                </span>
+                                <strong t-esc="s['nav_write']"/>
+                                <span t-esc="s['q_write_sub']"/>
+                                <span class="acceso-boton-flecha">
+                                    <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </a>
+                        </li>
+                        <li class="entra" style="--i: 3">
+                            <a class="acceso" t-att-href="privacy_link or '/privacidad'">
+                                <span class="acceso-icono acceso-icono-privacidad">
+                                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                                </span>
+                                <strong t-esc="s['q_privacy']"/>
+                                <span t-esc="s['q_privacy_sub']"/>
+                                <span class="acceso-boton-flecha">
+                                    <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                </span>
                             </a>
                         </li>
                     </ul>
+
+                    <!-- Modern Stats Bar (Wander.ph style) -->
+                    <div class="cifras-contenedor">
+                        <dl class="cifras">
+                            <div class="cifra-card">
+                                <dt t-esc="s['stat_buses']"/>
+                                <dd><span class="cifra-icono" aria-hidden="true">🚌</span><t t-esc="total_buses"/></dd>
+                            </div>
+                            <div class="cifra-card">
+                                <dt t-esc="s['stat_lines']"/>
+                                <dd><span class="cifra-icono" aria-hidden="true">🗺️</span><t t-esc="len(lines)"/></dd>
+                            </div>
+                            <div class="cifra-card">
+                                <dt t-esc="s['stat_stops']"/>
+                                <dd><span class="cifra-icono" aria-hidden="true">📍</span><t t-esc="len(stop_names)"/></dd>
+                            </div>
+                        </dl>
+                    </div>
                 </section>
 
-                <!-- How it works: three statements; the fragment beside them changes with each one. -->
-                <section t-if="featured" class="marco inicio-como" aria-labelledby="titulo-como">
-                    <h2 id="titulo-como" t-esc="s['how_title']"/>
-                    <div class="como">
-                        <ol class="como-pasos">
-                            <li data-paso="1"><p class="frase" t-esc="s['how_1']"/><p t-esc="s['how_1b']"/></li>
-                            <li data-paso="2"><p class="frase" t-esc="s['how_2']"/><p t-esc="s['how_2b']"/></li>
-                            <li data-paso="3"><p class="frase" t-esc="s['how_3']"/><p t-esc="s['how_3b']"/></li>
-                        </ol>
-                        <div class="como-escenario" data-ui="" data-estado="1" aria-hidden="true">
-                            <div class="fragmento-cabeza">
-                                <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
-                                <span class="fragmento-nombre" t-esc="featured['name']"/>
+                <!-- Branded Feature Banner (CasaBus yellow graphic block) -->
+                <section class="banda" aria-labelledby="titulo-gente">
+                    <div class="marco banda-dentro">
+                        <div class="banda-texto">
+                            <span class="banda-etiqueta" t-esc="s['kicker_people']"/>
+                            <h2 id="titulo-gente" class="entra" t-esc="s['people_title']"/>
+                            <p class="entra" style="--i: 1" t-esc="s['people_lead']"/>
+                            <ul class="hechos">
+                                <li t-foreach="['people_1', 'people_2', 'people_3']" t-as="key" class="entra" t-attf-style="--i: #{key_index + 2}" t-esc="s[key]"/>
+                            </ul>
+                            <div class="banda-acciones">
+                                <a class="boton boton-tinta entra" style="--i: 5" href="/rutas">
+                                    <span t-esc="s['hero_cta_lines']"/>
+                                    <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                </a>
                             </div>
-                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus={'en': 'The bus', 'qu': 'Bus'}.get(site_lang, 'El bus'), n=2)"/>
-                            <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
-                                <t t-foreach="featured['stops'][:5]" t-as="stop_name">
-                                    <li t-if="stop_name_index == 1" class="demo-bus">
-                                        <span class="bus-en-linea"><span class="ficha"><t t-call="bus_tracking.bus_glyph"/></span></span>
-                                    </li>
-                                    <li t-att-class="'demo-mia' if stop_name_index == 3 else None">
-                                        <span class="parada" t-att-aria-pressed="'true' if stop_name_index == 3 else None"
-                                              t-att-data-mia="s['mine_tag']">
-                                            <span class="punto"/><span class="nombre" t-esc="stop_name"/>
-                                        </span>
-                                    </li>
-                                </t>
-                            </ol>
+                        </div>
+                        <div class="banda-foto">
+                            <div class="banda-foto-marco">
+                                <img class="banda-persona" src="/bus_tracking/static/img/gente/amarilla-800.webp"
+                                     srcset="/bus_tracking/static/img/gente/amarilla-800.webp 800w, /bus_tracking/static/img/gente/amarilla-1200.webp 1200w"
+                                     sizes="(min-width: 900px) 40vw, 80vw" alt="Estudiantes universitarios en Ambato" loading="lazy" decoding="async"/>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Photographs of the city, hung on the line like stops. -->
-                <section class="inicio-ciudad" aria-labelledby="titulo-ciudad">
-                    <div class="marco">
-                        <h2 id="titulo-ciudad" class="entra" t-esc="s['city_title']"/>
-                        <p class="entra" style="--i: 1" t-esc="s['city_lead']"/>
+                <!-- Smartphone App Showcase (From CasaBus + Metropolitan University Transit Case Study) -->
+                <section t-if="featured" class="marco en-celular" aria-labelledby="titulo-celular">
+                    <div class="telefono-mockup entra">
+                        <div class="telefono-carcasa">
+                            <div class="telefono-isla"></div>
+                            <div class="telefono-pantalla">
+                                <div class="fragmento" data-ui="">
+                                    <div class="fragmento-cabeza">
+                                        <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
+                                        <a class="fragmento-nombre" t-attf-href="/rutas/#{featured['code']}" t-esc="featured['name']"/>
+                                        <span class="vivo" data-vivo="" t-esc="s['searching']"/>
+                                    </div>
+                                    <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['featured_hint']"/>
+                                    <t t-set="line" t-value="featured"/>
+                                    <t t-call="bus_tracking.stop_line"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <ol class="marco ciudad">
-                        <t t-foreach="[('av-atahualpa-mall', 'cap_atahualpa'), ('huachi-grande', 'cap_huachi'), ('terminal-sur', 'cap_terminal'), ('uta-edificio', 'cap_uta'), ('ambato-vista', 'cap_vista'), ('tungurahua', 'cap_tungurahua')]" t-as="photo">
-                            <li class="entra" t-attf-style="--i: #{photo_index}">
-                                <figure>
+                    <div class="celular-texto">
+                        <span class="seccion-subtitulo" t-esc="s['kicker_app']"/>
+                        <h2 id="titulo-celular" class="entra" t-esc="s['app_title']"/>
+                        <p class="entra" style="--i: 1" t-esc="s['app_lead']"/>
+                        <ol class="pasos-modernos">
+                            <li class="paso-card entra" style="--i: 2">
+                                <span class="paso-num-badge">01</span>
+                                <div class="paso-cuerpo">
+                                    <strong class="paso-titulo" t-esc="s['how_1']"/>
+                                    <p class="paso-desc" t-esc="s['how_1b']"/>
+                                </div>
+                            </li>
+                            <li class="paso-card entra" style="--i: 3">
+                                <span class="paso-num-badge">02</span>
+                                <div class="paso-cuerpo">
+                                    <strong class="paso-titulo" t-esc="s['how_2']"/>
+                                    <p class="paso-desc" t-esc="s['how_2b']"/>
+                                </div>
+                            </li>
+                            <li class="paso-card entra" style="--i: 4">
+                                <span class="paso-num-badge">03</span>
+                                <div class="paso-cuerpo">
+                                    <strong class="paso-titulo" t-esc="s['how_3']"/>
+                                    <p class="paso-desc" t-esc="s['how_3b']"/>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="celular-insignias">
+                            <a href="/rutas" class="boton-app-badge">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                <div>
+                                    <span class="badge-mini" t-esc="s['app_open_small']"/>
+                                    <strong t-esc="s['app_open']"/>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- City of Ambato Transit Landscape Cards (Wander.ph destination card style) -->
+                <section class="marco inicio-ciudad" aria-labelledby="titulo-ciudad">
+                    <div class="ciudad-cabeza">
+                        <span class="seccion-subtitulo" t-esc="s['kicker_city']"/>
+                        <h2 id="titulo-ciudad" class="entra" t-esc="s['city_title']"/>
+                        <p class="lead entra" style="--i: 1" t-esc="s['city_lead']"/>
+                    </div>
+                    <ul class="tarjetas-foto">
+                        <t t-foreach="[('av-atahualpa-mall', 'cap_atahualpa', 'tag_south'), ('huachi-grande', 'cap_huachi', 'tag_south'), ('terminal-sur', 'cap_terminal', 'tag_terminal'), ('uta-edificio', 'cap_uta', 'tag_campus'), ('ambato-vista', 'cap_vista', 'tag_city'), ('tungurahua', 'cap_tungurahua', 'tag_andes')]" t-as="photo">
+                            <li class="entra tarjeta-foto-item" t-attf-style="--i: #{photo_index}">
+                                <figure class="tarjeta-foto-contenedor">
+                                    <span class="tarjeta-foto-tag" t-esc="s[photo[2]]"/>
                                     <img t-attf-src="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp"
                                          t-attf-srcset="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/ambato/#{photo[0]}-1200.webp 1200w"
-                                         sizes="(min-width: 900px) 33vw, 80vw" loading="lazy" decoding="async"
+                                         sizes="(min-width: 900px) 33vw, 90vw" decoding="async"
                                          t-att-alt="s[photo[1]]"/>
-                                    <figcaption><span class="punto"/><t t-esc="s[photo[1]]"/></figcaption>
+                                    <figcaption t-esc="s[photo[1]]"/>
                                 </figure>
                             </li>
                         </t>
-                    </ol>
+                    </ul>
                 </section>
 
-                <!-- One field: start a message to the transport team. -->
+                <!-- Customer Care / Citizen Feedback (Modern SaaS Contact Card) -->
                 <section class="marco inicio-escribir" aria-labelledby="titulo-escribir">
-                    <form action="/quejas" method="get" class="escribir">
-                        <h2 id="titulo-escribir"><span class="suave" t-esc="s['write_q1']"/> <t t-esc="s['write_q2']"/></h2>
-                        <label class="sr-only" for="escribir-texto" t-esc="s['write_field']"/>
-                        <div class="buscador grande">
-                            <input type="text" id="escribir-texto" name="texto" maxlength="300"
-                                   t-att-placeholder="s['write_placeholder']" aria-describedby="escribir-nota"/>
-                            <button class="boton" type="submit" t-esc="s['write_go']"/>
+                    <div class="escribir-tarjeta-moderna">
+                        <div class="escribir-formulario-lado">
+                            <span class="seccion-subtitulo" t-esc="s['kicker_write']"/>
+                            <h2 id="titulo-escribir"><span class="suave" t-esc="s['write_q1']"/> <t t-esc="s['write_q2']"/></h2>
+                            <p class="escribir-subtexto" t-esc="s['write_sub']"/>
+                            <form action="/quejas" method="get" class="escribir-form">
+                                <label class="sr-only" for="escribir-texto" t-esc="s['write_field']"/>
+                                <div class="buscador-escribir">
+                                    <input type="text" id="escribir-texto" name="texto" maxlength="300"
+                                           t-att-placeholder="s['write_placeholder']" aria-describedby="escribir-nota"/>
+                                    <button class="boton boton-escribir" type="submit">
+                                        <span t-esc="s['write_go']"/>
+                                        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                    </button>
+                                </div>
+                                <p id="escribir-nota" class="nota" t-esc="s['write_note']"/>
+                            </form>
                         </div>
-                        <p id="escribir-nota" class="nota" t-esc="s['write_note']"/>
-                    </form>
-                    <div class="despues">
-                        <h3 t-esc="s['next_title']"/>
-                        <ol class="linea">
-                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_1']"/></span></li>
-                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_2']"/></span></li>
-                            <li><span class="parada"><span class="punto"/><span class="nombre" t-esc="s['next_3']"/></span></li>
-                        </ol>
+                        <div class="despues-lado">
+                            <div class="despues-encabezado">
+                                <span class="despues-icono-badge">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </span>
+                                <h3 t-esc="s['next_title']"/>
+                            </div>
+                            <ol class="despues-pasos">
+                                <li>
+                                    <span class="paso-num">1</span>
+                                    <span class="paso-txt" t-esc="s['next_1']"/>
+                                </li>
+                                <li>
+                                    <span class="paso-num">2</span>
+                                    <span class="paso-txt" t-esc="s['next_2']"/>
+                                </li>
+                                <li>
+                                    <span class="paso-num">3</span>
+                                    <span class="paso-txt" t-esc="s['next_3']"/>
+                                </li>
+                            </ol>
+                        </div>
                     </div>
                 </section>
             </main>

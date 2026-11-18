@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { router, useFocusEffect } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiError, AuthError, NetworkError } from '../src/api/client';
 import { t } from '../src/i18n';
@@ -11,7 +11,7 @@ import { useLayout } from '../src/ui/layout';
 import { LangSwitch } from '../src/ui/LangSwitch';
 import { LineMark } from '../src/ui/LineMark';
 import { Notice } from '../src/ui/Notice';
-import { shape, space } from '../src/ui/theme';
+import { lift, shape, space } from '../src/ui/theme';
 import { useTheme } from '../src/ui/ThemeProvider';
 
 export default function Login() {
@@ -19,6 +19,10 @@ export default function Login() {
   const { palette } = useTheme();
   const layout = useLayout();
   const session = useSession();
+  // Opened from a badge or setup QR read by the system camera (uta-buses://login?… or setup?…). The link is not
+  // acted on: any web page could open it, so the code is read again from inside the app.
+  const link = useLocalSearchParams<{ token?: string; odoo?: string; link?: string }>();
+  const fromLink = Boolean(link.token || link.odoo || link.link);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -59,29 +63,57 @@ export default function Login() {
   const side = layout.wide;
 
   return (
-    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[12] : layout.gap * 2 }]}>
-      <View style={[styles.intro, !side && styles.introStack]}>
-        <Pressable onLongPress={() => setShowServer((v) => !v)} accessibilityLabel="Buses UTA" style={styles.brand}>
-          <LineMark />
-          <Txt bold size="data">
-            Buses UTA
+    <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[8] : layout.gap * 2 }]}>
+      {/* A real person at the wheel: the app is theirs. Hidden when height is short (keyboard up on a phone). */}
+      {side || !layout.short ? (
+        <View style={[styles.photo, side ? styles.photoSide : styles.photoStack, { backgroundColor: palette.tint }]}>
+          <Pressable
+            onLongPress={() => setShowServer((v) => !v)}
+            accessibilityLabel="Buses UTA"
+            style={[styles.brand, { backgroundColor: palette.panel }]}
+          >
+            <LineMark scale={0.7} />
+            <Txt bold size="body" color={palette.ink}>
+              Buses UTA
+            </Txt>
+          </Pressable>
+          {/* A real person at the wheel in a round frame, with a small drawing of the route beside it. */}
+          <View style={[styles.portrait, side ? styles.portraitSide : styles.portraitStack]}>
+            <View style={[styles.portraitRing, { backgroundColor: palette.panel }]}>
+              <View style={styles.portraitClip}>
+                <Image
+                  source={require('../assets/img/chofer.jpg')}
+                  style={styles.portraitImage}
+                  resizeMode="cover"
+                  accessibilityElementsHidden
+                />
+              </View>
+            </View>
+            <View style={[styles.portraitBadge, { backgroundColor: palette.panel }]}>
+              <Image source={require('../assets/img/ruta-pin.png')} style={styles.badgeArt} resizeMode="contain" accessibilityElementsHidden />
+            </View>
+          </View>
+          <Txt bold size="title" color={palette.ink} style={styles.welcome}>
+            {t('loginTitle')}
           </Txt>
-        </Pressable>
-        <Txt bold size="title">
-          {t('loginTitle')}
-        </Txt>
-        <Txt size="body" dim>
-          {t('loginHelp')}
-        </Txt>
-        <Txt size="small" dim>
-          {t('trackingNoticeLogin')}
-        </Txt>
-        <View style={styles.langs}>
-          <LangSwitch />
         </View>
-      </View>
+      ) : null}
 
-      <View style={[styles.card, side ? styles.cardSide : styles.cardStack, { backgroundColor: palette.panel, padding: layout.phone ? space[4] : space[6] }]}>
+      <View style={[styles.side, side ? styles.sideWide : styles.cardStack]}>
+        <View style={styles.intro}>
+          <Txt size="body">{t('loginHelp')}</Txt>
+          <Txt size="small" dim>
+            {t('trackingNoticeLogin')}
+          </Txt>
+        </View>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: palette.panel, borderColor: palette.edge, padding: layout.phone ? space[4] : space[6] },
+          palette.mode === 'day' && lift,
+        ]}
+      >
+        {fromLink ? <Notice item={{ key: 'link', tone: 'warn', title: t('scanFromApp'), live: 'polite' }} /> : null}
         <Action label={t('scanDriverBadge')} onPress={() => router.push('/scan')} kind="accent" />
         <Txt size="small" dim style={styles.or}>
           {t('orManualLogin')}
@@ -146,6 +178,8 @@ export default function Login() {
           disabled={busy || !login || !password}
         />
       </View>
+        <LangSwitch />
+      </View>
     </Screen>
   );
 }
@@ -156,37 +190,101 @@ const styles = StyleSheet.create({
   },
   pageSide: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
   },
   pageStack: {
     flexDirection: 'column',
   },
-  intro: {
-    flex: 1,
-    gap: space[3],
+  photo: {
+    ...shape.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space[5],
+    padding: space[6],
   },
-  introStack: {
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: 'auto',
+  photoSide: {
+    flex: 1,
+    minHeight: 420,
+  },
+  photoStack: {
+    width: '100%',
+    maxWidth: 560,
+    alignSelf: 'center',
+    paddingVertical: space[5],
   },
   brand: {
+    position: 'absolute',
+    top: space[4],
+    left: space[4],
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space[3],
-    marginBottom: space[6],
-    alignSelf: 'flex-start',
+    gap: space[2],
+    paddingVertical: space[1],
+    paddingLeft: space[2],
+    paddingRight: space[4],
+    borderRadius: 999,
   },
-  langs: {
-    marginTop: space[5],
+  portrait: {
+    marginTop: space[8],
   },
-  card: {
-    ...shape.control,
-    gap: space[3],
+  portraitSide: {
+    width: 280,
+    height: 280,
   },
-  cardSide: {
+  portraitStack: {
+    width: 150,
+    height: 150,
+  },
+  portraitRing: {
+    width: '100%',
+    height: '100%',
+    padding: 8,
+    borderRadius: 999,
+  },
+  // the clip lives on a wrapper: an Image alone does not round its corners on the web
+  portraitClip: {
+    flex: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  portraitImage: {
+    width: '100%',
+    height: '100%',
+  },
+  // the route drawing overlaps the frame at the bottom left, like a sticker
+  portraitBadge: {
+    position: 'absolute',
+    left: -12,
+    bottom: 0,
+    width: '36%',
+    aspectRatio: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeArt: {
+    width: '125%',
+    height: '125%',
+  },
+  welcome: {
+    textAlign: 'center',
+  },
+  side: {
+    gap: space[5],
+    justifyContent: 'center',
+  },
+  sideWide: {
     flex: 1,
     maxWidth: 560,
+  },
+  intro: {
+    gap: space[2],
+  },
+  card: {
+    ...shape.card,
+    borderWidth: 1,
+    gap: space[3],
   },
   cardStack: {
     width: '100%',

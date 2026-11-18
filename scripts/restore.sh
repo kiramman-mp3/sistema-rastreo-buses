@@ -20,6 +20,7 @@ set -a
 . "./$ENV_FILE"
 set +a
 ODOO_DB="${ODOO_DB:-buses}"
+. scripts/db.sh
 
 TARGET=""
 CONFIRMED=0
@@ -33,15 +34,13 @@ done
 
 (cd "$BACKUP" && sha256sum -c SHA256SUMS)
 
-psql_admin() { $DC exec -T db psql -U odoo -d postgres -v ON_ERROR_STOP=1 "$@"; }
-
 if [ -n "$TARGET" ]; then
   [ "$TARGET" != "$ODOO_DB" ] || { echo "--target-db must differ from the production database ($ODOO_DB)."; exit 1; }
   echo "Restoring Odoo database into '$TARGET' (production is not touched)..."
   psql_admin -c "DROP DATABASE IF EXISTS \"$TARGET\""
-  psql_admin -c "CREATE DATABASE \"$TARGET\" OWNER odoo"
-  $DC exec -T db pg_restore -U odoo -d "$TARGET" --no-owner < "$BACKUP/odoo.dump"
-  echo "Done. Inspect it with: docker compose --env-file $ENV_FILE -f docker-compose.prod.yml exec db psql -U odoo -d $TARGET"
+  create_db "$TARGET"
+  pg_tool pg_restore -d "$TARGET" --no-owner < "$BACKUP/odoo.dump"
+  echo "Done. Inspect the database '$TARGET' and drop it when you are finished."
   exit 0
 fi
 
@@ -54,12 +53,16 @@ fi
 echo "Stopping Odoo and Traccar..."
 $DC stop odoo traccar
 psql_admin -c "DROP DATABASE IF EXISTS \"$ODOO_DB\""
-psql_admin -c "CREATE DATABASE \"$ODOO_DB\" OWNER odoo"
-$DC exec -T db pg_restore -U odoo -d "$ODOO_DB" --no-owner < "$BACKUP/odoo.dump"
+create_db "$ODOO_DB"
+pg_tool pg_restore -d "$ODOO_DB" --no-owner < "$BACKUP/odoo.dump"
 
 psql_admin -c "DROP DATABASE IF EXISTS traccar"
-psql_admin -c "CREATE DATABASE traccar OWNER traccar"
-$DC exec -T db pg_restore -U odoo -d traccar --no-owner --role=traccar < "$BACKUP/traccar.dump"
+create_db traccar traccar
+if is_external_db; then
+  pg_tool pg_restore -d traccar --no-owner < "$BACKUP/traccar.dump"
+else
+  pg_tool pg_restore -d traccar --no-owner --role=traccar < "$BACKUP/traccar.dump"
+fi
 
 echo "Restoring filestore..."
 $DC run --rm -T --no-deps --entrypoint sh odoo -c "rm -rf /var/lib/odoo/filestore/$ODOO_DB && mkdir -p /var/lib/odoo/filestore/$ODOO_DB && tar xzf - -C /var/lib/odoo/filestore/$ODOO_DB" < "$BACKUP/filestore.tgz"

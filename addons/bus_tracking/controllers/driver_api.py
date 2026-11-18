@@ -10,16 +10,22 @@ from odoo.http import Response, request
 from odoo.tools import mute_logger
 
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
-from ..models.utils import parse_traccar_dt, pick_odoo_lang, tile_url
+from ..models.utils import parse_traccar_dt, pick_odoo_lang, secure_gps_url, tile_url
 from .portal import RateLimiter
 
 _logger = logging.getLogger(__name__)
 
-LOGIN_LIMIT = 10          # attempts per IP and per login, per minute and worker process
+LOGIN_LIMIT = 10          # attempts per IP, per minute and worker process
 login_limiter = RateLimiter(LOGIN_LIMIT, 60.0)
+# Attempts per login from any address. Higher than the IP limit, so someone elsewhere cannot lock a driver out
+# with a handful of wrong passwords, but still a ceiling for guesses spread over many addresses.
+ACCOUNT_LIMIT = 60
+account_limiter = RateLimiter(ACCOUNT_LIMIT, 60.0)
 CLIENT_ERROR_LIMIT = 20   # reports per driver and minute and worker process: a crash loop must not flood the log
 error_limiter = RateLimiter(CLIENT_ERROR_LIMIT, 60.0)
 MESSAGE_MAX, STACK_MAX, SHORT_MAX = 500, 3000, 60
+# How long after a shift ends its incidents saved without signal are still accepted.
+LATE_INCIDENT = timedelta(hours=2)
 INCIDENT_KIND = {key for key, _label in INCIDENT_KINDS}
 
 
@@ -76,6 +82,20 @@ class BusDriverApi(http.Controller):
     def _active_shift(self, user):
         return request.env['bus.shift'].with_user(user).search([('state', '=', 'active')], limit=1)
 
+    def _just_ended_shift(self, user, reported_at):
+        """The shift, closed less than LATE_INCIDENT ago, during which an incident was reported. A tablet without
+        signal sends its saved incidents (an SOS among them) when the signal comes back, which can be after the
+        driver ended the shift (DEF-059)."""
+        if not reported_at:
+            return request.env['bus.shift']
+        now = fields.Datetime.now()
+        return request.env['bus.shift'].with_user(user).search([
+            ('state', '=', 'done'),
+            ('end', '>=', now - LATE_INCIDENT),
+            ('start', '<=', reported_at + timedelta(minutes=1)),
+            ('end', '>=', reported_at - timedelta(minutes=1)),
+        ], order='end desc', limit=1)
+
     def _shift_payload(self, shift):
         return {
             'id': shift.id,
@@ -93,7 +113,7 @@ class BusDriverApi(http.Controller):
         if not (isinstance(login, str) and isinstance(password, str) and login and password):
             return json_response({'error': 'bad_request'}, 400)
         ip = request.httprequest.remote_addr
-        if not (login_limiter.allow('ip:%s' % ip) and login_limiter.allow('login:%s' % login.lower())):
+        if not (login_limiter.allow('ip:%s' % ip) and account_limiter.allow('login:%s' % login.lower())):
             return Response(status=429, headers=[('Retry-After', '60')])
         try:
             uid = request.env['res.users'].authenticate(
@@ -161,6 +181,16 @@ class BusDriverApi(http.Controller):
                 'color': route.color or '#3388ff',
             } for route in env['bus.route'].search([])],
             'shift': self._shift_payload(shift) if shift else None,
+            # The next trips of this driver, for the reminders of the tablet (10 minutes before and at the start).
+            'upcoming': [{
+                'id': trip.id,
+                'planned_start': utc_z(trip.planned_start),
+                'route_id': trip.route_id.id,
+                'route_code': trip.route_id.code or '',
+                'route_name': trip.route_id.name,
+                'vehicle_id': trip.vehicle_id.id,
+                'vehicle_name': trip.vehicle_id.name,
+            } for trip in env['bus.trip'].sudo()._upcoming_for(user)],
         })
 
     @http.route('/bus_tracking/driver/shift/start', type='http', auth='public', methods=['POST'], csrf=False)
@@ -185,7 +215,10 @@ class BusDriverApi(http.Controller):
             return json_response({'error': 'no_gps'}, 409)
         # Without it the tablet has nowhere to send positions: better refuse than a silent shift.
         gps_url = (env['ir.config_parameter'].sudo().get_param('bus_tracking.gps_url') or '').strip().rstrip('/')
-        if not gps_url:
+        # An address saved before https was required is treated as missing: never hand the identifier to it.
+        if not secure_gps_url(gps_url):
+            if gps_url:
+                _logger.warning("bus_tracking.gps_url is not https; shifts cannot start until it is fixed")
             return json_response({'error': 'no_gps_url'}, 409)
         Shift = env['bus.shift'].sudo()
         with mute_logger('odoo.sql_db'):
@@ -334,9 +367,11 @@ class BusDriverApi(http.Controller):
         if err:
             return err
         shift = self._active_shift(user)
-        if not shift:
-            return json_response({'error': 'no_shift'}, 409)
         body = read_body()
+        if not shift:
+            shift = self._just_ended_shift(user, parse_traccar_dt((body or {}).get('reported_at')))
+            if not shift:
+                return json_response({'error': 'no_shift'}, 409)
         if body is None:
             return json_response({'error': 'bad_request'}, 400)
         kind = body.get('kind')
@@ -363,6 +398,8 @@ class BusDriverApi(http.Controller):
         reported_at = parse_traccar_dt(body.get('reported_at'))
         if not reported_at or not (shift.start - timedelta(minutes=1) <= reported_at <= now + timedelta(minutes=1)):
             reported_at = now
+        if shift.end:
+            reported_at = min(reported_at, shift.end)
         incident = request.env['bus.incident'].sudo().create({
             'reported_at': min(reported_at, now),
             'shift_id': shift.id,

@@ -1,10 +1,13 @@
 import json
 from datetime import timedelta
+from unittest.mock import patch
 
 from odoo import fields
+from odoo.exceptions import ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
+from odoo.tools import mute_logger
 
-from ..controllers.driver_api import error_limiter, login_limiter
+from ..controllers.driver_api import account_limiter, error_limiter, login_limiter
 from ..models.utils import pick_odoo_lang
 from .test_driver_auth import make_driver
 
@@ -125,6 +128,25 @@ class TestTripProgress(TransactionCase):
         self.assertEqual(trip['direction'], 'forward')
         self.assertEqual(trip['next_stop'], self.b)
 
+    def test_missing_the_first_stop_moves_on_to_the_one_after_the_last_reached(self):
+        self.arrive(self.b, 50)                          # never entered the radius of A
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['direction'], 'forward')
+        self.assertEqual(set(trip['arrived']), {self.b.id})
+        self.assertEqual(trip['next_stop'], self.c)
+
+    def test_a_trip_can_start_at_any_stop(self):
+        five = self.env['bus.route'].create({'name': 'R5', 'code': 'R5', 'stop_ids': [
+            (0, 0, {'sequence': i, 'name': name, 'latitude': -1.3 - i / 100, 'longitude': -78.5})
+            for i, name in enumerate('ABCDE', start=1)]})
+        a, b, c, d, e = five.stop_ids
+        self.bus.route_id = five
+        self.shift.route_id = five
+        self.arrive(d, 50)
+        trip = self.shift._trip_progress()
+        self.assertEqual(trip['next_stop'], e)
+        self.assertEqual(set(trip['arrived']), {d.id})
+
     def test_arrivals_before_the_shift_do_not_count(self):
         self.arrive(self.c, 300)
         trip = self.shift._trip_progress()
@@ -133,11 +155,81 @@ class TestTripProgress(TransactionCase):
 
 
 @tagged('post_install', '-at_install')
+class TestSkippedStopsOnAShift(TransactionCase):
+    """A bus on a shift without a scheduled trip: the stops it should have met and did not are reported when it
+    reaches a later one."""
+
+    def setUp(self):
+        super().setUp()
+        self.route = self.env['bus.route'].create({'name': 'R5', 'code': 'R5', 'stop_ids': [
+            (0, 0, {'sequence': i, 'name': name, 'latitude': -1.3 - i / 100, 'longitude': -78.5})
+            for i, name in enumerate('ABCDE', start=1)]})
+        self.a, self.b, self.c, self.d, self.e = self.route.stop_ids
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus S', 'route_id': self.route.id})
+        self.shift = self.env['bus.shift'].create({
+            'user_id': make_driver(self.env).id, 'vehicle_id': self.bus.id, 'route_id': self.route.id})
+        self.shift.start = fields.Datetime.now() - timedelta(hours=3)
+
+    def arrive(self, stop, minutes_ago):
+        arrival = self.env['bus.stop.arrival'].create({
+            'vehicle_id': self.bus.id, 'stop_id': stop.id,
+            'arrival_time': fields.Datetime.now() - timedelta(minutes=minutes_ago)})
+        self.env['bus.alert']._on_stop_reached(arrival)
+
+    def skipped(self):
+        return self.env['bus.alert'].search(
+            [('vehicle_id', '=', self.bus.id), ('kind', '=', 'skipped_stop')]).mapped('stop_id')
+
+    def test_starting_at_the_fourth_stop_reports_the_three_before(self):
+        self.arrive(self.d, 50)
+        self.assertEqual(self.skipped(), self.a | self.b | self.c)
+        alert = self.env['bus.alert'].search([('stop_id', '=', self.a.id)])
+        self.assertEqual((alert.state, alert.trip_id.id), ('closed', False))
+        self.assertTrue(alert.detail)
+
+    def test_a_stop_missed_on_the_way_is_reported(self):
+        self.arrive(self.a, 60)
+        self.arrive(self.b, 50)
+        self.arrive(self.d, 40)                          # drove past C
+        self.assertEqual(self.skipped(), self.c)
+
+    def test_a_trip_that_follows_every_stop_reports_nothing(self):
+        for stop, ago in ((self.a, 60), (self.b, 50), (self.c, 40)):
+            self.arrive(stop, ago)
+        self.assertFalse(self.skipped())
+
+    def test_starting_at_the_far_end_is_not_skipping_the_others(self):
+        self.arrive(self.e, 60)
+        self.arrive(self.d, 50)
+        self.assertFalse(self.skipped())
+
+    def test_the_same_stop_is_reported_once_per_trip(self):
+        self.arrive(self.a, 60)
+        self.arrive(self.c, 50)
+        self.arrive(self.d, 45)
+        self.arrive(self.c, 40)                          # GPS noise: back in the radius of C
+        self.arrive(self.d, 35)
+        self.assertEqual(len(self.env['bus.alert'].search([('kind', '=', 'skipped_stop')])), 1)
+
+    def test_without_a_shift_nothing_is_reported(self):
+        self.shift.state = 'done'
+        self.arrive(self.d, 50)
+        self.assertFalse(self.skipped())
+
+    def test_a_scheduled_trip_reports_its_own(self):
+        self.env['bus.alert'].search([]).unlink()
+        with patch.object(type(self.env['bus.trip']), '_trip_at', lambda _self, *a: self.env['bus.trip'].browse(1)):
+            self.arrive(self.d, 50)
+        self.assertFalse(self.skipped())
+
+
+@tagged('post_install', '-at_install')
 class TestDriverShiftApi(HttpCase):
 
     def setUp(self):
         super().setUp()
         login_limiter.reset()
+        account_limiter.reset()
         error_limiter.reset()
         self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
         self.env['ir.config_parameter'].sudo().set_param('bus_tracking.gps_url', 'https://gps.example.com/')
@@ -395,6 +487,25 @@ class TestDriverShiftApi(HttpCase):
         self.assertEqual(resp.json(), {'error': 'no_gps_url'})
         self.assertFalse(self.env['bus.shift'].search_count([('vehicle_id', '=', self.bus.id)]))
 
+    def test_start_never_hands_the_identifier_to_a_plain_http_address(self):
+        icp = self.env['ir.config_parameter'].sudo()
+        icp.set_param('bus_tracking.gps_url', 'http://gps.example.com')     # saved before https was required
+        with mute_logger('odoo.addons.bus_tracking.controllers.driver_api'):
+            resp = self.start(self.token())
+        self.assertEqual((resp.status_code, resp.json()), (409, {'error': 'no_gps_url'}))
+        self.assertNotIn('b-secret', resp.text)
+        icp.set_param('bus_tracking.gps_url', 'http://192.168.1.20:5055')    # a lab on the local network
+        self.assertEqual(self.start(self.token()).status_code, 200)
+
+    def test_the_gps_address_setting_needs_https_outside_the_local_network(self):
+        Settings = self.env['res.config.settings']
+        for bad in ('http://gps.example.com', 'ftp://gps.example.com', 'gps.example.com', 'http://8.8.8.8:5055'):
+            with self.subTest(bad), self.assertRaises(ValidationError):
+                Settings.create({'bus_gps_url': bad})
+        for good in ('https://gps.example.com', 'https://gps.example.com:8443/osmand', 'http://localhost:5055',
+                     'http://10.0.2.2:5055', 'http://tablet-lab.local', 'http://[::1]:5055'):
+            Settings.create({'bus_gps_url': good})
+
     def test_start_refuses_an_archived_route(self):
         self.route.active = False
         self.assertEqual(self.start(self.token()).status_code, 400)
@@ -404,6 +515,32 @@ class TestDriverShiftApi(HttpCase):
         vehicles = {v['name']: v for v in self.post(ME, token=self.token()).json()['vehicles']}
         self.assertTrue(vehicles['Bus 1']['has_gps'])
         self.assertFalse(vehicles['Sin GPS']['has_gps'])
+
+    def test_an_sos_saved_without_signal_arrives_after_the_shift_ended(self):
+        token = self.token()
+        self.assertEqual(self.start(token).status_code, 200)
+        shift = self.env['bus.shift'].search([('user_id', '=', self.driver.id), ('state', '=', 'active')])
+        shift.start = fields.Datetime.now() - timedelta(hours=2)
+        pressed = (fields.Datetime.now() - timedelta(minutes=30)).replace(microsecond=0)
+        shift._end()
+        resp = self.post(INCIDENT, {'kind': 'sos', 'reported_at': pressed.isoformat() + 'Z'}, token=token)
+        self.assertEqual(resp.status_code, 200, resp.text)
+        incident = self.env['bus.incident'].browse(resp.json()['id'])
+        self.assertEqual((incident.shift_id, incident.reported_at, incident.kind), (shift, pressed, 'sos'))
+        # Without a time, or with one after the shift ended, there is no shift to put it in.
+        self.assertEqual(self.post(INCIDENT, {'kind': 'sos'}, token=token).status_code, 409)
+        later = (fields.Datetime.now() + timedelta(minutes=5)).isoformat() + 'Z'
+        self.assertEqual(self.post(INCIDENT, {'kind': 'sos', 'reported_at': later}, token=token).status_code, 409)
+
+    def test_an_incident_of_a_shift_ended_long_ago_is_refused(self):
+        token = self.token()
+        self.start(token)
+        shift = self.env['bus.shift'].search([('user_id', '=', self.driver.id), ('state', '=', 'active')])
+        shift._end()
+        now = fields.Datetime.now()
+        shift.write({'start': now - timedelta(hours=6), 'end': now - timedelta(hours=3)})
+        pressed = (fields.Datetime.now() - timedelta(hours=4)).isoformat() + 'Z'
+        self.assertEqual(self.post(INCIDENT, {'kind': 'sos', 'reported_at': pressed}, token=token).status_code, 409)
 
     def test_an_incident_keeps_the_time_it_was_reported(self):
         token = self.token()

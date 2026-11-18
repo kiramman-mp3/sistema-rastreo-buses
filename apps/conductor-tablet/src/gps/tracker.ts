@@ -4,8 +4,8 @@ import * as TaskManager from 'expo-task-manager';
 
 import { GPS_INTERVAL_MS } from './interval';
 import { requestBatteryExemption, requestGpsPermissions } from './permissions';
-import { flushFixes, ingestLocations } from './runtime';
-import { gpsStore, locationQueue, readLastSent, writeLastError, writeLastSample, writeLastSent } from './store';
+import { flushFixes, heartbeatDue, ingestLocations } from './runtime';
+import { gpsStore, locationQueue, readLastSample, writeLastError, writeLastSample, writeLastSent } from './store';
 import { t } from '../i18n';
 import type { GpsController } from './types';
 
@@ -86,9 +86,8 @@ export const liveGps: GpsController = {
     // are sent to Traccar every few seconds while the app is running in the cockpit.
     stationaryHeartbeat = setInterval(async () => {
       try {
-        const lastSent = await readLastSent();
-        const now = Date.now();
-        if (!lastSent || now - lastSent.at >= GPS_INTERVAL_MS - 500) {
+        const lastFix = await readLastSample();
+        if (heartbeatDue(lastFix?.at ?? null, Date.now(), GPS_INTERVAL_MS)) {
           const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
           await runLocationTask([loc]);
         }
