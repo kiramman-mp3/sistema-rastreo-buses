@@ -84,8 +84,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-074 | 18-nov-2026 | Prueba del tablero de flota | Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom | static/src/js/live_map.js | Cerrado |
 | DEF-075 | 18-nov-2026 | Reporte del usuario | El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando | static/src/js/push_setup.js | Cerrado |
 | DEF-076 | 18-nov-2026 | Despliegue de v1.0.0-rc1 en Azure | La migración 16.0.1.9.0 no pudo borrar el rol grafana_reader en Supabase | migrations/16.0.1.9.0/pre-migrate.py | Cerrado |
+| DEF-077 | 18-nov-2026 | Verificación de v1.0.0-rc1 en Azure | Tras actualizar, los menús en español seguían diciendo Indicadores y Reportes | migrations/16.0.1.9.0/post-migrate.py | Cerrado |
 
-Resumen: 76 registrados, 76 cerrados (100 %), 0 abiertos. Densidad: 15,1 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 77 registrados, 77 cerrados (100 %), 0 abiertos. Densidad: 15,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -544,6 +545,12 @@ Resumen: 76 registrados, 76 cerrados (100 %), 0 abiertos. Densidad: 15,1 defecto
 - **Causa raíz:** Desde PostgreSQL 16, DROP OWNED BY exige ser miembro del rol; el usuario postgres de Supabase no es superusuario y no lo era.
 - **Categoría:** Migración
 - **Prueba que lo protege:** En la base de producción: GRANT al usuario actual, DROP OWNED y DROP ROLE en una transacción, 0 roles restantes; test_migration_grafana
+
+### DEF-077: Tras actualizar, los menús en español seguían diciendo Indicadores y Reportes
+
+- **Causa raíz:** Una actualización sin --i18n-overwrite conserva las traducciones que ya estaban en la base, así que los menús renombrados mantenían el nombre viejo.
+- **Categoría:** Internacionalización
+- **Prueba que lo protege:** Producción: -u con --i18n-overwrite, menús Reportes, Tablero y Notificaciones (Willachikuna en kichwa); desarrollo: la migración devuelve el nombre nuevo a un menú con el viejo
 
 ## 3. Qué falta para cerrar los abiertos
 
