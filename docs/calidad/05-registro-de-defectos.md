@@ -81,8 +81,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-071 | 17-nov-2026 | Retiro de Grafana | Al borrar un modelo, su tabla queda en la base | migrations/16.0.1.9.0/pre-migrate.py | Cerrado |
 | DEF-072 | 17-nov-2026 | Reporte en PDF | Las traducciones nuevas del módulo no se cargaban | i18n/bus_tracking.pot | Cerrado |
 | DEF-073 | 17-nov-2026 | Reporte en PDF | Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF | models/bus_report.py | Cerrado |
+| DEF-074 | 18-nov-2026 | Prueba del tablero de flota | Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom | static/src/js/live_map.js | Cerrado |
 
-Resumen: 73 registrados, 73 cerrados (100 %), 0 abiertos. Densidad: 14,5 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 74 registrados, 74 cerrados (100 %), 0 abiertos. Densidad: 14,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -523,6 +524,12 @@ Resumen: 73 registrados, 73 cerrados (100 %), 0 abiertos. Densidad: 14,5 defecto
 - **Causa raíz:** report_action pide el diseño de la compañía si no está configurado, aunque el reporte tiene su propia cabecera.
 - **Categoría:** Lógica
 - **Prueba que lo protege:** test_report: imprimir devuelve directamente la acción del reporte; descarga probada desde el tablero
+
+### DEF-074: Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom
+
+- **Causa raíz:** Leaflet 1.9.4 termina la animación de zoom 250 ms después aunque el mapa ya se haya quitado, y falla sobre los paneles borrados.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** Prueba en el navegador: entrar y salir del mapa en vivo de inmediato no muestra errores
 
 ## 3. Qué falta para cerrar los abiertos
 
