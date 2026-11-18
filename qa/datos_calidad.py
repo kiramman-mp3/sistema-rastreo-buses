@@ -314,6 +314,9 @@ DEFECTOS = [
     ('DEF-075', '18-nov-2026', 'Reporte del usuario', 'El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando',
      'static/src/js/push_setup.js', 'La página esperaba navigator.serviceWorker.ready, que sólo se cumple con un service worker que controle la página; /web queda fuera del alcance /bus_tracking/ del nuestro y la espera no terminaba.',
      'Lógica', 'Cerrado', 'Chrome (FCM) y Edge (WNS) en Windows: activar, registrar el dispositivo y enviar la prueba; test_push comprueba que no se espera a ready'),
+    ('DEF-076', '18-nov-2026', 'Despliegue de v1.0.0-rc1 en Azure', 'La migración 16.0.1.9.0 no pudo borrar el rol grafana_reader en Supabase',
+     'migrations/16.0.1.9.0/pre-migrate.py', 'Desde PostgreSQL 16, DROP OWNED BY exige ser miembro del rol; el usuario postgres de Supabase no es superusuario y no lo era.',
+     'Migración', 'Cerrado', 'En la base de producción: GRANT al usuario actual, DROP OWNED y DROP ROLE en una transacción, 0 roles restantes; test_migration_grafana'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
