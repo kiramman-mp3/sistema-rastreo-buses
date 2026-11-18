@@ -24,7 +24,7 @@ import { NoticeList } from '../src/ui/Notice';
 import { StopStrip } from '../src/ui/StopStrip';
 import { useTheme } from '../src/ui/ThemeProvider';
 import { useStopCue } from '../src/ui/useStopCue';
-import { border, shape, space } from '../src/ui/theme';
+import { border, lift, shape, space } from '../src/ui/theme';
 
 const GPS_LABEL: Record<string, Message> = {
   sending: 'gpsSending',
@@ -321,7 +321,14 @@ export default function ShiftScreen() {
   return (
     <Screen scroll={pageScroll}>
       {/* Header: bus and line, real GPS state, time, day or night */}
-      <View style={[styles.header, layout.compact && styles.headerPhone, { backgroundColor: palette.panel }]}>
+      <View
+        style={[
+          styles.header,
+          layout.compact && styles.headerPhone,
+          { backgroundColor: palette.panel, borderColor: palette.edge, borderLeftColor: color },
+          palette.mode === 'day' && lift,
+        ]}
+      >
         <View style={[styles.identity, tallHeader && styles.identityTall, layout.short && styles.identityShort]}>
           <View style={[styles.chip, { backgroundColor: color }]}>
             <Txt bold size="body" color={readableOn(color)}>
@@ -380,7 +387,7 @@ export default function ShiftScreen() {
             pageScroll ? styles.mapFixed : side ? (layout.short ? styles.mapSideShort : styles.mapSide) : styles.mapStack,
             // The stop strip comes before the map: on a screen with little height the map gives way first.
             !pageScroll && !side && layout.height < 700 && styles.mapStackLow,
-            { backgroundColor: palette.panel },
+            { backgroundColor: palette.panel, borderColor: palette.edge },
           ]}
         >
           <RouteMapView route={routeMap} bus={busFix} nextStopId={nextStop?.id ?? null} />
@@ -424,7 +431,10 @@ const styles = StyleSheet.create({
     paddingVertical: space[3],
     columnGap: space[4],
     rowGap: space[2],
-    ...shape.control,
+    ...shape.card,
+    borderWidth: 1,
+    // the line's own colour runs down the left edge: the header says which line before it is read
+    borderLeftWidth: 8,
   },
   // On a phone every pixel counts: tighter sides so the GPS state and the clock fit one row of a 360 dp screen.
   headerPhone: {
@@ -531,7 +541,8 @@ const styles = StyleSheet.create({
     marginTop: space[1],
   },
   map: {
-    ...shape.control,
+    ...shape.card,
+    borderWidth: 1,
     overflow: 'hidden',
   },
   mapSide: {

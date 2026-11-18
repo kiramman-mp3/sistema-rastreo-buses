@@ -9,7 +9,7 @@ import type { Route, Vehicle } from '../api/types';
 import { t } from '../i18n';
 import { Press, Txt } from './cabin';
 import { readableOn } from './contrast';
-import { shape, space } from './theme';
+import { border, lift, shape, space } from './theme';
 import { useTheme } from './ThemeProvider';
 
 type BusOptionProps = {
@@ -31,19 +31,29 @@ export const BusOption = memo(function BusOption({ bus, selected, usable, hit, o
       accessibilityState={{ checked: selected, disabled: !usable }}
       style={[
         styles.option,
-        { minHeight: hit + 8, backgroundColor: selected ? palette.ink : palette.panel, opacity: usable ? 1 : 0.45 },
+        styles.row,
+        {
+          minHeight: hit + 8,
+          backgroundColor: selected ? palette.ink : palette.panel,
+          borderColor: selected ? palette.ink : palette.edge,
+          opacity: usable ? 1 : 0.45,
+        },
+        selected && palette.mode === 'day' && lift,
       ]}
     >
-      <Txt bold size="data" color={selected ? palette.ground : palette.ink}>
-        {bus.name}
-      </Txt>
-      <Txt size="small" color={selected ? palette.ground : palette.ink2}>
-        {!bus.available
-          ? `${bus.plate} · ${t('busTaken')}`
-          : bus.has_gps === false
-            ? `${bus.plate} · ${t('busNoGps')}`
-            : bus.plate}
-      </Txt>
+      <View style={styles.grow}>
+        <Txt bold size="data" color={selected ? palette.ground : palette.ink}>
+          {bus.name}
+        </Txt>
+        <Txt size="small" color={selected ? palette.ground : palette.ink2}>
+          {!bus.available
+            ? `${bus.plate} · ${t('busTaken')}`
+            : bus.has_gps === false
+              ? `${bus.plate} · ${t('busNoGps')}`
+              : bus.plate}
+        </Txt>
+      </View>
+      {usable ? <Pick on={selected} /> : null}
     </Press>
   );
 });
@@ -63,31 +73,69 @@ export const RouteOption = memo(function RouteOption({ route, selected, hit, onP
       onPress={() => onPick(route)}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      style={[styles.option, styles.routeOption, { minHeight: hit + 8, backgroundColor: selected ? palette.ink : palette.panel }]}
+      style={[
+        styles.option,
+        styles.row,
+        { minHeight: hit + 8, backgroundColor: selected ? palette.ink : palette.panel, borderColor: selected ? palette.ink : palette.edge },
+        selected && palette.mode === 'day' && lift,
+      ]}
     >
       <View style={[styles.chip, { backgroundColor: chip }]}>
         <Txt bold size="body" color={readableOn(chip)}>
           {route.code}
         </Txt>
       </View>
-      <Txt bold size="body" color={selected ? palette.ground : palette.ink} lines={2} style={styles.routeName}>
+      <Txt bold size="body" color={selected ? palette.ground : palette.ink} lines={2} style={styles.grow}>
         {route.name}
       </Txt>
+      <Pick on={selected} />
     </Press>
   );
 });
 
+/** The radio mark: a ring when free, a yellow stop with a dark core when picked (shape, not only colour). */
+function Pick({ on }: { on: boolean }) {
+  const { palette } = useTheme();
+  return (
+    <View
+      accessibilityElementsHidden
+      style={[
+        styles.pick,
+        on
+          ? { backgroundColor: palette.signal, borderColor: palette.signal }
+          : { borderColor: palette.mode === 'day' ? '#9AA5A3' : palette.ink2 },
+      ]}
+    >
+      {on ? <View style={[styles.pickCore, { backgroundColor: palette.onSignal }]} /> : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   option: {
     ...shape.control,
+    borderWidth: 1,
     paddingHorizontal: space[5],
     paddingVertical: space[3],
     justifyContent: 'center',
   },
-  routeOption: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[4],
+  },
+  pick: {
+    width: 28,
+    height: 28,
+    borderRadius: border.round,
+    borderWidth: border.mark,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickCore: {
+    width: 10,
+    height: 10,
+    borderRadius: border.round,
   },
   chip: {
     minWidth: 56,
@@ -97,7 +145,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  routeName: {
+  grow: {
     flex: 1,
   },
 });
