@@ -52,6 +52,8 @@
     --ancho: 76rem;
     --radio-sm: 8px;
     --radio: 14px;             /* controls, chips, fields */
+    --radio-md: 18px;          /* small cards and floating bars */
+    --radio-lg: 20px;          /* panels inside a page */
     --radio-g: 22px;           /* cards and photographs */
     --radio-xl: 30px;          /* feature banners and hero cards */
     --radio-pill: 9999px;      /* pills and status tags */
