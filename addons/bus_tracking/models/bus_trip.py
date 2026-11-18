@@ -308,7 +308,9 @@ class BusTrip(models.Model):
                     'trip_id': trip.id, 'stop_id': stop.id, 'sequence': stop.sequence,
                     'planned_time': trip.planned_start + timedelta(minutes=stop.planned_offset_min),
                 })
-        self.env['bus.trip.stop'].create(lines)
+        # The stop lines follow the route and nobody writes them by hand: the managers who create a trip
+        # may not create them directly.
+        self.env['bus.trip.stop'].sudo().create(lines)
         return trips
 
     def action_cancel(self):
