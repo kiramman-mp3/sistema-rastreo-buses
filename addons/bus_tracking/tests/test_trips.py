@@ -84,6 +84,16 @@ class TestTripCreation(TripCase):
         self.assertEqual(set(trip.stop_line_ids.mapped('status')), {'pending'})
         self.assertIn('L1', trip.name)
 
+    def test_a_manager_creates_a_trip_with_its_stop_lines(self):
+        """A manager may not write stop lines by hand, but creating a trip still builds them (DEF-080)."""
+        manager = self.env['res.users'].create({
+            'name': 'Gestor', 'login': 'gestor-recorridos',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_manager').id])]})
+        trip = self.env['bus.trip'].with_user(manager).create({
+            'vehicle_id': self.bus.id, 'route_id': self.route.id, 'planned_start': local_to_utc(MONDAY, 7.25)})
+        self.assertEqual(len(trip.stop_line_ids), 3)
+
     def test_a_route_without_planned_minutes_cannot_be_scheduled(self):
         bare = self.env['bus.route'].create({
             'name': 'Sin horario', 'code': 'S1',
