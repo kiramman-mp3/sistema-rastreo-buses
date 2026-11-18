@@ -88,7 +88,7 @@
     --bus-font-body: var(--texto);
     --bus-radius-sm: var(--radio);
     --bus-radius: var(--radio);
-    --bus-radius-lg: var(--radio);
+    --bus-radius-lg: var(--radio-g);
     --bus-shadow-sm: none;
     --bus-shadow: none;
     --bus-shadow-lg: 0 8px 24px rgba(23, 32, 37, 0.18);   /* only for things that float */
