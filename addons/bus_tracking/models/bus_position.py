@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 # Used until someone saves Settings: a new install must not keep positions forever (DEF-053).
 DEFAULT_RETENTION_DAYS = 30
-# Arrivals, closed alerts and incidents, finished trips and shifts: the history the reports and Grafana read.
+# Arrivals, closed alerts and incidents, finished trips and shifts: the history the reports read.
 DEFAULT_HISTORY_DAYS = 365
 
 # (table, condition, which deadline). Only what is over: an open alert, an incident nobody has seen yet or an
@@ -23,7 +23,6 @@ PURGES = [
     ('bus_incident', "state = 'seen' AND reported_at < %s", 'history'),
     ('bus_trip', "state IN ('done', 'incomplete', 'cancelled') AND planned_start < %s", 'history'),
     ('bus_run', "state = 'done' AND departure < %s", 'history'),
-    ('bus_position_day', "local_day < %s::date", 'history'),
     ('bus_shift', "state = 'done' AND \"end\" < %s AND NOT EXISTS ("
                   "SELECT 1 FROM bus_incident i WHERE i.shift_id = bus_shift.id)", 'history'),
 ]
