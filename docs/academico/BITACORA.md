@@ -1373,8 +1373,17 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 
 ### Pendiente o sin confirmar
 
-- Supabase no deja borrar el rol `grafana_reader` (`permission denied to drop objects`); la migración lo avisa y sigue. Borrarlo desde la consola de Supabase si nada lo usa.
-- Quitar de `.env.prod` de la VM las variables `GRAFANA_*`, que ya no se usan.
-- El panel no se revisó con sesión iniciada en la VM: menús Reportes y Notificaciones y descarga del PDF, comprobados solo en desarrollo.
+- ~~Rol `grafana_reader` en Supabase~~: borrado el mismo día (ver abajo, DEF-076).
+- ~~Variables `GRAFANA_*` en `.env.prod`~~: quitadas el mismo día.
+- ~~Panel sin revisar en la VM~~: revisado el mismo día; los menús tenían el nombre viejo (DEF-077), corregido.
 - El IPA va sin firmar: se instala con AltStore o SideStore.
 - Fase 46 sin hacer: jornada real con tabletas y prueba de carga.
+
+### Cierre de pendientes (18-nov, tarde)
+
+- Rol `grafana_reader`: en Supabase el usuario `postgres` no es superusuario y, desde PostgreSQL 16, `DROP OWNED BY` exige ser miembro del rol. Se borró en una transacción con `GRANT grafana_reader TO CURRENT_USER`, `DROP OWNED` y `DROP ROLE` (0 roles restantes). La migración 16.0.1.9.0 hace ahora lo mismo (DEF-076) y `test_migration_grafana` cubre la limpieza.
+- `.env.prod` de la VM sin las variables `GRAFANA_*` (copia previa `.env.prod.bak-*`); `docker compose config` válido.
+- Revisión en producción con `odoo shell` (sin guardar cambios): módulo `16.0.1.9.0`, *Conversaciones* oculto, reporte PDF generado (23 941 bytes) y flota agrupada en sus tres columnas. Los menús en español seguían diciendo *Indicadores* y *Reportes*: la actualización sin `--i18n-overwrite` conserva las traducciones viejas (DEF-077). Se respaldó y se corrió `-u bus_tracking --i18n-overwrite`: ahora dicen *Reportes*, *Tablero* y *Notificaciones* (*Willachikuna* en kichwa). La migración recarga sola las traducciones del módulo desde ahora.
+- Suite completa: 557 de 557 pruebas de Odoo.
+- Siguen pendientes, fuera del alcance de este trabajo: firmar el IPA (necesita cuenta de Apple) y la fase 46 (jornada real con tabletas).
+
