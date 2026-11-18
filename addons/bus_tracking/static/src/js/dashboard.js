@@ -72,7 +72,10 @@ export class BusDashboard extends Component {
                 this.state.now = Date.now();
             }, 1000);
         });
-        onPatched(() => this.drawCharts());
+        // The clock re-renders the page every second: charts are redrawn only when their data or the tab changed,
+        // otherwise they would restart their animation in a loop.
+        this.drawn = { data: null, tab: null };
+        onPatched(() => this.drawChartsIfChanged());
         onWillUnmount(() => {
             clearInterval(this.poll);
             clearInterval(this.clock);
@@ -257,18 +260,34 @@ export class BusDashboard extends Component {
         this.charts = {};
     }
 
-    drawCharts() {
-        if (!window.Chart || !this.state.data) {
+    drawChartsIfChanged() {
+        const { data, tab } = this.state;
+        if (data === this.drawn.data && tab === this.drawn.tab) {
             return;
+        }
+        // A new tab animates in; the 30-second refresh of the same tab swaps the figures without a replay.
+        const animate = tab !== this.drawn.tab;
+        if (this.drawCharts(animate)) {
+            this.drawn = { data, tab };
+        }
+    }
+
+    drawCharts(animate = true) {
+        if (!window.Chart || !this.state.data) {
+            return false;
         }
         this.destroyCharts();
         const specs = this.chartSpecs();
         for (const [name, config] of Object.entries(specs)) {
             const canvas = this.refs[name] && this.refs[name].el;
             if (canvas) {
+                if (!animate) {
+                    config.options = Object.assign({}, config.options, { animation: { duration: 0 } });
+                }
                 this.charts[name] = new window.Chart(canvas.getContext("2d"), config);
             }
         }
+        return true;
     }
 
     kindLabel(kind) {
