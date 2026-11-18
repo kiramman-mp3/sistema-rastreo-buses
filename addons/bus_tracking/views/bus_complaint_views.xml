@@ -127,6 +127,6 @@
         <field name="name">Passenger messages</field>
         <field name="res_model">bus.complaint</field>
         <field name="view_mode">kanban,tree,form</field>
-        <field name="context">{'search_default_unresolved': 1}</field>
+        <field name="context">{}</field>
     </record>
 </odoo>
