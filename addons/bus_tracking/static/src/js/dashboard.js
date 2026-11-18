@@ -58,6 +58,7 @@ export class BusDashboard extends Component {
             error: null,
             lastSync: null,
             now: Date.now(),
+            printing: false,
         });
 
         onMounted(async () => {
@@ -229,6 +230,31 @@ export class BusDashboard extends Component {
     async onScope(ev) {
         this.state.scope = ev.target.value;
         await this.load();
+    }
+
+    // The PDF of what is on screen: same period, line and data.
+    async downloadPdf() {
+        const data = this.state.data;
+        if (!data || this.state.printing) {
+            return;
+        }
+        this.state.printing = true;
+        try {
+            const created = await this.orm.create("bus.report.wizard", [{
+                date_from: data.period.from,
+                date_to: data.period.to,
+                route_ids: this.state.routeId ? [[6, 0, [Number.parseInt(this.state.routeId, 10)]]] : [],
+                scope: this.state.scope,
+                compare: true,
+            }]);
+            const id = Array.isArray(created) ? created[0] : created;
+            const action = await this.orm.call("bus.report.wizard", "action_print", [[id]]);
+            await this.action.doAction(action);
+        } catch {
+            this.notification.add(_t("The PDF could not be prepared. Try again in a moment."), { type: "danger" });
+        } finally {
+            this.state.printing = false;
+        }
     }
 
     openTrip(id) {
