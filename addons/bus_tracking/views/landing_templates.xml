@@ -36,6 +36,7 @@
         <link rel="alternate icon" type="image/png" href="/bus_tracking/static/img/favicon.png"/>
         <link rel="preload" href="/bus_tracking/static/fonts/atkinson-400.woff2" as="font" type="font/woff2" crossorigin=""/>
         <link rel="preload" href="/bus_tracking/static/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin=""/>
+        <link rel="stylesheet" href="/web/static/src/libs/fontawesome/css/font-awesome.css"/>
         <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/css/brand.css?v=#{asset_v}"/>
         <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/site.css?v=#{asset_v}"/>
         <link rel="stylesheet" t-attf-href="/bus_tracking/static/src/portal/pages.css?v=#{asset_v}"/>
@@ -125,12 +126,6 @@
                 </div>
 
                 <div class="pie-inferior">
-                    <p class="creditos">
-                        <t t-esc="s['photos_credit']"/>
-                        <a href="https://commons.wikimedia.org/wiki/File:Ambato_Avenida_Atahualpa_seen_from_the_entrance_to_Mall_de_los_Andes.jpg" rel="noopener">Ymblanter</a>,
-                        <a href="https://commons.wikimedia.org/wiki/File:VIENDO_AL_INTERCAMBIADOR_HUACHI_GRANDE_-_panoramio.jpg" rel="noopener">DIOHER_PAVAL</a>,
-                        <a href="https://commons.wikimedia.org/wiki/File:Fachada_nocturna_del_Terminal_Terrestre_Sur_de_Ambato.jpg" rel="noopener">Martín Vasco</a>.
-                    </p>
                     <div class="pie-copyright">
                         <span>© <t t-esc="datetime.date.today().year"/> <t t-esc="brand"/> · <t t-esc="s.get('brand_sub', 'Universidad Técnica de Ambato')"/></span>
                     </div>
@@ -307,15 +302,15 @@
                         <dl class="cifras">
                             <div class="cifra-card">
                                 <dt t-esc="s['stat_buses']"/>
-                                <dd><span class="cifra-icono" aria-hidden="true">🚌</span><t t-esc="total_buses"/></dd>
+                                <dd><span class="cifra-icono fa fa-bus" aria-hidden="true"></span><span class="cifra-numero" t-esc="total_buses"/></dd>
                             </div>
                             <div class="cifra-card">
                                 <dt t-esc="s['stat_lines']"/>
-                                <dd><span class="cifra-icono" aria-hidden="true">🗺️</span><t t-esc="len(lines)"/></dd>
+                                <dd><span class="cifra-icono fa fa-map" aria-hidden="true"></span><span class="cifra-numero" t-esc="len(lines)"/></dd>
                             </div>
                             <div class="cifra-card">
                                 <dt t-esc="s['stat_stops']"/>
-                                <dd><span class="cifra-icono" aria-hidden="true">📍</span><t t-esc="len(stop_names)"/></dd>
+                                <dd><span class="cifra-icono fa fa-map-marker" aria-hidden="true"></span><span class="cifra-numero" t-esc="len(stop_names)"/></dd>
                             </div>
                         </dl>
                     </div>
@@ -404,29 +399,6 @@
                             </a>
                         </div>
                     </div>
-                </section>
-
-                <!-- City of Ambato Transit Landscape Cards (Wander.ph destination card style) -->
-                <section class="marco inicio-ciudad" aria-labelledby="titulo-ciudad">
-                    <div class="ciudad-cabeza">
-                        <span class="seccion-subtitulo" t-esc="s['kicker_city']"/>
-                        <h2 id="titulo-ciudad" class="entra" t-esc="s['city_title']"/>
-                        <p class="lead entra" style="--i: 1" t-esc="s['city_lead']"/>
-                    </div>
-                    <ul class="tarjetas-foto">
-                        <t t-foreach="[('av-atahualpa-mall', 'cap_atahualpa', 'tag_south'), ('huachi-grande', 'cap_huachi', 'tag_south'), ('terminal-sur', 'cap_terminal', 'tag_terminal'), ('uta-edificio', 'cap_uta', 'tag_campus'), ('ambato-vista', 'cap_vista', 'tag_city'), ('tungurahua', 'cap_tungurahua', 'tag_andes')]" t-as="photo">
-                            <li class="entra tarjeta-foto-item" t-attf-style="--i: #{photo_index}">
-                                <figure class="tarjeta-foto-contenedor">
-                                    <span class="tarjeta-foto-tag" t-esc="s[photo[2]]"/>
-                                    <img t-attf-src="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp"
-                                         t-attf-srcset="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/ambato/#{photo[0]}-1200.webp 1200w"
-                                         sizes="(min-width: 900px) 33vw, 90vw" decoding="async"
-                                         t-att-alt="s[photo[1]]"/>
-                                    <figcaption t-esc="s[photo[1]]"/>
-                                </figure>
-                            </li>
-                        </t>
-                    </ul>
                 </section>
 
                 <!-- Customer Care / Citizen Feedback (Modern SaaS Contact Card) -->
