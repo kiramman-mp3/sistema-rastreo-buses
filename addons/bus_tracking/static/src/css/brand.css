@@ -47,13 +47,32 @@
     --t-4: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem); /* 28-44px: page title */
     --t-5: clamp(2.5rem, 1.4rem + 5vw, 5.5rem);   /* 40-88px: the one very large thing */
 
-    /* Space and shape: one radius, one pair of margins */
+    /* Space and shape: modern elevation and radii */
     --margen: clamp(1.25rem, 4vw, 3rem);
-    --ancho: 72rem;
-    --radio: 12px;             /* controls, chips, fields */
-    --radio-g: 22px;           /* cards and photographs: rounder than what sits inside them */
-    --sombra: 0 1px 2px rgb(23 32 37 / 0.06), 0 10px 30px -12px rgb(23 32 37 / 0.18);
+    --ancho: 76rem;
+    --radio-sm: 8px;
+    --radio: 14px;             /* controls, chips, fields */
+    --radio-md: 18px;          /* small cards and floating bars */
+    --radio-lg: 20px;          /* panels inside a page */
+    --radio-g: 22px;           /* cards and photographs */
+    --radio-xl: 30px;          /* feature banners and hero cards */
+    --radio-pill: 9999px;      /* pills and status tags */
+
+    /* Modern Elevation & Shadows */
+    --sombra-sm: 0 1px 3px rgba(23, 32, 37, 0.06), 0 1px 2px rgba(23, 32, 37, 0.04);
+    --sombra-md: 0 4px 8px -1px rgba(23, 32, 37, 0.08), 0 2px 4px -2px rgba(23, 32, 37, 0.04);
+    --sombra-lg: 0 12px 24px -4px rgba(23, 32, 37, 0.09), 0 4px 8px -2px rgba(23, 32, 37, 0.04);
+    --sombra-xl: 0 20px 32px -6px rgba(23, 32, 37, 0.12), 0 8px 14px -4px rgba(23, 32, 37, 0.06);
+    --sombra-flotante: 0 24px 50px -12px rgba(23, 32, 37, 0.22);
+    --sombra: var(--sombra-lg);
     --toque: 48px;             /* minimum touch target on the portal */
+
+    /* Glass and Borders */
+    --borde-suave: rgba(23, 32, 37, 0.08);
+    --borde-fuerte: rgba(23, 32, 37, 0.16);
+    --glass-bg: rgba(255, 255, 255, 0.90);
+    --glass-border: rgba(255, 255, 255, 0.65);
+    --glass-blur: blur(14px);
 
     /* Motion */
     --facil: cubic-bezier(0.22, 1, 0.36, 1);   /* ease-out for things that arrive */
