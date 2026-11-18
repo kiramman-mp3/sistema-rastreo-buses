@@ -21,7 +21,6 @@ Regla del proyecto: **cada vez que se pruebe, se mida o se corrija algo relacion
 | [11-elementos-acs.md](11-elementos-acs.md) | Elementos del ACS que existen y que faltan, y mejoras futuras |
 | [13-recorridos-de-prueba.md](13-recorridos-de-prueba.md) | 12 recorridos simulados: lo esperado contra lo detectado |
 | [14-metricas-de-transporte.md](14-metricas-de-transporte.md) | Los 12 indicadores con fórmula, fuente, umbrales, SQL y resultado *(generado de `scripts/doc_metricas.py`)* |
-| [15-tablero-grafana.md](15-tablero-grafana.md) | Tablero de Odoo y Grafana incrustado |
 | [16-sonarqube.md](16-sonarqube.md) | SonarQube: antes y después, interpretación |
 | [17-rendimiento-por-volumen.md](17-rendimiento-por-volumen.md) | Tiempos de cada pantalla hasta 1 000 000 de posiciones |
 | [18-mejora-continua-pdca.md](18-mejora-continua-pdca.md) | Ishikawa, Pareto y cuatro ciclos PDCA de la etapa del proyecto final |
