@@ -122,134 +122,148 @@
             <t t-call="bus_tracking.portal_header"/>
 
             <main id="contenido">
-                <!-- First screen: the question, the stop search, and the busiest line working. -->
-                <section class="marco inicio-hero">
-                    <div class="hero-texto">
-                        <h1 class="entra" t-esc="s['home_title']"/>
-                        <p class="lead entra" style="--i: 1" t-esc="s['home_lead']"/>
-                        <form action="/rutas" method="get" role="search" class="buscador entra" style="--i: 2">
-                            <label class="sr-only" for="buscar-parada" t-esc="s['search_label']"/>
-                            <input type="search" id="buscar-parada" name="q" list="paradas" autocomplete="off"
-                                   t-att-placeholder="s['search_placeholder']"/>
-                            <button class="boton" type="submit" t-esc="s['search_go']"/>
-                        </form>
-                        <datalist id="paradas">
-                            <option t-foreach="stop_names" t-as="name" t-att-value="name"/>
-                        </datalist>
-                        <p class="total entra" style="--i: 3">
-                            <t t-if="total_buses == 1" t-esc="s['buses_now_one']"/>
-                            <t t-elif="total_buses" t-esc="s['buses_now_total'].format(n=total_buses)"/>
-                            <t t-else="" t-esc="s['buses_now_none']"/>
-                        </p>
-                    </div>
-
-                    <div t-if="featured" class="fragmento entra" style="--i: 2" data-ui="">
-                        <div class="fragmento-cabeza">
-                            <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
-                            <a class="fragmento-nombre" t-attf-href="/rutas/#{featured['code']}" t-esc="featured['name']"/>
-                            <span class="vivo" data-vivo="" t-esc="s['searching']"/>
-                        </div>
-                        <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['featured_hint']"/>
-                        <t t-set="line" t-value="featured"/>
-                        <t t-call="bus_tracking.stop_line"/>
-                    </div>
-                    <div t-else="" class="aviso">
-                        <strong t-esc="s['no_routes']"/>
-                    </div>
-                </section>
-
-                <!-- Every line, as two-ended rows: name on the left, buses now on the right. -->
-                <section class="marco inicio-lineas" id="lineas" aria-labelledby="titulo-lineas">
-                    <h2 id="titulo-lineas" class="entra" t-esc="s['lines_title']"/>
-                    <ul class="filas">
-                        <li t-foreach="lines" t-as="l" class="entra" t-attf-style="--i: #{l_index}">
-                            <a class="fila" t-attf-href="/rutas/#{l['code']}">
-                                <span class="chip-linea" t-attf-style="background: #{l['color']}" t-esc="l['code']"/>
-                                <span class="fila-nombre">
-                                    <strong t-esc="l['name']"/>
-                                    <span t-if="l['stops']" class="fila-sub">
-                                        <t t-esc="s['line_from_to'].format(a=l['stops'][0], b=l['stops'][-1])"/> ·
-                                        <t t-esc="s['line_stops_n'].format(n=len(l['stops']))"/>
-                                    </span>
-                                </span>
-                                <span t-attf-class="fila-valor #{'con-buses' if l['buses'] else ''}"
-                                      t-esc="s['buses_in_service'].format(n=l['buses']) if l['buses'] else s['no_service']"/>
-                            </a>
-                        </li>
-                    </ul>
-                </section>
-
-                <!-- The people the buses are for: three photographs, each with what the page does for them. -->
-                <section class="marco inicio-gente" aria-labelledby="titulo-gente">
-                    <div class="gente-texto">
-                        <h2 id="titulo-gente" class="entra" t-esc="s['people_title']"/>
-                        <p class="entra" style="--i: 1" t-esc="s['people_lead']"/>
-                    </div>
-                    <ul class="gente">
-                        <t t-foreach="[('estudiantes', 'people_1'), ('parada', 'people_2'), ('celular', 'people_3')]" t-as="photo">
-                            <li class="entra" t-attf-style="--i: #{photo_index}">
-                                <figure>
-                                    <img t-attf-src="/bus_tracking/static/img/gente/#{photo[0]}-800.webp"
-                                         t-attf-srcset="/bus_tracking/static/img/gente/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/gente/#{photo[0]}-1200.webp 1200w"
-                                         sizes="(min-width: 900px) 33vw, 90vw" loading="lazy" decoding="async" alt=""/>
-                                    <figcaption t-esc="s[photo[1]]"/>
-                                </figure>
-                            </li>
-                        </t>
-                    </ul>
-                </section>
-
-                <!-- How it works: three statements; the fragment beside them changes with each one. -->
-                <section t-if="featured" class="marco inicio-como" aria-labelledby="titulo-como">
-                    <h2 id="titulo-como" t-esc="s['how_title']"/>
-                    <div class="como">
-                        <ol class="como-pasos">
-                            <li data-paso="1"><img class="paso-arte" src="/bus_tracking/static/img/gente/mapa-celular.png" alt="" loading="lazy" width="120" height="120"/><p class="frase" t-esc="s['how_1']"/><p t-esc="s['how_1b']"/></li>
-                            <li data-paso="2"><img class="paso-arte" src="/bus_tracking/static/img/gente/ruta-pin.png" alt="" loading="lazy" width="120" height="120"/><p class="frase" t-esc="s['how_2']"/><p t-esc="s['how_2b']"/></li>
-                            <li data-paso="3"><img class="paso-arte" src="/bus_tracking/static/img/gente/espera.png" alt="" loading="lazy" width="120" height="120"/><p class="frase" t-esc="s['how_3']"/><p t-esc="s['how_3b']"/></li>
-                        </ol>
-                        <div class="como-escenario" data-ui="" data-estado="1" aria-hidden="true">
-                            <div class="fragmento-cabeza">
-                                <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
-                                <span class="fragmento-nombre" t-esc="featured['name']"/>
+                <!-- First screen: a bus in the Andes at dusk, the question, and the two ways in. -->
+                <section class="portada">
+                    <div class="portada-foto">
+                        <img src="/bus_tracking/static/img/gente/bus-andes-1200.webp"
+                             srcset="/bus_tracking/static/img/gente/bus-andes-800.webp 800w, /bus_tracking/static/img/gente/bus-andes-1200.webp 1200w, /bus_tracking/static/img/gente/bus-andes-1920.webp 1920w"
+                             sizes="100vw" alt="" fetchpriority="high" decoding="async"/>
+                        <div class="portada-texto marco">
+                            <h1 class="entra" t-esc="s['home_title']"/>
+                            <p class="lead entra" style="--i: 1" t-esc="s['home_lead']"/>
+                            <div class="portada-botones entra" style="--i: 2">
+                                <a class="boton boton-senal" href="/rutas" t-esc="s['hero_cta_lines']"/>
+                                <a class="boton boton-claro" href="/quejas" t-esc="s['nav_write']"/>
                             </div>
-                            <p class="resumen demo-3" t-esc="s['bus_n_stops'].format(bus={'en': 'The bus', 'qu': 'Bus'}.get(site_lang, 'El bus'), n=2)"/>
-                            <ol class="linea demo" t-attf-style="--c: #{featured['color']}">
-                                <t t-foreach="featured['stops'][:5]" t-as="stop_name">
-                                    <li t-if="stop_name_index == 1" class="demo-bus">
-                                        <span class="bus-en-linea"><span class="ficha"><t t-call="bus_tracking.bus_glyph"/></span></span>
-                                    </li>
-                                    <li t-att-class="'demo-mia' if stop_name_index == 3 else None">
-                                        <span class="parada" t-att-aria-pressed="'true' if stop_name_index == 3 else None"
-                                              t-att-data-mia="s['mine_tag']">
-                                            <span class="punto"/><span class="nombre" t-esc="stop_name"/>
+                        </div>
+                    </div>
+
+                    <!-- The yellow panel over the photo: the stop search and every line with its buses now. -->
+                    <div class="marco">
+                        <div class="buscar-panel entra" style="--i: 3">
+                            <form action="/rutas" method="get" role="search" class="buscar-fila">
+                                <label class="buscar-titulo" for="buscar-parada" t-esc="s['find_title']"/>
+                                <div class="buscador">
+                                    <input type="search" id="buscar-parada" name="q" list="paradas" autocomplete="off"
+                                           t-att-placeholder="s['search_placeholder']"/>
+                                    <button class="boton" type="submit" t-esc="s['search_go']"/>
+                                </div>
+                            </form>
+                            <datalist id="paradas">
+                                <option t-foreach="stop_names" t-as="name" t-att-value="name"/>
+                            </datalist>
+                            <ul t-if="lines" class="pestanas" id="lineas" t-att-aria-label="s['lines_title']">
+                                <li t-foreach="lines" t-as="l">
+                                    <a class="pestana" t-attf-href="/rutas/#{l['code']}">
+                                        <span class="chip-linea" t-attf-style="background: #{l['color']}" t-esc="l['code']"/>
+                                        <span class="pestana-texto">
+                                            <strong t-esc="l['name']"/>
+                                            <span t-attf-class="#{'con-buses' if l['buses'] else ''}"
+                                                  t-esc="s['buses_in_service'].format(n=l['buses']) if l['buses'] else s['no_service']"/>
                                         </span>
-                                    </li>
-                                </t>
-                            </ol>
+                                    </a>
+                                </li>
+                            </ul>
+                            <p t-else="" class="aviso"><strong t-esc="s['no_routes']"/></p>
                         </div>
                     </div>
                 </section>
 
-                <!-- Photographs of the city, hung on the line like stops. -->
-                <section class="inicio-ciudad" aria-labelledby="titulo-ciudad">
-                    <div class="marco">
+                <!-- Four doors into the site, then the numbers of right now. -->
+                <section class="marco inicio-accesos" t-att-aria-label="s['nav_lines']">
+                    <ul class="accesos">
+                        <li class="entra"><a class="acceso" href="/rutas">
+                            <span class="acceso-icono"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4v16M5 7h9a3 3 0 010 6H8a3 3 0 000 6h11"/><circle cx="5" cy="4" r="1.6"/><circle cx="19" cy="19" r="1.6"/></svg></span>
+                            <strong t-esc="s['q_lines']"/><span t-esc="s['q_lines_sub']"/>
+                        </a></li>
+                        <li class="entra" style="--i: 1"><a class="acceso" t-attf-href="/rutas/#{featured['code'] if featured else ''}">
+                            <span class="acceso-icono"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="15" rx="3"/><path d="M5 11h14M8 21v-3M16 21v-3"/><circle cx="9" cy="14.5" r="0.8"/><circle cx="15" cy="14.5" r="0.8"/></svg></span>
+                            <strong t-esc="s['q_live']"/><span t-esc="s['q_live_sub']"/>
+                        </a></li>
+                        <li class="entra" style="--i: 2"><a class="acceso" href="/quejas">
+                            <span class="acceso-icono"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
+                            <strong t-esc="s['nav_write']"/><span t-esc="s['q_write_sub']"/>
+                        </a></li>
+                        <li class="entra" style="--i: 3"><a class="acceso" t-att-href="privacy_link or '/privacidad'">
+                            <span class="acceso-icono"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+                            <strong t-esc="s['q_privacy']"/><span t-esc="s['q_privacy_sub']"/>
+                        </a></li>
+                    </ul>
+                    <dl class="cifras">
+                        <div><dt t-esc="s['stat_buses']"/><dd t-esc="total_buses"/></div>
+                        <div><dt t-esc="s['stat_lines']"/><dd t-esc="len(lines)"/></div>
+                        <div><dt t-esc="s['stat_stops']"/><dd t-esc="len(stop_names)"/></div>
+                    </dl>
+                </section>
+
+                <!-- The yellow band: who the buses are for, with a person in a round frame. -->
+                <section class="banda" aria-labelledby="titulo-gente">
+                    <div class="marco banda-dentro">
+                        <div class="banda-texto">
+                            <h2 id="titulo-gente" class="entra" t-esc="s['people_title']"/>
+                            <p class="entra" style="--i: 1" t-esc="s['people_lead']"/>
+                            <ul class="hechos">
+                                <li t-foreach="['people_1', 'people_2', 'people_3']" t-as="key" class="entra" t-attf-style="--i: #{key_index + 2}" t-esc="s[key]"/>
+                            </ul>
+                            <a class="boton boton-tinta entra" style="--i: 5" href="/rutas" t-esc="s['hero_cta_lines']"/>
+                        </div>
+                        <div class="banda-foto">
+                            <img class="banda-persona" src="/bus_tracking/static/img/gente/amarilla-800.webp"
+                                 srcset="/bus_tracking/static/img/gente/amarilla-800.webp 800w, /bus_tracking/static/img/gente/amarilla-1200.webp 1200w"
+                                 sizes="(min-width: 900px) 40vw, 80vw" alt="" loading="lazy" decoding="async"/>
+                            <img class="banda-arte" src="/bus_tracking/static/img/gente/ruta-pin.png" alt="" loading="lazy" width="140" height="140"/>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- On the phone: the busiest line, live, inside a phone frame; beside it the three steps. -->
+                <section t-if="featured" class="marco en-celular" aria-labelledby="titulo-celular">
+                    <div class="telefono entra">
+                        <div class="telefono-pantalla">
+                            <div class="fragmento" data-ui="">
+                                <div class="fragmento-cabeza">
+                                    <span class="chip-linea" t-attf-style="background: #{featured['color']}" t-esc="featured['code']"/>
+                                    <a class="fragmento-nombre" t-attf-href="/rutas/#{featured['code']}" t-esc="featured['name']"/>
+                                    <span class="vivo" data-vivo="" t-esc="s['searching']"/>
+                                </div>
+                                <p class="resumen" data-resumen="" aria-live="polite" t-esc="s['featured_hint']"/>
+                                <t t-set="line" t-value="featured"/>
+                                <t t-call="bus_tracking.stop_line"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="celular-texto">
+                        <h2 id="titulo-celular" class="entra" t-esc="s['app_title']"/>
+                        <p class="entra" style="--i: 1" t-esc="s['app_lead']"/>
+                        <ol class="pasos">
+                            <li t-foreach="[('how_1', 'how_1b', 'mapa-celular'), ('how_2', 'how_2b', 'ruta-pin'), ('how_3', 'how_3b', 'espera')]" t-as="step"
+                                class="entra" t-attf-style="--i: #{step_index + 2}">
+                                <img class="paso-arte" t-attf-src="/bus_tracking/static/img/gente/#{step[2]}.png" alt="" loading="lazy" width="96" height="96"/>
+                                <div><strong t-esc="s[step[0]]"/><p t-esc="s[step[1]]"/></div>
+                            </li>
+                        </ol>
+                    </div>
+                </section>
+
+                <!-- Photographs of the city as cards, the caption laid over the bottom of each. -->
+                <section class="marco inicio-ciudad" aria-labelledby="titulo-ciudad">
+                    <div class="ciudad-cabeza">
                         <h2 id="titulo-ciudad" class="entra" t-esc="s['city_title']"/>
                         <p class="entra" style="--i: 1" t-esc="s['city_lead']"/>
                     </div>
-                    <ol class="marco ciudad">
+                    <ul class="tarjetas-foto">
                         <t t-foreach="[('av-atahualpa-mall', 'cap_atahualpa'), ('huachi-grande', 'cap_huachi'), ('terminal-sur', 'cap_terminal'), ('uta-edificio', 'cap_uta'), ('ambato-vista', 'cap_vista'), ('tungurahua', 'cap_tungurahua')]" t-as="photo">
                             <li class="entra" t-attf-style="--i: #{photo_index}">
                                 <figure>
                                     <img t-attf-src="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp"
                                          t-attf-srcset="/bus_tracking/static/img/ambato/#{photo[0]}-800.webp 800w, /bus_tracking/static/img/ambato/#{photo[0]}-1200.webp 1200w"
-                                         sizes="(min-width: 900px) 33vw, 80vw" loading="lazy" decoding="async"
+                                         sizes="(min-width: 900px) 33vw, 90vw" loading="lazy" decoding="async"
                                          t-att-alt="s[photo[1]]"/>
-                                    <figcaption><span class="punto"/><t t-esc="s[photo[1]]"/></figcaption>
+                                    <figcaption t-esc="s[photo[1]]"/>
                                 </figure>
                             </li>
                         </t>
-                    </ol>
+                    </ul>
                 </section>
 
                 <!-- One field: start a message to the transport team. -->

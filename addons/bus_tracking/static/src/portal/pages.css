@@ -884,82 +884,6 @@ a.fragmento-nombre:hover {
     margin-top: 2rem;
 }
 
-/* People: three photographs, each captioned with what the page does for the person in it. The caption sits
-   on a solid white tab cut into the photo, not on a gradient, so it reads over any picture. */
-.inicio-gente {
-    margin-top: clamp(4rem, 10vw, 8rem);
-    display: grid;
-    gap: 2rem;
-}
-
-.gente-texto {
-    max-width: 38rem;
-}
-
-.gente-texto p {
-    margin-top: 0.75rem;
-    color: var(--tinta-2);
-}
-
-.gente {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1.25fr 1fr 1fr;
-    gap: 1.25rem;
-}
-
-.gente figure {
-    position: relative;
-    margin: 0;
-    height: 100%;
-}
-
-.gente img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    min-height: 22rem;
-    object-fit: cover;
-    border-radius: var(--radio-g);
-    background: var(--papel-2);
-}
-
-.gente li:nth-child(2) img {
-    margin-top: 2.5rem;
-    height: calc(100% - 2.5rem);
-}
-
-.gente figcaption {
-    position: absolute;
-    left: 0.75rem;
-    bottom: 0.75rem;
-    max-width: calc(100% - 1.5rem);
-    padding: 0.55rem 0.9rem;
-    border-radius: var(--radio);
-    background: var(--blanco);
-    box-shadow: var(--sombra);
-    font-weight: 700;
-    line-height: 1.25;
-}
-
-@media (max-width: 900px) {
-    .gente {
-        grid-template-columns: 1fr;
-    }
-
-    .gente img {
-        min-height: 0;
-        aspect-ratio: 4 / 3;
-    }
-
-    .gente li:nth-child(2) img {
-        margin-top: 0;
-        height: 100%;
-    }
-}
-
 /* One drawing per step of "how it works", and one beside "what happens next". */
 .paso-arte {
     width: 6.5rem;
@@ -984,4 +908,657 @@ a.fragmento-nombre:hover {
         width: 5rem;
         height: 5rem;
     }
+}
+
+/* =====================================================================================================
+   Home, second pass: a photograph first screen with a yellow search panel over its edge, four doors with
+   icons, the numbers of right now, a yellow band with a person, the live line inside a phone, the city as
+   photo cards, and a dark footer. Yellow is the stop-sign yellow of the brand, used in large fields here.
+   ===================================================================================================== */
+
+.o_bus_landing main {
+    padding-bottom: 1rem;
+}
+
+/* ---------- First screen ---------- */
+
+.portada {
+    padding-inline: clamp(0.5rem, 1.5vw, 1.25rem);
+}
+
+.portada-foto {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: clamp(30rem, 72vh, 44rem);
+    border-radius: var(--radio-g);
+    overflow: hidden;
+    background: var(--tinta);
+    isolation: isolate;
+}
+
+.portada-foto > img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 30% 60%;
+}
+
+/* A scrim from the left only, under the words; the bus and the mountains stay clear on the right. */
+.portada-foto::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgb(23 32 37 / 0.82) 0%, rgb(23 32 37 / 0.55) 40%, rgb(23 32 37 / 0) 75%);
+}
+
+.portada-texto {
+    padding-block: 4rem 7rem;
+    color: var(--blanco);
+}
+
+.portada-texto h1 {
+    max-width: 11ch;
+    font-size: clamp(2.75rem, 1.2rem + 5vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--blanco);
+}
+
+.portada-texto .lead {
+    max-width: 34ch;
+    margin-top: 1.25rem;
+    font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+    color: rgb(255 255 255 / 0.92);
+}
+
+.portada-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.boton-senal,
+.boton-claro,
+.boton-tinta {
+    min-height: 52px;
+    padding-inline: 1.5rem;
+    border-radius: 999px;
+}
+
+.boton-senal {
+    background: var(--senal);
+    color: var(--tinta) !important;
+}
+
+.boton-senal:hover {
+    background: #FFD45C;
+}
+
+.boton-claro {
+    background: transparent;
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.85);
+}
+
+.boton-claro:hover {
+    background: rgb(255 255 255 / 0.12);
+}
+
+.boton-tinta {
+    background: var(--tinta);
+}
+
+.boton-tinta:hover {
+    background: #26343A;
+}
+
+/* ---------- Yellow search panel, over the bottom edge of the photograph ---------- */
+
+.buscar-panel {
+    position: relative;
+    z-index: 2;
+    margin-top: -4.5rem;
+    padding: clamp(1rem, 2.5vw, 1.75rem);
+    border-radius: var(--radio-g);
+    background: var(--senal);
+    box-shadow: var(--sombra);
+}
+
+.buscar-fila {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+}
+
+.buscar-titulo {
+    font-family: var(--display);
+    font-size: var(--t-3);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--tinta);
+}
+
+.buscar-panel .buscador {
+    max-width: none;
+}
+
+.buscar-panel .buscador input {
+    border-color: transparent !important;
+    border-radius: 999px !important;
+    background: var(--blanco) !important;
+}
+
+.buscar-panel .buscador .boton {
+    border-radius: 999px;
+    background: var(--tinta);
+}
+
+.pestanas {
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+    gap: 0.5rem;
+}
+
+.pestana {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 100%;
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radio);
+    background: rgb(255 255 255 / 0.7);
+    color: var(--tinta) !important;
+    text-decoration: none !important;
+    transition: background-color var(--rapido) var(--facil);
+}
+
+.pestana:hover {
+    background: var(--blanco);
+}
+
+.pestana-texto {
+    display: grid;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.pestana-texto strong {
+    font-family: var(--display);
+    letter-spacing: -0.01em;
+}
+
+.pestana-texto span {
+    font-size: var(--t-1);
+    color: var(--tinta-2);
+}
+
+.pestana-texto span.con-buses {
+    color: var(--ok);
+    font-weight: 700;
+}
+
+/* ---------- Four doors and the numbers ---------- */
+
+.inicio-accesos {
+    margin-top: clamp(3rem, 7vw, 5rem);
+}
+
+.accesos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.acceso {
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    height: 100%;
+    padding: 1.75rem 1rem 1.5rem;
+    border-radius: var(--radio-g);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+    color: var(--tinta) !important;
+    text-align: center;
+    text-decoration: none !important;
+    transition: transform var(--medio) var(--facil);
+}
+
+.acceso:hover {
+    transform: translateY(-3px);
+}
+
+.acceso-icono {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 50%;
+    background: #FFF3CC;
+    color: var(--granate);
+}
+
+.acceso strong {
+    font-family: var(--display);
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+}
+
+.acceso span:last-child {
+    font-size: var(--t-1);
+    color: var(--tinta-2);
+}
+
+.cifras {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: clamp(2.5rem, 5vw, 3.5rem) 0 0;
+}
+
+.cifras div {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+}
+
+.cifras dd {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(2.5rem, 1.5rem + 3vw, 4rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--granate);
+}
+
+.cifras dt {
+    margin-top: 0.35rem;
+    color: var(--tinta-2);
+    font-weight: 700;
+}
+
+/* ---------- Yellow band with a person ---------- */
+
+.banda {
+    margin-top: clamp(4rem, 9vw, 7rem);
+    padding-inline: clamp(0.5rem, 1.5vw, 1.25rem);
+}
+
+.banda-dentro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 2rem;
+    padding-block: clamp(2.5rem, 5vw, 3.5rem);
+    border-radius: var(--radio-g);
+    background: var(--senal);
+    max-width: calc(var(--ancho) + 2 * var(--margen));
+}
+
+.banda-texto h2 {
+    font-size: var(--t-4);
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.banda-texto > p {
+    max-width: 40ch;
+    margin-top: 1rem;
+    color: var(--tinta);
+}
+
+.hechos {
+    list-style: none;
+    margin: 1.5rem 0 2rem;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+/* each fact is a stop on the line: a ring with a tick */
+.hechos li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+}
+
+.hechos li::before {
+    content: "";
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 70% no-repeat,
+        var(--granate);
+}
+
+.banda-foto {
+    position: relative;
+    justify-self: center;
+    width: min(26rem, 100%);
+}
+
+.banda-persona {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: 40% 30%;
+    border-radius: 50%;
+    border: 10px solid var(--blanco);
+    box-shadow: var(--sombra);
+}
+
+.banda-arte {
+    position: absolute;
+    left: -2rem;
+    bottom: -1rem;
+    width: 9rem;
+    height: 9rem;
+    padding: 0.5rem;
+    object-fit: contain;
+    border-radius: 50%;
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+}
+
+/* ---------- The live line inside a phone ---------- */
+
+.en-celular {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    margin-top: clamp(4rem, 9vw, 7rem);
+}
+
+.telefono {
+    justify-self: center;
+    width: min(22rem, 100%);
+    padding: 0.75rem;
+    border-radius: 2.75rem;
+    background: var(--tinta);
+    box-shadow: 0 30px 60px -20px rgb(23 32 37 / 0.45);
+}
+
+.telefono-pantalla {
+    min-height: 34rem;
+    padding: 2.25rem 0.75rem 1rem;
+    border-radius: 2.1rem;
+    background: var(--papel);
+    position: relative;
+}
+
+/* the notch */
+.telefono-pantalla::before {
+    content: "";
+    position: absolute;
+    top: 0.7rem;
+    left: 50%;
+    width: 5.5rem;
+    height: 1.1rem;
+    border-radius: 999px;
+    background: var(--tinta);
+    transform: translateX(-50%);
+}
+
+.telefono .fragmento {
+    padding: 1rem 0.9rem 0.75rem;
+    border-radius: 1.25rem;
+}
+
+.celular-texto h2 {
+    font-size: var(--t-4);
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.celular-texto > p {
+    max-width: 44ch;
+    margin-top: 1rem;
+    color: var(--tinta-2);
+}
+
+.pasos {
+    list-style: none;
+    counter-reset: paso;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.pasos li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem 0.75rem 0.75rem;
+    border-radius: var(--radio-g);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+}
+
+.pasos .paso-arte {
+    flex: none;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin: 0;
+    padding: 0.25rem;
+    box-shadow: none;
+    background: var(--papel);
+}
+
+.pasos strong {
+    font-family: var(--display);
+    font-size: 1.125rem;
+    letter-spacing: -0.01em;
+}
+
+/* the order of the steps is real: the number comes before the sentence */
+.pasos strong::before {
+    counter-increment: paso;
+    content: counter(paso) ". ";
+    color: var(--granate);
+}
+
+.pasos p {
+    margin-top: 0.15rem;
+    font-size: var(--t-1);
+    color: var(--tinta-2);
+}
+
+/* ---------- The city as photo cards ---------- */
+
+.inicio-ciudad {
+    margin-top: clamp(4rem, 9vw, 7rem);
+}
+
+.ciudad-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+}
+
+.ciudad-cabeza p {
+    color: var(--tinta-2);
+}
+
+.tarjetas-foto {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.tarjetas-foto figure {
+    position: relative;
+    margin: 0;
+    border-radius: var(--radio-g);
+    overflow: hidden;
+    background: var(--papel-2);
+}
+
+.tarjetas-foto img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform 600ms var(--facil);
+}
+
+.tarjetas-foto li:hover img {
+    transform: scale(1.04);
+}
+
+.tarjetas-foto figcaption {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 3rem 1.25rem 1.1rem;
+    background: linear-gradient(to top, rgb(23 32 37 / 0.85), rgb(23 32 37 / 0));
+    color: var(--blanco);
+    font-family: var(--display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+/* ---------- The write section keeps its layout, with the new cards ---------- */
+
+.inicio-escribir {
+    margin-top: clamp(4rem, 9vw, 7rem);
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 900px) {
+    .accesos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .banda-dentro,
+    .en-celular {
+        grid-template-columns: 1fr;
+    }
+
+    .banda-foto {
+        width: min(18rem, 80%);
+        margin-top: 1rem;
+    }
+
+    .tarjetas-foto {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .telefono-pantalla {
+        min-height: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .portada-foto {
+        min-height: 34rem;
+        align-items: flex-end;
+    }
+
+    .portada-foto::after {
+        background: linear-gradient(to top, rgb(23 32 37 / 0.88) 0%, rgb(23 32 37 / 0.5) 55%, rgb(23 32 37 / 0.1) 100%);
+    }
+
+    .portada-texto {
+        padding-block: 2rem 6rem;
+    }
+
+    .buscar-fila {
+        grid-template-columns: 1fr;
+    }
+
+    .cifras dt {
+        font-size: var(--t-1);
+    }
+
+    .tarjetas-foto {
+        grid-template-columns: 1fr;
+    }
+
+    .tarjetas-foto img {
+        aspect-ratio: 4 / 3;
+    }
+
+    .banda-arte {
+        left: -0.75rem;
+        width: 6.5rem;
+        height: 6.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .acceso,
+    .tarjetas-foto img {
+        transition: none;
+    }
+
+    .acceso:hover,
+    .tarjetas-foto li:hover img {
+        transform: none;
+    }
+}
+
+/* =====================================================================================================
+   Header and footer of every public page: a white bar that stays on top, and a dark footer.
+   ===================================================================================================== */
+
+.cabecera {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgb(255 255 255 / 0.96);
+    box-shadow: 0 1px 0 var(--papel-2);
+}
+
+.boton-acceso {
+    border-radius: 999px !important;
+}
+
+.pie {
+    margin-top: clamp(4rem, 10vw, 7rem);
+    padding-block: 3rem 2rem;
+    background: var(--tinta);
+    color: #C9D1CE;
+}
+
+.pie nav a,
+.pie .creditos a {
+    color: var(--blanco);
+}
+
+.pie .fin {
+    color: var(--senal);
+    font-family: var(--display);
+    font-weight: 800;
+}
+
+.pie .creditos {
+    color: #AEB9B6;
 }
