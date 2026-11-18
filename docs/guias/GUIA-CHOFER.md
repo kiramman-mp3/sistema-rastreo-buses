@@ -37,6 +37,15 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 
 Si cierras la app sin terminar el turno, el servicio en primer plano sigue enviando posición hasta que termines el turno. Si la oficina cierra tu turno o revoca la tableta, la app apaga el GPS en cuanto se entera (en unos segundos con señal) y vuelve a *Elegir bus*; Odoo, además, descarta cualquier posición de un bus sin turno abierto.
 
+### Recordatorios de recorridos
+
+Si la oficina te asigna un recorrido (campo **Chofer** del horario o del recorrido programado en Odoo), la tableta avisa dos veces aunque esté sin señal o con la app cerrada:
+
+- **10 minutos antes**: «En 10 minutos tienes un recorrido», con la línea, la hora y el bus.
+- **A la hora de salida**: «Inicia tu recorrido programado».
+
+La tableta toma los recorridos de las próximas 24 horas cada vez que entras o la app se reconecta; si la oficina cambia o quita uno, el aviso se actualiza la próxima vez. Al cerrar sesión se borran, para que el siguiente chofer no reciba los tuyos. La primera vez, Android pide permiso para notificaciones: acéptalo. En Android 14, para que el aviso salga al minuto exacto, activa *Alarmas y recordatorios* para Buses UTA en los ajustes de la app; sin eso puede llegar unos minutos tarde.
+
 ## Qué ve el sistema de ti
 
 - Posición, rumbo y hora del bus **solo con turno abierto**.
