@@ -311,6 +311,9 @@ DEFECTOS = [
     ('DEF-074', '18-nov-2026', 'Prueba del tablero de flota', 'Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom',
      'static/src/js/live_map.js', 'Leaflet 1.9.4 termina la animación de zoom 250 ms después aunque el mapa ya se haya quitado, y falla sobre los paneles borrados.',
      'Interfaz', 'Cerrado', 'Prueba en el navegador: entrar y salir del mapa en vivo de inmediato no muestra errores'),
+    ('DEF-075', '18-nov-2026', 'Reporte del usuario', 'El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando',
+     'static/src/js/push_setup.js', 'La página esperaba navigator.serviceWorker.ready, que sólo se cumple con un service worker que controle la página; /web queda fuera del alcance /bus_tracking/ del nuestro y la espera no terminaba.',
+     'Lógica', 'Cerrado', 'Chrome (FCM) y Edge (WNS) en Windows: activar, registrar el dispositivo y enviar la prueba; test_push comprueba que no se espera a ready'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).

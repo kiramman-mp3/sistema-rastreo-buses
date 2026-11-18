@@ -82,8 +82,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-072 | 17-nov-2026 | Reporte en PDF | Las traducciones nuevas del módulo no se cargaban | i18n/bus_tracking.pot | Cerrado |
 | DEF-073 | 17-nov-2026 | Reporte en PDF | Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF | models/bus_report.py | Cerrado |
 | DEF-074 | 18-nov-2026 | Prueba del tablero de flota | Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom | static/src/js/live_map.js | Cerrado |
+| DEF-075 | 18-nov-2026 | Reporte del usuario | El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando | static/src/js/push_setup.js | Cerrado |
 
-Resumen: 74 registrados, 74 cerrados (100 %), 0 abiertos. Densidad: 14,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 75 registrados, 75 cerrados (100 %), 0 abiertos. Densidad: 14,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -530,6 +531,12 @@ Resumen: 74 registrados, 74 cerrados (100 %), 0 abiertos. Densidad: 14,7 defecto
 - **Causa raíz:** Leaflet 1.9.4 termina la animación de zoom 250 ms después aunque el mapa ya se haya quitado, y falla sobre los paneles borrados.
 - **Categoría:** Interfaz
 - **Prueba que lo protege:** Prueba en el navegador: entrar y salir del mapa en vivo de inmediato no muestra errores
+
+### DEF-075: El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando
+
+- **Causa raíz:** La página esperaba navigator.serviceWorker.ready, que sólo se cumple con un service worker que controle la página; /web queda fuera del alcance /bus_tracking/ del nuestro y la espera no terminaba.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** Chrome (FCM) y Edge (WNS) en Windows: activar, registrar el dispositivo y enviar la prueba; test_push comprueba que no se espera a ready
 
 ## 3. Qué falta para cerrar los abiertos
 

@@ -13,6 +13,24 @@ function keyToBytes(base64Url) {
     return Uint8Array.from(raw, (char) => char.charCodeAt(0));
 }
 
+// navigator.serviceWorker.ready never settles here: it waits for a worker that controls this page, and /web is
+// outside the scope of ours. Wait for our own registration to have an active worker instead.
+function whenActive(registration) {
+    const worker = registration.installing || registration.waiting;
+    if (registration.active || !worker) {
+        return Promise.resolve(registration);
+    }
+    return new Promise((resolve, reject) => {
+        worker.addEventListener("statechange", () => {
+            if (worker.state === "activated") {
+                resolve(registration);
+            } else if (worker.state === "redundant") {
+                reject(new Error("The service worker could not be installed."));
+            }
+        });
+    });
+}
+
 export class PushSetup extends Component {
     static template = "bus_tracking.PushSetup";
 
@@ -56,8 +74,9 @@ export class PushSetup extends Component {
                 return;
             }
             const info = await this.rpc("/bus_tracking/push/state", {});
-            const registration = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE });
-            await navigator.serviceWorker.ready;
+            const registration = await whenActive(
+                await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE })
+            );
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: keyToBytes(info.key),
