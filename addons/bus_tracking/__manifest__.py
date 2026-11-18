@@ -32,6 +32,8 @@ Live bus tracking and route monitoring backed by a Traccar server.
         'views/bus_driver_views.xml',
         'views/bus_incident_views.xml',
         'views/bus_complaint_views.xml',
+        'views/bus_report_views.xml',
+        'report/bus_report_templates.xml',
         'views/notification_views.xml',
         'views/res_config_settings_views.xml',
         'views/menus.xml',

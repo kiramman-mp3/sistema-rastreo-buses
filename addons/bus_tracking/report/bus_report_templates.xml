@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_operation" model="report.paperformat">
+        <field name="name">Bus operation report (A4)</field>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">18</field>
+        <field name="margin_left">12</field>
+        <field name="margin_right">12</field>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_operation" model="ir.actions.report">
+        <field name="name">Operation report</field>
+        <field name="model">bus.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">bus_tracking.report_operation</field>
+        <field name="report_file">bus_tracking.report_operation</field>
+        <field name="print_report_name">'Reporte-buses-%s-%s' % (object.date_from, object.date_to)</field>
+        <field name="paperformat_id" ref="paperformat_operation"/>
+    </record>
+
+    <!-- One figure with its unit: "85.0 %", "4.2 min", "12". -->
+    <template id="report_value">
+        <t t-if="value is None">—</t>
+        <t t-elif="unit == '%'"><t t-esc="'%.1f' % value"/> %</t>
+        <t t-elif="unit == 'n'"><t t-esc="'%g' % value"/></t>
+        <t t-else=""><t t-esc="'%.1f' % value"/> <t t-esc="unit"/></t>
+    </template>
+
+    <template id="report_metric_rows">
+        <tr t-foreach="metrics" t-as="m">
+            <td class="bt-code" t-esc="m['code']"/>
+            <td>
+                <strong t-esc="m['name']"/>
+                <div class="bt-muted" t-esc="m['detail']"/>
+            </td>
+            <td class="bt-num">
+                <span t-attf-class="bt-dot bt-#{m['status']}"/>
+                <t t-call="bus_tracking.report_value"><t t-set="value" t-value="m['value']"/><t t-set="unit" t-value="m['unit']"/></t>
+            </td>
+            <td t-if="docs.compare" class="bt-num bt-muted">
+                <t t-call="bus_tracking.report_value"><t t-set="value" t-value="m['previous']"/><t t-set="unit" t-value="m['unit']"/></t>
+            </td>
+            <td t-if="docs.compare" t-attf-class="bt-num bt-#{m['trend'] or 'same'}">
+                <t t-if="m['change']"><t t-esc="'%+.1f' % m['change']"/></t>
+                <t t-else="">=</t>
+            </td>
+        </tr>
+    </template>
+
+    <template id="report_operation">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <div class="page bt-report">
+                    <style>
+                        .bt-report { font-family: "Atkinson Hyperlegible", Arial, sans-serif; color: #172025; font-size: 11px; }
+                        .bt-report h1 { font-size: 22px; margin: 0 0 2px; color: #7A1A22; }
+                        .bt-report h2 { font-size: 14px; margin: 18px 0 6px; padding-bottom: 3px; border-bottom: 2px solid #7A1A22; }
+                        .bt-report table { width: 100%; border-collapse: collapse; margin-bottom: 6px; page-break-inside: auto; }
+                        .bt-report tr { page-break-inside: avoid; }
+                        .bt-report th { background: #F1F3F2; text-align: left; padding: 4px 6px; font-size: 10px; text-transform: uppercase; }
+                        .bt-report td { padding: 4px 6px; border-bottom: 1px solid #E2E6E4; vertical-align: top; }
+                        .bt-num { text-align: right; white-space: nowrap; }
+                        .bt-code { font-weight: bold; color: #7A1A22; width: 30px; }
+                        .bt-muted { color: #5B676C; font-size: 10px; }
+                        .bt-meta { width: 100%; margin: 6px 0 4px; }
+                        .bt-meta td { border: 0; padding: 2px 8px 2px 0; }
+                        .bt-dot { display: inline-block; width: 8px; height: 8px; border-radius: 4px; margin-right: 4px; background: #9AA5A9; }
+                        .bt-good { background: #1D6B44; } .bt-warn { background: #C88A00; } .bt-bad { background: #B42318; }
+                        td.bt-better { color: #1D6B44; font-weight: bold; } td.bt-worse { color: #B42318; font-weight: bold; }
+                        .bt-bar { height: 9px; background: #7A1A22; border-radius: 2px; }
+                        .bt-bar.bt-soft { background: #FFC62B; }
+                        .bt-chip { display: inline-block; padding: 1px 6px; border-radius: 3px; color: #fff; font-weight: bold; font-size: 10px; }
+                        .bt-brand { padding: 6px 10px; margin-bottom: 10px; background: #7A1A22; color: #fff; border-radius: 4px; }
+                        .bt-brand-mark { display: inline-block; padding: 1px 6px; margin-right: 8px; background: #FFC62B; color: #172025; border-radius: 3px; font-weight: bold; font-size: 10px; }
+                        .bt-brand-name { font-weight: bold; font-size: 13px; }
+                        .bt-keep { page-break-inside: avoid; }
+                        .bt-legend { font-size: 9px; color: #5B676C; margin-top: 2px; }
+                    </style>
+
+                    <div class="bt-brand">
+                        <span class="bt-brand-mark">BUS</span>
+                        <span class="bt-brand-name" t-esc="brand"/>
+                    </div>
+                    <h1>Operation report</h1>
+                    <table class="bt-meta">
+                        <tr>
+                            <td><strong>Period:</strong> <t t-esc="period['from']"/> → <t t-esc="period['to']"/></td>
+                            <td><strong>Lines:</strong> <t t-esc="lines_name"/></td>
+                            <td><strong>Data:</strong> <t t-esc="scope_name"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="bt-muted">
+                                Printed <t t-esc="printed_at.strftime('%Y-%m-%d %H:%M')"/> by <t t-esc="printed_by"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h2>Transport indicators</h2>
+                    <table>
+                        <thead><tr>
+                            <th/><th>Indicator</th><th class="bt-num">Value</th>
+                            <th t-if="docs.compare" class="bt-num">Previous period</th>
+                            <th t-if="docs.compare" class="bt-num">Change</th>
+                        </tr></thead>
+                        <tbody><t t-call="bus_tracking.report_metric_rows"><t t-set="metrics" t-value="transport"/></t></tbody>
+                    </table>
+                    <div class="bt-legend">
+                        <span class="bt-dot bt-good"/>within the goal <span class="bt-dot bt-warn"/>watch <span class="bt-dot bt-bad"/>out of range
+                        <span class="bt-dot"/>no goal or no data
+                    </div>
+
+                    <h2>Lines</h2>
+                    <p t-if="not by_route" class="bt-muted">No trips in this period.</p>
+                    <table t-else="">
+                        <thead><tr>
+                            <th>Line</th><th class="bt-num">Trips</th><th class="bt-num">Compliance</th>
+                            <th class="bt-num">Punctuality</th><th class="bt-num">Avg. delay</th>
+                            <th class="bt-num">Km planned</th><th class="bt-num">Km driven</th><th class="bt-num">Alerts</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr t-foreach="by_route" t-as="r">
+                                <td><span class="bt-chip" t-attf-style="background: #{r['color']}" t-esc="r['code']"/> <t t-esc="r['name']"/></td>
+                                <td class="bt-num" t-esc="r['trips']"/>
+                                <td class="bt-num"><t t-call="bus_tracking.report_value"><t t-set="value" t-value="r['compliance']"/><t t-set="unit" t-value="'%'"/></t></td>
+                                <td class="bt-num"><t t-call="bus_tracking.report_value"><t t-set="value" t-value="r['punctuality']"/><t t-set="unit" t-value="'%'"/></t></td>
+                                <td class="bt-num"><t t-call="bus_tracking.report_value"><t t-set="value" t-value="r['delay']"/><t t-set="unit" t-value="'min'"/></t></td>
+                                <td class="bt-num" t-esc="r['est_km']"/>
+                                <td class="bt-num" t-esc="r['real_km']"/>
+                                <td class="bt-num" t-esc="r['alerts']"/>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Day by day</h2>
+                    <table>
+                        <thead><tr>
+                            <th>Day</th><th class="bt-num">Done</th><th class="bt-num">Incomplete</th>
+                            <th style="width: 34%">Trips</th><th class="bt-num">Punctuality</th><th class="bt-num">Alerts</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr t-foreach="by_day" t-as="d">
+                                <td t-esc="d['date']"/>
+                                <td class="bt-num" t-esc="d['done']"/>
+                                <td class="bt-num" t-esc="d['incomplete']"/>
+                                <td><div class="bt-bar" t-attf-style="width: #{round(100.0 * (d['done'] + d['incomplete']) / max_day_trips)}%"/></td>
+                                <td class="bt-num"><t t-call="bus_tracking.report_value"><t t-set="value" t-value="d['punctuality']"/><t t-set="unit" t-value="'%'"/></t></td>
+                                <td class="bt-num" t-esc="d['alerts']"/>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Arrivals by delay</h2>
+                    <table>
+                        <tbody>
+                            <tr t-foreach="buckets" t-as="b">
+                                <td style="width: 30%" t-esc="b['label']"/>
+                                <td><div class="bt-bar bt-soft" t-attf-style="width: #{round(100.0 * b['count'] / max_bucket)}%"/></td>
+                                <td class="bt-num" style="width: 12%" t-esc="b['count']"/>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Incidents and alerts by kind</h2>
+                    <p t-if="not kinds" class="bt-muted">No incidents or alerts in this period.</p>
+                    <table t-else="">
+                        <thead><tr><th>Kind</th><th style="width: 40%"/><th class="bt-num">Count</th><th class="bt-num">Cumulative</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="kinds" t-as="k">
+                                <td t-esc="k['label']"/>
+                                <td><div class="bt-bar" t-attf-style="width: #{round(100.0 * k['count'] / max_kind)}%"/></td>
+                                <td class="bt-num" t-esc="k['count']"/>
+                                <td class="bt-num"><t t-esc="k['cumulative']"/> %</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Stops with the most delay</h2>
+                    <p t-if="not stop_delays" class="bt-muted">No late arrivals in this period.</p>
+                    <table t-else="">
+                        <thead><tr><th>Stop</th><th>Line</th><th class="bt-num">Average delay</th><th class="bt-num">Arrivals</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="stop_delays" t-as="s">
+                                <td t-esc="s['stop']"/>
+                                <td t-esc="s['route']"/>
+                                <td class="bt-num"><t t-esc="s['delay']"/> min</td>
+                                <td class="bt-num" t-esc="s['arrivals']"/>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Latest trips</h2>
+                    <p t-if="not trips" class="bt-muted">No trips in this period.</p>
+                    <table t-else="">
+                        <thead><tr>
+                            <th>Trip</th><th>Line</th><th>Day</th><th>State</th><th class="bt-num">Stops</th>
+                            <th class="bt-num">Late</th><th class="bt-num">Skipped</th><th class="bt-num">Delay at the end</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr t-foreach="trips" t-as="t">
+                                <td t-esc="t['name']"/>
+                                <td t-esc="t['route']"/>
+                                <td t-esc="t['date']"/>
+                                <td><t t-esc="t['state_name']"/><span t-if="t['simulated']" class="bt-muted"> (simulated)</span></td>
+                                <td class="bt-num"><t t-esc="t['visited']"/>/<t t-esc="t['total']"/></td>
+                                <td class="bt-num" t-esc="t['late']"/>
+                                <td class="bt-num" t-esc="t['skipped']"/>
+                                <td class="bt-num"><t t-esc="t['delay_end']"/> min</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="bt-keep">
+                    <h2>System quality</h2>
+                    <table>
+                        <thead><tr>
+                            <th/><th>Indicator</th><th class="bt-num">Value</th>
+                            <th t-if="docs.compare" class="bt-num">Previous period</th>
+                            <th t-if="docs.compare" class="bt-num">Change</th>
+                        </tr></thead>
+                        <tbody><t t-call="bus_tracking.report_metric_rows"><t t-set="metrics" t-value="software"/></t></tbody>
+                    </table>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

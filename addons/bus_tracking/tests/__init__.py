@@ -27,3 +27,4 @@ from . import test_fleet
 from . import test_demo_report
 from . import test_boundaries
 from . import test_traccar_consistency
+from . import test_report
