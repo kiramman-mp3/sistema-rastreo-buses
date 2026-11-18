@@ -22,16 +22,16 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 24 | 32,9 % | 32,9 % |
-| Seguridad | 14 | 19,2 % | 52,1 % |
-| Configuración | 11 | 15,1 % | 67,1 % |
-| Accesibilidad y diseño | 7 | 9,6 % | 76,7 % |
-| Validación de entrada | 5 | 6,8 % | 83,6 % |
-| Infraestructura y despliegue | 2 | 2,7 % | 86,3 % |
-| Interfaz | 2 | 2,7 % | 89,0 % |
-| Internacionalización | 2 | 2,7 % | 91,8 % |
+| Lógica | 24 | 32,4 % | 32,4 % |
+| Seguridad | 14 | 18,9 % | 51,4 % |
+| Configuración | 11 | 14,9 % | 66,2 % |
+| Accesibilidad y diseño | 7 | 9,5 % | 75,7 % |
+| Validación de entrada | 5 | 6,8 % | 82,4 % |
+| Interfaz | 3 | 4,1 % | 86,5 % |
+| Infraestructura y despliegue | 2 | 2,7 % | 89,2 % |
+| Internacionalización | 2 | 2,7 % | 91,9 % |
 | Accesibilidad | 1 | 1,4 % | 93,2 % |
-| Contenido | 1 | 1,4 % | 94,5 % |
+| Contenido | 1 | 1,4 % | 94,6 % |
 | Entorno | 1 | 1,4 % | 95,9 % |
 | Interfaz y vistas | 1 | 1,4 % | 97,3 % |
 | Migración | 1 | 1,4 % | 98,6 % |
