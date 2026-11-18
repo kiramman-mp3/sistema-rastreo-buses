@@ -66,13 +66,7 @@ export default function Login() {
     <Screen scroll style={[styles.page, side ? styles.pageSide : styles.pageStack, { gap: side ? space[8] : layout.gap * 2 }]}>
       {/* A real person at the wheel: the app is theirs. Hidden when height is short (keyboard up on a phone). */}
       {side || !layout.short ? (
-        <View style={[styles.photo, side ? styles.photoSide : styles.photoStack]}>
-          <Image
-            source={require('../assets/img/chofer.jpg')}
-            style={StyleSheet.absoluteFill}
-            resizeMode="cover"
-            accessibilityElementsHidden
-          />
+        <View style={[styles.photo, side ? styles.photoSide : styles.photoStack, { backgroundColor: palette.tint }]}>
           <Pressable
             onLongPress={() => setShowServer((v) => !v)}
             accessibilityLabel="Buses UTA"
@@ -83,11 +77,25 @@ export default function Login() {
               Buses UTA
             </Txt>
           </Pressable>
-          <View style={[styles.caption, { backgroundColor: palette.accent }]}>
-            <Txt bold size="title" color={palette.onAccent}>
-              {t('loginTitle')}
-            </Txt>
+          {/* A real person at the wheel in a round frame, with a small drawing of the route beside it. */}
+          <View style={[styles.portrait, side ? styles.portraitSide : styles.portraitStack]}>
+            <View style={[styles.portraitRing, { backgroundColor: palette.panel }]}>
+              <View style={styles.portraitClip}>
+                <Image
+                  source={require('../assets/img/chofer.jpg')}
+                  style={styles.portraitImage}
+                  resizeMode="cover"
+                  accessibilityElementsHidden
+                />
+              </View>
+            </View>
+            <View style={[styles.portraitBadge, { backgroundColor: palette.panel }]}>
+              <Image source={require('../assets/img/ruta-pin.png')} style={styles.badgeArt} resizeMode="contain" accessibilityElementsHidden />
+            </View>
           </View>
+          <Txt bold size="title" color={palette.ink} style={styles.welcome}>
+            {t('loginTitle')}
+          </Txt>
         </View>
       ) : null}
 
@@ -189,36 +197,78 @@ const styles = StyleSheet.create({
   },
   photo: {
     ...shape.card,
-    overflow: 'hidden',
-    justifyContent: 'space-between',
-    padding: space[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space[5],
+    padding: space[6],
   },
   photoSide: {
     flex: 1,
     minHeight: 420,
   },
   photoStack: {
-    height: 220,
     width: '100%',
     maxWidth: 560,
     alignSelf: 'center',
+    paddingVertical: space[5],
   },
   brand: {
+    position: 'absolute',
+    top: space[4],
+    left: space[4],
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[2],
-    alignSelf: 'flex-start',
     paddingVertical: space[1],
     paddingLeft: space[2],
     paddingRight: space[4],
     borderRadius: 999,
   },
-  // A solid band, not a gradient: the title stays readable over any part of the photo.
-  caption: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: space[4],
-    paddingVertical: space[3],
-    ...shape.control,
+  portrait: {
+    marginTop: space[8],
+  },
+  portraitSide: {
+    width: 280,
+    height: 280,
+  },
+  portraitStack: {
+    width: 150,
+    height: 150,
+  },
+  portraitRing: {
+    width: '100%',
+    height: '100%',
+    padding: 8,
+    borderRadius: 999,
+  },
+  // the clip lives on a wrapper: an Image alone does not round its corners on the web
+  portraitClip: {
+    flex: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  portraitImage: {
+    width: '100%',
+    height: '100%',
+  },
+  // the route drawing overlaps the frame at the bottom left, like a sticker
+  portraitBadge: {
+    position: 'absolute',
+    left: -12,
+    bottom: 0,
+    width: '36%',
+    aspectRatio: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeArt: {
+    width: '125%',
+    height: '125%',
+  },
+  welcome: {
+    textAlign: 'center',
   },
   side: {
     gap: space[5],
