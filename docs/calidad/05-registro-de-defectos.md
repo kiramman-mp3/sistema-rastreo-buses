@@ -71,8 +71,18 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-061 | 17-nov-2026 | Segunda auditoría integral (Y1) | Al cambiar de servidor, la tableta envía el token del servidor anterior al nuevo | apps/conductor-tablet/src/state/session.ts, app/scan.tsx | Cerrado |
 | DEF-062 | 17-nov-2026 | Segunda auditoría integral (Y3) | La dirección del GPS acepta http y el identificador del bus viajaría sin cifrar | models/res_config_settings.py, apps/conductor-tablet/src/gps/osmand.ts | Cerrado |
 | DEF-063 | 17-nov-2026 | Reporte del usuario tras el despliegue en Azure | Si el bus no pasa por la primera parada, la tableta la sigue mostrando como próxima y no avanza con las demás | models/bus_shift.py, models/bus_alert.py, models/bus_trip.py, models/bus_run.py | Cerrado |
+| DEF-064 | 17-nov-2026 | Revisión del rediseño del portal | Esquinas cuadradas en la barra del mapa y en tarjetas del portal | static/src/css/live_map.css, static/src/portal/pages.css, static/src/css/brand.css | Cerrado |
+| DEF-065 | 17-nov-2026 | Revisión del rediseño del portal | La portada salía en español aunque el visitante eligiera inglés o kichwa | views/landing_templates.xml, models/portal_i18n.py | Cerrado |
+| DEF-066 | 17-nov-2026 | Revisión del rediseño del portal | La portada mostraba cifras y estados que ningún dato respalda | views/landing_templates.xml | Cerrado |
+| DEF-067 | 17-nov-2026 | Revisión del rediseño del portal | Contraste insuficiente en el pie y en los números de los pasos; lista de cifras mal formada | static/src/portal/pages.css, views/landing_templates.xml | Cerrado |
+| DEF-068 | 17-nov-2026 | Suite de pruebas de Odoo | Las pruebas HTTP fallaban al azar con «Session expired» (1 a 3 de 590 por corrida) | volumen /var/lib/odoo (entorno Docker) | Cerrado |
+| DEF-069 | 17-nov-2026 | Reporte del usuario | Los gráficos del tablero de Odoo repetían su animación sin parar | static/src/js/dashboard.js | Cerrado |
+| DEF-070 | 17-nov-2026 | Reporte del usuario | Mensajes de pasajeros: no aparecía la columna «Resuelta» | models/bus_complaint.py, views/bus_complaint_views.xml | Cerrado |
+| DEF-071 | 17-nov-2026 | Retiro de Grafana | Al borrar un modelo, su tabla queda en la base | migrations/16.0.1.9.0/pre-migrate.py | Cerrado |
+| DEF-072 | 17-nov-2026 | Reporte en PDF | Las traducciones nuevas del módulo no se cargaban | i18n/bus_tracking.pot | Cerrado |
+| DEF-073 | 17-nov-2026 | Reporte en PDF | Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF | models/bus_report.py | Cerrado |
 
-Resumen: 63 registrados, 63 cerrados (100 %), 0 abiertos. Densidad: 12,5 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 73 registrados, 73 cerrados (100 %), 0 abiertos. Densidad: 14,5 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -453,6 +463,66 @@ Resumen: 63 registrados, 63 cerrados (100 %), 0 abiertos. Densidad: 12,5 defecto
 - **Causa raíz:** La próxima parada era la primera sin llegada en orden, no la que sigue a la más lejana alcanzada; las paradas saltadas sólo se avisaban al cerrar un viaje programado y nunca en un turno sin horario; un recorrido sólo empezaba en un extremo.
 - **Categoría:** Lógica
 - **Prueba que lo protege:** test_driver_shift: empezar en la cuarta parada sigue con la quinta y avisa de las tres anteriores; test_trip_run: el viaje marca la primera parada saltada en cuanto llega a la segunda; test_runs: un recorrido empieza en una parada intermedia
+
+### DEF-064: Esquinas cuadradas en la barra del mapa y en tarjetas del portal
+
+- **Causa raíz:** Las hojas usaban --radio-md y --radio-lg, que brand.css no definía; una variable inexistente deja el radio en 0.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** Búsqueda de variables usadas y no definidas: ninguna
+
+### DEF-065: La portada salía en español aunque el visitante eligiera inglés o kichwa
+
+- **Causa raíz:** Unos veinte textos (etiquetas de sección, pie, insignias) estaban escritos en la plantilla y no en las cadenas del portal.
+- **Categoría:** Internacionalización
+- **Prueba que lo protege:** test_portal: las tres lenguas tienen las mismas claves; revisión de la plantilla sin textos fijos
+
+### DEF-066: La portada mostraba cifras y estados que ningún dato respalda
+
+- **Causa raíz:** El rediseño añadió «100 % servicio universitario» y «sistema activo y conectado en tiempo real» fijos, aun con cero buses con señal.
+- **Categoría:** Contenido
+- **Prueba que lo protege:** Las cifras salen de total_buses, las líneas y las paradas; test_no_invented_numbers_when_no_bus_reports
+
+### DEF-067: Contraste insuficiente en el pie y en los números de los pasos; lista de cifras mal formada
+
+- **Causa raíz:** Colores gris y ámbar sobre fondos claros u oscuros por debajo de 4,5:1; el <dl> tenía un <span> entre <dt> y <dd>.
+- **Categoría:** Accesibilidad
+- **Prueba que lo protege:** qa/accesibilidad.py (axe): 0 problemas en escritorio y móvil
+
+### DEF-068: Las pruebas HTTP fallaban al azar con «Session expired» (1 a 3 de 590 por corrida)
+
+- **Causa raíz:** 13 de las 256 carpetas de sesiones eran de root; Odoo corre como odoo, no podía guardar ahí la sesión y werkzeug oculta el error.
+- **Categoría:** Entorno
+- **Prueba que lo protege:** chown -R odoo:odoo /var/lib/odoo; dos corridas completas seguidas sin fallos
+
+### DEF-069: Los gráficos del tablero de Odoo repetían su animación sin parar
+
+- **Causa raíz:** Un reloj actualiza el estado cada segundo; onPatched destruía y volvía a crear todos los gráficos en cada repintado.
+- **Categoría:** Rendimiento
+- **Prueba que lo protege:** Prueba en el navegador: los gráficos sólo se crean al cargar y al cambiar de pestaña (antes, dos por segundo)
+
+### DEF-070: Mensajes de pasajeros: no aparecía la columna «Resuelta»
+
+- **Causa raíz:** El tablero agrupaba por estado sólo con los estados presentes y la acción filtraba por defecto los no resueltos.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** test_complaints: el tablero siempre muestra Nueva, En revisión y Resuelta
+
+### DEF-071: Al borrar un modelo, su tabla queda en la base
+
+- **Causa raíz:** Odoo borra los registros de un modelo que ya no existe pero no su tabla (bus_position_day) ni las vistas SQL kpi_*.
+- **Categoría:** Migración
+- **Prueba que lo protege:** Actualización de la base de desarrollo: sin vistas kpi_*, sin tabla ni parámetros de Grafana
+
+### DEF-072: Las traducciones nuevas del módulo no se cargaban
+
+- **Causa raíz:** Odoo combina cada .po con el .pot del módulo; el .pot era del 5-nov y descartaba las entradas posteriores.
+- **Categoría:** Internacionalización
+- **Prueba que lo protege:** Plantilla .pot regenerada; menús y textos en español y kichwa tras actualizar
+
+### DEF-073: Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF
+
+- **Causa raíz:** report_action pide el diseño de la compañía si no está configurado, aunque el reporte tiene su propia cabecera.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** test_report: imprimir devuelve directamente la acción del reporte; descarga probada desde el tablero
 
 ## 3. Qué falta para cerrar los abiertos
 

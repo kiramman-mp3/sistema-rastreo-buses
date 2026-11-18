@@ -22,13 +22,20 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 23 | 36,5 % | 36,5 % |
-| Seguridad | 14 | 22,2 % | 58,7 % |
-| Configuración | 11 | 17,5 % | 76,2 % |
-| Accesibilidad y diseño | 7 | 11,1 % | 87,3 % |
-| Validación de entrada | 5 | 7,9 % | 95,2 % |
-| Infraestructura y despliegue | 2 | 3,2 % | 98,4 % |
-| Interfaz y vistas | 1 | 1,6 % | 100,0 % |
+| Lógica | 24 | 32,9 % | 32,9 % |
+| Seguridad | 14 | 19,2 % | 52,1 % |
+| Configuración | 11 | 15,1 % | 67,1 % |
+| Accesibilidad y diseño | 7 | 9,6 % | 76,7 % |
+| Validación de entrada | 5 | 6,8 % | 83,6 % |
+| Infraestructura y despliegue | 2 | 2,7 % | 86,3 % |
+| Interfaz | 2 | 2,7 % | 89,0 % |
+| Internacionalización | 2 | 2,7 % | 91,8 % |
+| Accesibilidad | 1 | 1,4 % | 93,2 % |
+| Contenido | 1 | 1,4 % | 94,5 % |
+| Entorno | 1 | 1,4 % | 95,9 % |
+| Interfaz y vistas | 1 | 1,4 % | 97,3 % |
+| Migración | 1 | 1,4 % | 98,6 % |
+| Rendimiento | 1 | 1,4 % | 100,0 % |
 
 **Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). No queda ningún defecto abierto.
 
