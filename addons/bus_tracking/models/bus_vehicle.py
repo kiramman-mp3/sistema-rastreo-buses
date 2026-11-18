@@ -303,7 +303,10 @@ class BusVehicle(models.Model):
             bus.write({'traccar_device_id': device['id'], 'traccar_unique_id': unique_id})
 
     def action_sync_now(self):
-        self._sync_from_traccar()
+        # Only who may edit the buses; the positions, arrivals and alerts it writes belong to the system.
+        self.check_access_rights('write')
+        self.check_access_rule('write')
+        self.sudo()._sync_from_traccar()
 
     def action_open_map(self):
         self.ensure_one()
