@@ -97,7 +97,15 @@ Una vez al mes (30 minutos):
 | Datos personales | Revisa los plazos de *Ajustes* contra `docs/diseno/PRIVACIDAD.md`. |
 | Respaldo | Ensayo de restauración (sección 4). |
 
-## 8. Pruebas en el equipo de desarrollo
+## 8. Reportes, flota y notificaciones en Odoo
+
+- **Reportes > Tablero**: indicadores de transporte y de calidad del sistema, por línea y por día. **Descargar PDF** baja el reporte de operación del periodo y la línea que muestra el tablero.
+- **Reportes > Descargar reporte**: el mismo PDF con otro periodo (hasta un año), otras líneas o sólo datos simulados. Compara cada indicador con el periodo anterior de igual duración.
+- **Notificaciones**: alertas, incidencias y mensajes de pasajeros (antes se llamaba *Reportes*).
+- **Flota**: tres columnas fijas. *En ruta* mientras el bus tiene un turno abierto en la tableta; *Estacionados (no en ruta)* el resto; *Dados de baja* si el vehículo está archivado o en el estado *Dado de baja* de Flota. Las columnas no se arrastran: siguen a los turnos.
+- Grafana se retiró el 17-nov-2026 (versión 16.0.1.9.0); los reportes de Odoo lo reemplazan. La app *Conversaciones* de Odoo está oculta: el sistema no la usa.
+
+## 9. Pruebas en el equipo de desarrollo
 
 La suite de Odoo se corre como el CI: con `docker run` y una base nueva, no con `docker compose run`. Con `compose run`, `TestHttp` falló de forma intermitente (`Session expired` tras `authenticate('admin')`, o el inicio sin redirección): 2 de 4 corridas sobre nuestra rama y 2 de 4 sobre `develop` sin ningún cambio nuestro. Con el comando del CI pasó 5 de 5.
 

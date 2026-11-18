@@ -120,6 +120,9 @@ export class BusLiveMap extends Component {
                 cancelAnimationFrame(this.frame);
             }
             if (this.map) {
+                // Leaflet 1.9.4 ends a zoom animation 250 ms later even if the map is gone, and then fails on the
+                // removed panes; leaving the map in the middle of the first zoom showed an error.
+                this.map._animatingZoom = false;
                 this.map.remove();
             }
         });
