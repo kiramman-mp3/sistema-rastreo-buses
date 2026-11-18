@@ -248,6 +248,11 @@ class TestFleetService(TransactionCase):
             [('id', '=', self.vehicle.id)], ['bus_service'], ['bus_service'])
         self.assertEqual([g['bus_service'] for g in groups], ['route', 'parked', 'retired'])
 
+    def test_the_form_hides_the_tax_info(self):
+        view = self.env['fleet.vehicle'].get_view(self.env.ref('fleet.fleet_vehicle_view_form').id, 'form')['arch']
+        self.assertIn('horsepower_tax', view)
+        self.assertRegex(view, r'<page string="Tax Info" modifiers="\{&quot;invisible&quot;: true\}"')
+
     def test_the_fleet_menu_opens_the_service_board(self):
         menu = self.env.ref('bus_tracking.menu_bus_fleet_vehicles')
         self.assertEqual(menu.action, self.env.ref('bus_tracking.action_bus_fleet_service'))
