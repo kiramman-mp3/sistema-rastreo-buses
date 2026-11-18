@@ -85,8 +85,10 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-075 | 18-nov-2026 | Reporte del usuario | El administrador no podía activar las notificaciones push en Windows: el botón se quedaba cargando | static/src/js/push_setup.js | Cerrado |
 | DEF-076 | 18-nov-2026 | Despliegue de v1.0.0-rc1 en Azure | La migración 16.0.1.9.0 no pudo borrar el rol grafana_reader en Supabase | migrations/16.0.1.9.0/pre-migrate.py | Cerrado |
 | DEF-077 | 18-nov-2026 | Verificación de v1.0.0-rc1 en Azure | Tras actualizar, los menús en español seguían diciendo Indicadores y Reportes | migrations/16.0.1.9.0/post-migrate.py | Cerrado |
+| DEF-078 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | El emulador perdió el DNS y la app mostraba «Sin conexión» al iniciar sesión | Entorno (emulador Android 17) | Cerrado |
+| DEF-079 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando | expo-task-manager (TaskJobService) en Android 17 | Abierto |
 
-Resumen: 77 registrados, 77 cerrados (100 %), 0 abiertos. Densidad: 15,3 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 79 registrados, 78 cerrados (99 %), 1 abiertos. Densidad: 15,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -552,6 +554,20 @@ Resumen: 77 registrados, 77 cerrados (100 %), 0 abiertos. Densidad: 15,3 defecto
 - **Categoría:** Internacionalización
 - **Prueba que lo protege:** Producción: -u con --i18n-overwrite, menús Reportes, Tablero y Notificaciones (Willachikuna en kichwa); desarrollo: la migración devuelve el nombre nuevo a un menú con el viejo
 
+### DEF-078: El emulador perdió el DNS y la app mostraba «Sin conexión» al iniciar sesión
+
+- **Causa raíz:** El emulador conserva el DNS de la red con la que arrancó; la red del PC cambió (red compartida y Tailscale) y dejó de resolver nombres, aunque las IP respondían.
+- **Categoría:** Entorno
+- **Prueba que lo protege:** Reiniciar la red del emulador (svc wifi/data) o arrancarlo con -dns-server 8.8.8.8; después resolvió el dominio de Azure
+
+### DEF-079: Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando
+
+- **Causa raíz:** Cada posición del GPS en segundo plano llega por un trabajo de JobScheduler; en el emulador con Android 17 el sistema no logra enlazar el servicio (Timed out while trying to bind, stated jobs went negative) y lo reporta como ANR. El hilo principal de la app estaba libre.
+- **Categoría:** Entorno
+- **Prueba que lo protege:** Pendiente: probar en una tableta real o en un emulador con Android 14 o 15; si se repite, agrupar las posiciones para crear menos trabajos
+
 ## 3. Qué falta para cerrar los abiertos
 
-No queda ningún defecto abierto. DEF-013 (una credencial en el historial de git) se cerró al reescribir el historial y rotar la contraseña; `gitleaks` corre en el CI (`.github/workflows/ci.yml`) para que no se repita.
+Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
+
+1. DEF-079: Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando

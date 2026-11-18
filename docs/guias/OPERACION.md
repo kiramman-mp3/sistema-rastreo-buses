@@ -103,6 +103,7 @@ Una vez al mes (30 minutos):
 - **Reportes > Descargar reporte**: el mismo PDF con otro periodo (hasta un año), otras líneas o sólo datos simulados. Compara cada indicador con el periodo anterior de igual duración.
 - **Notificaciones**: alertas, incidencias y mensajes de pasajeros (antes se llamaba *Reportes*).
 - **Flota**: tres columnas fijas. *En ruta* mientras el bus tiene un turno abierto en la tableta; *Estacionados (no en ruta)* el resto; *Dados de baja* si el vehículo está archivado o en el estado *Dado de baja* de Flota. Las columnas no se arrastran: siguen a los turnos. El formulario del vehículo no muestra la pestaña *Información fiscal* (impuestos, contrato, valor de compra y residual): la universidad no lleva esos datos en el sistema.
+- **Llegada en el portal de pasajeros**: al tocar su parada, el pasajero ve «El bus está a 2 paradas de tu parada. Llega en unos 5 minutos aproximadamente.». Los minutos salen de los *Minutos planificados* de las paradas de la línea; si todas están en 0, se estiman con la distancia por el recorrido a 20 km/h. Esa velocidad se cambia con el parámetro del sistema `bus_tracking.eta_speed_kmh`. El mensaje ya no nombra el bus.
 - Grafana se retiró el 17-nov-2026 (versión 16.0.1.9.0); los reportes de Odoo lo reemplazan. La app *Conversaciones* de Odoo está oculta: el sistema no la usa.
 
 ## 9. Pruebas en el equipo de desarrollo
