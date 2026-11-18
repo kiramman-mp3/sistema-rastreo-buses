@@ -69,6 +69,8 @@ No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seg
 | Cambiaste de tableta | Entra con tu usuario o tu credencial. Un gestor puede *Cerrar sesión de la tableta* si la anterior sigue con sesión: esa tableta se apaga y cierra el turno, pero tu credencial QR sigue valiendo. |
 | GPS "Esperando señal" mucho rato | Abre el estado del GPS: la fila *Último error* dice por qué no se envía (sin red, Traccar rechaza el identificador, el servidor no responde). |
 | En iPhone no envía ubicación estando detenido | Verifica que el permiso de ubicación esté en "Siempre" y "Actualización en 2.° plano" activada. La app cuenta con un latido periódico cada 5 s para mantener la posición activa incluso si Apple CoreLocation entra en reposo por falta de movimiento. |
+| La pantalla muestra datos viejos | Desliza la pantalla hacia abajo desde arriba: la app vuelve a pedir al servidor los buses, las líneas, tus próximos recorridos y, en turno, el estado y el mapa de la línea. Si dice que no hay conexión, revisa los datos móviles. |
+| Android dice que la app no responde, pero sigue funcionando | Pulsa *Esperar*. Se vio en el emulador con Android 17 por el servicio que entrega las posiciones del GPS (DEF-079); avisa al administrador si pasa en la tableta del bus. |
 | Perdiste la credencial QR | Pide al administrador que la revoque y genere otra en *Choferes*: la anterior deja de servir al instante. |
 
 ## Actualizar la app
