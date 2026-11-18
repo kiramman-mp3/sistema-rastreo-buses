@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from odoo import fields
+from odoo.exceptions import UserError
 from odoo.tests import tagged
 
 from .common import traccar_position
@@ -208,3 +209,49 @@ class TestTripEvents(RunCase):
             'reported_at': self.trip_.planned_start + timedelta(minutes=8)})
         self.assertEqual(incident.trip_id, self.trip_)
         self.assertEqual(self.trip_.incident_count, 1)
+
+
+@tagged('post_install', '-at_install')
+class TestPlannedMinutes(RunCase):
+    """The two buttons of the line that fill its planned minutes: from the distance or from the real trips."""
+
+    def offsets(self):
+        return self.route.stop_ids.mapped('planned_offset_min')
+
+    def test_the_distance_gives_minutes_that_never_go_back(self):
+        self.route.action_plan_minutes_distance()
+        minutes = self.offsets()
+        self.assertEqual(minutes[0], 0)
+        self.assertEqual(minutes, sorted(minutes))
+        self.assertGreater(minutes[-1], 0)
+
+    def test_the_real_trips_give_the_average_time_to_each_stop(self):
+        self.at(0, TERMINAL)
+        self.at(14, PLAZA)
+        self.at(32, HOSPITAL)
+        second = self.trip(day=PAST, start_local=9.0)
+        self.at(0, TERMINAL, trip=second)
+        self.at(18, PLAZA, trip=second)
+        self.at(36, HOSPITAL, trip=second)
+        self.route.action_plan_minutes_trips()
+        self.assertEqual(self.offsets(), [0, 16, 34])
+
+    def test_simulated_trips_do_not_count(self):
+        sim = self.trip(day=PAST, start_local=9.0, simulated=True)
+        self.at(0, TERMINAL, trip=sim)
+        self.at(40, PLAZA, trip=sim)
+        self.at(60, HOSPITAL, trip=sim)
+        with self.assertRaises(UserError):
+            self.route.action_plan_minutes_trips()
+
+    def test_without_real_trips_it_asks_to_use_the_distance(self):
+        before = self.offsets()
+        with self.assertRaises(UserError):
+            self.route.action_plan_minutes_trips()
+        self.assertEqual(self.offsets(), before)
+
+    def test_the_buttons_ask_before_changing_the_minutes(self):
+        arch = self.env.ref('bus_tracking.view_bus_route_form').arch
+        self.assertIn('name="action_plan_minutes_distance"', arch)
+        self.assertIn('calculated from the distance and the speed. Continue?', arch)
+        self.assertIn('the average time the bus takes to reach each stop. Continue?', arch)
