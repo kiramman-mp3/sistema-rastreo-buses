@@ -1352,7 +1352,9 @@ msgstr "Purishka km"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__user_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__driver_user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__user_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__driver_user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__driver_id
 #: model:res.groups,name:bus_tracking.group_bus_driver
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
@@ -5444,3 +5446,17 @@ msgstr "Sayashka (mana ñanpi)"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
 msgid "Service"
 msgstr "Llamkay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_route_schedule__driver_user_id
+msgid ""
+"The driver of its trips. Their tablet reminds them 10 minutes before each "
+"trip and at its start."
+msgstr "Purikunapa antawa pushak. Paypa tabletaka sapan purina chunka minuto ñawpaman, llukshina pachapipash willan."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_trip__driver_user_id
+msgid ""
+"The driver of this trip. Their tablet reminds them 10 minutes before and at "
+"the planned start."
+msgstr "Kay purinapa antawa pushak. Paypa tabletaka chunka minuto ñawpaman, yuyashka llukshina pachapipash willan."
