@@ -138,7 +138,7 @@
          a "my stop" button and places the live buses between the stops. -->
     <template id="stop_line" name="Stop line">
         <ol class="linea" t-attf-style="--c: #{line['color']}" t-att-data-linea="line['code']"
-            t-att-data-stops="line['stops_json']" t-att-data-i18n="line_i18n">
+            t-att-data-stops="line['stops_json']" t-att-data-minutes="line.get('minutes_json')" t-att-data-i18n="line_i18n">
             <li t-foreach="line['stops']" t-as="stop_name">
                 <span class="parada"><span class="punto"/><span class="nombre" t-esc="stop_name"/></span>
             </li>

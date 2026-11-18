@@ -22,7 +22,7 @@ LANG_COOKIE = 'bus_lang'
 # The only strings the page's script needs.
 JS_STRINGS = ('status_moving', 'status_stopped', 'status_offline', 'updated', 'update_error', 'stops', 'path_all',
               'live', 'searching', 'updated_min', 'stale', 'rate', 'mine_tag', 'bus_at_mine', 'bus_one_stop',
-              'bus_n_stops', 'none_coming', 'position_unknown', 'bus_between', 'bus_at', 'no_buses',
+              'bus_n_stops', 'eta_one', 'eta_n', 'none_coming', 'position_unknown', 'bus_between', 'bus_at', 'no_buses',
               'featured_hint', 'pick_stop_hint')
 
 
@@ -270,6 +270,7 @@ class BusPortal(http.Controller):
                 'buses_count': len(buses),
                 'stops': [s['name'] for s in stops],
                 'stops_json': json.dumps([s['name'] for s in stops]),
+                'minutes_json': json.dumps(route._stop_minutes()),
             },
             active_nav='rutas',
             stops=stops,

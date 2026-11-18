@@ -70,6 +70,9 @@
     document.querySelectorAll("[data-linea]").forEach(function (list) {
         var code = list.getAttribute("data-linea");
         var stops = readJSON(list.getAttribute("data-stops"), []);
+        // Minutes from the start of the line to each stop: planned, or estimated from the distance (bus.route._stop_minutes).
+        var minutes = readJSON(list.getAttribute("data-minutes"), []);
+        var timed = minutes.length === stops.length && minutes.some(function (m) { return m > 0; });
         var t = readJSON(list.getAttribute("data-i18n"), {});
         var box = list.closest(".fragmento, .ruta-linea") || document;
         var summary = box.querySelector("[data-resumen]");
@@ -126,6 +129,26 @@
             return fmt(t.bus_at, { a: stops[bus.after] });
         }
 
+        // About how long the bus takes to reach my stop, from the timetable of the line: null without one.
+        function eta(bus) {
+            if (!timed) { return null; }
+            var from;
+            if (bus.at !== null && bus.at !== undefined) {
+                from = minutes[bus.at];
+            } else {
+                var ahead = bus.after + heading(bus);
+                // between two stops: halfway through the stretch
+                from = ahead >= 0 && ahead < minutes.length ? (minutes[bus.after] + minutes[ahead]) / 2 : minutes[bus.after];
+            }
+            return Math.max(1, Math.round(Math.abs(minutes[mine] - from)));
+        }
+
+        function soon(text, bus) {
+            var m = eta(bus);
+            if (m === null) { return text; }
+            return text + " " + (m === 1 ? t.eta_one : fmt(t.eta_n, { m: m }));
+        }
+
         function answer() {
             if (mine === null) { return { text: hint, chosen: false }; }
             if (!buses.length) { return { text: t.no_buses, chosen: true }; }
@@ -144,9 +167,9 @@
                 var placed = buses.some(function (bus) { return where(bus) !== null; });
                 return { text: placed ? t.none_coming : t.position_unknown, chosen: true };
             }
-            if (best.left === 0) { return { text: fmt(t.bus_at_mine, { bus: best.bus.name }), chosen: true }; }
-            if (best.left === 1) { return { text: fmt(t.bus_one_stop, { bus: best.bus.name }), chosen: true }; }
-            return { text: fmt(t.bus_n_stops, { bus: best.bus.name, n: best.left }), chosen: true };
+            if (best.left === 0) { return { text: t.bus_at_mine, chosen: true }; }
+            if (best.left === 1) { return { text: soon(t.bus_one_stop, best.bus), chosen: true }; }
+            return { text: soon(fmt(t.bus_n_stops, { n: best.left }), best.bus), chosen: true };
         }
 
         function render() {
