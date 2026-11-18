@@ -28,7 +28,7 @@ class BusComplaint(models.Model):
     description = fields.Text(required=True)
     state = fields.Selection(
         [('new', "New"), ('review', "In review"), ('resolved', "Resolved")],
-        required=True, default='new', index=True)
+        required=True, default='new', index=True, group_expand='_group_expand_state')
     user_id = fields.Many2one('res.users', string="Responsible", index=True)
     resolved_date = fields.Datetime(readonly=True, copy=False)
     internal_note = fields.Text(help="Visible only to the team.")
@@ -57,6 +57,11 @@ class BusComplaint(models.Model):
         return super().create(vals_list)
 
     # ------------------------------------------------------------------
+    @api.model
+    def _group_expand_state(self, states, domain, order):
+        """The board always shows the three columns, so a message can be dropped on Resolved."""
+        return [key for key, _label in self._fields['state'].selection]
+
     def action_review(self):
         for rec in self:
             rec.write({'state': 'review', 'resolved_date': False,
