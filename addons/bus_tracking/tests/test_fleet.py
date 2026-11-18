@@ -200,3 +200,57 @@ class TestFleetLink(TransactionCase):
         self.assertEqual(bus.capacity, 42)
         self.assertEqual(bus.fleet_vehicle_id, new_vehicle)
         self.assertEqual(new_vehicle.bus_id, bus)
+
+
+@tagged('post_install', '-at_install')
+class TestFleetService(TransactionCase):
+    """The fleet board of the bus app: On route, Parked (not on route), Decommissioned."""
+
+    def setUp(self):
+        super().setUp()
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus S', 'plate': 'TBS-1000'})
+        self.vehicle = self.bus.fleet_vehicle_id
+        self.route = self.env['bus.route'].create({'name': 'Ruta S', 'code': 'S1'})
+        self.driver = self.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'Chofer S', 'login': 'chofer_s', 'password': 'x' * 12})
+
+    def shift(self):
+        return self.env['bus.shift'].create({'user_id': self.driver.id, 'vehicle_id': self.bus.id,
+                                             'route_id': self.route.id})
+
+    def test_a_new_bus_is_parked(self):
+        self.assertEqual(self.vehicle.bus_service, 'parked')
+
+    def test_a_bus_driving_a_shift_is_on_route_and_parks_when_it_ends(self):
+        shift = self.shift()
+        self.assertEqual(self.vehicle.bus_service, 'route')
+        shift._end()
+        self.assertEqual(self.vehicle.bus_service, 'parked')
+
+    def test_deleting_the_shift_parks_the_bus(self):
+        self.shift().unlink()
+        self.assertEqual(self.vehicle.bus_service, 'parked')
+
+    def test_archived_or_downgraded_vehicles_are_decommissioned(self):
+        self.vehicle.state_id = self.env.ref('fleet.fleet_vehicle_state_downgraded')
+        self.assertEqual(self.vehicle.bus_service, 'retired')
+        other = self.env['bus.vehicle'].create({'name': 'Bus T', 'plate': 'TBS-2000'})
+        other.active = False
+        self.assertEqual(other.fleet_vehicle_id.bus_service, 'retired')
+
+    def test_decommissioned_wins_over_a_shift(self):
+        self.shift()
+        self.vehicle.state_id = self.env.ref('fleet.fleet_vehicle_state_downgraded')
+        self.assertEqual(self.vehicle.bus_service, 'retired')
+
+    def test_the_board_always_has_its_three_columns(self):
+        groups = self.env['fleet.vehicle'].with_context(active_test=False).read_group(
+            [('id', '=', self.vehicle.id)], ['bus_service'], ['bus_service'])
+        self.assertEqual([g['bus_service'] for g in groups], ['route', 'parked', 'retired'])
+
+    def test_the_fleet_menu_opens_the_service_board(self):
+        menu = self.env.ref('bus_tracking.menu_bus_fleet_vehicles')
+        self.assertEqual(menu.action, self.env.ref('bus_tracking.action_bus_fleet_service'))
+        arch = self.env.ref('bus_tracking.view_fleet_vehicle_kanban_service')
+        view = self.env['fleet.vehicle'].get_view(arch.id, 'kanban')['arch']
+        self.assertIn('default_group_by="bus_service"', view)

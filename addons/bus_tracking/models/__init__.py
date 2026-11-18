@@ -8,13 +8,13 @@ from . import bus_kpi
 from . import bus_report
 from . import bus_route_gpx
 from . import bus_vehicle
-from . import bus_fleet
 from . import bus_position
 from . import bus_alert
 from . import bus_complaint
 from . import bus_push
 from . import bus_run
 from . import bus_shift
+from . import bus_fleet
 from . import bus_driver_token
 from . import bus_incident
 from . import res_users

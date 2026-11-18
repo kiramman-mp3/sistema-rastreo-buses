@@ -68,6 +68,14 @@ class BusVehicle(models.Model):
                 bus.fleet_vehicle_id.sudo().with_context(**{SYNC: True}).write(values)
         return result
 
+    def _sync_fleet_route(self):
+        """Tells each Fleet vehicle whether its bus is driving a shift now, for the En ruta column."""
+        Shift = self.env['bus.shift'].sudo()
+        for bus in self.sudo().with_context(active_test=False).filtered('fleet_vehicle_id'):
+            on_route = bool(Shift.search_count([('vehicle_id', '=', bus.id), ('state', '=', 'active')]))
+            if bus.fleet_vehicle_id.bus_on_route != on_route:
+                bus.fleet_vehicle_id.with_context(**{SYNC: True}).bus_on_route = on_route
+
     def action_open_fleet(self):
         self.ensure_one()
         if not self.fleet_vehicle_id:
@@ -99,6 +107,27 @@ class FleetVehicle(models.Model):
     bus_demo_report_until = fields.Datetime(related='bus_id.demo_report_until', string="Demo report until")
     bus_tablet_setup_link = fields.Char(related='bus_id.tablet_setup_link', string="Tablet setup link")
     bus_tablet_qr = fields.Binary(related='bus_id.tablet_qr', string="Tablet QR")
+    bus_on_route = fields.Boolean(string="Driving a shift", readonly=True, copy=False)
+    bus_service = fields.Selection(
+        [('route', "On route"), ('parked', "Parked (not on route)"), ('retired', "Decommissioned")],
+        string="Service", compute='_compute_bus_service', store=True, index=True, group_expand='_group_expand_service',
+        help="On route while its bus drives a shift; decommissioned when archived or in the Downgraded state of Fleet.")
+
+    @api.depends('active', 'state_id', 'bus_on_route')
+    def _compute_bus_service(self):
+        downgraded = self.env.ref('fleet.fleet_vehicle_state_downgraded', raise_if_not_found=False)
+        for vehicle in self:
+            if not vehicle.active or (downgraded and vehicle.state_id == downgraded):
+                vehicle.bus_service = 'retired'
+            elif vehicle.bus_on_route:
+                vehicle.bus_service = 'route'
+            else:
+                vehicle.bus_service = 'parked'
+
+    @api.model
+    def _group_expand_service(self, values, domain, order):
+        """The fleet board always shows its three columns, even an empty one."""
+        return [key for key, _label in self._fields['bus_service'].selection]
 
     @api.depends('license_plate')
     def _compute_bus(self):
@@ -173,3 +202,26 @@ class FleetVehicle(models.Model):
     def action_stop_demo_report(self):
         self.ensure_one()
         return self._ensure_bus().action_stop_demo_report()
+
+
+class BusShift(models.Model):
+    _inherit = 'bus.shift'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        shifts = super().create(vals_list)
+        shifts.vehicle_id._sync_fleet_route()
+        return shifts
+
+    def write(self, vals):
+        before = self.vehicle_id
+        result = super().write(vals)
+        if {'state', 'vehicle_id'} & vals.keys():
+            (before | self.vehicle_id)._sync_fleet_route()
+        return result
+
+    def unlink(self):
+        buses = self.vehicle_id
+        result = super().unlink()
+        buses.exists()._sync_fleet_route()
+        return result
