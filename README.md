@@ -1,149 +1,379 @@
-# Sistema de rastreo de buses (Odoo 16 + Traccar)
+# 🚌 Sistema de rastreo de buses UTA
 
-Módulo Odoo `bus_tracking` que muestra en un mapa en vivo los buses de un servidor Traccar, con rutas, paraderos y detección de llegada a paraderos.
+[![Odoo](https://img.shields.io/badge/Odoo-16.0-714B67?style=flat-square&logo=odoo&logoColor=white)](https://www.odoo.com/)
+[![Python](https://img.shields.io/badge/Python-3.9-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Traccar](https://img.shields.io/badge/Traccar-6.16.0-1A73E8?style=flat-square)](https://www.traccar.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Expo](https://img.shields.io/badge/Expo-SDK%2058-000020?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/)
+[![Azure](https://img.shields.io/badge/Azure-VM-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+[![Licencia](https://img.shields.io/badge/Licencia-LGPL--3.0-blue?style=flat-square)](LICENSE)
 
-## Arquitectura
+**Sistema de rastreo de buses UTA** es un módulo de Odoo 16 (`bus_tracking`), unido a un servidor Traccar y a una app de tableta para el chofer, que muestra en vivo dónde van los buses de la Universidad Técnica de Ambato. Lo usan tres públicos: el personal de transporte (panel de Odoo), los choferes (tableta) y los pasajeros (portal público sin login).
 
+Se hizo como proyecto de la universidad: un sistema de transporte con indicadores de servicio, gestión de calidad documentada (ISO 25010, Pareto, Ishikawa, PDCA) y despliegue real en Azure.
+
+> [!TIP]
+> Demo pública: <https://busesuta2340.eastus2.cloudapp.azure.com>. Para correrlo en local: `cp .env.example .env && docker compose up -d` y abrir <http://localhost:8069>.
+
+---
+
+## 📋 Descripción
+
+### ¿Qué problema resuelve?
+
+Los estudiantes esperan el bus sin saber si ya pasó, si viene tarde o si viene. La oficina de transporte no tiene cómo ver los buses en ruta, enterarse a tiempo de un SOS ni medir la puntualidad del servicio.
+
+### ¿Qué hace?
+
+1. El chofer entra a la tableta del bus (con su credencial QR o usuario y clave), elige bus y línea, e inicia el turno.
+2. La tableta envía su posición GPS a Traccar por el protocolo OsmAnd, también en segundo plano y guardando los puntos cuando no hay señal.
+3. Traccar reenvía cada posición a Odoo por webhook; un cron consulta la API de Traccar cada minuto como respaldo.
+4. Odoo guarda la posición solo si el bus tiene un turno abierto, detecta llegadas a paradas, recorridos, desvíos, excesos de velocidad y señal perdida, y genera alertas.
+5. El personal ve los buses en el mapa en vivo, atiende SOS e incidentes y recibe notificaciones push en el navegador.
+6. Los pasajeros ven en el portal cuántas paradas le faltan al bus para llegar a la suya y pueden escribir a transporte.
+7. Los reportes muestran 12 indicadores de transporte y de calidad del sistema, y se descargan en PDF.
+
+### ¿Para quién está pensado?
+
+- **Oficina de transporte de la UTA**: administra buses, rutas, horarios y choferes, y vigila la operación.
+- **Choferes**: usan solo la tableta; nunca entran al panel.
+- **Estudiantes y personal**: consultan el portal público desde el celular, sin cuenta.
+
+---
+
+## 📸 Capturas
+
+| | |
+|---|---|
+| <img width="420" src="docs/capturas/portal-inicio.png" alt="Portada del portal"><br><sub>Portada del portal de pasajeros: buscador de paradas y líneas.</sub> | <img width="420" src="docs/capturas/portal-ruta-movil.png" alt="Línea en el celular"><br><sub>Una línea en el celular: paradas y buses en vivo.</sub> |
+| <img width="420" src="docs/capturas/panel-mapa-en-vivo.png" alt="Mapa en vivo"><br><sub>Mapa en vivo del panel con la cola de Atención.</sub> | <img width="420" src="docs/capturas/panel-reportes.png" alt="Tablero de reportes"><br><sub>Reportes: indicadores de transporte y de calidad, con descarga en PDF.</sub> |
+| <img width="420" src="docs/capturas/reporte-pdf.png" alt="Reporte en PDF"><br><sub>Reporte de operación en PDF.</sub> | <img width="420" src="docs/capturas/panel-flota.png" alt="Flota"><br><sub>Flota: en ruta, estacionados y dados de baja.</sub> |
+| <img width="420" src="docs/capturas/tableta-seleccion.png" alt="Elegir bus en la tableta"><br><sub>Tableta: elegir bus y línea para iniciar el turno.</sub> | <img width="420" src="docs/capturas/tableta-turno.png" alt="Turno en la tableta"><br><sub>Tableta en turno: próxima parada, alertas y SOS.</sub> |
+
+Generadas con `scripts/dev_seed.py` en local (`qa/capturas_ui.py` y `qa/capturas_tablet.py`); no contienen datos reales.
+
+---
+
+## ✨ Características
+
+- **Mapa en vivo**: buses con filtros por estado (en ruta, detenido, sin señal, con alerta) y una cola de Atención con SOS, incidentes, alertas y mensajes nuevos.
+- **Turnos de chofer**: Odoo solo acepta posiciones de un bus con turno abierto; los turnos se cierran solos a las 14 horas.
+- **App de tableta**: GPS en segundo plano, cola sin red, pantalla bloqueada en marcha, SOS con pulsación larga y modo día/noche.
+- **Recordatorios de recorridos**: la tableta avisa 10 minutos antes de cada recorrido asignado al chofer y a la hora de salida, con notificaciones locales.
+- **Alertas**: exceso de velocidad, sin señal, parada larga, desvío de ruta y parada no pasada, con umbrales en Ajustes.
+- **Horarios y recorridos**: horarios por línea que generan los recorridos programados de cada día, con puntualidad por parada.
+- **Reportes**: 12 indicadores (8 de transporte y 4 de calidad del sistema) con gráficos y reporte de operación en PDF comparado con el periodo anterior.
+- **Flota**: integración con Odoo Fleet; tablero con columnas En ruta, Estacionados (no en ruta) y Dados de baja.
+- **Notificaciones push**: los administradores reciben alertas e incidentes en el navegador; probado en Chrome y Edge de Windows.
+- **Portal de pasajeros**: líneas, paradas y buses en vivo sin login; cuenta paradas, nunca promete minutos; nunca publica placa, chofer ni velocidad.
+- **Mensajes de pasajeros**: formulario `/quejas` con protección contra abuso y tablero Nueva, En revisión y Resuelta.
+- **Tres idiomas**: español, inglés y kichwa (borrador) en el portal, el panel y la tableta.
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Frontend del panel**: OWL (Odoo 16), Leaflet 1.9.4, Chart.js de Odoo, teselas CARTO Voyager (OpenStreetMap).
+- **App de tableta**: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router, `expo-location`, `expo-task-manager`, `expo-notifications`.
+- **Backend**: Odoo 16 (Python 3.9), módulo `bus_tracking` (depende de `mail`, `fleet` y `auth_totp`), `pywebpush` para Web Push, wkhtmltopdf para los PDF.
+- **Rastreo**: Traccar 6.16.0 (protocolo OsmAnd, puerto 5055).
+- **Base de datos**: PostgreSQL 15 en desarrollo; PostgreSQL 17 o Supabase en producción.
+- **Pruebas y calidad**: pruebas de Odoo (`--test-enable`), Jest, ESLint, flake8, Playwright, axe, SonarQube, gitleaks.
+- **Despliegue**: Docker Compose, Caddy 2 (HTTPS con Let's Encrypt), VM de Azure, EAS Build para el APK.
+
+---
+
+## 🏗️ Arquitectura
+
+```mermaid
+graph TD
+    T[Tableta del chofer<br/>Expo] -->|OsmAnd HTTPS| TR[Traccar :5055]
+    T -->|/bus_tracking/driver/*| O[Odoo 16<br/>bus_tracking]
+    TR -->|webhook JSON| O
+    O -->|cron cada minuto<br/>REST /api| TR
+    O --> DB[(PostgreSQL)]
+    TR --> DB
+    O -->|Web Push| N[Navegadores del personal]
+    P[Portal de pasajeros] -->|/rutas, /quejas| O
+    A[Panel de Odoo] --> O
+    C[Caddy HTTPS] --> O
+    C --> TR
 ```
-Tableta (Buses UTA) --OsmAnd--> Traccar (:5055) --webhook--> Odoo (/bus_tracking/traccar/webhook)
-                                      ^                              |
-                                      +---- cron cada 1 min (REST /api)
-Login, turnos e incidentes: tableta --> Odoo (/bus_tracking/driver/*)
-```
 
-- **Webhook**: Traccar reenvía cada posición a Odoo (tiempo real).
-- **Cron**: respaldo que consulta `/api/positions` cada minuto, por si el webhook falla.
-- Las posiciones duplicadas se descartan (único por bus + hora GPS), también cuando el webhook y el cron traen la misma a la vez.
-- Sólo se guardan posiciones de buses con un **turno abierto**: si la tableta sigue enviando después de cerrar el turno, Odoo las descarta. Para probar con `curl` sin tableta, activa *Aceptar posiciones sin turno* en Ajustes.
+Odoo es la fuente de verdad: Traccar solo recibe el GPS y lo reenvía. Las posiciones duplicadas se descartan (único por bus y hora GPS), aunque el webhook y el cron traigan la misma a la vez.
 
-## Puesta en marcha
+---
+
+## 📁 Estructura del Proyecto
 
 ```bash
-cp .env.example .env          # cambia WEBHOOK_SECRET y DB_PASSWORD
-docker compose up -d
+sistema-rastreo-buses/
+├── addons/
+│   └── bus_tracking/          # Módulo Odoo 16
+│       ├── controllers/       # Portal, API de la tableta, webhook, push, quejas
+│       ├── models/            # Buses, rutas, turnos, recorridos, alertas, indicadores, reporte
+│       ├── views/             # Vistas y menús del panel
+│       ├── report/            # Reporte de operación en PDF
+│       ├── static/            # OWL (mapa, tablero, push), CSS, Leaflet, service worker
+│       ├── migrations/        # Migraciones por versión (16.0.1.1.0 a 16.0.1.9.0)
+│       ├── i18n/              # es.po, qu.po y plantilla .pot
+│       └── tests/             # Pruebas de Odoo
+├── apps/
+│   └── conductor-tablet/      # App del chofer (Expo, TypeScript)
+├── config/                    # odoo.conf de desarrollo y producción
+├── docker/odoo/               # Imagen de Odoo con pywebpush
+├── docs/
+│   ├── arquitectura/          # Roadmap, planes, requisitos, arquitectura y datos
+│   ├── guias/                 # Chofer, operación, producción, personalización
+│   ├── diseno/                # Diseño visual y privacidad
+│   ├── calidad/               # Gestión de calidad, defectos, métricas, evidencias
+│   ├── academico/             # Bitácora y guion de defensa
+│   └── capturas/              # Imágenes de este README
+├── proxy/                     # Caddyfile (HTTPS)
+├── qa/                        # Suites de calidad, capturas y generadores de documentos
+├── scripts/                   # Despliegue, respaldos, semillas de desarrollo
+├── docker-compose.yml         # Entorno de desarrollo
+├── docker-compose.prod.yml    # Producción
+├── .env.example               # Variables de desarrollo
+└── .env.prod.example          # Variables de producción
 ```
 
-- Odoo: http://localhost:8069 (cambia `ODOO_PORT` en `.env` si el puerto está ocupado)
-- Traccar: http://localhost:8082 (primer usuario que se registra queda como admin)
+El índice de la documentación está en `docs/README.md`.
 
-1. En Odoo crea una base de datos e instala la app **Bus Tracking (Traccar)** (activa el modo desarrollador y *Actualizar lista de aplicaciones*).
-2. `Bus Tracking > Configuration > Settings`:
-   - URL de Traccar: `http://traccar:8082`
-   - Usuario/clave (o token API) de Traccar
-   - *Webhook secret*: el mismo valor de `WEBHOOK_SECRET` en `.env`
-   - **Dirección del GPS para los teléfonos** (obligatoria): adonde envía la tableta, p. ej. `http://<ip-del-pc>:5055` en desarrollo o `https://gps.tu-dominio` en producción. Sin ella no se puede iniciar un turno.
-   - **Test connection**.
-3. Crea **Routes** con sus paradas (lat/lon y radio de llegada en metros).
-4. Crea un bus por tableta, asígnale su ruta y pulsa **Register GPS in Traccar** (Odoo crea el dispositivo). El id OsmAnd llega a la app al iniciar el turno, no se pega a mano.
-5. Crea el chofer en `Flota > Nuevo chofer` (queda como usuario de portal: entra sólo a la app de la tableta, nunca al panel) y, si quieres, pulsa **Generar credencial QR** en su ficha: el chofer la escanea para entrar sin escribir clave. Odoo la muestra una sola vez: imprímela entonces. Sólo los managers de buses gestionan choferes y credenciales. Sigue `docs/guias/GUIA-CHOFER.md`. App: `apps/conductor-tablet`. Para pruebas sin tableta (con *Aceptar posiciones sin turno* activado): `curl "http://localhost:5055/?id=<identificador>&lat=-33.45&lon=-70.66&speed=10"`.
-6. `Bus Tracking > Live Map`. Menús **Turnos** e **Incidentes** para el personal.
+---
 
-En desarrollo el puerto 5055 (OsmAnd) va sin cifrar; en producción los celulares usan HTTPS (ver `docs/guias/PRODUCCION.md`).
+## 💻 Requisitos del Sistema
 
-## Qué incluye
+- Docker y Docker Compose.
+- Node.js 20 para la app de tableta.
+- Python 3 en el equipo para los scripts de `qa/` (Playwright para las capturas).
+- Solo en producción: un servidor Linux con dos dominios (`DOMAIN` y `GPS_DOMAIN`), puertos 80 y 443 abiertos, y una base PostgreSQL (local o Supabase).
+- Para la tableta: Android con GPS; el APK se compila con EAS Build.
+
+---
+
+## ⚙️ Instalación y Configuración
+
+1. Clonar y crear el archivo de entorno:
+
+   ```bash
+   git clone https://github.com/kiramman-mp3/sistema-rastreo-buses.git
+   cd sistema-rastreo-buses
+   cp .env.example .env
+   ```
+
+   Variables de `.env`: `DB_PASSWORD`, `WEBHOOK_SECRET` (el mismo valor va en Ajustes de Odoo) y `ODOO_PORT` (8069 por defecto). Los secretos nunca se guardan en el repositorio.
+
+2. Levantar los servicios:
+
+   ```bash
+   docker compose up -d
+   ```
+
+   Odoo queda en <http://localhost:8069> y Traccar en <http://localhost:8082>.
+
+3. Crear la base e instalar el módulo con datos de ejemplo:
+
+   ```bash
+   MSYS_NO_PATHCONV=1 docker compose run --rm odoo odoo -d buses -i bus_tracking --load-language=es_EC --without-demo=all --stop-after-init --no-http
+   docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo < scripts/dev_seed.py
+   ```
+
+   `scripts/dev_seed.py` crea 4 líneas de Ambato, 6 buses y los choferes `chofer1` (con turno abierto) y `chofer2`. Solo para desarrollo. En Git Bash de Windows, `MSYS_NO_PATHCONV=1` evita que las rutas se conviertan.
+
+4. Configurar en `Configuración > Ajustes` de Odoo: URL de Traccar (`http://traccar:8082`), usuario o token, secreto del webhook y la dirección del GPS para las tabletas. Sin la dirección del GPS no se puede iniciar un turno.
+
+5. App de tableta:
+
+   ```bash
+   cd apps/conductor-tablet
+   npm install
+   EXPO_PUBLIC_ODOO_URL=http://<ip-del-pc>:8069 npx expo start
+   ```
+
+---
+
+## 🚀 Uso y Ejecución
+
+### Desarrollo
+
+Crea las rutas con sus paradas, los buses (botón **Register GPS in Traccar**) y los choferes (`Flota > Nuevo chofer`, con credencial QR opcional). Para probar sin tableta, activa *Aceptar posiciones sin turno* en Ajustes y envía una posición:
+
+```bash
+curl "http://localhost:5055/?id=<identificador>&lat=-1.24&lon=-78.62&speed=10"
+```
+
+### Producción local
+
+`docker-compose.yml` es solo para desarrollo. Para un servidor se usa `docker-compose.prod.yml` (ver Despliegue).
+
+| Comando | Qué hace |
+|---|---|
+| `docker compose up -d` | Levanta Postgres, Odoo y Traccar de desarrollo |
+| `MSYS_NO_PATHCONV=1 docker compose run --rm odoo odoo -d buses_test -i bus_tracking --test-enable --test-tags /bus_tracking --stop-after-init --without-demo=all --no-http` | Corre las pruebas de Odoo |
+| `python -m flake8 addons/bus_tracking` | Linter de Python |
+| `python -X utf8 qa/traducciones.py` | Comprueba que `es.po` esté completo |
+| `cd apps/conductor-tablet && npm test` | Pruebas de Jest de la tableta |
+| `npm run lint` / `npm run typecheck` | ESLint y TypeScript de la tableta |
+| `npm run eas:android` | Compila el APK de producción en EAS |
+| `sh qa/ejecutar_todo.sh` | Pruebas en vivo y auditoría de calidad |
+| `python -X utf8 qa/generar_docs.py` | Regenera los documentos de `docs/calidad/` |
+| `./scripts/backup.sh` / `./scripts/restore.sh <archivo>` | Respaldo y restauración de las bases |
+
+Después de las pruebas de Odoo, borra la base de prueba (`docker compose exec -T db dropdb -U odoo buses_test`): con dos bases, las páginas públicas fallan.
+
+---
+
+## ☁️ Despliegue
+
+La demo corre en una VM de Azure con `docker-compose.prod.yml`, Caddy como proxy HTTPS y respaldos a una cuenta de almacenamiento privada. La guía completa está en `docs/guias/PRODUCCION.md`.
+
+```bash
+cp .env.prod.example .env.prod      # editar DOMAIN, GPS_DOMAIN, ACME_EMAIL y los secretos
+sudo ./scripts/init-prod.sh
+```
+
+| Variable | Uso |
+|---|---|
+| `DOMAIN` / `GPS_DOMAIN` | Dominio del panel y dominio al que envían las tabletas |
+| `ACME_EMAIL` | Correo para los certificados de Let's Encrypt |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` | Base de Odoo (local o Supabase) |
+| `TRACCAR_DATABASE_URL`, `TRACCAR_DB_USER`, `TRACCAR_DB_PASSWORD` | Base de Traccar |
+| `WEBHOOK_SECRET` | Secreto del reenvío Traccar → Odoo |
+| `ODOO_DB`, `ODOO_LANG` | Base y lenguaje de Odoo |
+| `POSTGRES_IMAGE`, `ODOO_IMAGE`, `TRACCAR_IMAGE` | Versiones de las imágenes |
+| `BACKUP_KEEP_DAYS` | Días que se guardan los respaldos |
+
+La tableta toma la dirección de Odoo de `EXPO_PUBLIC_ODOO_URL`, definida como variable de entorno en EAS.
+
+---
+
+## 🔌 API y reglas del sistema
+
+### API de la tableta
+
+Todas por `POST`, con `Authorization: Bearer <token>` salvo el login.
+
+| Endpoint | Uso |
+|---|---|
+| `/bus_tracking/driver/login` | Login con usuario y clave; devuelve el token |
+| `/bus_tracking/driver/login_badge` | Login con la credencial QR |
+| `/bus_tracking/driver/logout` | Cierra la sesión de la tableta |
+| `/bus_tracking/driver/me` | Chofer, buses, líneas, turno abierto y próximos recorridos asignados |
+| `/bus_tracking/driver/shift/start` | Inicia el turno; entrega el identificador OsmAnd y la dirección del GPS |
+| `/bus_tracking/driver/shift/end` | Termina el turno |
+| `/bus_tracking/driver/state` | Paradas, próxima parada, alertas y estado del SOS |
+| `/bus_tracking/driver/route` | Trazado de la línea |
+| `/bus_tracking/driver/incident` | Aviso o SOS |
+| `/bus_tracking/driver/client_error` | Fallas de la app para la oficina |
+
+### Endpoints públicos
+
+| Endpoint | Uso |
+|---|---|
+| `/`, `/inicio`, `/transporte` | Portada del portal |
+| `/rutas`, `/rutas/<código>`, `/rutas/<código>/buses.json` | Líneas, una línea y sus buses en vivo |
+| `/quejas` | Formulario de mensajes de pasajeros |
+| `/privacidad` | Aviso de privacidad |
+| `/bus_tracking/traccar/webhook` | Reenvío de posiciones desde Traccar (cabecera `X-Webhook-Secret`) |
+| `/bus_tracking/health` | Monitoreo: 200 `ok` o 503 `stale` si ningún bus reporta |
+
+### Modelos principales
 
 | Modelo | Uso |
 |---|---|
-| `bus.vehicle` | Bus (nombre único), enlazado a `traccar_device_id`; guarda última posición y estado (moving / stopped / offline: sin datos hace 5 min) |
-| `bus.route` / `bus.route.stop` | Rutas con paradas ordenadas y radio de llegada (5 a 1000 m); el campo `public` decide qué rutas ve el pasajero |
-| `bus.route.record` | Asistente que graba el trazado de una ruta desde las posiciones de un bus |
-| `bus.route.gpx` | Asistente que carga el trazado de una ruta desde un archivo GPX (la pista más larga, simplificada a 1500 puntos como máximo; opcionalmente crea las paradas desde los puntos de referencia) |
-| `bus.position` | Historial de posiciones (se purga según *Keep positions (days)*) |
-| `bus.stop.arrival` | Registro de llegadas a paradas (reporte de puntualidad) |
-| `bus.run` | Recorridos: cada viaje de un extremo de la ruta al otro, con su duración |
-| `bus.alert` | Alertas de exceso de velocidad, bus sin señal, parada larga y desvío de ruta (umbrales en Ajustes) |
-| `bus.shift` | Turnos de los choferes (bus + ruta); se cierran solos a las 14 h |
-| `bus.incident` | Avisos y SOS que manda el chofer desde la tableta, con la hora en que los pulsó |
-| `bus.driver.token` | Sesiones de la tableta y credenciales QR (sólo se guarda la huella del token) |
-| `bus.complaint` | Mensajes de pasajeros enviados desde `/quejas` |
+| `bus.vehicle` | Bus enlazado a su dispositivo de Traccar y a su vehículo de Fleet |
+| `bus.route` / `bus.route.stop` | Líneas con paradas ordenadas y radio de llegada |
+| `bus.route.schedule` / `bus.trip` | Horarios y recorridos programados, con chofer asignado |
+| `bus.shift` | Turnos de los choferes |
+| `bus.position` / `bus.stop.arrival` | Posiciones y llegadas a paradas |
+| `bus.alert` / `bus.incident` | Alertas automáticas y avisos o SOS del chofer |
+| `bus.complaint` | Mensajes de pasajeros |
+| `bus.driver.token` | Sesiones de tableta y credenciales QR (solo se guarda la huella) |
 | `bus.push.subscription` | Navegadores suscritos a las notificaciones push |
+| `bus.report.wizard` | Reporte de operación en PDF |
 
-Grupos: **User** (solo lectura + mapa), **Manager** (todo; admin lo recibe al instalar) y **Driver** (sólo la API de la tableta; los choferes son usuarios de portal).
+### Reglas de negocio
 
-## Personalización
+| Regla | Valor |
+|---|---|
+| Posiciones aceptadas | Solo de buses con turno abierto (salvo *Aceptar posiciones sin turno*) |
+| Cierre automático del turno | 14 horas |
+| Desvío de ruta | Más de 150 m durante 3 minutos |
+| Recordatorio al chofer | 10 minutos antes del recorrido y a la hora de salida |
+| Portal | Cuenta paradas, no minutos; no publica placa, chofer ni velocidad |
+| Grupos | User (lectura y mapa), Manager (todo), Driver (solo la API de la tableta, usuarios de portal) |
 
-El sistema está ajustado para la Universidad Técnica de Ambato (zona horaria de Ecuador, español de Ecuador, mapa en Ambato, límite urbano de 50 km/h). El nombre, el centro del mapa y el enlace de privacidad se cambian en `Configuración > Ajustes`; el logo y las fotos los aporta la universidad. Ver `docs/guias/PERSONALIZACION.md`.
+### Migraciones
 
-## Menú del panel
+Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versión actual del módulo es `16.0.1.9.0`, que retira Grafana (vistas `kpi_*`, tabla de conteos diarios y parámetros) y marca qué vehículos de la flota están en ruta. Se aplican con `-u bus_tracking`.
 
-- **Mapa en vivo**: buses en vivo, filtros con contador (en ruta, detenidos, sin señal, con alerta) y una cola de **Atención** con SOS, incidentes, alertas y mensajes nuevos. Un SOS aparece como banda roja hasta que alguien lo marca como atendido; la tableta del chofer ve quién lo atendió.
-- **Operación**: *Incidentes* (kanban: sin atender / atendido), *Mensajes de pasajeros* (kanban por estado) y *Turnos*.
-- **Flota**: *Buses* (GPS en Traccar), *Recorridos*, *Rutas* y *Choferes*.
-- **Reportes**: *Velocidad*, *Sin señal*, *Paradas largas*, *Desvíos de ruta* y *Llegada a paradas*.
-- **Configuración**: *Ajustes* y *Notificaciones en este dispositivo*.
+### Calidad
 
-El desvío de ruta se mide contra la línea que une las paradas de la ruta, en orden. Las alertas nuevas llegan por push (notificaciones web) a los administradores suscritos desde *Notificaciones en este dispositivo*. No hay correo ni respuestas a quejas.
+Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida: 555 pruebas de Odoo y 186 de Jest en verde. El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
 
-## Portal de pasajeros
+### Lo que queda por confirmar
 
-Sin login. La portada (`/`) muestra la línea con más buses en vivo sobre sus paradas, el buscador por parada y todas las líneas. `/rutas` lista las rutas marcadas como *Visible to passengers* (`/rutas?q=pillaro` busca por parada, sin importar tildes) y `/rutas/<código>` muestra la línea de paradas y el mapa: el pasajero toca **su parada** y la página dice cuántas paradas le faltan al bus más cercano (cuenta paradas, nunca promete minutos). Solo se publican nombre, posición, rumbo, estado y el tramo de la línea donde va el bus; nunca placa, chofer ni velocidad. Español e inglés con selector y un borrador de kichwa. Teléfono y correo de contacto solo aparecen si se configuran en *Ajustes*. Identidad y reglas de diseño en `docs/diseno/DISENO.md`.
+La segunda auditoría (17-nov-2026) concluyó que el sistema aún **no está listo para producción general**: falta la fase 46, una jornada real con tabletas. El detalle está en `docs/arquitectura/PLAN-AUDITORIA-2.md`.
 
-Quejas: `/quejas` es el formulario público (contacto opcional, con protección contra abuso). Llegan a `Bus Tracking > Quejas` con estados, responsable y nota interna; los datos de contacto solo los ven los administradores y se borran a los 90 días de resuelta la queja (ajustable).
+---
 
-## Estructura del repositorio
+## 🗺️ Roadmap de Funcionalidades
 
-```
-sistema-rastreo-buses/
-├── addons/                # Módulo Odoo 16 (bus_tracking)
-│   └── bus_tracking/      # Modelos, vistas, controladores, OWL Live Map, i18n
-├── apps/                  # Aplicaciones móviles de campo
-│   └── conductor-tablet/  # App móvil chofer en Expo (React Native / TypeScript)
-├── config/                # Configuraciones de Odoo (odoo.conf, odoo.prod.conf)
-├── dist-mobile/           # Binarios móviles compilados (APK Android, IPA iOS)
-├── docker/                # Dockerfiles para imágenes personalizadas (Odoo 16)
-├── docs/                  # Documentación integral del proyecto (ver docs/README.md)
-│   ├── arquitectura/      # Planes técnicos (maestro, app chofer, UX, móvil, auditoría)
-│   ├── guias/             # Manuales de uso (chofer, operación, producción, personalización)
-│   ├── diseno/            # Sistema visual, tokens de diseño y privacidad de datos
-│   ├── calidad/           # Sistema de gestión de calidad ISO 25010 y evidencias
-│   └── academico/         # Bitácora cronológica de ingeniería y guion de defensa
-├── proxy/                 # Reverse proxy perimetral Caddy (HTTPS, Let's Encrypt)
-├── qa/                    # Suites de calidad, pruebas automatizadas y generadores
-└── scripts/               # Scripts de despliegue, respaldo, reinicio y desarrollo
-```
+- [x] Odoo 16 + Traccar con Docker, mapa en vivo y alertas
+- [x] Celulares como GPS (OsmAnd) y portal de pasajeros
+- [x] App de tableta del chofer con GPS en segundo plano y cola sin red
+- [x] Rediseño del portal, el panel y la cabina
+- [x] Horarios, recorridos, simulador e indicadores
+- [x] Integración con Odoo Fleet
+- [x] Correcciones de la primera y la segunda auditoría (fases 38 a 45)
+- [x] Reportes propios de Odoo con PDF (Grafana retirado)
+- [x] Flota en tablero En ruta / Estacionados / Dados de baja
+- [x] Notificaciones push del administrador en Windows
+- [x] Recordatorios de recorridos en la tableta
+- [ ] Fase 46: jornada real con tabletas, Supabase y VM Linux
+- [ ] Revisión del kichwa por una persona hablante
+- [ ] Pruebas de usabilidad con personas
+- [ ] Dominio institucional, correo real y suscripción de Azure definitiva
 
-> Para explorar en detalle los documentos, mapas de lectura por rol y matrices de trazabilidad, consulta [docs/README.md](docs/README.md).
+El estado detallado está en `docs/arquitectura/ROADMAP.md`.
 
-## Calidad
+---
 
-Política, reglas, casos de prueba, resultados, defectos, Pareto, Ishikawa y cumplimiento de las ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Para repetir las pruebas en vivo y la auditoría: `sh qa/ejecutar_todo.sh`. El guion para defender el proyecto está en `docs/academico/GUION_DEFENSA.md`. Los hallazgos de la auditoría del 2026-11-02 y su corrección están en `docs/arquitectura/PLAN-AUDITORIA.md`. La auditoría del 2026-11-17 concluyó que el sistema **no está listo para producción general**: sus hallazgos y el plan de las fases 38 a 47 están en `docs/arquitectura/PLAN-AUDITORIA-2.md`, y el estado de todo el proyecto en `docs/arquitectura/ROADMAP.md`.
+## 👥 Contribuidores
 
-## Desarrollo local con datos y capturas
+| Nombre | Commits |
+|---|---|
+| JoseM151 | 388 |
+| kiramman-mp3 | 242 |
+| Johan Rodríguez | 158 |
 
-```bash
-cp .env.example .env                      # ODOO_PORT=8070 si el 8069 está ocupado
-docker compose up -d --build db odoo
-MSYS_NO_PATHCONV=1 docker compose run --rm odoo odoo -d buses -i bus_tracking --load-language=es_EC --without-demo=all --stop-after-init --no-http
-docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo < scripts/dev_seed.py
-```
+---
 
-`scripts/dev_seed.py` crea 4 líneas de Ambato con paradas aproximadas, 6 buses, los choferes `chofer1` (con turno abierto) y `chofer2`, y algunas quejas; cada nueva ejecución mueve los buses. Solo para desarrollo.
+## 📚 Fuentes y referencias
 
-- Capturas del portal y del panel: `python qa/capturas_ui.py --out <carpeta>` (Playwright).
-- Capturas de la tableta: `cd apps/conductor-tablet && EXPO_PUBLIC_ODOO_URL=http://localhost:8070 npx expo start --web --port 8081`, luego `python qa/capturas_tablet.py --out <carpeta>`.
-- Contraste de los colores: `python qa/contraste.py`. Accesibilidad del portal (axe): `python qa/accesibilidad.py`.
-- Con una sola base de datos las páginas públicas funcionan sin sesión; si hay bases de prueba creadas, bórralas o Odoo no sabrá cuál usar.
+<details>
+<summary>Ver referencias</summary>
 
-## Producción
+- Documentación de Odoo 16: <https://www.odoo.com/documentation/16.0/>
+- Traccar, protocolo OsmAnd y reenvío de eventos: <https://www.traccar.org/documentation/>
+- Expo SDK 58: <https://docs.expo.dev/versions/v58.0.0/>
+- Leaflet: <https://leafletjs.com/>
+- Teselas CARTO Voyager y datos de OpenStreetMap: <https://carto.com/basemaps/>, <https://www.openstreetmap.org/copyright>
+- Web Push (RFC 8030, RFC 8291) y VAPID (RFC 8292)
+- ISO/IEC 25010 (calidad del producto de software)
 
-Para instalar en un servidor (HTTPS, secretos, respaldos, monitoreo) ve `docs/guias/PRODUCCION.md`. El archivo `docker-compose.yml` de esta carpeta es solo para desarrollo.
+</details>
 
-## Notas
+---
 
-- La landing pública está en `/` y `/inicio`; el login y el backend tienen tema propio. Detalles y créditos en `docs/diseno/DISENO.md`.
-- El mapa usa Leaflet (incluido en `static/lib`) y teselas de **CARTO Voyager** (datos de OpenStreetMap), un servicio de terceros con su propia clave y condiciones; necesita internet en el navegador. La dirección se cambia en *Ajustes > Teselas del mapa* y vale para el panel, el portal y la tableta.
-- La conexión Odoo → Traccar y el reenvío Traccar → Odoo asumen la red de Docker (`traccar` y `odoo` como hostnames). Si separas los servidores, ajusta la URL en Settings y `FORWARD_URL` en `docker-compose.yml`.
-- El reenvío de Traccar se configura con variables de entorno (`CONFIG_USE_ENVIRONMENT_VARIABLES`): `FORWARD_TYPE=json`, `FORWARD_URL` y `FORWARD_HEADER` (el secreto va en la cabecera `X-Webhook-Secret`). En versiones antiguas de Traccar (5.x) la clave era `forward.json`/`forward.enable`. Verificado con la imagen `traccar/traccar:latest` de octubre 2026.
-- La interfaz del módulo viene en inglés con traducción al español (`i18n/es.po`): instala el idioma español en Odoo (`Ajustes > Idiomas`) y elígelo en tu perfil.
+## 📄 Licencia
 
-## Tests
+Este proyecto se distribuye bajo la licencia LGPL-3.0; ver [LICENSE](LICENSE).
 
-```bash
-docker compose up -d db
-docker compose run --rm odoo odoo -d buses_test -i bus_tracking --test-enable --test-tags /bus_tracking --stop-after-init --without-demo=all --no-http
-docker compose exec -T db dropdb -U odoo buses_test     # con dos bases, las páginas públicas fallan
-```
+---
 
-En Git Bash de Windows antepón `MSYS_NO_PATHCONV=1` al comando, o la ruta `/bus_tracking` se convierte en una ruta de Windows. Hoy son 250 pruebas de Odoo y 72 de la tableta (`cd apps/conductor-tablet && npm test`).
+## ✍️ Autor
 
-Otros chequeos: `flake8` (reglas en `.flake8`), `python -X utf8 qa/traducciones.py` (es.po completo y sin modelos borrados) y, en la tableta, `npm run lint` y `npm run typecheck`. El CI (`.github/workflows/ci.yml`) corre todo esto y la suite de Odoo contra Postgres.
+Johan Rodríguez
