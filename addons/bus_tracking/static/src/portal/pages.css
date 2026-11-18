@@ -1409,7 +1409,7 @@ a.fragmento-nombre:hover {
 
 .cifras {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
     margin: 0;
 }
@@ -1750,16 +1750,7 @@ a.fragmento-nombre:hover {
     line-height: 1.2;
 }
 
-.boton-app-conductor {
-    background: #FFFFFF;
-    border: 1.5px solid #CBD5E1;
-    color: var(--tinta) !important;
-}
 
-.boton-app-conductor:hover {
-    background: #F8FAFC;
-    border-color: var(--granate);
-}
 
 /* ---------- City of Ambato & Fleet Cards (Wander.ph Style) ---------- */
 
@@ -2026,18 +2017,6 @@ a.fragmento-nombre:hover {
     margin-bottom: 1.25rem;
 }
 
-.pie-estado-red {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.4rem 0.9rem;
-    border-radius: var(--radio-pill);
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    color: #34D399;
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
 
 .pie-titulo {
     font-family: var(--display);
@@ -2204,7 +2183,6 @@ a.fragmento-nombre:hover {
 
 .ruta-linea .resumen {
     background: #F8FAFC;
-    border: 1px solid #E2E8F0;
     border-radius: var(--radio-md);
 }
 
@@ -2246,14 +2224,6 @@ a.fragmento-nombre:hover {
 @media (max-width: 900px) {
     .accesos {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .cifras {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .cifra-card + .cifra-card:nth-child(3) {
-        border-left: none;
     }
 
     .banda-dentro,
@@ -2322,19 +2292,16 @@ a.fragmento-nombre:hover {
         grid-template-columns: 1fr;
     }
 
-    .cifras {
-        grid-template-columns: 1fr;
-    }
-
     .cifra-card + .cifra-card {
-        border-left: none;
-        border-top: 1px solid #E2E8F0;
-        padding-left: 0;
-        padding-top: 1rem;
+        padding-left: 0.85rem;
     }
 
     .tarjetas-foto {
         grid-template-columns: 1fr;
+    }
+
+    .tarjetas-foto > li:nth-child(n + 4) {
+        display: none;
     }
 
     .pie-grid {
