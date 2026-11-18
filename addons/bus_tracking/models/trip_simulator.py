@@ -232,10 +232,13 @@ class BusTripSimulate(models.TransientModel):
 
     def action_simulate(self):
         self.ensure_one()
-        return self._open_trips(self.env['bus.trip.simulator']._simulate(self.route_id, self.scenario))
+        # Replaying a trip writes positions, arrivals and alerts, which belong to the system: only managers open this
+        # wizard (its access rights), and it runs as the system.
+        trips = self.env['bus.trip.simulator'].sudo()._simulate(self.route_id.sudo(), self.scenario)
+        return self._open_trips(trips)
 
     def action_demo_set(self):
-        trips = self.env['bus.trip.simulator']._simulate_demo_set()
+        trips = self.env['bus.trip.simulator'].sudo()._simulate_demo_set()
         if not trips:
             raise UserError(_("No route with the codes L1 to L4 exists: use the simulator on one of your routes."))
         return self._open_trips(trips)
