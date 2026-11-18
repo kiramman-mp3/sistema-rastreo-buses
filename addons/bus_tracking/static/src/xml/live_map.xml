@@ -93,7 +93,10 @@
                     </div>
 
                     <div t-if="state.tab == 'atencion'" class="o_bus_panel_body" role="tabpanel">
-                        <p t-if="!attention.length and !state.newComplaints" class="o_bus_empty">Nothing needs attention right now.</p>
+                        <div t-if="!attention.length and !state.newComplaints" class="o_bus_empty o_bus_empty_art">
+                            <img src="/bus_tracking/static/img/gente/espera.png" alt="" width="140" height="140"/>
+                            <p>Nothing needs attention right now.</p>
+                        </div>
                         <article t-foreach="attention" t-as="item" t-key="item.key" t-attf-class="o_bus_item o_bus_item_l#{item.level}">
                             <div class="o_bus_item_head">
                                 <strong t-esc="item.title"/>
