@@ -325,23 +325,32 @@ export default function ShiftScreen() {
         style={[
           styles.header,
           layout.compact && styles.headerPhone,
-          { backgroundColor: palette.panel, borderColor: palette.edge, borderLeftColor: color },
+          { backgroundColor: palette.panel, borderColor: palette.edge },
           palette.mode === 'day' && lift,
         ]}
       >
-        <View style={[styles.identity, tallHeader && styles.identityTall, layout.short && styles.identityShort]}>
-          <View style={[styles.chip, { backgroundColor: color }]}>
+        {/* The line as a block of its own colour: which bus and which line, readable from across the cab. */}
+        <View
+          style={[
+            styles.identity,
+            styles.identityBlock,
+            tallHeader && styles.identityTall,
+            layout.short && styles.identityShort,
+            { backgroundColor: color },
+          ]}
+        >
+          <View style={[styles.chip, styles.chipOnColor]}>
             <Txt bold size="body" color={readableOn(color)}>
               {route?.code ?? ''}
             </Txt>
           </View>
           <View style={styles.identityText}>
-            <Txt bold size="body" lines={1}>
+            <Txt bold size="body" lines={1} color={readableOn(color)}>
               {bus?.name ?? ''}
             </Txt>
             {/* On a phone on its side the line code already says which line it is: one row for the whole header. */}
             {layout.short && layout.width < 760 ? null : (
-              <Txt size="small" dim lines={1}>
+              <Txt size="small" lines={1} color={readableOn(color)}>
                 {route?.name ?? ''}
               </Txt>
             )}
@@ -433,13 +442,23 @@ const styles = StyleSheet.create({
     rowGap: space[2],
     ...shape.card,
     borderWidth: 1,
-    // the line's own colour runs down the left edge: the header says which line before it is read
-    borderLeftWidth: 8,
   },
   // On a phone every pixel counts: tighter sides so the GPS state and the clock fit one row of a 360 dp screen.
   headerPhone: {
     paddingHorizontal: space[3],
     paddingVertical: space[2],
+  },
+  identityBlock: {
+    // hugs its words instead of stretching across the header
+    flexGrow: 0,
+    flexBasis: 'auto',
+    paddingVertical: space[2],
+    paddingLeft: space[2],
+    paddingRight: space[5],
+    ...shape.control,
+  },
+  chipOnColor: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   identity: {
     flexDirection: 'row',
