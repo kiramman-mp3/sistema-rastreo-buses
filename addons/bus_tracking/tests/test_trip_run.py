@@ -1,12 +1,14 @@
 from datetime import date, timedelta
+from unittest.mock import patch
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
 
 from .common import traccar_position
 from .test_trips import TripCase
 
+API = 'odoo.addons.bus_tracking.models.traccar_api.BusTraccarApi'
 PAST = date(2026, 10, 26)                      # a Monday that is over: its trips can be closed by the cron
 TERMINAL = (-33.4500, -70.6600)
 PLAZA = (-33.4540, -70.6500)
@@ -255,3 +257,39 @@ class TestPlannedMinutes(RunCase):
         self.assertIn('name="action_plan_minutes_distance"', arch)
         self.assertIn('calculated from the distance and the speed. Continue?', arch)
         self.assertIn('the average time the bus takes to reach each stop. Continue?', arch)
+
+
+@tagged('post_install', '-at_install')
+class TestManagerActions(RunCase):
+    """What a manager starts writes records only the system may create: positions, arrivals, trip stops (DEF-080)."""
+
+    def setUp(self):
+        super().setUp()
+        self.manager = self.env['res.users'].create({
+            'name': 'Gestor', 'login': 'gestor-acciones',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_manager').id])]})
+
+    def test_a_manager_syncs_a_bus_now(self):
+        self.bus.demo_report_until = fields.Datetime.now() + timedelta(hours=1)
+        fix = traccar_position(7, fields.Datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'), *TERMINAL)
+        before = self.env['bus.position'].search_count([('vehicle_id', '=', self.bus.id)])
+        with patch(API + '.get_latest_positions', return_value=[fix]):
+            self.bus.with_user(self.manager).action_sync_now()
+        self.assertEqual(self.env['bus.position'].search_count([('vehicle_id', '=', self.bus.id)]), before + 1)
+
+    def test_a_viewer_cannot_sync(self):
+        viewer = self.env['res.users'].create({
+            'name': 'Visor', 'login': 'visor-acciones',
+            'groups_id': [(6, 0, [self.env.ref('base.group_user').id,
+                                  self.env.ref('bus_tracking.group_bus_user').id])]})
+        with self.assertRaises(AccessError):
+            self.bus.with_user(viewer).action_sync_now()
+
+    def test_a_manager_simulates_a_trip(self):
+        wizard = self.env['bus.trip.simulate'].with_user(self.manager).create(
+            {'route_id': self.route.id, 'scenario': 'punctual'})
+        action = wizard.action_simulate()
+        trips = self.env['bus.trip'].browse(action['domain'][0][2])
+        self.assertTrue(trips.simulated)
+        self.assertTrue(trips.stop_line_ids)
