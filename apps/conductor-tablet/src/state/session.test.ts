@@ -61,6 +61,23 @@ function gpsMemory(): GpsStore {
 }
 
 describe('session', () => {
+  test('the next trips of the driver become reminders, and signing out forgets them', async () => {
+    const tokens = memoryStore('saved');
+    const upcoming = [{ id: 4, planned_start: '2026-11-18T13:00:00Z', route_id: 2, route_code: 'L1',
+      route_name: 'Centro', vehicle_id: 1, vehicle_name: 'Bus 1' }];
+    const client = createClient({
+      baseUrl: 'http://odoo:8069',
+      store: tokens,
+      fetch: (url) => (String(url).endsWith('/logout') ? json(200, { ok: true }) : json(200, { ...me, upcoming })),
+    });
+    const reminders = { sync: jest.fn(async () => undefined), clear: jest.fn(async () => undefined) };
+    const session = new Session(tokens, client, undefined, undefined, undefined, undefined, undefined, undefined, reminders);
+    await session.boot();
+    expect(reminders.sync).toHaveBeenCalledWith(upcoming);
+    await session.logout();
+    expect(reminders.clear).toHaveBeenCalled();
+  });
+
   test('boot restores an active shift from /me', async () => {
     const tokens = memoryStore('saved');
     const client = createClient({

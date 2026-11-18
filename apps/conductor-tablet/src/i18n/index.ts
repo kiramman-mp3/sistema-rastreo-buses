@@ -142,6 +142,11 @@ const es = {
   gpsLastError: 'Último error',
   gpsServiceTitle: 'Buses UTA: GPS activo',
   gpsServiceBody: 'Enviando la posición del bus',
+  reminderChannel: 'Recorridos programados',
+  reminderSoonTitle: 'En 10 minutos tienes un recorrido',
+  reminderSoonBody: 'Línea {route} a las {time} en {bus}. Prepárate.',
+  reminderStartTitle: 'Inicia tu recorrido programado',
+  reminderStartBody: 'Línea {route} de las {time} en {bus}. Empieza el turno en la tableta.',
 };
 
 const en: typeof es = {
@@ -285,6 +290,11 @@ const en: typeof es = {
   gpsLastError: 'Last error',
   gpsServiceTitle: 'Buses UTA: GPS on',
   gpsServiceBody: 'Sending the bus position',
+  reminderChannel: 'Scheduled trips',
+  reminderSoonTitle: 'You have a trip in 10 minutes',
+  reminderSoonBody: 'Line {route} at {time} on {bus}. Get ready.',
+  reminderStartTitle: 'Start your scheduled trip',
+  reminderStartBody: 'Line {route} of {time} on {bus}. Start the shift on the tablet.',
 };
 
 const qu: typeof es = {
@@ -428,6 +438,11 @@ const qu: typeof es = {
   gpsLastError: 'Tukuri pantay',
   gpsServiceTitle: 'Buses UTA: GPS purin',
   gpsServiceBody: 'Busmanta maypi kashkata kachashpa',
+  reminderChannel: 'Yuyashka purikuna',
+  reminderSoonTitle: 'Chunka minutopi shuk purinata charinki',
+  reminderSoonBody: '{route} ñan, {time} pachapi, {bus}pi. Allichiri.',
+  reminderStartTitle: 'Yuyashka purinata kallari',
+  reminderStartBody: '{route} ñan, {time} pacha, {bus}pi. Tabletapi turnota kallari.',
 };
 
 export const messages: Record<Lang, typeof es> = { es, en, qu };
