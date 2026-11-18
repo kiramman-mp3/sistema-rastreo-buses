@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0-20250909\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 04:45+0000\n"
-"PO-Revision-Date: 2026-11-18 04:45+0000\n"
+"POT-Creation-Date: 2026-11-18 05:07+0000\n"
+"PO-Revision-Date: 2026-11-18 05:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1279,6 +1279,12 @@ msgid "Days"
 msgstr ""
 
 #. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__retired
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Decommissioned"
+msgstr ""
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__vehicle_id
 msgid "Default bus"
 msgstr ""
@@ -1589,6 +1595,11 @@ msgid "Drivers sign in from the bus tablet, not from here."
 msgstr ""
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_on_route
+msgid "Driving a shift"
+msgstr ""
+
+#. module: bus_tracking
 #: model:ir.model.constraint,message:bus_tracking.constraint_bus_position_vehicle_fix_uniq
 msgid "Duplicate position for this bus and time."
 msgstr ""
@@ -1799,6 +1810,7 @@ msgstr ""
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_fleet_service
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet
 #, python-format
 msgid "Fleet"
@@ -2919,8 +2931,17 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__route
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
 #, python-format
 msgid "On route"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_service
+msgid ""
+"On route while its bus drives a shift; decommissioned when archived or in "
+"the Downgraded state of Fleet."
 msgstr ""
 
 #. module: bus_tracking
@@ -3151,6 +3172,12 @@ msgstr ""
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
 msgid "Pareto: the few kinds that cause most incidents"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__parked
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Parked (not on route)"
 msgstr ""
 
 #. module: bus_tracking
@@ -3807,6 +3834,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__sequence
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_stop__sequence
 msgid "Sequence"
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_service
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Service"
 msgstr ""
 
 #. module: bus_tracking
