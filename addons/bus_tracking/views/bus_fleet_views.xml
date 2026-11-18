@@ -106,6 +106,10 @@
                     </group>
                 </page>
             </xpath>
+            <!-- The university does not keep tax or contract values of its buses. -->
+            <xpath expr="//field[@name='horsepower_tax']/ancestor::page[1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
         </field>
     </record>
 
