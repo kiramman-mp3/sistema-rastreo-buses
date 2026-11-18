@@ -165,6 +165,11 @@
                                 </li>
                             </ul>
                             <p t-else="" class="aviso"><strong t-esc="s['no_routes']"/></p>
+                            <p class="total">
+                                <t t-if="total_buses == 1" t-esc="s['buses_now_one']"/>
+                                <t t-elif="total_buses" t-esc="s['buses_now_total'].format(n=total_buses)"/>
+                                <t t-else="" t-esc="s['buses_now_none']"/>
+                            </p>
                         </div>
                     </div>
                 </section>
