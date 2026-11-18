@@ -10,6 +10,9 @@ from .geo import PathMeasure
 # bus; decoding up to 1,500 points each time was the cost. The key changes whenever the route,
 # its track or any of its stops is edited, so a stale line is never used.
 _MEASURES = {}
+# Average speed of a city bus, stops and traffic included: it estimates the minutes of a line without a timetable.
+# The office can change it with the system parameter bus_tracking.eta_speed_kmh.
+ETA_SPEED_KMH = 20.0
 _MEASURES_MAX = 64
 
 
@@ -90,6 +93,27 @@ class BusRoute(models.Model):
                 _MEASURES.clear()
             _MEASURES[key] = PathMeasure(lines[0]['points']) if lines else None
         return _MEASURES[key]
+
+    def _stop_minutes(self):
+        """Minutes from the first stop to each stop, for the passengers' estimate. The planned minutes when the
+        line has them; otherwise the distance along the line at the average speed of a city bus."""
+        self.ensure_one()
+        stops = self.stop_ids
+        planned = stops.mapped('planned_offset_min')
+        measure = self._path_measure() if not any(planned) else None
+        if not measure:
+            return planned
+        try:
+            speed = float(self.env['ir.config_parameter'].sudo().get_param('bus_tracking.eta_speed_kmh') or 0)
+        except ValueError:
+            speed = 0
+        speed = speed if speed > 0 else ETA_SPEED_KMH
+        minutes, along = [], 0.0
+        for stop in stops:
+            # a recorded track that loops could place a stop behind the previous one: never go back
+            along = max(along, measure.locate(stop.latitude, stop.longitude)[0])
+            minutes.append(round(along / 1000.0 / speed * 60.0, 1))
+        return minutes
 
     def action_record_track(self):
         self.ensure_one()

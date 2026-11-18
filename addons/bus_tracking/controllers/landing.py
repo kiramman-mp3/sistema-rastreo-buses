@@ -42,6 +42,7 @@ class BusLanding(Home):
                 'buses': len(fresh),
                 'stops': [s.name for s in r.stop_ids],
                 'stops_json': json.dumps([s.name for s in r.stop_ids]),
+                'minutes_json': json.dumps(r._stop_minutes()),
             })
         # The line drawn in the first screen: the one with most buses right now, else the first one.
         featured = max(lines, key=lambda line: line['buses']) if lines else None
