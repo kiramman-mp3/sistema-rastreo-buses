@@ -308,6 +308,9 @@ DEFECTOS = [
     ('DEF-073', '17-nov-2026', 'Reporte en PDF', 'Descargar el reporte abría «Configure el diseño de sus documentos» en vez del PDF',
      'models/bus_report.py', 'report_action pide el diseño de la compañía si no está configurado, aunque el reporte tiene su propia cabecera.',
      'Lógica', 'Cerrado', 'test_report: imprimir devuelve directamente la acción del reporte; descarga probada desde el tablero'),
+    ('DEF-074', '18-nov-2026', 'Prueba del tablero de flota', 'Error del cliente de Odoo al salir del mapa en vivo mientras hace el primer zoom',
+     'static/src/js/live_map.js', 'Leaflet 1.9.4 termina la animación de zoom 250 ms después aunque el mapa ya se haya quitado, y falla sobre los paneles borrados.',
+     'Interfaz', 'Cerrado', 'Prueba en el navegador: entrar y salir del mapa en vivo de inmediato no muestra errores'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
