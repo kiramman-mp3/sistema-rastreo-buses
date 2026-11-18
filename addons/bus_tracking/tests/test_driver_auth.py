@@ -242,3 +242,58 @@ class TestPanelSignIn(TransactionCase):
         totp = self.env['ir.module.module'].search([('name', '=', 'auth_totp')])
         self.assertEqual(totp.state, 'installed')
         self.assertIn('totp_enabled', self.env['res.users']._fields)
+
+
+@tagged('post_install', '-at_install')
+class TestDriverUpcomingTrips(HttpCase):
+    """The tablet reminds the driver of their next trips: /driver/me lists them."""
+
+    post = TestDriverApi.post
+    login = TestDriverApi.login
+
+    def setUp(self):
+        super().setUp()
+        login_limiter.reset()
+        account_limiter.reset()
+        self.env['ir.config_parameter'].sudo().set_param('base.login_cooldown_after', '0')
+        self.driver = make_driver(self.env)
+        self.route = self.env['bus.route'].create({'name': 'Linea Centro', 'code': 'L1'})
+        self.bus = self.env['bus.vehicle'].create({'name': 'Bus 1', 'plate': 'ABC-123', 'route_id': self.route.id})
+        for sequence, (name, minutes) in enumerate((('Terminal', 0), ('Hospital', 20))):
+            self.env['bus.route.stop'].create({'route_id': self.route.id, 'name': name, 'sequence': sequence,
+                                               'latitude': -1.24 - sequence / 100, 'longitude': -78.62,
+                                               'planned_offset_min': minutes})
+
+    def trip(self, minutes, driver=None, **extra):
+        return self.env['bus.trip'].create(dict({
+            'vehicle_id': self.bus.id, 'route_id': self.route.id,
+            'planned_start': fields.Datetime.now() + timedelta(minutes=minutes),
+            'driver_user_id': (driver or self.driver).id}, **extra))
+
+    def upcoming(self):
+        token = self.login().json()['token']
+        return self.post(ME, token=token).json()['upcoming']
+
+    def test_the_driver_gets_their_next_trips_soonest_first(self):
+        later, sooner = self.trip(180), self.trip(30)
+        trips = self.upcoming()
+        self.assertEqual([t['id'] for t in trips], [sooner.id, later.id])
+        self.assertEqual((trips[0]['route_code'], trips[0]['vehicle_name']), ('L1', 'Bus 1'))
+        self.assertTrue(trips[0]['planned_start'].endswith('Z'))
+
+    def test_only_their_planned_trips_of_the_next_day(self):
+        other = make_driver(self.env, login='chofer2', password='clave-segura-2')
+        self.trip(30, driver=other)
+        self.trip(-30)                                       # already due
+        self.trip(60 * 25)                                   # beyond the next 24 hours
+        self.trip(90).action_cancel()
+        self.assertEqual(self.upcoming(), [])
+
+    def test_a_schedule_gives_its_driver_to_the_trips_it_creates(self):
+        schedule = self.env['bus.route.schedule'].create({
+            'route_id': self.route.id, 'departure_time': 7.5, 'vehicle_id': self.bus.id,
+            'driver_user_id': self.driver.id, 'saturday': True, 'sunday': True})
+        today = fields.Date.today()
+        trips = schedule._generate_trips(today, today + timedelta(days=1))
+        self.assertTrue(trips)
+        self.assertEqual(trips.driver_user_id, self.driver)

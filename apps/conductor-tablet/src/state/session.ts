@@ -15,6 +15,7 @@ import type { GpsController, GpsStore } from '../gps/types';
 import { flushErrors, type ErrorQueue } from '../diagnostics/queue';
 import { getLang } from '../i18n';
 import { flushIncidents, IncidentQueue } from '../incidents/queue';
+import type { TripReminders } from '../shift/reminders';
 
 export type SessionSnapshot = {
   ready: boolean;
@@ -66,6 +67,8 @@ export class Session {
     private endStore?: TokenStore,
     /** Failures of the app itself, waiting to be told to the office. */
     private errors?: ErrorQueue,
+    /** Local notifications before the driver's next trips. */
+    private reminders?: TripReminders,
   ) {}
 
   subscribe(listener: () => void) {
@@ -94,6 +97,7 @@ export class Session {
       shift: me.shift,
       offline: false,
     });
+    void this.reminders?.sync(me.upcoming ?? []);
   }
 
   async setOdooUrl(raw: string) {
@@ -222,6 +226,8 @@ export class Session {
   /** Forget the session on this tablet only. */
   private async signOutHere() {
     await this.stopGps();
+    // The next driver of this tablet must not hear about the trips of this one.
+    await this.reminders?.clear();
     await this.store.clear();
     this.set({ ready: true, ...empty, odooUrl: this.snapshot.odooUrl });
   }

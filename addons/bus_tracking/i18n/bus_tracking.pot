@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0-20250909\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 05:07+0000\n"
-"PO-Revision-Date: 2026-11-18 05:07+0000\n"
+"POT-Creation-Date: 2026-11-18 05:37+0000\n"
+"PO-Revision-Date: 2026-11-18 05:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1542,7 +1542,9 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__user_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__driver_user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__user_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__driver_user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__driver_id
 #: model:res.groups,name:bus_tracking.group_bus_driver
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
@@ -4425,6 +4427,20 @@ msgstr ""
 #: code:addons/bus_tracking/models/bus_complaint.py:0
 #, python-format
 msgid "The description cannot be longer than %s characters."
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_route_schedule__driver_user_id
+msgid ""
+"The driver of its trips. Their tablet reminds them 10 minutes before each "
+"trip and at its start."
+msgstr ""
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_trip__driver_user_id
+msgid ""
+"The driver of this trip. Their tablet reminds them 10 minutes before and at "
+"the planned start."
 msgstr ""
 
 #. module: bus_tracking
