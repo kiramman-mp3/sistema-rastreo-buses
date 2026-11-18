@@ -1593,6 +1593,7 @@ msgstr "GPS pacha"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_fleet_service
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet
 #, python-format
 msgid "Fleet"
@@ -2675,6 +2676,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__route
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
 #, python-format
 msgid "On route"
 msgstr "Ñanpi"
@@ -5411,3 +5414,33 @@ msgstr "pi"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "min"
 msgstr "min"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__retired
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Decommissioned"
+msgstr "Llamkaymanta llukchishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_on_route
+msgid "Driving a shift"
+msgstr "Turnopi purikun"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_service
+msgid ""
+"On route while its bus drives a shift; decommissioned when archived or in "
+"the Downgraded state of Fleet."
+msgstr "Antawa turnopi purikukpika ñanpimi kan; pakashka kakpi, Flotapi llukchishka kakpipash, llamkaymanta llukchishkami kan."
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__parked
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Parked (not on route)"
+msgstr "Sayashka (mana ñanpi)"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_service
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Service"
+msgstr "Llamkay"

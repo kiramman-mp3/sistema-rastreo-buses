@@ -1662,6 +1662,7 @@ msgstr "Hora GPS"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_fleet_service
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet
 #, python-format
 msgid "Fleet"
@@ -2777,6 +2778,8 @@ msgstr "Las posiciones más antiguas se borran cada día, junto con las posicion
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__route
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
 #, python-format
 msgid "On route"
 msgstr "En ruta"
@@ -5630,3 +5633,33 @@ msgstr "por"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "min"
 msgstr "min"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__retired
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Decommissioned"
+msgstr "Dados de baja"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_on_route
+msgid "Driving a shift"
+msgstr "En turno"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_service
+msgid ""
+"On route while its bus drives a shift; decommissioned when archived or in "
+"the Downgraded state of Fleet."
+msgstr "En ruta mientras su bus tiene un turno abierto; dado de baja si está archivado o en el estado Dado de baja de Flota."
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__parked
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Parked (not on route)"
+msgstr "Estacionados (no en ruta)"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_service
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Service"
+msgstr "Servicio"
