@@ -45,6 +45,11 @@ class TestComplaintModel(TransactionCase):
         complaint.action_reopen()
         self.assertEqual((complaint.state, complaint.resolved_date), ('review', False))
 
+    def test_the_board_always_shows_the_resolved_column(self):
+        self.make()                                   # only a new message exists
+        groups = self.Complaint.read_group([], ['state'], ['state'])
+        self.assertEqual([g['state'] for g in groups], ['new', 'review', 'resolved'])
+
     def test_review_keeps_an_existing_assignee(self):
         other = self.env['res.users'].create({'name': 'Otro', 'login': 'otro'})
         complaint = self.make(user_id=other.id)
