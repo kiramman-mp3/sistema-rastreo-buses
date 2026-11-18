@@ -29,3 +29,4 @@ from . import test_boundaries
 from . import test_traccar_consistency
 from . import test_report
 from . import test_discuss
+from . import test_migration_grafana
