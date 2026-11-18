@@ -19,7 +19,7 @@
         <div class="o_dash">
             <header class="o_dash_head">
                 <div>
-                    <h1>Indicators</h1>
+                    <h1>Reports</h1>
                     <p class="o_dash_sub"><t t-esc="periodText"/> · <t t-esc="scopeText"/></p>
                 </div>
                 <div class="o_dash_filters">
@@ -55,6 +55,9 @@
                         </select>
                     </label>
                     <span class="o_dash_sync" role="status" t-esc="syncText"/>
+                    <button class="o_dash_btn o_dash_pdf" t-on-click="downloadPdf" t-att-disabled="state.printing">
+                        <i class="fa fa-download" aria-hidden="true"/> <t t-if="state.printing">Preparing the PDF…</t><t t-else="">Download PDF</t>
+                    </button>
                 </div>
             </header>
 
