@@ -181,6 +181,16 @@ class BusDriverApi(http.Controller):
                 'color': route.color or '#3388ff',
             } for route in env['bus.route'].search([])],
             'shift': self._shift_payload(shift) if shift else None,
+            # The next trips of this driver, for the reminders of the tablet (10 minutes before and at the start).
+            'upcoming': [{
+                'id': trip.id,
+                'planned_start': utc_z(trip.planned_start),
+                'route_id': trip.route_id.id,
+                'route_code': trip.route_id.code or '',
+                'route_name': trip.route_id.name,
+                'vehicle_id': trip.vehicle_id.id,
+                'vehicle_name': trip.vehicle_id.name,
+            } for trip in env['bus.trip'].sudo()._upcoming_for(user)],
         })
 
     @http.route('/bus_tracking/driver/shift/start', type='http', auth='public', methods=['POST'], csrf=False)
