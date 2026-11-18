@@ -60,6 +60,7 @@ Live bus tracking and route monitoring backed by a Traccar server.
             'bus_tracking/static/src/css/dashboard.css',
             'bus_tracking/static/src/xml/dashboard.xml',
             'bus_tracking/static/src/js/push_setup.js',
+            'bus_tracking/static/src/js/no_discuss.js',
             'bus_tracking/static/src/js/stop_picker.js',
             'bus_tracking/static/src/xml/stop_picker.xml',
             'bus_tracking/static/src/xml/live_map.xml',
