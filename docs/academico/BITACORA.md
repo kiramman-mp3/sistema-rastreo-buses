@@ -1348,3 +1348,33 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Si cambia la IP de quien administra, actualizar la regla `default-allow-ssh` del grupo `vm-busesNSG`.
 - Los respaldos nuevos no se copian solos a la cuenta de almacenamiento: falta programarlo.
 - Fase 46 sin hacer: jornada real con tabletas y prueba de carga.
+
+## 2026-11-18: versión candidata v1.0.0-rc1
+
+### Qué se hizo
+
+- `develop` se integró en `main` y `main` pasó a ser la rama principal del repositorio en GitHub.
+- App de la tableta 1.2.0 (recordatorios de recorridos con `expo-notifications`). Builds de EAS: Android `production` (APK) e iOS `ios-altstore` (IPA sin firmar), los dos apuntando al Odoo de Azure.
+- Etiqueta `v1.0.0-rc1` en `main` y release en GitHub (prerelease) con `BusesUTA-1.2.0.apk`, `BusesUTA-1.2.0.ipa`, `SHA256SUMS` y el enlace de la demo.
+- VM `vm-buses` actualizada con el procedimiento de `PRODUCCION.md` > *Actualizar*: respaldo `20261118T064211Z`, código de `develop` (2d39961) a `main` en `v1.0.0-rc1`, módulo de `16.0.1.8.0` a `16.0.1.9.0` y `up -d --remove-orphans`, que quitó el contenedor de Grafana.
+- El `main` local de la VM era la copia anterior a la reescritura del historial del 17-nov (mismo árbol que `c00fdc4`); se apuntó a `origin/main`.
+- SSH no sirvió (la regla `default-allow-ssh` admite otra IP); todo se hizo con `az vm run-command`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Builds de EAS | Android e iOS terminados, versión 1.2.0 |
+| Migración 16.0.1.9.0 en la VM | `pre-migrate` y `post-migrate` corrieron; módulos cargados sin errores |
+| `/`, `/rutas`, `/quejas`, `/web/login`, `/bus_tracking/sw.js` | 200 |
+| `/bus_tracking/health` | `stale`: ningún bus transmite |
+| Contenedores | `odoo` healthy, `traccar` healthy, `proxy` arriba; `grafana` eliminado |
+| Memoria de la VM | 762 MB usados, 861 MB disponibles |
+
+### Pendiente o sin confirmar
+
+- Supabase no deja borrar el rol `grafana_reader` (`permission denied to drop objects`); la migración lo avisa y sigue. Borrarlo desde la consola de Supabase si nada lo usa.
+- Quitar de `.env.prod` de la VM las variables `GRAFANA_*`, que ya no se usan.
+- El panel no se revisó con sesión iniciada en la VM: menús Reportes y Notificaciones y descarga del PDF, comprobados solo en desarrollo.
+- El IPA va sin firmar: se instala con AltStore o SideStore.
+- Fase 46 sin hacer: jornada real con tabletas y prueba de carga.
