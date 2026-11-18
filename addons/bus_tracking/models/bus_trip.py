@@ -18,6 +18,9 @@ _logger = logging.getLogger(__name__)
 # Ecuador is UTC-5 all year (utils.LOCAL_TIMEZONE): times are written in local time and stored in UTC.
 LOCAL_OFFSET = timedelta(hours=5)
 WEEKDAYS = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+# The tablet schedules its reminders from the trips of the next hours; it asks again at each sign-in and refresh.
+UPCOMING_HOURS = 24
+UPCOMING_LIMIT = 20
 
 
 def local_to_utc(day, hours):
@@ -55,6 +58,10 @@ class BusRouteSchedule(models.Model):
     vehicle_id = fields.Many2one(
         'bus.vehicle', string="Default bus", ondelete='set null',
         help="The bus that does this schedule. Trips are created for it every day for the next few days.")
+    driver_user_id = fields.Many2one(
+        'res.users', string="Driver", ondelete='set null', index=True,
+        domain=lambda self: [('groups_id', 'in', self.env.ref('bus_tracking.group_bus_driver').ids)],
+        help="The driver of its trips. Their tablet reminds them 10 minutes before each trip and at its start.")
     active = fields.Boolean(default=True)
     arrival_time = fields.Float(compute='_compute_arrival_time', help="Planned local time of arrival at the last stop.")
 
@@ -108,7 +115,8 @@ class BusRouteSchedule(models.Model):
                 if schedule._runs_on(day) and not Trip.search_count([
                         ('vehicle_id', '=', bus.id), ('schedule_id', '=', schedule.id), ('planned_start', '=', start)]):
                     values = {'vehicle_id': bus.id, 'route_id': schedule.route_id.id,
-                              'schedule_id': schedule.id, 'planned_start': start}
+                              'schedule_id': schedule.id, 'planned_start': start,
+                              'driver_user_id': schedule.driver_user_id.id}
                     if strict:
                         created |= Trip.create(values)
                     else:
@@ -136,6 +144,10 @@ class BusTrip(models.Model):
     vehicle_id = fields.Many2one('bus.vehicle', string="Bus", required=True, ondelete='cascade', index=True)
     route_id = fields.Many2one('bus.route', string="Route", required=True, ondelete='cascade', index=True)
     schedule_id = fields.Many2one('bus.route.schedule', string="Schedule", ondelete='set null')
+    driver_user_id = fields.Many2one(
+        'res.users', string="Driver", ondelete='set null', index=True,
+        domain=lambda self: [('groups_id', 'in', self.env.ref('bus_tracking.group_bus_driver').ids)],
+        help="The driver of this trip. Their tablet reminds them 10 minutes before and at the planned start.")
     date = fields.Date(compute='_compute_date', store=True, index=True, help="Local date of the planned departure.")
     planned_start = fields.Datetime(required=True, index=True)
     planned_end = fields.Datetime(compute='_compute_planned_end', store=True)
@@ -306,6 +318,14 @@ class BusTrip(models.Model):
     # What happens on the road
     # ------------------------------------------------------------------
     @api.model
+    @api.model
+    def _upcoming_for(self, user, hours=UPCOMING_HOURS):
+        """The planned trips of a driver that start in the next hours, soonest first."""
+        now = fields.Datetime.now()
+        return self.search([('driver_user_id', '=', user.id), ('state', '=', 'planned'), ('simulated', '=', False),
+                            ('planned_start', '>', now), ('planned_start', '<=', now + timedelta(hours=hours))],
+                           order='planned_start', limit=UPCOMING_LIMIT)
+
     def _trips_around(self, vehicle, when, states=('planned', 'running'), route=None):
         """The trips of the bus whose planned window, widened by the margin, holds `when`; the closest start first."""
         margin = timedelta(minutes=int_param(self.env, 'bus_tracking.trip_margin_min', 30))
