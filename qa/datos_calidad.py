@@ -326,6 +326,9 @@ DEFECTOS = [
     ('DEF-079', '18-nov-2026', 'Prueba de la tableta en el emulador de Android Studio', 'Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando',
      'expo-task-manager (TaskJobService) en Android 17', 'Cada posición del GPS en segundo plano llega por un trabajo de JobScheduler; en el emulador con Android 17 el sistema no logra enlazar el servicio (Timed out while trying to bind, stated jobs went negative) y lo reporta como ANR. El hilo principal de la app estaba libre.',
      'Entorno', 'Abierto', 'Pendiente: probar en una tableta real o en un emulador con Android 14 o 15; si se repite, agrupar las posiciones para crear menos trabajos'),
+    ('DEF-080', '18-nov-2026', 'Uso en producción (gestor creando un recorrido)', 'Un gestor no podía crear recorridos, sincronizar un bus ni simular: «No puede crear Parada de un recorrido programado»',
+     'models/bus_trip.py, models/bus_vehicle.py, models/trip_simulator.py', 'Crear un recorrido arma sus paradas, y sincronizar o simular guarda posiciones, con el usuario que pulsa el botón; los gestores no pueden crear esos registros del sistema. Las pruebas corrían como superusuario y no lo veían.',
+     'Permisos', 'Cerrado', 'TestTripCreation y TestManagerActions crean, sincronizan y simulan con un gestor real; un usuario de solo lectura no puede sincronizar'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).

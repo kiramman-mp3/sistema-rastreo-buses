@@ -87,8 +87,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-077 | 18-nov-2026 | Verificación de v1.0.0-rc1 en Azure | Tras actualizar, los menús en español seguían diciendo Indicadores y Reportes | migrations/16.0.1.9.0/post-migrate.py | Cerrado |
 | DEF-078 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | El emulador perdió el DNS y la app mostraba «Sin conexión» al iniciar sesión | Entorno (emulador Android 17) | Cerrado |
 | DEF-079 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando | expo-task-manager (TaskJobService) en Android 17 | Abierto |
+| DEF-080 | 18-nov-2026 | Uso en producción (gestor creando un recorrido) | Un gestor no podía crear recorridos, sincronizar un bus ni simular: «No puede crear Parada de un recorrido programado» | models/bus_trip.py, models/bus_vehicle.py, models/trip_simulator.py | Cerrado |
 
-Resumen: 79 registrados, 78 cerrados (99 %), 1 abiertos. Densidad: 15,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 80 registrados, 79 cerrados (99 %), 1 abiertos. Densidad: 15,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -565,6 +566,12 @@ Resumen: 79 registrados, 78 cerrados (99 %), 1 abiertos. Densidad: 15,7 defectos
 - **Causa raíz:** Cada posición del GPS en segundo plano llega por un trabajo de JobScheduler; en el emulador con Android 17 el sistema no logra enlazar el servicio (Timed out while trying to bind, stated jobs went negative) y lo reporta como ANR. El hilo principal de la app estaba libre.
 - **Categoría:** Entorno
 - **Prueba que lo protege:** Pendiente: probar en una tableta real o en un emulador con Android 14 o 15; si se repite, agrupar las posiciones para crear menos trabajos
+
+### DEF-080: Un gestor no podía crear recorridos, sincronizar un bus ni simular: «No puede crear Parada de un recorrido programado»
+
+- **Causa raíz:** Crear un recorrido arma sus paradas, y sincronizar o simular guarda posiciones, con el usuario que pulsa el botón; los gestores no pueden crear esos registros del sistema. Las pruebas corrían como superusuario y no lo veían.
+- **Categoría:** Permisos
+- **Prueba que lo protege:** TestTripCreation y TestManagerActions crean, sincronizan y simulan con un gestor real; un usuario de solo lectura no puede sincronizar
 
 ## 3. Qué falta para cerrar los abiertos
 
