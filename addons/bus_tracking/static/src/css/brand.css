@@ -50,7 +50,9 @@
     /* Space and shape: one radius, one pair of margins */
     --margen: clamp(1.25rem, 4vw, 3rem);
     --ancho: 72rem;
-    --radio: 6px;
+    --radio: 12px;             /* controls, chips, fields */
+    --radio-g: 22px;           /* cards and photographs: rounder than what sits inside them */
+    --sombra: 0 1px 2px rgb(23 32 37 / 0.06), 0 10px 30px -12px rgb(23 32 37 / 0.18);
     --toque: 48px;             /* minimum touch target on the portal */
 
     /* Motion */
@@ -86,7 +88,7 @@
     --bus-font-body: var(--texto);
     --bus-radius-sm: var(--radio);
     --bus-radius: var(--radio);
-    --bus-radius-lg: var(--radio);
+    --bus-radius-lg: var(--radio-g);
     --bus-shadow-sm: none;
     --bus-shadow: none;
     --bus-shadow-lg: 0 8px 24px rgba(23, 32, 37, 0.18);   /* only for things that float */

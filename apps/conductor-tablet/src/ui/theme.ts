@@ -18,13 +18,17 @@ export type Palette = {
   warn: string;
   danger: string;
   onDanger: string;
+  /** Hairline around cards that sit on the ground. */
+  edge: string;
+  /** Soft wash of the accent behind a selected or highlighted row. */
+  tint: string;
 };
 
 export const palettes: Record<'day' | 'night', Palette> = {
   day: {
     mode: 'day',
-    ground: '#FFFFFF',
-    panel: '#F1F3F2',
+    ground: '#F3F4F1',
+    panel: '#FFFFFF',
     field: '#FFFFFF',
     ink: '#172025',
     ink2: '#3E4C51',
@@ -37,6 +41,8 @@ export const palettes: Record<'day' | 'night', Palette> = {
     warn: '#7A5000',
     danger: '#A1221B',
     onDanger: '#FFFFFF',
+    edge: '#DCE0DC',
+    tint: '#F6E9EA',
   },
   night: {
     mode: 'night',
@@ -54,6 +60,8 @@ export const palettes: Record<'day' | 'night', Palette> = {
     warn: '#FFC62B',
     danger: '#FF8A80',
     onDanger: '#172025',
+    edge: '#2B363B',
+    tint: '#2A2420',
   },
 };
 
@@ -81,10 +89,27 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 12: 48 } a
 /** Lines around controls and marks. */
 export const border = { thin: 2, mark: 3, round: 999 } as const;
 
-/** One corner for every control. `continuous` is the smooth corner of iOS and changes nothing on Android. */
-export const shape = { control: { borderRadius: 8, borderCurve: 'continuous' } } as const;
+/**
+ * Two corners: controls and fields are rounder than the old 8, cards that group them rounder still, so the
+ * nesting reads. `continuous` is the smooth corner of iOS and changes nothing on Android.
+ */
+export const shape = {
+  control: { borderRadius: 14, borderCurve: 'continuous' },
+  card: { borderRadius: 22, borderCurve: 'continuous' },
+} as const;
+
+/** One soft lift for cards on the ground. Night mode drops it: a shadow on near-black only muddies. */
+export const lift = {
+  shadowColor: '#172025',
+  shadowOpacity: 0.08,
+  shadowRadius: 18,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 3,
+} as const;
 
 export const fonts = {
   text: 'Atkinson-Regular',
   bold: 'Atkinson-Bold',
+  /** Bricolage Grotesque for the big words only (titles, the next stop, the numbers): the voice of the brand. */
+  display: 'Bricolage-Bold',
 };

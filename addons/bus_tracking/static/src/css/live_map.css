@@ -726,3 +726,61 @@
         transition: none;
     }
 }
+
+/* Premium pass: the floating bar and the side panel are cards (rounder than the controls inside them), the tabs
+   are a pill switch, and an empty "needs attention" list says it with a drawing instead of a lone line. */
+.o_bus_panel,
+.o_bus_card {
+    border-radius: var(--radio-g);
+    box-shadow: var(--sombra);
+}
+
+.o_bus_bar {
+    border-radius: var(--radio-g);
+    box-shadow: var(--sombra);
+}
+
+.o_bus_tabs {
+    margin: 0.75rem 0.75rem 0;
+    padding: 4px;
+    border-radius: 999px;
+}
+
+.o_bus_tab {
+    height: 40px;
+    border-radius: 999px;
+}
+
+.o_bus_tab.is-on {
+    box-shadow: 0 1px 3px rgb(23 32 37 / 0.14);
+}
+
+.o_bus_item {
+    background: var(--blanco);
+    border: 1px solid var(--papel-2);
+    border-left-width: 5px;
+}
+
+.o_bus_item_l0 { border-color: #EBC9C5; border-left-color: var(--peligro); background: #F6E3E1; }
+.o_bus_item_l1 { border-left-color: var(--alerta); }
+.o_bus_item_l2 { border-left-color: var(--granate); }
+.o_bus_item_l3 { border-left-color: var(--ok); }
+
+.o_bus_empty_art {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0.5rem;
+    text-align: center;
+}
+
+.o_bus_empty_art img {
+    width: 140px;
+    height: auto;
+}
+
+.o_bus_empty_art p {
+    margin: 0;
+    font-weight: 700;
+    color: var(--tinta);
+}
