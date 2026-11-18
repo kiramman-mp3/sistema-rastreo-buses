@@ -28,6 +28,10 @@
                             class="btn-primary"/>
                     <button name="action_load_gpx" type="object" string="Load a GPX file"
                             class="btn-primary"/>
+                    <button name="action_plan_minutes_distance" type="object" string="Minutes by distance"
+                            confirm="The planned minutes will be calculated from the distance and the speed. Continue?"/>
+                    <button name="action_plan_minutes_trips" type="object" string="Minutes from real trips"
+                            confirm="The planned minutes will be the average time the bus takes to reach each stop. Continue?"/>
                     <button name="action_clear_track" type="object" string="Clear the recorded track"
                             attrs="{'invisible': [('track_points', '=', 0)]}"
                             confirm="The route will be drawn again as straight lines between its stops."/>
