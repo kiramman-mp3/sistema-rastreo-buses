@@ -50,8 +50,9 @@
 .fragmento {
     grid-column: 8 / -1;
     padding: 1.25rem 1.25rem 1rem;
-    border-radius: var(--radio);
-    background: var(--papel-2);
+    border-radius: var(--radio-g);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
 }
 
 .fragmento-cabeza {
@@ -247,8 +248,9 @@ a.fragmento-nombre:hover {
     top: 14vh;
     align-self: start;
     padding: 1.25rem;
-    border-radius: var(--radio);
-    background: var(--papel-2);
+    border-radius: var(--radio-g);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
 }
 
 .como-escenario .chip-linea {
@@ -256,7 +258,7 @@ a.fragmento-nombre:hover {
 }
 
 .como-escenario[data-estado="1"] .chip-linea {
-    box-shadow: 0 0 0 4px var(--papel-2), 0 0 0 8px var(--senal);
+    box-shadow: 0 0 0 4px var(--blanco), 0 0 0 8px var(--senal);
 }
 
 /* the answer and the bus only exist in the third state; they arrive with the line's own entrance */
@@ -364,6 +366,7 @@ a.fragmento-nombre:hover {
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
+    border-radius: var(--radio-g);
     background: var(--papel-2);
 }
 
@@ -444,8 +447,9 @@ a.fragmento-nombre:hover {
 .despues {
     grid-column: 8 / -1;
     padding: 1.5rem;
-    border-radius: var(--radio);
-    background: var(--papel-2);
+    border-radius: var(--radio-g);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
 }
 
 .despues h3 {
@@ -878,4 +882,106 @@ a.fragmento-nombre:hover {
 
 .pagina-gracias .acciones {
     margin-top: 2rem;
+}
+
+/* People: three photographs, each captioned with what the page does for the person in it. The caption sits
+   on a solid white tab cut into the photo, not on a gradient, so it reads over any picture. */
+.inicio-gente {
+    margin-top: clamp(4rem, 10vw, 8rem);
+    display: grid;
+    gap: 2rem;
+}
+
+.gente-texto {
+    max-width: 38rem;
+}
+
+.gente-texto p {
+    margin-top: 0.75rem;
+    color: var(--tinta-2);
+}
+
+.gente {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.gente figure {
+    position: relative;
+    margin: 0;
+    height: 100%;
+}
+
+.gente img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 22rem;
+    object-fit: cover;
+    border-radius: var(--radio-g);
+    background: var(--papel-2);
+}
+
+.gente li:nth-child(2) img {
+    margin-top: 2.5rem;
+    height: calc(100% - 2.5rem);
+}
+
+.gente figcaption {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    max-width: calc(100% - 1.5rem);
+    padding: 0.55rem 0.9rem;
+    border-radius: var(--radio);
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+@media (max-width: 900px) {
+    .gente {
+        grid-template-columns: 1fr;
+    }
+
+    .gente img {
+        min-height: 0;
+        aspect-ratio: 4 / 3;
+    }
+
+    .gente li:nth-child(2) img {
+        margin-top: 0;
+        height: 100%;
+    }
+}
+
+/* One drawing per step of "how it works", and one beside "what happens next". */
+.paso-arte {
+    width: 6.5rem;
+    height: 6.5rem;
+    margin-bottom: 0.25rem;
+    padding: 0.4rem;
+    object-fit: contain;
+    border-radius: 50%;
+    background: var(--blanco);
+    box-shadow: var(--sombra);
+}
+
+.despues-arte {
+    display: block;
+    width: 9rem;
+    height: auto;
+    margin: -0.5rem 0 0.75rem auto;
+}
+
+@media (max-width: 900px) {
+    .paso-arte {
+        width: 5rem;
+        height: 5rem;
+    }
 }
