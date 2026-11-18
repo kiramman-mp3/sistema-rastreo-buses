@@ -69,8 +69,9 @@
     <menuitem id="menu_bus_push_setup" name="Notifications on this device" parent="menu_bus_config"
               action="action_push_setup" sequence="20"/>
 
-    <!-- The Discuss chat app is not used by this system: keep it for administrators only. -->
+    <!-- The Discuss chat app is not used by this system. mail cannot be uninstalled (Fleet and this module need
+         it for the chatter), so its app is hidden from everyone; no_discuss.js removes its top bar buttons. -->
     <record id="mail.menu_root_discuss" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        <field name="active" eval="False"/>
     </record>
 </odoo>
