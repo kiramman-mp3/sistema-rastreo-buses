@@ -276,6 +276,17 @@ export class Session {
     return state;
   }
 
+  /**
+   * What the driver asks for by pulling the screen down: the buses, lines and next trips again and, during a
+   * shift, its state and the map of the line. Throws NetworkError without signal, like the calls it makes.
+   */
+  async refreshAll() {
+    await this.refreshMe();
+    if (!this.snapshot.shift) return;
+    await this.pullState();
+    await this.loadRouteMap();
+  }
+
   async loadRouteMap(): Promise<RouteMap> {
     const routeMap = await this.client.routeMap();
     this.set({ routeMap });

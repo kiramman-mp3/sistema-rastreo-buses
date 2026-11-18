@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -39,16 +40,19 @@ type ScreenProps = {
   /** Let the content scroll (forms, lists that may not fit on a phone). */
   scroll?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Pulling the screen down from the top calls it and shows the spinner until it ends; its errors are the caller's. */
+  onRefresh?: () => Promise<unknown>;
 };
 
 /**
  * The frame of every cabin screen: ground colour, padding that keeps clear of notches, cut-outs and
  * the system bars in either orientation, and (when `scroll`) room for the keyboard.
  */
-export function Screen({ children, scroll, style }: ScreenProps) {
+export function Screen({ children, scroll, style, onRefresh }: ScreenProps) {
   const { palette } = useTheme();
   const { gutter, gap } = useLayout();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
   const frame = {
     paddingTop: insets.top + gutter,
     paddingBottom: insets.bottom + gutter,
@@ -56,9 +60,25 @@ export function Screen({ children, scroll, style }: ScreenProps) {
     paddingRight: insets.right + gutter,
     gap,
   };
-  if (!scroll) {
+  if (!scroll && !onRefresh) {
     return <View style={[styles.screen, { backgroundColor: palette.ground }, frame, style]}>{children}</View>;
   }
+  function pull() {
+    if (!onRefresh) return;
+    setRefreshing(true);
+    onRefresh()
+      .catch(() => undefined)
+      .finally(() => setRefreshing(false));
+  }
+  const refreshControl = onRefresh ? (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={pull}
+      colors={[palette.accent]}
+      tintColor={palette.accent}
+      progressViewOffset={insets.top}
+    />
+  ) : undefined;
   return (
     <KeyboardAvoidingView
       style={[styles.screen, { backgroundColor: palette.ground }]}
@@ -68,6 +88,7 @@ export function Screen({ children, scroll, style }: ScreenProps) {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.scrollContent, frame, style]}
         showsVerticalScrollIndicator={false}
+        refreshControl={refreshControl}
       >
         {children}
       </ScrollView>

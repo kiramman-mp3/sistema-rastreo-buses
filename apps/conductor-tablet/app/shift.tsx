@@ -153,6 +153,19 @@ export default function ShiftScreen() {
     }, [actions]),
   );
 
+  async function refresh() {
+    try {
+      await actions.refreshAll();
+      setStale(false);
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'no_shift') {
+        router.replace('/select');
+        return;
+      }
+      if (error instanceof NetworkError) setStale(true);
+    }
+  }
+
   function confirmEnd() {
     showDialog(t('confirmEnd'), t('confirmEndBody'), [
       { text: t('cancel'), style: 'cancel' },
@@ -293,6 +306,7 @@ export default function ShiftScreen() {
     <View style={styles.leftContent}>{nextContent}</View>
   ) : (
     <ScrollView
+      nestedScrollEnabled
       style={side ? styles.leftScroll : [styles.top, { maxHeight: Math.round(layout.height * 0.44) }]}
       contentContainerStyle={styles.leftContent}
       showsVerticalScrollIndicator={false}
@@ -319,7 +333,7 @@ export default function ShiftScreen() {
   const tallHeader = layout.phone && !layout.landscape;
 
   return (
-    <Screen scroll={pageScroll}>
+    <Screen scroll={pageScroll} onRefresh={refresh}>
       {/* Header: bus and line, real GPS state, time, day or night */}
       <View
         style={[

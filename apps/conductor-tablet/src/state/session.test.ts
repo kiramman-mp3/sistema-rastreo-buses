@@ -379,6 +379,31 @@ describe('session', () => {
     });
   }
 
+  test('pulling the screen down asks for the driver, the shift state and the line map again', async () => {
+    const tokens = memoryStore('tok');
+    const fetchMock = routed({
+      '/me': () => json(200, { ...me, shift: activeShift }),
+      '/state': () => json(200, { shift: activeShift, stops: [], next_stop_id: null, alerts: [], sos: null }),
+      '/driver/route': () => json(200, { stops: [], path: [] }),
+    });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client, gpsMock(), gpsMemory());
+    await session.refreshAll();
+    const paths = fetchMock.mock.calls.map(([url]) => String(url).split('/').pop());
+    expect(paths).toEqual(expect.arrayContaining(['me', 'state', 'route']));
+    expect(session.snapshot.routeMap).toEqual({ stops: [], path: [] });
+  });
+
+  test('pulling the screen down without a shift only asks for the driver', async () => {
+    const tokens = memoryStore('tok');
+    const fetchMock = routed({ '/me': () => json(200, me) });
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: tokens, fetch: fetchMock as unknown as typeof fetch });
+    const session = new Session(tokens, client);
+    await session.refreshAll();
+    const paths = fetchMock.mock.calls.map(([url]) => String(url).split('/').pop());
+    expect(paths).toEqual(['me']);
+  });
+
   test('a shift closed by the office stops the gps', async () => {
     const tokens = memoryStore('tok');
     const gps = gpsMock();

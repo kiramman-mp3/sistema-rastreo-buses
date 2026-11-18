@@ -320,6 +320,12 @@ DEFECTOS = [
     ('DEF-077', '18-nov-2026', 'Verificación de v1.0.0-rc1 en Azure', 'Tras actualizar, los menús en español seguían diciendo Indicadores y Reportes',
      'migrations/16.0.1.9.0/post-migrate.py', 'Una actualización sin --i18n-overwrite conserva las traducciones que ya estaban en la base, así que los menús renombrados mantenían el nombre viejo.',
      'Internacionalización', 'Cerrado', 'Producción: -u con --i18n-overwrite, menús Reportes, Tablero y Notificaciones (Willachikuna en kichwa); desarrollo: la migración devuelve el nombre nuevo a un menú con el viejo'),
+    ('DEF-078', '18-nov-2026', 'Prueba de la tableta en el emulador de Android Studio', 'El emulador perdió el DNS y la app mostraba «Sin conexión» al iniciar sesión',
+     'Entorno (emulador Android 17)', 'El emulador conserva el DNS de la red con la que arrancó; la red del PC cambió (red compartida y Tailscale) y dejó de resolver nombres, aunque las IP respondían.',
+     'Entorno', 'Cerrado', 'Reiniciar la red del emulador (svc wifi/data) o arrancarlo con -dns-server 8.8.8.8; después resolvió el dominio de Azure'),
+    ('DEF-079', '18-nov-2026', 'Prueba de la tableta en el emulador de Android Studio', 'Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando',
+     'expo-task-manager (TaskJobService) en Android 17', 'Cada posición del GPS en segundo plano llega por un trabajo de JobScheduler; en el emulador con Android 17 el sistema no logra enlazar el servicio (Timed out while trying to bind, stated jobs went negative) y lo reporta como ANR. El hilo principal de la app estaba libre.',
+     'Entorno', 'Abierto', 'Pendiente: probar en una tableta real o en un emulador con Android 14 o 15; si se repite, agrupar las posiciones para crear menos trabajos'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
