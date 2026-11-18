@@ -7,9 +7,11 @@
     <menuitem id="menu_bus_live_map" name="Live Map" parent="menu_bus_root"
               action="action_live_map" sequence="10"/>
 
-    <menuitem id="menu_bus_indicators" name="Indicators" parent="menu_bus_root" sequence="12"/>
-    <menuitem id="menu_bus_dashboard" name="Odoo dashboard" parent="menu_bus_indicators"
+    <menuitem id="menu_bus_indicators" name="Reports" parent="menu_bus_root" sequence="12"/>
+    <menuitem id="menu_bus_dashboard" name="Dashboard" parent="menu_bus_indicators"
               action="action_live_dashboard" sequence="10"/>
+    <menuitem id="menu_bus_report_pdf" name="Download report" parent="menu_bus_indicators"
+              action="action_bus_report_wizard" sequence="20"/>
 
     <!-- Operation: what happens today. Fleet: what the service is made of. -->
     <menuitem id="menu_bus_operation" name="Operations" parent="menu_bus_root" sequence="15"/>
@@ -38,7 +40,7 @@
     <menuitem id="menu_bus_complaint" name="Passenger messages" parent="menu_bus_operation"
               action="action_bus_complaint" sequence="20"/>
 
-    <menuitem id="menu_bus_reports" name="Reports" parent="menu_bus_root" sequence="40"/>
+    <menuitem id="menu_bus_reports" name="Notifications" parent="menu_bus_root" sequence="40"/>
     <menuitem id="menu_bus_report_speeding" name="Speeding" parent="menu_bus_reports"
               action="action_bus_report_speeding" sequence="10"/>
     <menuitem id="menu_bus_report_offline" name="No signal" parent="menu_bus_reports"
