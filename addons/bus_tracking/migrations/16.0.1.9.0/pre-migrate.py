@@ -10,11 +10,12 @@ KPI_VIEWS = [
 
 
 def migrate(cr, version):
-    """Grafana is no longer part of the system: drop its views, its settings and, when this user may, its role.
-    The table of positions counted per day goes with its model when the update ends."""
+    """Grafana is no longer part of the system: drop its views, its daily counts, its settings and, when this user
+    may, its role. Odoo removes the records of the deleted models but leaves their tables."""
     cr.execute(r"SELECT viewname FROM pg_views WHERE schemaname = 'public' AND viewname LIKE 'kpi\_%%'")
     for name in sorted({row[0] for row in cr.fetchall()} | set(KPI_VIEWS)):
         cr.execute('DROP VIEW IF EXISTS "%s" CASCADE' % name)
+    cr.execute('DROP TABLE IF EXISTS bus_position_day')
     cr.execute("DELETE FROM ir_config_parameter WHERE key LIKE 'bus_tracking.grafana%%'")
     cr.execute("SELECT 1 FROM pg_roles WHERE rolname = 'grafana_reader'")
     if cr.fetchone():
