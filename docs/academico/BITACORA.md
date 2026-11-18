@@ -1348,3 +1348,42 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Si cambia la IP de quien administra, actualizar la regla `default-allow-ssh` del grupo `vm-busesNSG`.
 - Los respaldos nuevos no se copian solos a la cuenta de almacenamiento: falta programarlo.
 - Fase 46 sin hacer: jornada real con tabletas y prueba de carga.
+
+## 2026-11-18: versión candidata v1.0.0-rc1
+
+### Qué se hizo
+
+- `develop` se integró en `main` y `main` pasó a ser la rama principal del repositorio en GitHub.
+- App de la tableta 1.2.0 (recordatorios de recorridos con `expo-notifications`). Builds de EAS: Android `production` (APK) e iOS `ios-altstore` (IPA sin firmar), los dos apuntando al Odoo de Azure.
+- Etiqueta `v1.0.0-rc1` en `main` y release en GitHub (prerelease) con `BusesUTA-1.2.0.apk`, `BusesUTA-1.2.0.ipa`, `SHA256SUMS` y el enlace de la demo.
+- VM `vm-buses` actualizada con el procedimiento de `PRODUCCION.md` > *Actualizar*: respaldo `20261118T064211Z`, código de `develop` (2d39961) a `main` en `v1.0.0-rc1`, módulo de `16.0.1.8.0` a `16.0.1.9.0` y `up -d --remove-orphans`, que quitó el contenedor de Grafana.
+- El `main` local de la VM era la copia anterior a la reescritura del historial del 17-nov (mismo árbol que `c00fdc4`); se apuntó a `origin/main`.
+- SSH no sirvió (la regla `default-allow-ssh` admite otra IP); todo se hizo con `az vm run-command`.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Builds de EAS | Android e iOS terminados, versión 1.2.0 |
+| Migración 16.0.1.9.0 en la VM | `pre-migrate` y `post-migrate` corrieron; módulos cargados sin errores |
+| `/`, `/rutas`, `/quejas`, `/web/login`, `/bus_tracking/sw.js` | 200 |
+| `/bus_tracking/health` | `stale`: ningún bus transmite |
+| Contenedores | `odoo` healthy, `traccar` healthy, `proxy` arriba; `grafana` eliminado |
+| Memoria de la VM | 762 MB usados, 861 MB disponibles |
+
+### Pendiente o sin confirmar
+
+- ~~Rol `grafana_reader` en Supabase~~: borrado el mismo día (ver abajo, DEF-076).
+- ~~Variables `GRAFANA_*` en `.env.prod`~~: quitadas el mismo día.
+- ~~Panel sin revisar en la VM~~: revisado el mismo día; los menús tenían el nombre viejo (DEF-077), corregido.
+- El IPA va sin firmar: se instala con AltStore o SideStore.
+- Fase 46 sin hacer: jornada real con tabletas y prueba de carga.
+
+### Cierre de pendientes (18-nov, tarde)
+
+- Rol `grafana_reader`: en Supabase el usuario `postgres` no es superusuario y, desde PostgreSQL 16, `DROP OWNED BY` exige ser miembro del rol. Se borró en una transacción con `GRANT grafana_reader TO CURRENT_USER`, `DROP OWNED` y `DROP ROLE` (0 roles restantes). La migración 16.0.1.9.0 hace ahora lo mismo (DEF-076) y `test_migration_grafana` cubre la limpieza.
+- `.env.prod` de la VM sin las variables `GRAFANA_*` (copia previa `.env.prod.bak-*`); `docker compose config` válido.
+- Revisión en producción con `odoo shell` (sin guardar cambios): módulo `16.0.1.9.0`, *Conversaciones* oculto, reporte PDF generado (23 941 bytes) y flota agrupada en sus tres columnas. Los menús en español seguían diciendo *Indicadores* y *Reportes*: la actualización sin `--i18n-overwrite` conserva las traducciones viejas (DEF-077). Se respaldó y se corrió `-u bus_tracking --i18n-overwrite`: ahora dicen *Reportes*, *Tablero* y *Notificaciones* (*Willachikuna* en kichwa). La migración recarga sola las traducciones del módulo desde ahora.
+- Suite completa: 557 de 557 pruebas de Odoo.
+- Siguen pendientes, fuera del alcance de este trabajo: firmar el IPA (necesita cuenta de Apple) y la fase 46 (jornada real con tabletas).
+

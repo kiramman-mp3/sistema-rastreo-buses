@@ -2,7 +2,7 @@
 
 Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-18.
 
-Estado: versión del módulo `16.0.1.9.0`, app de tableta `1.1.1`, última etiqueta `v0.9.5-beta`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
+Estado: versión del módulo `16.0.1.9.0`, app de tableta `1.2.0`, última etiqueta `v1.0.0-rc1`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
 
 ## 1. Lo hecho
 
@@ -51,7 +51,7 @@ Fases de [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md). Tamaño: S (horas), M (un
 Hitos:
 
 - **Piloto vigilado** (`v0.9.6-beta`): fases 38, 39 y 40 integradas. Pocos buses, con alguien mirando el panel.
-- **Candidata** (`v1.0.0-rc1`): fases 41 a 45 integradas y suite completa en verde.
+- **Candidata** (`v1.0.0-rc1`): fases 41 a 45 integradas y suite completa en verde. **Alcanzado el 18-nov-2026**: etiqueta en `main`, release en GitHub con el APK y el IPA 1.2.0, y la VM de Azure actualizada.
 - **Producción** (`v1.0.0`): fase 46 superada, es decir una jornada real sin defectos críticos y respaldos fuera del servidor.
 
 Decisiones ya tomadas: base de producción en **Supabase** (17-nov), que amplía la fase 39 con soporte de base externa en los scripts.

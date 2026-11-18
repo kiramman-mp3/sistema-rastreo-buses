@@ -21,6 +21,9 @@ def migrate(cr, version):
     if cr.fetchone():
         cr.execute('SAVEPOINT drop_grafana_role')
         try:
+            # PostgreSQL 16 and later only let a member of the role drop what it owns; a CREATEROLE user that is
+            # not a superuser (Supabase's postgres) becomes one first.
+            cr.execute('GRANT grafana_reader TO CURRENT_USER')
             cr.execute('DROP OWNED BY grafana_reader')
             cr.execute('DROP ROLE grafana_reader')
             cr.execute('RELEASE SAVEPOINT drop_grafana_role')
