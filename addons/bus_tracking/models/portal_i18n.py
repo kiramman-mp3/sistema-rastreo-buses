@@ -446,6 +446,41 @@ KICHWA = {
 
 STRINGS['qu'] = dict(KICHWA)
 
+# Home section labels, footer headings and photo tags (portal polish). Same keys in the three languages.
+STRINGS['es'].update(
+    kicker_services='Servicios', services_title='Todo tu transporte en un solo lugar',
+    find_sub='Busca una parada o mira cada línea y sus buses ahora.',
+    kicker_people='Comunidad universitaria', kicker_app='En el celular', kicker_city='La ciudad',
+    kicker_write='Escríbenos',
+    write_sub='Cuéntale al equipo de transporte una demora, un problema en el bus o algo que se quedó olvidado.',
+    app_open_small='Sin instalar nada', app_open='Abrir las líneas',
+    foot_services='Servicios', foot_info='Información', foot_campus='Campus',
+    tag_south='Sur de Ambato', tag_terminal='Terminal', tag_campus='Universidad', tag_city='Ciudad',
+    tag_andes='Andes',
+)
+STRINGS['en'].update(
+    kicker_services='Services', services_title='All your transport in one place',
+    find_sub='Search for a stop or see each line and its buses now.',
+    kicker_people='University community', kicker_app='On your phone', kicker_city='The city',
+    kicker_write='Write to us',
+    write_sub='Tell the transport team about a delay, a problem on the bus or something left behind.',
+    app_open_small='Nothing to install', app_open='Open the lines',
+    foot_services='Services', foot_info='Information', foot_campus='Campuses',
+    tag_south='South Ambato', tag_terminal='Bus terminal', tag_campus='University', tag_city='City',
+    tag_andes='The Andes',
+)
+STRINGS['qu'].update(
+    kicker_services='Yanapaykuna', services_title='Tukuy kanpa antawa shuk kuskapi',
+    find_sub='Shuk sayanata maskay, mana kashpaka sapan ñanta kunan buskunantin rikuy.',
+    kicker_people='Yachana wasi ayllu', kicker_app='Telefonopi', kicker_city='Llakta',
+    kicker_write='Killkaway',
+    write_sub='Transporte llankak ayllupa willay: unaylla, busmanta llaki, mana kashpaka kunkashka ima.',
+    app_open_small='Mana imata churashpa', app_open='Ñankunata paskay',
+    foot_services='Yanapaykuna', foot_info='Willaykuna', foot_campus='Yachana kuskakuna',
+    tag_south='Ambato urin', tag_terminal='Terminal kuska', tag_campus='Yachana hatun wasi', tag_city='Llaktapi',
+    tag_andes='Andes urkukuna',
+)
+
 
 def pick_lang(accept_languages, requested=None, remembered=None):
     """Explicit request, then the remembered choice, then Spanish.
