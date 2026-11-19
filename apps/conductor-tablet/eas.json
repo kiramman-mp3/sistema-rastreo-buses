@@ -14,7 +14,7 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
+        "EXPO_PUBLIC_ODOO_URL": "https://buses.madebyjohan.xyz"
       }
     },
     "preview": {
@@ -26,7 +26,7 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
+        "EXPO_PUBLIC_ODOO_URL": "https://buses.madebyjohan.xyz"
       }
     },
     "production": {
@@ -43,7 +43,7 @@
         "config": "unsigned-ipa.yml"
       },
       "env": {
-        "EXPO_PUBLIC_ODOO_URL": "https://busesuta2340.eastus2.cloudapp.azure.com"
+        "EXPO_PUBLIC_ODOO_URL": "https://buses.madebyjohan.xyz"
       }
     }
   }
