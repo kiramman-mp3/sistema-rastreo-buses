@@ -14,7 +14,7 @@
 Se hizo como proyecto de la universidad: un sistema de transporte con indicadores de servicio, gestión de calidad documentada (ISO 25010, Pareto, Ishikawa, PDCA) y despliegue real en Azure.
 
 > [!TIP]
-> Demo pública: <https://busesuta2340.eastus2.cloudapp.azure.com>. Para correrlo en local: `cp .env.example .env && docker compose up -d` y abrir <http://localhost:8069>.
+> Demo pública: <https://buses.madebyjohan.xyz>. Para correrlo en local: `cp .env.example .env && docker compose up -d` y abrir <http://localhost:8069>.
 
 ---
 
