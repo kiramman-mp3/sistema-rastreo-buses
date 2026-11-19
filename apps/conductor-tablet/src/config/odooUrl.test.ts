@@ -2,7 +2,7 @@ import { normalizeOdooUrl, parseDriverBadge, PRODUCTION_ODOO_URL } from './odooU
 
 describe('Odoo URL from QR or typing', () => {
   test('strips /web and a trailing slash', () => {
-    expect(normalizeOdooUrl('https://busesuta2340.eastus2.cloudapp.azure.com/web')).toBe(PRODUCTION_ODOO_URL);
+    expect(normalizeOdooUrl('https://buses.madebyjohan.xyz/web')).toBe(PRODUCTION_ODOO_URL);
     expect(normalizeOdooUrl(PRODUCTION_ODOO_URL + '/')).toBe(PRODUCTION_ODOO_URL);
   });
 
@@ -30,7 +30,7 @@ describe('Odoo URL from QR or typing', () => {
 
   describe('parseDriverBadge', () => {
     test('parses uta-buses://login deep link with token, odoo, and driver', () => {
-      const qr = 'uta-buses://login?odoo=https%3A%2F%2Fbusesuta2340.eastus2.cloudapp.azure.com&token=secret-token-123&driver=Carlos+Mendoza';
+      const qr = 'uta-buses://login?odoo=https%3A%2F%2Fbuses.madebyjohan.xyz&token=secret-token-123&driver=Carlos+Mendoza';
       const parsed = parseDriverBadge(qr);
       expect(parsed).toEqual({
         odooUrl: PRODUCTION_ODOO_URL,
@@ -54,7 +54,7 @@ describe('Odoo URL from QR or typing', () => {
     });
 
     test('returns null for server setup QR (no token)', () => {
-      expect(parseDriverBadge('uta-buses://setup?odoo=https://busesuta2340.eastus2.cloudapp.azure.com')).toBeNull();
+      expect(parseDriverBadge('uta-buses://setup?odoo=https://buses.madebyjohan.xyz')).toBeNull();
     });
 
     test('returns null for arbitrary strings or empty input', () => {

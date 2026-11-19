@@ -1,4 +1,4 @@
-export const PRODUCTION_ODOO_URL = 'https://busesuta2340.eastus2.cloudapp.azure.com';
+export const PRODUCTION_ODOO_URL = 'https://buses.madebyjohan.xyz';
 
 export function defaultBaseUrl(): string {
   return normalizeOdooUrl(process.env.EXPO_PUBLIC_ODOO_URL || PRODUCTION_ODOO_URL) || PRODUCTION_ODOO_URL;
