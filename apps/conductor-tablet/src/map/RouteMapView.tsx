@@ -26,7 +26,7 @@ export function RouteMapView({ route, bus, nextStopId }: Props) {
       route
         ? {
             html: buildMapHtml(route, null, null, { stop: t('mapStop'), you: t('mapYou'), recenter: t('mapRecenter') }),
-            baseUrl: 'https://busesuta2340.eastus2.cloudapp.azure.com',
+            baseUrl: 'https://buses.madebyjohan.xyz',
           }
         : null,
     // t() reads the active language, so the page is rebuilt when it changes
