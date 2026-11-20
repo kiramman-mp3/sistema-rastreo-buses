@@ -333,6 +333,7 @@ class BusKpi(models.AbstractModel):
             'stop_delays': [{'stop': name, 'route': code, 'delay': round(float(avg), 1), 'arrivals': n}
                             for name, code, avg, n in rows('stop_delays')],
             'incident_kinds': pareto,
+            'fines': self.env['bus.fine']._dashboard(p['d1'], p['d2'], p['routes'], p['scope']),
             'perf_days': [{'date': str(day), 'p50': round(float(a), 1), 'p95': round(float(b), 1), 'samples': n}
                           for day, a, b, n in sorted(rows('perf_days'))],
             'trips': [{

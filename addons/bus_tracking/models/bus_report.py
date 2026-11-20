@@ -87,6 +87,7 @@ class BusOperationReport(models.AbstractModel):
             'buckets': data['delay_buckets'],
             'max_bucket': max([b['count'] for b in data['delay_buckets']] or [0]) or 1,
             'stop_delays': data['stop_delays'][:10],
+            'fines': data['fines'],
             'trips': data['trips'][:25],
             'printed_at': fields.Datetime.context_timestamp(self, fields.Datetime.now()),
             'printed_by': self.env.user.name,
