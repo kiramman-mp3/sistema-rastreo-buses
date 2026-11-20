@@ -2,6 +2,7 @@ import json
 from datetime import timedelta
 
 from odoo import fields
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
 from ..models.bus_trip import local_to_utc
@@ -145,6 +146,19 @@ class TestFineDetection(FineCase):
                          {'speeding', 'off_route', 'long_stop', 'skipped_stop', 'incomplete_trip'})
         self.assertEqual(fines.filtered(lambda f: f.state == 'discarded').mapped('rule'), ['late_start'])
         self.assertEqual(set(fines.mapped('driver_id')), {self.driver})
+
+    def test_the_fines_set_refuses_a_route_of_short_stretches(self):
+        # stops about 700 m apart: two minutes each, too short for three minutes off the route
+        short = self.env['bus.route'].create({
+            'name': 'Linea Corta', 'code': 'LC',
+            'stop_ids': [(0, 0, {'sequence': i, 'name': 'Corta %d' % i, 'latitude': -1.2 - i * 0.006,
+                                 'longitude': -78.6, 'radius': 60}) for i in range(4)]})
+        wizard = self.env['bus.trip.simulate'].create({'route_id': short.id, 'scenario': 'punctual',
+                                                       'driver_user_id': self.driver.id})
+        with self.assertRaises(UserError) as caught:
+            wizard.action_fines_set()
+        self.assertIn(self.route.display_name, str(caught.exception))   # the route that fits is named
+        self.assertFalse(self.env['bus.trip'].search([('route_id', '=', short.id)]))
 
     def test_the_reasons_are_written_out(self):
         fine = self.fines_of(simulate(self.env, self.route, 'speeding', self.driver))
