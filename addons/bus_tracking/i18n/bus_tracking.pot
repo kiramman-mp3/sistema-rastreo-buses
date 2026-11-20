@@ -3616,6 +3616,23 @@ msgstr ""
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/trip_simulator.py:0
+#, python-format
+msgid ""
+"The stretches of %(route)s are too short to show a deviation of %(minutes)s "
+"minutes and a sustained speeding run. Choose a route with a longer stretch: "
+"%(routes)s."
+msgstr ""
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/trip_simulator.py:0
+#, python-format
+msgid "none"
+msgstr ""
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/bus_fine_detect.py:0
 #, python-format
 msgid "No shift of the bus and no driver on the trip at that time"
