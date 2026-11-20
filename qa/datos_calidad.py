@@ -84,6 +84,11 @@ PROBLEMAS = [
     ('Diagnóstico GPS (04-nov)', 'Saturación del pool de conexiones PostgreSQL en Odoo por db_maxconn=3', 'E'),
     ('Diagnóstico GPS (04-nov)', 'La pantalla Estado del GPS leía session.snapshot.gps en memoria y mostraba guion', 'L'),
     ('Diagnóstico GPS (04-nov)', 'CoreLocation en iOS ignora timeInterval y suspende el GPS cuando el dispositivo está inmóvil', 'L'),
+    ('Multas (20-nov)', 'Cada contenedor temporal de Odoo tenía su propio almacén de archivos y los assets respondían 500', 'E'),
+    ('Multas (20-nov)', 'El servidor de demostración seguía con el código de antes y la tableta no encontraba los endpoints nuevos', 'P'),
+    ('Multas (20-nov)', 'Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit', 'H'),
+    ('Multas (20-nov)', 'Un heredoc de Git Bash cambió las barras invertidas de una expresión regular', 'H'),
+    ('Multas (20-nov)', 'La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo sigue en 16.0.1.6.0', 'P'),
 ]
 
 # Defect log: id, date, who found it, description, where, root cause, category, status, test that guards it.
@@ -329,6 +334,18 @@ DEFECTOS = [
     ('DEF-080', '18-nov-2026', 'Uso en producción (gestor creando un recorrido)', 'Un gestor no podía crear recorridos, sincronizar un bus ni simular: «No puede crear Parada de un recorrido programado»',
      'models/bus_trip.py, models/bus_vehicle.py, models/trip_simulator.py', 'Crear un recorrido arma sus paradas, y sincronizar o simular guarda posiciones, con el usuario que pulsa el botón; los gestores no pueden crear esos registros del sistema. Las pruebas corrían como superusuario y no lo veían.',
      'Permisos', 'Cerrado', 'TestTripCreation y TestManagerActions crean, sincronizan y simulan con un gestor real; un usuario de solo lectura no puede sincronizar'),
+    ('DEF-081', '20-nov-2026', 'Revisión visual de la ficha de una multa', 'Los marcadores de inicio y fin del tramo daban 404 y salían como imagen rota',
+     'static/src/js/fine_evidence.js', 'Leaflet busca las imágenes de su marcador por defecto junto a su CSS, y el módulo solo trae leaflet.js y leaflet.css.',
+     'Interfaz', 'Cerrado', 'Inicio y fin son etiquetas HTML (divIcon); captura sin errores de consola ni 404'),
+    ('DEF-082', '20-nov-2026', 'Revisión visual del kanban de multas', 'Los montos de las multas salían sin el símbolo $',
+     'data/fine_types.xml', 'La compañía de una base nueva usa EUR y el dólar viene inactivo: el panel solo conoce las monedas activas.',
+     'Configuración', 'Cerrado', 'Los datos del módulo activan USD en cada instalación y actualización; captura del kanban con $'),
+    ('DEF-083', '20-nov-2026', 'Revisión visual de la ficha de una multa', 'El mapa de la evidencia ocupaba solo unos 300 px de ancho',
+     'static/src/css/fines.css', 'Odoo envuelve cada campo en un elemento que no ocupa todo el ancho cuando está fuera de un grupo.',
+     'Interfaz', 'Cerrado', 'CSS de ancho completo para o_field_bus_fine_evidence; captura del mapa a todo el ancho'),
+    ('DEF-084', '20-nov-2026', 'Suite completa de las fases de multas', 'test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader',
+     'tests/test_migration_grafana.py', 'El rol es del servidor, no de una base: la base de desarrollo buses sigue en 16.0.1.6.0 con 9 permisos del rol, y DROP ROLE no puede borrarlo. La prueba supone que ninguna otra base lo usa.',
+     'Entorno', 'Abierto', 'Pendiente: actualizar la base de desarrollo a 16.0.1.10.0 (su migración 16.0.1.9.0 quita los permisos) o hacer que la prueba cree su propio rol con otro nombre'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).
