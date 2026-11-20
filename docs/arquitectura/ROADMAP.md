@@ -1,8 +1,8 @@
 # Roadmap del proyecto
 
-Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-18.
+Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-20.
 
-Estado: versión del módulo `16.0.1.9.0`, app de tableta `1.2.0`, última etiqueta `v1.0.0-rc1`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
+Estado: versión del módulo `16.0.1.10.0` en `develop` (control de multas), app de tableta `1.4.0`, última etiqueta `v1.0.6-rc3`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
 
 ## 1. Lo hecho
 
@@ -23,6 +23,7 @@ Estado: versión del módulo `16.0.1.9.0`, app de tableta `1.2.0`, última etiqu
 | Licencia | 12-nov | — | LGPL-3.0 | `LICENSE` |
 | Segunda auditoría | 17-nov | — | 7 críticos, 14 medios, 7 de robustez y rendimiento y 15 menores; DEF-051 a DEF-062 | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
 | Pedidos del usuario tras la auditoría | 17 y 18-nov | — | Estado Resuelta en mensajes, gráficos sin repetir animación, Grafana retirado, reportes propios con PDF, menús Reportes y Notificaciones, flota en tablero, Conversaciones oculto, push del administrador en Windows, recordatorios de recorridos en la tableta; DEF-064 a DEF-075 | [`../academico/BITACORA.md`](../academico/BITACORA.md) |
+| Control de multas (demostración) | 20-nov | M1 a M6 | Tipos de multa parametrizables, detector que propone multas desde las alertas con evidencia congelada y comprobaciones, kanban de revisión con descarte y descargo, ficha con mapa y gráfico de velocidad, pantalla *Mis multas* con descargo en la tableta, pestaña del tablero y sección del PDF, escenarios del simulador; DEF-081 a DEF-084 | [`PLAN-MULTAS.md`](PLAN-MULTAS.md) |
 | Correcciones de la segunda auditoría | 17-nov | 38 a 45 | Portal sin XSS, colas de la tableta seguras, despliegue sobre Supabase, acceso al panel, turnos y alertas, servidor y GPS de la tableta, permisos de choferes, carga y purga, build; DEF-051 a DEF-062 cerrados | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
 
 Cifras al cierre de la etapa de la rúbrica (5-nov): 544 pruebas de Odoo, 167 de Jest, 96 % de cobertura de Python según `odoo_test.log`, SonarQube con el Quality Gate aprobado, 50 defectos registrados y cerrados.
@@ -30,6 +31,8 @@ Cifras al cierre de la etapa de la rúbrica (5-nov): 544 pruebas de Odoo, 167 de
 Cifras tras la fase 45 (17-nov): 579 pruebas de Odoo, 179 de Jest, 97 % de cobertura de Python (medida ahora en el CI), 62 defectos registrados y cerrados.
 
 Cifras al 18-nov: 555 pruebas de Odoo (bajan al retirar las de Grafana), 186 de Jest, 75 defectos registrados y cerrados.
+
+Cifras al 20-nov (control de multas): 624 pruebas de Odoo, de las que pasan 622; las 2 que fallan son de la migración de Grafana y dependen de la base de desarrollo, que sigue en 16.0.1.6.0 (DEF-084). 197 pruebas de Jest. 84 defectos registrados, 82 cerrados (abiertos: DEF-079 y DEF-084).
 
 ## 2. Lo que falta
 
@@ -56,10 +59,27 @@ Hitos:
 
 Decisiones ya tomadas: base de producción en **Supabase** (17-nov), que amplía la fase 39 con soporte de base externa en los scripts.
 
+### Control de multas
+
+Detalle en [`PLAN-MULTAS.md`](PLAN-MULTAS.md). Decisiones del usuario (20-nov): columna *Apelada* y descargo desde la tableta, montos en dólares ficticios, multas también de los recorridos simulados, límite de 50 km/h con tolerancia hasta 70 km/h.
+
+| Fase | Rama | Contenido | Estado |
+|---|---|---|---|
+| M1 | `feature/multas-modelo` | Tipos y multas, estados, permisos, ajustes, migración 16.0.1.10.0 | Hecha |
+| M2 | `feature/multas-deteccion` | Detector, evidencia, comprobaciones, cron, parada larga al reanudar, simulador | Hecha |
+| M3 | `feature/multas-panel` | Kanban, ficha con mapa y gráfico, menús, descarte con motivo | Hecha |
+| M4 | `feature/multas-tableta` | API del chofer y pantalla *Mis multas* con descargo (app 1.4.0) | Hecha |
+| M5 | `feature/multas-reportes` | Pestaña *Multas* del tablero y sección del PDF | Hecha |
+| — | `chore/traducir-multas` | Español y kichwa de las multas y de textos que faltaban | Hecha |
+| M6 | `docs/multas` | Documentación | Hecha |
+
+Hito **Multas demostrables**: alcanzado el 20-nov-2026 en `develop` (sin etiqueta ni despliegue todavía).
+
 ## 3. Pendientes que no son código
 
 - Confirmar con la universidad los días de cada recorrido, las coordenadas de los campus y las anomalías del documento de rutas.
-- Revisión del kichwa por una persona hablante.
+- Revisión del kichwa por una persona hablante (también el vocabulario de las multas).
+- Multas reales: que la empresa las incluya en su reglamento interno aprobado por el Ministerio del Trabajo, fije los montos y decida cuánto tiempo se conservan las multas y su evidencia.
 - Pruebas de usabilidad con personas (fase 31).
 - Confirmar con el docente que los reportes de Odoo sirven en lugar de Power BI (Grafana se retiró el 17-nov).
 - Dominio institucional, correo real y suscripción de Azure definitiva.
