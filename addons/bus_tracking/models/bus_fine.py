@@ -299,8 +299,8 @@ class BusFine(models.Model):
     def action_review(self):
         self._check_manager()
         for fine in self:
-            if fine.state not in ('new', 'discarded') or (fine.state == 'discarded'
-                                                         and fine.discard_reason == 'appeal_accepted'):
+            accepted = fine.state == 'discarded' and fine.discard_reason == 'appeal_accepted'
+            if fine.state not in ('new', 'discarded') or accepted:
                 raise UserError(_("Only a new or discarded fine can be reviewed."))
             fine._set({'state': 'review', 'reviewer_id': self.env.user.id, 'discard_reason': False,
                        'discard_note': False, 'decided_at': False})

@@ -55,6 +55,7 @@ class TestFinePanel(FineCase):
         self.assertEqual(action['context']['active_ids'], fine.ids)
 
     def test_the_map_uses_the_tiles_of_the_settings(self):
-        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.tile_url', 'https://tiles.example.com/{z}/{x}/{y}.png')
+        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.tile_url',
+                                                         'https://tiles.example.com/{z}/{x}/{y}.png')
         fine = self.fines_of(simulate(self.env, self.route, 'speeding', self.driver))
         self.assertEqual(fine.map_tile_url, 'https://tiles.example.com/{z}/{x}/{y}.png')
