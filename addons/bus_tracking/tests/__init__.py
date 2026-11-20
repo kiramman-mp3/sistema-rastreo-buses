@@ -31,3 +31,4 @@ from . import test_report
 from . import test_discuss
 from . import test_migration_grafana
 from . import test_fine_states
+from . import test_fine_detect
