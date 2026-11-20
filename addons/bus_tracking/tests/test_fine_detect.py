@@ -13,9 +13,8 @@ def simulate(env, route, scenario, driver=None, days_ago=1):
     return env['bus.trip.simulator']._simulate(route, scenario, days_ago=days_ago, driver=driver)
 
 
-@tagged('post_install', '-at_install')
-class TestFineDetection(TransactionCase):
-    """Each rule of a fine, from the trip simulator through the real rules of the system to a proposed fine."""
+class FineCase(TransactionCase):
+    """A route with long stretches and a driver to give the fines of the simulated trips to."""
 
     @classmethod
     def setUpClass(cls):
@@ -32,6 +31,11 @@ class TestFineDetection(TransactionCase):
 
     def check(self, fine, key):
         return next(c for c in fine._checks() if c['key'] == key)
+
+
+@tagged('post_install', '-at_install')
+class TestFineDetection(FineCase):
+    """Each rule of a fine, from the trip simulator through the real rules of the system to a proposed fine."""
 
     def test_speeding_beyond_the_tolerance_is_proposed(self):
         trip = simulate(self.env, self.route, 'speeding', self.driver)
