@@ -2,6 +2,8 @@ import { ApiError, AuthError, createClient, defaultBaseUrl, NetworkError, type D
 import { normalizeOdooUrl } from '../config/odooUrl';
 import type {
   Driver,
+  Fine,
+  FinesResponse,
   IncidentDraft,
   MeResponse,
   Route,
@@ -291,6 +293,16 @@ export class Session {
     const routeMap = await this.client.routeMap();
     this.set({ routeMap });
     return routeMap;
+  }
+
+  /** The confirmed fines of the driver. They are read when the screen opens, never kept on the tablet. */
+  async loadFines(): Promise<FinesResponse> {
+    return this.client.fines(getLang());
+  }
+
+  async appealFine(id: number, text: string): Promise<Fine> {
+    const { fine } = await this.client.appealFine(id, text, getLang());
+    return fine;
   }
 
   async reportIncident(input: IncidentDraft) {
