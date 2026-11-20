@@ -285,12 +285,21 @@
                 <group>
                     <field name="route_id"/>
                     <field name="scenario"/>
+                    <field name="driver_user_id" options="{'no_create': True}"/>
                 </group>
+                <p class="text-muted">
+                    Fines scenarios: seven trips on the chosen route, one per rule of a fine, plus a speeding inside
+                    the tolerance (no fine) and a trip without GPS data (discarded by the system). Choose a driver to
+                    give them the fines.
+                </p>
                 <footer>
                     <button name="action_simulate" type="object" string="Simulate this trip" class="btn-primary"/>
                     <button name="action_demo_set" type="object" string="Create the demo set (12 trips)"
                             class="btn-secondary"
                             confirm="Twelve simulated trips are created on the lines L1 to L4."/>
+                    <button name="action_fines_set" type="object" string="Fines scenarios (7 trips)"
+                            class="btn-secondary"
+                            confirm="Seven simulated trips are created on this route, each on a past day."/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
