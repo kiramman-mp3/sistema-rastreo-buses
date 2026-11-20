@@ -33,6 +33,7 @@ Live bus tracking and route monitoring backed by a Traccar server.
         'views/bus_driver_views.xml',
         'views/bus_incident_views.xml',
         'views/bus_complaint_views.xml',
+        'views/bus_fine_views.xml',
         'views/bus_report_views.xml',
         'report/bus_report_templates.xml',
         'views/notification_views.xml',
@@ -66,6 +67,9 @@ Live bus tracking and route monitoring backed by a Traccar server.
             'bus_tracking/static/src/xml/stop_picker.xml',
             'bus_tracking/static/src/xml/live_map.xml',
             'bus_tracking/static/src/xml/push_setup.xml',
+            'bus_tracking/static/src/css/fines.css',
+            'bus_tracking/static/src/js/fine_evidence.js',
+            'bus_tracking/static/src/xml/fine_evidence.xml',
         ],
     },
 }

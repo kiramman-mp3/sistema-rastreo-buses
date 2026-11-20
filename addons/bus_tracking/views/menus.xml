@@ -13,6 +13,11 @@
     <menuitem id="menu_bus_report_pdf" name="Download report" parent="menu_bus_indicators"
               action="action_bus_report_wizard" sequence="20"/>
 
+    <menuitem id="menu_bus_fines" name="Fines" parent="menu_bus_root" sequence="14"/>
+    <menuitem id="menu_bus_fine" name="Fines" parent="menu_bus_fines" action="action_bus_fine" sequence="10"/>
+    <menuitem id="menu_bus_fine_type" name="Fine types" parent="menu_bus_fines" action="action_bus_fine_type"
+              sequence="20" groups="bus_tracking.group_bus_manager"/>
+
     <!-- Operation: what happens today. Fleet: what the service is made of. -->
     <menuitem id="menu_bus_operation" name="Operations" parent="menu_bus_root" sequence="15"/>
     <menuitem id="menu_bus_fleet" name="Fleet" parent="menu_bus_root" sequence="20"/>

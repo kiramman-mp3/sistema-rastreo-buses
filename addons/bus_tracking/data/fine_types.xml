@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The fines the system proposes, one per rule. Demonstration amounts in dollars: the company sets its own in
      Buses > Fines > Fine types. noupdate: an update of the module never overwrites what a manager changed. -->
-<odoo noupdate="1">
+<odoo>
+  <data>
+    <!-- The fines are in dollars (Ecuador): the currency must be active to be shown. -->
+    <function model="res.currency" name="write">
+        <value eval="[ref('base.USD')]"/>
+        <value eval="{'active': True}"/>
+    </function>
+  </data>
+  <data noupdate="1">
     <record id="fine_type_speeding" model="bus.fine.type">
         <field name="name">Speeding</field>
         <field name="sequence">10</field>
@@ -62,4 +70,5 @@
         <field name="min_seconds">0</field>
         <field name="description">The scheduled trip ended with stops never reached, with no incident reported during the trip.</field>
     </record>
+  </data>
 </odoo>
