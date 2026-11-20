@@ -19,6 +19,8 @@ PLAN_SPEED_KMH = 22.0          # the speed the planned minutes assume
 DWELL_S = 30                   # the bus stays this long at a stop
 POSITION_EVERY_S = 60
 SIDE_STEP_DEG = 0.0045         # about 500 m: far from the line of the route
+FAST_EVERY_S = 10              # on the speeding stretch the positions come more often, as a phone reports at speed
+LONG_STOP_MIN = 25             # the long-stop scenario stands still this long, beyond the 20 minutes of its fine
 START_LOCAL = 7.0              # simulated trips leave at 07:00 local time
 
 
@@ -48,7 +50,13 @@ SCENARIOS = {
         'delays': lambda offs: [0.0] * len(offs), 'off_route': True},
     'speeding': {
         'label': "Over the speed limit", 'flags': ('speeding',),
-        'delays': lambda offs: [0.0] * len(offs), 'speeding': True},
+        'delays': lambda offs: [0.0] * len(offs), 'speeding': 82.0},
+    'speeding_tolerated': {
+        'label': "Over the limit, inside the tolerance", 'flags': ('speeding',),
+        'delays': lambda offs: [0.0] * len(offs), 'speeding': 62.0},
+    'long_stop': {
+        'label': "Long stop away from the stops", 'flags': ('late',),
+        'delays': lambda offs: [0.0] * len(offs), 'long_stop': True},
     'not_started': {
         'label': "Never started", 'flags': ('not_started', 'incomplete'),
         'delays': lambda offs: [0.0] * len(offs), 'no_positions': True},
@@ -65,6 +73,11 @@ DEMO_SET = [
     ('L3', 'punctual'), ('L3', 'incomplete_end'), ('L3', 'not_started'),
     ('L4', 'late_deviation'), ('L4', 'speeding'), ('L4', 'punctual'),
 ]
+
+# The fines demo: one trip per rule of a fine, plus the ones that must not become a fine (inside the tolerance) or
+# that the system discards by itself (no GPS data on a trip that never started).
+FINES_SET = ['speeding', 'speeding_tolerated', 'deviation', 'long_stop', 'skipped_stop', 'incomplete_end',
+             'not_started']
 
 
 def side_step(a, b):
@@ -128,8 +141,9 @@ class BusTripSimulator(models.AbstractModel):
 
     # ------------------------------------------------------------------
     @api.model
-    def _simulate(self, route, scenario, day=None, days_ago=1):
-        """Create a simulated trip of `route` and replay the scenario. Returns the trip."""
+    def _simulate(self, route, scenario, day=None, days_ago=1, driver=None):
+        """Create a simulated trip of `route` and replay the scenario. Returns the trip. With a driver, the trip is
+        theirs and so are the fines it proposes."""
         spec = SCENARIOS.get(scenario)
         if not spec:
             raise UserError(_("Unknown scenario."))
@@ -141,11 +155,15 @@ class BusTripSimulator(models.AbstractModel):
         day = day or self._day_for(days_ago, route)
         trip = self.env['bus.trip'].create({
             'vehicle_id': bus.id, 'route_id': route.id, 'planned_start': local_to_utc(day, START_LOCAL),
-            'simulated': True, 'scenario': scenario, 'expected_flags': ','.join(sorted(spec['flags']))})
+            'simulated': True, 'scenario': scenario, 'expected_flags': ','.join(sorted(spec['flags'])),
+            'driver_user_id': driver.id if driver else False})
         if not spec.get('no_positions'):
             self._replay(trip, spec)
         # Close what the replay left open and report the late start, as the cron does for real trips.
         self.env['bus.trip']._cron_close_trips(only=trip)
+        # The fines of the trip are proposed now, not at the next run of the cron: the demonstration shows them at once.
+        self.env['bus.fine']._detect_alerts(self.env['bus.alert'].search([
+            ('vehicle_id', '=', bus.id), ('state', '=', 'closed'), ('fine_checked', '=', False)], order='id'))
         return trip
 
     @api.model
@@ -159,9 +177,12 @@ class BusTripSimulator(models.AbstractModel):
         arrival = [ln.planned_time + timedelta(minutes=d) for ln, d in zip(lines, delays)]
         skip = {n // 2} if spec.get('skip') == 'middle' else set()
         last = n - 2 if spec.get('stop_before_end') else n - 1
-        # the longest stretch carries the deviation
+        # the longest stretch carries the deviation and the long stop
         durations = [(arrival[i + 1] - arrival[i]).total_seconds() for i in range(n - 1)]
         long_leg = max(range(n - 1), key=lambda i: durations[i]) if n > 1 else 0
+        if spec.get('long_stop'):
+            # the bus stands still in the middle of the stretch: every stop after it is reached that much later
+            arrival = arrival[:long_leg + 1] + [t + timedelta(minutes=LONG_STOP_MIN) for t in arrival[long_leg + 1:]]
         points = []                                        # (time, lat, lon, km/h)
 
         def add(when, lat, lon, kmh):
@@ -186,21 +207,47 @@ class BusTripSimulator(models.AbstractModel):
             nxt = stops[i + 1]
             d_lat, d_lon = side_step((stop.latitude, stop.longitude), (nxt.latitude, nxt.longitude))
             distance = haversine_m(stop.latitude, stop.longitude, nxt.latitude, nxt.longitude)
-            kmh = distance / 1000.0 / (seconds / 3600.0)
+            stand = LONG_STOP_MIN * 60.0 if spec.get('long_stop') and i == long_leg else 0.0
+            driving = max(seconds - stand, 1.0)
+            kmh = distance / 1000.0 / (driving / 3600.0)
+            every = POSITION_EVERY_S
             if spec.get('speeding') and i == 0:
-                kmh = 68.0
-            count = int(seconds // POSITION_EVERY_S)
+                kmh, every = spec['speeding'], FAST_EVERY_S
+            count = max(int(driving // every), 4 if stand else 0)
+            halted = False
             for k in range(1, count):
                 f = k / float(count)
-                lat = stop.latitude + (nxt.latitude - stop.latitude) * f
-                lon = stop.longitude + (nxt.longitude - stop.longitude) * f
-                if spec.get('off_route') and i == long_leg and 0.1 < f < 0.9:
-                    lat, lon = lat + d_lat, lon + d_lon                        # well beyond the corridor
-                add(start + timedelta(seconds=seconds * f), lat, lon, kmh)
+                if stand and f >= 0.5 and not halted:
+                    # half way, the bus stands still away from any stop, reporting every minute
+                    halted = True
+                    lat, lon = self._place(stop, nxt, 0.5, None)
+                    halt = start + timedelta(seconds=driving * 0.5)
+                    for minute in range(int(stand // 60)):
+                        add(halt + timedelta(seconds=minute * 60), lat, lon, 0.0)
+                lat, lon = self._place(stop, nxt, f, (d_lat, d_lon) if spec.get('off_route') and i == long_leg else None)
+                add(start + timedelta(seconds=driving * f + (stand if halted else 0.0)), lat, lon, kmh)
         for when, lat, lon, kmh in points:
             bus._apply_position({
                 'fixTime': when.strftime('%Y-%m-%dT%H:%M:%SZ'), 'latitude': lat, 'longitude': lon,
                 'speed': kmh / 1.852, 'course': 0.0})
+
+    @api.model
+    def _place(self, stop, nxt, f, step):
+        """A point at fraction f of the way between two stops; with a side step, pushed off the route in the middle
+        of the way (well beyond the corridor)."""
+        lat = stop.latitude + (nxt.latitude - stop.latitude) * f
+        lon = stop.longitude + (nxt.longitude - stop.longitude) * f
+        if step and 0.1 < f < 0.9:
+            lat, lon = lat + step[0], lon + step[1]
+        return lat, lon
+
+    @api.model
+    def _simulate_fines_set(self, route, driver=None):
+        """One simulated trip per scenario of FINES_SET on a route, each on its own past day."""
+        trips = self.env['bus.trip']
+        for days_ago, scenario in enumerate(FINES_SET, start=1):
+            trips |= self._simulate(route, scenario, days_ago=days_ago, driver=driver)
+        return trips
 
     @api.model
     def _simulate_demo_set(self):
@@ -223,6 +270,11 @@ class BusTripSimulate(models.TransientModel):
     scenario = fields.Selection(
         [(key, spec['label']) for key, spec in SCENARIOS.items()], required=True, default='punctual')
     route_id = fields.Many2one('bus.route', string="Route", required=True, ondelete='cascade')
+    driver_user_id = fields.Many2one(
+        'res.users', string="Driver", ondelete='cascade',
+        domain=lambda self: [('groups_id', 'in', self.env.ref('bus_tracking.group_bus_driver').ids)],
+        help="The driver the simulated trips are given to, so their fines have someone to be proposed to. Without "
+             "one, the fines are discarded by the system: nobody drove.")
 
     def _open_trips(self, trips):
         return {
@@ -234,8 +286,18 @@ class BusTripSimulate(models.TransientModel):
         self.ensure_one()
         # Replaying a trip writes positions, arrivals and alerts, which belong to the system: only managers open this
         # wizard (its access rights), and it runs as the system.
-        trips = self.env['bus.trip.simulator'].sudo()._simulate(self.route_id.sudo(), self.scenario)
+        trips = self.env['bus.trip.simulator'].sudo()._simulate(self.route_id.sudo(), self.scenario,
+                                                                driver=self.driver_user_id.sudo())
         return self._open_trips(trips)
+
+    def action_fines_set(self):
+        self.ensure_one()
+        trips = self.env['bus.trip.simulator'].sudo()._simulate_fines_set(self.route_id.sudo(),
+                                                                          driver=self.driver_user_id.sudo())
+        return {
+            'type': 'ir.actions.act_window', 'name': _("Fines of the simulated trips"), 'res_model': 'bus.fine',
+            'view_mode': 'kanban,tree,form', 'domain': [('trip_id', 'in', trips.ids)],
+        }
 
     def action_demo_set(self):
         trips = self.env['bus.trip.simulator'].sudo()._simulate_demo_set()
