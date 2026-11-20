@@ -22,25 +22,25 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 25 | 31,2 % | 31,2 % |
-| Seguridad | 14 | 17,5 % | 48,8 % |
-| Configuración | 11 | 13,8 % | 62,5 % |
-| Accesibilidad y diseño | 7 | 8,8 % | 71,2 % |
-| Validación de entrada | 5 | 6,2 % | 77,5 % |
-| Entorno | 3 | 3,8 % | 81,2 % |
-| Interfaz | 3 | 3,8 % | 85,0 % |
-| Internacionalización | 3 | 3,8 % | 88,8 % |
-| Infraestructura y despliegue | 2 | 2,5 % | 91,2 % |
-| Migración | 2 | 2,5 % | 93,8 % |
-| Accesibilidad | 1 | 1,2 % | 95,0 % |
-| Contenido | 1 | 1,2 % | 96,2 % |
-| Interfaz y vistas | 1 | 1,2 % | 97,5 % |
+| Lógica | 25 | 29,8 % | 29,8 % |
+| Seguridad | 14 | 16,7 % | 46,4 % |
+| Configuración | 12 | 14,3 % | 60,7 % |
+| Accesibilidad y diseño | 7 | 8,3 % | 69,0 % |
+| Interfaz | 5 | 6,0 % | 75,0 % |
+| Validación de entrada | 5 | 6,0 % | 81,0 % |
+| Entorno | 4 | 4,8 % | 85,7 % |
+| Internacionalización | 3 | 3,6 % | 89,3 % |
+| Infraestructura y despliegue | 2 | 2,4 % | 91,7 % |
+| Migración | 2 | 2,4 % | 94,0 % |
+| Accesibilidad | 1 | 1,2 % | 95,2 % |
+| Contenido | 1 | 1,2 % | 96,4 % |
+| Interfaz y vistas | 1 | 1,2 % | 97,6 % |
 | Permisos | 1 | 1,2 % | 98,8 % |
 | Rendimiento | 1 | 1,2 % | 100,0 % |
 
-**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Quedan abiertos: DEF-079, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.
+**Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Quedan abiertos: DEF-079, DEF-084, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.
 
-## 3. Problemas encontrados durante la construcción (57)
+## 3. Problemas encontrados durante la construcción (62)
 
 Cada viñeta de las secciones "Problemas encontrados" de la bitácora cuenta como un problema (los de la evaluación de calidad incluidos). Se clasificó cada uno en una de cinco categorías; la lista completa está al final.
 
@@ -48,11 +48,11 @@ Cada viñeta de las secciones "Problemas encontrados" de la bitácora cuenta com
 
 | Categoría | Problemas | % | % acumulado |
 |---|---|---|---|
-| Pruebas y su entorno | 16 | 28,1 % | 28,1 % |
-| Entorno, dependencias y configuración | 12 | 21,1 % | 49,1 % |
-| Herramientas de shell y edición | 12 | 21,1 % | 70,2 % |
-| Lógica y diseño del código | 9 | 15,8 % | 86,0 % |
-| Datos de entrada y supuestos sin confirmar | 8 | 14,0 % | 100,0 % |
+| Pruebas y su entorno | 18 | 29,0 % | 29,0 % |
+| Herramientas de shell y edición | 14 | 22,6 % | 51,6 % |
+| Entorno, dependencias y configuración | 13 | 21,0 % | 72,6 % |
+| Lógica y diseño del código | 9 | 14,5 % | 87,1 % |
+| Datos de entrada y supuestos sin confirmar | 8 | 12,9 % | 100,0 % |
 
 **Lectura:** más de la mitad de los problemas no estuvo en el producto sino en las **pruebas y su entorno** y en las **herramientas de shell**: tests mal escritos, bases sucias, rutas que Git Bash convierte, comillas. Con las tres primeras categorías se llega a cerca del 72 %. Acciones que salen de aquí: una base de pruebas nueva en cada corrida (ya está en `qa/ejecutar_todo.sh`), scripts en archivos y no en la línea de comandos, y versiones fijas de las dependencias.
 
@@ -119,3 +119,8 @@ Categorías: Pruebas y su entorno; Herramientas de shell y edición; Entorno, de
 | 55 | Diagnóstico GPS (04-nov) | Saturación del pool de conexiones PostgreSQL en Odoo por db_maxconn=3 | Entorno, dependencias y configuración |
 | 56 | Diagnóstico GPS (04-nov) | La pantalla Estado del GPS leía session.snapshot.gps en memoria y mostraba guion | Lógica y diseño del código |
 | 57 | Diagnóstico GPS (04-nov) | CoreLocation en iOS ignora timeInterval y suspende el GPS cuando el dispositivo está inmóvil | Lógica y diseño del código |
+| 58 | Multas (20-nov) | Cada contenedor temporal de Odoo tenía su propio almacén de archivos y los assets respondían 500 | Entorno, dependencias y configuración |
+| 59 | Multas (20-nov) | El servidor de demostración seguía con el código de antes y la tableta no encontraba los endpoints nuevos | Pruebas y su entorno |
+| 60 | Multas (20-nov) | Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit | Herramientas de shell y edición |
+| 61 | Multas (20-nov) | Un heredoc de Git Bash cambió las barras invertidas de una expresión regular | Herramientas de shell y edición |
+| 62 | Multas (20-nov) | La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo sigue en 16.0.1.6.0 | Pruebas y su entorno |

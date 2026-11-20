@@ -88,8 +88,12 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-078 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | El emulador perdió el DNS y la app mostraba «Sin conexión» al iniciar sesión | Entorno (emulador Android 17) | Cerrado |
 | DEF-079 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando | expo-task-manager (TaskJobService) en Android 17 | Abierto |
 | DEF-080 | 18-nov-2026 | Uso en producción (gestor creando un recorrido) | Un gestor no podía crear recorridos, sincronizar un bus ni simular: «No puede crear Parada de un recorrido programado» | models/bus_trip.py, models/bus_vehicle.py, models/trip_simulator.py | Cerrado |
+| DEF-081 | 20-nov-2026 | Revisión visual de la ficha de una multa | Los marcadores de inicio y fin del tramo daban 404 y salían como imagen rota | static/src/js/fine_evidence.js | Cerrado |
+| DEF-082 | 20-nov-2026 | Revisión visual del kanban de multas | Los montos de las multas salían sin el símbolo $ | data/fine_types.xml | Cerrado |
+| DEF-083 | 20-nov-2026 | Revisión visual de la ficha de una multa | El mapa de la evidencia ocupaba solo unos 300 px de ancho | static/src/css/fines.css | Cerrado |
+| DEF-084 | 20-nov-2026 | Suite completa de las fases de multas | test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader | tests/test_migration_grafana.py | Abierto |
 
-Resumen: 80 registrados, 79 cerrados (99 %), 1 abiertos. Densidad: 15,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 84 registrados, 82 cerrados (98 %), 2 abiertos. Densidad: 16,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -573,8 +577,33 @@ Resumen: 80 registrados, 79 cerrados (99 %), 1 abiertos. Densidad: 15,9 defectos
 - **Categoría:** Permisos
 - **Prueba que lo protege:** TestTripCreation y TestManagerActions crean, sincronizan y simulan con un gestor real; un usuario de solo lectura no puede sincronizar
 
+### DEF-081: Los marcadores de inicio y fin del tramo daban 404 y salían como imagen rota
+
+- **Causa raíz:** Leaflet busca las imágenes de su marcador por defecto junto a su CSS, y el módulo solo trae leaflet.js y leaflet.css.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** Inicio y fin son etiquetas HTML (divIcon); captura sin errores de consola ni 404
+
+### DEF-082: Los montos de las multas salían sin el símbolo $
+
+- **Causa raíz:** La compañía de una base nueva usa EUR y el dólar viene inactivo: el panel solo conoce las monedas activas.
+- **Categoría:** Configuración
+- **Prueba que lo protege:** Los datos del módulo activan USD en cada instalación y actualización; captura del kanban con $
+
+### DEF-083: El mapa de la evidencia ocupaba solo unos 300 px de ancho
+
+- **Causa raíz:** Odoo envuelve cada campo en un elemento que no ocupa todo el ancho cuando está fuera de un grupo.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** CSS de ancho completo para o_field_bus_fine_evidence; captura del mapa a todo el ancho
+
+### DEF-084: test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader
+
+- **Causa raíz:** El rol es del servidor, no de una base: la base de desarrollo buses sigue en 16.0.1.6.0 con 9 permisos del rol, y DROP ROLE no puede borrarlo. La prueba supone que ninguna otra base lo usa.
+- **Categoría:** Entorno
+- **Prueba que lo protege:** Pendiente: actualizar la base de desarrollo a 16.0.1.10.0 (su migración 16.0.1.9.0 quita los permisos) o hacer que la prueba cree su propio rol con otro nombre
+
 ## 3. Qué falta para cerrar los abiertos
 
 Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
 
 1. DEF-079: Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando
+2. DEF-084: test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader
