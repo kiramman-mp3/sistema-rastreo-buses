@@ -89,6 +89,7 @@ PROBLEMAS = [
     ('Multas (20-nov)', 'Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit', 'H'),
     ('Multas (20-nov)', 'Un heredoc de Git Bash cambió las barras invertidas de una expresión regular', 'H'),
     ('Multas (20-nov)', 'La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo sigue en 16.0.1.6.0', 'P'),
+    ('Reinstalación (20-nov)', 'Puerto 8069 ocupado por el Odoo de otro proyecto de la máquina (odoo16): se detuvo sin borrarlo', 'E'),
 ]
 
 # Defect log: id, date, who found it, description, where, root cause, category, status, test that guards it.
@@ -345,7 +346,13 @@ DEFECTOS = [
      'Interfaz', 'Cerrado', 'CSS de ancho completo para o_field_bus_fine_evidence; captura del mapa a todo el ancho'),
     ('DEF-084', '20-nov-2026', 'Suite completa de las fases de multas', 'test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader',
      'tests/test_migration_grafana.py', 'El rol es del servidor, no de una base: la base de desarrollo buses sigue en 16.0.1.6.0 con 9 permisos del rol, y DROP ROLE no puede borrarlo. La prueba supone que ninguna otra base lo usa.',
-     'Entorno', 'Abierto', 'Pendiente: actualizar la base de desarrollo a 16.0.1.10.0 (su migración 16.0.1.9.0 quita los permisos) o hacer que la prueba cree su propio rol con otro nombre'),
+     'Entorno', 'Cerrado', 'Reinstalación del entorno de desarrollo desde cero (20-nov): base buses nueva en 16.0.1.10.0, sin el rol grafana_reader; suite completa 624 de 624'),
+    ('DEF-085', '20-nov-2026', 'Reinstalación del entorno y verificación con flake8', 'flake8 marcaba 6 avisos de estilo (sangría y largo de línea) en el código de multas',
+     'models/bus_fine.py, models/bus_fine_detect.py, models/trip_simulator.py, tests/test_fine_panel.py', 'Al cerrar las fases de multas solo se corrió el linter de la tableta, no flake8 del módulo.',
+     'Proceso', 'Cerrado', 'python -m flake8 addons/bus_tracking sin avisos; mismas pruebas de multas en verde'),
+    ('DEF-086', '20-nov-2026', 'Demostración en la base reinstalada (línea L1)', 'Escenarios de multas en una línea de tramos cortos no generaba las multas de velocidad ni de desvío, y no avisaba',
+     'models/trip_simulator.py', 'Los tramos de L1 son de 2 a 4 minutos: no cabe un desvío de 3 minutos ni un exceso sostenido de 30 s; además el exceso iba siempre en el primer tramo y no en el más largo. Las pruebas usaban una ruta de tramos de 5,5 km.',
+     'Lógica', 'Cerrado', 'TestFineDetection.test_the_fines_set_refuses_a_route_of_short_stretches; el exceso va en el tramo más largo; en L1 el asistente nombra las líneas que sirven y en L4 salen las 6 reglas'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).

@@ -91,9 +91,11 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-081 | 20-nov-2026 | Revisión visual de la ficha de una multa | Los marcadores de inicio y fin del tramo daban 404 y salían como imagen rota | static/src/js/fine_evidence.js | Cerrado |
 | DEF-082 | 20-nov-2026 | Revisión visual del kanban de multas | Los montos de las multas salían sin el símbolo $ | data/fine_types.xml | Cerrado |
 | DEF-083 | 20-nov-2026 | Revisión visual de la ficha de una multa | El mapa de la evidencia ocupaba solo unos 300 px de ancho | static/src/css/fines.css | Cerrado |
-| DEF-084 | 20-nov-2026 | Suite completa de las fases de multas | test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader | tests/test_migration_grafana.py | Abierto |
+| DEF-084 | 20-nov-2026 | Suite completa de las fases de multas | test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader | tests/test_migration_grafana.py | Cerrado |
+| DEF-085 | 20-nov-2026 | Reinstalación del entorno y verificación con flake8 | flake8 marcaba 6 avisos de estilo (sangría y largo de línea) en el código de multas | models/bus_fine.py, models/bus_fine_detect.py, models/trip_simulator.py, tests/test_fine_panel.py | Cerrado |
+| DEF-086 | 20-nov-2026 | Demostración en la base reinstalada (línea L1) | Escenarios de multas en una línea de tramos cortos no generaba las multas de velocidad ni de desvío, y no avisaba | models/trip_simulator.py | Cerrado |
 
-Resumen: 84 registrados, 82 cerrados (98 %), 2 abiertos. Densidad: 16,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 86 registrados, 85 cerrados (99 %), 1 abiertos. Densidad: 17,1 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -599,11 +601,22 @@ Resumen: 84 registrados, 82 cerrados (98 %), 2 abiertos. Densidad: 16,7 defectos
 
 - **Causa raíz:** El rol es del servidor, no de una base: la base de desarrollo buses sigue en 16.0.1.6.0 con 9 permisos del rol, y DROP ROLE no puede borrarlo. La prueba supone que ninguna otra base lo usa.
 - **Categoría:** Entorno
-- **Prueba que lo protege:** Pendiente: actualizar la base de desarrollo a 16.0.1.10.0 (su migración 16.0.1.9.0 quita los permisos) o hacer que la prueba cree su propio rol con otro nombre
+- **Prueba que lo protege:** Reinstalación del entorno de desarrollo desde cero (20-nov): base buses nueva en 16.0.1.10.0, sin el rol grafana_reader; suite completa 624 de 624
+
+### DEF-085: flake8 marcaba 6 avisos de estilo (sangría y largo de línea) en el código de multas
+
+- **Causa raíz:** Al cerrar las fases de multas solo se corrió el linter de la tableta, no flake8 del módulo.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** python -m flake8 addons/bus_tracking sin avisos; mismas pruebas de multas en verde
+
+### DEF-086: Escenarios de multas en una línea de tramos cortos no generaba las multas de velocidad ni de desvío, y no avisaba
+
+- **Causa raíz:** Los tramos de L1 son de 2 a 4 minutos: no cabe un desvío de 3 minutos ni un exceso sostenido de 30 s; además el exceso iba siempre en el primer tramo y no en el más largo. Las pruebas usaban una ruta de tramos de 5,5 km.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** TestFineDetection.test_the_fines_set_refuses_a_route_of_short_stretches; el exceso va en el tramo más largo; en L1 el asistente nombra las líneas que sirven y en L4 salen las 6 reglas
 
 ## 3. Qué falta para cerrar los abiertos
 
 Cada defecto abierto tiene su fase en `docs/arquitectura/PLAN-AUDITORIA-2.md` y la prueba que lo cerrará en la sección 2.
 
 1. DEF-079: Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando
-2. DEF-084: test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader
