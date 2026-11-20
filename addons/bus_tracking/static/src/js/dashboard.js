@@ -2,11 +2,14 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { loadJS } from "@web/core/assets";
+import { loadCSS, loadJS } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
 import { Component, onMounted, onPatched, onWillUnmount, useRef, useState } from "@odoo/owl";
 
 const CHART_JS = "/web/static/lib/Chart/Chart.js";
+const LEAFLET_CSS = "/bus_tracking/static/lib/leaflet/leaflet.css";
+const LEAFLET_JS = "/bus_tracking/static/lib/leaflet/leaflet.js";
+const TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_500h_1_2faaa5c6c3a1e1bb863b25cb";
 const REFRESH_MS = 30000;
 // The palette of the brand: the garnet of the action, the yellow of a stop sign, the ink, and three line colours.
 const INK = "#172025";
@@ -20,8 +23,17 @@ const LOWER_IS_BETTER = new Set(["T3", "T5", "T8", "S3"]);
 const CHART_REFS = [
     "chart_days", "chart_kinds", "chart_route_punctuality", "chart_route_compliance", "chart_route_delay",
     "chart_route_km", "chart_punctuality_days", "chart_buckets", "chart_stops", "chart_pareto", "chart_alert_days",
-    "chart_route_alerts", "chart_perf",
+    "chart_route_alerts", "chart_perf", "chart_fine_drivers", "chart_fine_types", "chart_fine_weeks",
+    "chart_fine_precision", "fines_map",
 ];
+// A colour and a word per state of a fine: the column of the kanban it sits in.
+const FINE_STATES = {
+    new: "#3D4F8A",
+    review: "#C98A00",
+    fined: "#7A1A22",
+    appealed: "#9A4A12",
+    discarded: "#8A9499",
+};
 
 function today() {
     const d = new Date();
@@ -114,6 +126,7 @@ export class BusDashboard extends Component {
             { key: "punctuality", label: _t("Punctuality") },
             { key: "trips", label: _t("Trips") },
             { key: "incidents", label: _t("Incidents") },
+            { key: "fines", label: _t("Fines") },
             { key: "quality", label: _t("System quality") },
             { key: "formulas", label: _t("Formulas") },
         ];
@@ -284,6 +297,50 @@ export class BusDashboard extends Component {
             chart.destroy();
         }
         this.charts = {};
+        if (this.finesMap) {
+            this.finesMap.remove();
+            this.finesMap = null;
+        }
+    }
+
+    fineStateLabel(state) {
+        const fines = this.state.data && this.state.data.fines;
+        return (fines && fines.state_labels[state]) || state;
+    }
+
+    /** Where the fines of the period happened, one dot per fine in the colour of its state. */
+    async drawFinesMap() {
+        const el = this.refs.fines_map && this.refs.fines_map.el;
+        const fines = this.state.data && this.state.data.fines;
+        if (!el || !fines) {
+            return;
+        }
+        await loadCSS(LEAFLET_CSS);
+        await loadJS(LEAFLET_JS);
+        if (!window.L || this.state.tab !== "fines" || !el.isConnected) {
+            return;
+        }
+        const L = window.L;
+        if (this.finesMap) {
+            this.finesMap.remove();
+        }
+        const map = L.map(el, { scrollWheelZoom: false });
+        this.finesMap = map;
+        L.tileLayer(TILES, { maxZoom: 19, subdomains: "abcd", attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(map);
+        const points = fines.points.map((p) => [p.lat, p.lon]);
+        for (const p of fines.points) {
+            const color = FINE_STATES[p.state] || INK;
+            const text = String(`${p.label} · ${this.fineStateLabel(p.state)}`)
+                .replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+            L.circleMarker([p.lat, p.lon], { radius: 7, color: "#FFFFFF", weight: 1.5, fillColor: color, fillOpacity: 0.9 })
+                .bindTooltip(text)
+                .addTo(map);
+        }
+        if (points.length) {
+            map.fitBounds(L.latLngBounds(points).pad(0.15), { maxZoom: 15 });
+        } else {
+            map.setView([-1.2417, -78.6167], 12);
+        }
     }
 
     drawChartsIfChanged() {
@@ -295,6 +352,9 @@ export class BusDashboard extends Component {
         const animate = tab !== this.drawn.tab;
         if (this.drawCharts(animate)) {
             this.drawn = { data, tab };
+            if (tab === "fines") {
+                this.drawFinesMap().catch(() => {});
+            }
         }
     }
 
@@ -306,6 +366,9 @@ export class BusDashboard extends Component {
         const specs = this.chartSpecs();
         for (const [name, config] of Object.entries(specs)) {
             const canvas = this.refs[name] && this.refs[name].el;
+            if (canvas && !canvas.getContext) {
+                continue;
+            }
             if (canvas) {
                 if (!animate) {
                     config.options = Object.assign({}, config.options, { animation: { duration: 0 } });
@@ -451,6 +514,38 @@ export class BusDashboard extends Component {
                 type: "bar",
                 data: { labels: routes.map((r) => r.code), datasets: [{ data: routes.map((r) => r.alerts), backgroundColor: routes.map((r) => r.color) }] },
                 options: this.baseOptions(),
+            };
+        }
+        if (tab === "fines" && data.fines) {
+            const fines = data.fines;
+            const stacked = (labels, rows, horizontal = false) => ({
+                type: horizontal ? "horizontalBar" : "bar",
+                data: {
+                    labels,
+                    datasets: fines.states.map((state) => ({
+                        label: this.fineStateLabel(state),
+                        data: rows.map((row) => row[state]),
+                        backgroundColor: FINE_STATES[state],
+                    })),
+                },
+                options: this.baseOptions({
+                    legend: { display: true, position: "bottom" },
+                    scales: {
+                        xAxes: [{ stacked: true, gridLines: { display: horizontal, color: GRID }, ticks: { beginAtZero: true, precision: 0 } }],
+                        yAxes: [{ stacked: true, gridLines: { display: !horizontal, color: GRID }, ticks: { beginAtZero: true, precision: 0 } }],
+                    },
+                }),
+            });
+            specs.chart_fine_drivers = stacked(fines.by_driver.map((r) => r.driver), fines.by_driver, true);
+            specs.chart_fine_types = stacked(fines.by_type.map((r) => r.type), fines.by_type);
+            specs.chart_fine_weeks = stacked(fines.by_week.map((r) => r.week.slice(5)), fines.by_week);
+            specs.chart_fine_precision = {
+                type: "bar",
+                data: {
+                    labels: fines.by_type.map((r) => r.type),
+                    datasets: [{ data: fines.by_type.map((r) => r.precision), backgroundColor: OK }],
+                },
+                options: this.baseOptions({ scales: { xAxes: [{ gridLines: { display: false } }], yAxes: [{ gridLines: { color: GRID }, ticks: { beginAtZero: true, max: 100 } }] } }),
             };
         }
         if (tab === "quality") {
