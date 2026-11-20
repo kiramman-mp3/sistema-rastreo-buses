@@ -164,6 +164,53 @@
                     </div>
                 </section>
 
+                <!-- ============================ Fines ============================ -->
+                <section t-if="state.tab == 'fines' and state.data.fines" role="tabpanel">
+                    <p class="o_dash_note">
+                        The fines the system proposed in the period, as the kanban of Fines shows them. The precision
+                        is the share of the fines a person decided on that were confirmed: a low one means the
+                        threshold of that rule is too strict.
+                    </p>
+                    <div class="o_dash_cards">
+                        <t t-foreach="state.data.fines.metrics" t-as="metric" t-key="metric.code">
+                            <t t-call="bus_tracking.DashCard"/>
+                        </t>
+                    </div>
+                    <div class="o_dash_charts two">
+                        <figure><figcaption>Fines by driver and state</figcaption><div class="o_dash_chart tall"><canvas t-ref="chart_fine_drivers" role="img" aria-label="Fines by driver and state"/></div></figure>
+                        <figure><figcaption>Fines by type and state</figcaption><div class="o_dash_chart tall"><canvas t-ref="chart_fine_types" role="img" aria-label="Fines by type and state"/></div></figure>
+                        <figure><figcaption>Fines per week</figcaption><div class="o_dash_chart"><canvas t-ref="chart_fine_weeks" role="img" aria-label="Fines per week"/></div></figure>
+                        <figure><figcaption>Detector precision by type (%)</figcaption><div class="o_dash_chart"><canvas t-ref="chart_fine_precision" role="img" aria-label="Detector precision by type"/></div></figure>
+                    </div>
+                    <figure class="o_dash_map_figure">
+                        <figcaption>Where the fines happened</figcaption>
+                        <div class="o_dash_fines_map" t-ref="fines_map" role="img" aria-label="Map of the fines of the period"/>
+                        <ul class="o_dash_fines_legend">
+                            <li t-foreach="state.data.fines.states" t-as="fstate" t-key="fstate">
+                                <i t-attf-class="o_dash_fines_dot is-#{fstate}" aria-hidden="true"/>
+                                <t t-esc="fineStateLabel(fstate)"/>
+                            </li>
+                        </ul>
+                    </figure>
+                    <div class="o_dash_table_wrap">
+                        <table class="o_dash_table">
+                            <thead><tr>
+                                <th>Driver</th>
+                                <th t-foreach="state.data.fines.states" t-as="fstate" t-key="fstate" class="n" t-esc="fineStateLabel(fstate)"/>
+                                <th class="n">Amount fined</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr t-foreach="state.data.fines.by_driver" t-as="row" t-key="row.driver">
+                                    <td t-esc="row.driver"/>
+                                    <td t-foreach="state.data.fines.states" t-as="fstate" t-key="fstate" class="n" t-esc="row[fstate]"/>
+                                    <td class="n"><t t-esc="state.data.fines.currency"/><t t-esc="num(row.amount, 2)"/></td>
+                                </tr>
+                                <tr t-if="!state.data.fines.by_driver.length"><td colspan="7" class="o_dash_empty">No fines in this period.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
                 <!-- ============================ System quality ============================ -->
                 <section t-if="state.tab == 'quality'" role="tabpanel">
                     <div class="o_dash_cards">

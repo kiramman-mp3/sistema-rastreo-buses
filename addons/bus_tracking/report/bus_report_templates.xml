@@ -178,6 +178,50 @@
                         </tbody>
                     </table>
 
+                    <div class="bt-keep">
+                        <h2>Fines by driver</h2>
+                        <p class="bt-muted">
+                            Proposed by the system from its alerts and decided by a person.
+                            <t t-if="fines['metrics'][2]['detail']"><t t-esc="fines['metrics'][2]['detail']"/>.</t>
+                        </p>
+                        <p t-if="not fines['by_driver']" class="bt-muted">No fines in this period.</p>
+                        <table t-else="">
+                            <thead><tr>
+                                <th>Driver</th>
+                                <th t-foreach="fines['states']" t-as="fstate" class="bt-num" t-esc="fines['state_labels'][fstate]"/>
+                                <th class="bt-num">Amount fined</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr t-foreach="fines['by_driver']" t-as="row">
+                                    <td t-esc="row['driver']"/>
+                                    <td t-foreach="fines['states']" t-as="fstate" class="bt-num" t-esc="row[fstate]"/>
+                                    <td class="bt-num"><t t-esc="fines['currency']"/><t t-esc="'%.2f' % row['amount']"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div t-if="fines['by_type']" class="bt-keep">
+                        <h2>Fines by type</h2>
+                        <table>
+                            <thead><tr>
+                                <th>Type</th><th class="bt-num">Proposed</th><th class="bt-num">Fined</th>
+                                <th class="bt-num">Discarded by a person</th><th class="bt-num">Filtered by the system</th>
+                                <th class="bt-num">Precision</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr t-foreach="fines['by_type']" t-as="row">
+                                    <td t-esc="row['type']"/>
+                                    <td class="bt-num" t-esc="row['total'] - row['by_system']"/>
+                                    <td class="bt-num" t-esc="row['fined'] + row['appealed']"/>
+                                    <td class="bt-num" t-esc="row['by_person']"/>
+                                    <td class="bt-num" t-esc="row['by_system']"/>
+                                    <td class="bt-num"><t t-if="row['precision'] is not None"><t t-esc="row['precision']"/> %</t><t t-else="">—</t></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <h2>Stops with the most delay</h2>
                     <p t-if="not stop_delays" class="bt-muted">No late arrivals in this period.</p>
                     <table t-else="">
