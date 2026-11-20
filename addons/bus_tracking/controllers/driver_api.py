@@ -9,6 +9,7 @@ from odoo.exceptions import AccessDenied
 from odoo.http import Response, request
 from odoo.tools import mute_logger
 
+from ..models.bus_fine import APPEAL_MAX
 from ..models.bus_incident import KINDS as INCIDENT_KINDS
 from ..models.utils import parse_traccar_dt, pick_odoo_lang, secure_gps_url, tile_url
 from .portal import RateLimiter
@@ -27,6 +28,7 @@ MESSAGE_MAX, STACK_MAX, SHORT_MAX = 500, 3000, 60
 # How long after a shift ends its incidents saved without signal are still accepted.
 LATE_INCIDENT = timedelta(hours=2)
 INCIDENT_KIND = {key for key, _label in INCIDENT_KINDS}
+FINES_LIMIT = 50          # the latest confirmed fines the tablet lists
 
 
 def json_response(data, status=200):
@@ -410,3 +412,70 @@ class BusDriverApi(http.Controller):
             'longitude': lon,
         })
         return json_response({'id': incident.id})
+
+    # ------------------------------------------------------------------
+    # Fines: the driver sees only the confirmed ones (never a proposal still in review) and may answer each once.
+    # ------------------------------------------------------------------
+    def _fine_payload(self, fine):
+        return {
+            'id': fine.id,
+            'number': fine.name,
+            'type': fine.type_id.name,
+            'rule': fine.rule,
+            'state': fine.state,
+            'occurred_at': utc_z(fine.occurred_at),
+            'vehicle': fine.vehicle_id.name or '',
+            'route': fine.route_id.code or '',
+            'headline': fine.headline or '',
+            'summary': fine.summary or '',
+            'amount': fine.amount,
+            'currency': fine.currency_id.symbol or '$',
+            'simulated': fine.simulated,
+            'can_appeal': fine.can_appeal,
+            'appeal_deadline': utc_z(fine.appeal_deadline),
+            'appeal_text': fine.appeal_text or None,
+            'appeal_date': utc_z(fine.appeal_date),
+            'appeal_result': fine.appeal_result or None,
+            'appeal_answer': (fine.appeal_answer or None) if fine.appeal_result else None,
+            'checks': [{'label': c['label'], 'detail': c['detail'], 'ok': c['ok']} for c in fine._checks_rendered()],
+        }
+
+    def _driver_fines(self, user):
+        return request.env['bus.fine'].sudo().search([
+            ('driver_id', '=', user.id),
+            '|', ('state', 'in', ('fined', 'appealed')), ('appeal_result', '=', 'accepted'),
+        ], order='occurred_at desc, id desc', limit=FINES_LIMIT)
+
+    def _lang_for(self, user, body):
+        installed = request.env['res.lang'].sudo().search([('active', '=', True)]).mapped('code')
+        return pick_odoo_lang((body or {}).get('lang'), installed, fallback=user.lang)
+
+    @http.route('/bus_tracking/driver/fines', type='http', auth='public', methods=['POST'], csrf=False)
+    def fines(self, **kwargs):
+        user, err = self._auth()
+        if err:
+            return err
+        lang = self._lang_for(user, read_body())
+        fines = self._driver_fines(user).with_context(lang=lang)
+        real = request.env['ir.config_parameter'].sudo().get_param('bus_tracking.fines_real') in ('1', 'True', 'true')
+        return json_response({'demo': not real, 'fines': [self._fine_payload(fine) for fine in fines]})
+
+    @http.route('/bus_tracking/driver/fines/appeal', type='http', auth='public', methods=['POST'], csrf=False)
+    def fine_appeal(self, **kwargs):
+        user, err = self._auth()
+        if err:
+            return err
+        body = read_body()
+        if body is None:
+            return json_response({'error': 'bad_request'}, 400)
+        fine_id, text = as_int(body.get('id')), body.get('text')
+        if fine_id is None or not isinstance(text, str) or not text.strip() or len(text) > APPEAL_MAX:
+            return json_response({'error': 'bad_request'}, 400)
+        fine = self._driver_fines(user).filtered(lambda f: f.id == fine_id)
+        if not fine:
+            return json_response({'error': 'not_found'}, 404)
+        if not fine.can_appeal:
+            return json_response({'error': 'closed'}, 409)
+        fine._appeal(text)
+        lang = self._lang_for(user, body)
+        return json_response({'fine': self._fine_payload(fine.with_context(lang=lang))})
