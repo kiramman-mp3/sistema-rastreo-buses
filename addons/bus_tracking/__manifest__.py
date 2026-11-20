@@ -67,6 +67,9 @@ Live bus tracking and route monitoring backed by a Traccar server.
             'bus_tracking/static/src/xml/stop_picker.xml',
             'bus_tracking/static/src/xml/live_map.xml',
             'bus_tracking/static/src/xml/push_setup.xml',
+            'bus_tracking/static/src/css/fines.css',
+            'bus_tracking/static/src/js/fine_evidence.js',
+            'bus_tracking/static/src/xml/fine_evidence.xml',
         ],
     },
 }
