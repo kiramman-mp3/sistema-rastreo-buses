@@ -224,7 +224,8 @@ class BusTripSimulator(models.AbstractModel):
                     halt = start + timedelta(seconds=driving * 0.5)
                     for minute in range(int(stand // 60)):
                         add(halt + timedelta(seconds=minute * 60), lat, lon, 0.0)
-                lat, lon = self._place(stop, nxt, f, (d_lat, d_lon) if spec.get('off_route') and i == long_leg else None)
+                offset = (d_lat, d_lon) if spec.get('off_route') and i == long_leg else None
+                lat, lon = self._place(stop, nxt, f, offset)
                 add(start + timedelta(seconds=driving * f + (stand if halted else 0.0)), lat, lon, kmh)
         for when, lat, lon, kmh in points:
             bus._apply_position({
