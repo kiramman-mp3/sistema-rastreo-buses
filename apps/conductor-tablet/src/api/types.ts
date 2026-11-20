@@ -113,3 +113,38 @@ export type IncidentDraft = {
   /** When the driver pressed the button (ISO, UTC). Odoo keeps it for incidents sent later. */
   reported_at?: string;
 };
+
+export type FineCheck = { label: string; detail: string; ok: boolean };
+
+/** A confirmed fine of this driver. Proposals still in review never reach the tablet. */
+export type Fine = {
+  id: number;
+  number: string;
+  type: string;
+  rule: string;
+  state: 'fined' | 'appealed' | 'discarded' | string;
+  occurred_at: string | null;
+  vehicle: string;
+  route: string;
+  /** One line with the figure that makes the fine, in the language of the app. */
+  headline: string;
+  /** Why the system proposed it, in plain words. */
+  summary: string;
+  amount: number;
+  currency: string;
+  simulated: boolean;
+  can_appeal: boolean;
+  appeal_deadline: string | null;
+  appeal_text: string | null;
+  appeal_date: string | null;
+  appeal_result: 'accepted' | 'rejected' | null;
+  /** What the office answered, once the appeal is resolved. */
+  appeal_answer: string | null;
+  checks: FineCheck[];
+};
+
+export type FinesResponse = {
+  /** True while the fines are a demonstration with fictitious amounts. */
+  demo: boolean;
+  fines: Fine[];
+};

@@ -1,5 +1,5 @@
 import type { ErrorReport } from '../diagnostics/report';
-import type { IncidentDraft, MeResponse, RouteMap, StartResponse, StateResponse } from './types';
+import type { Fine, FinesResponse, IncidentDraft, MeResponse, RouteMap, StartResponse, StateResponse } from './types';
 
 export class AuthError extends Error {
   constructor() {
@@ -138,6 +138,14 @@ export function createClient(options: ClientOptions) {
       }
       if (draft.reported_at) body.reported_at = draft.reported_at;
       return post<{ id: number }>('/bus_tracking/driver/incident', body);
+    },
+    /** The confirmed fines of the driver, written in the language of the app. */
+    fines(lang?: string) {
+      return post<FinesResponse>('/bus_tracking/driver/fines', lang ? { lang } : {});
+    },
+    /** The driver's statement on a confirmed fine: once, within the time to appeal. */
+    appealFine(id: number, text: string, lang?: string) {
+      return post<{ fine: Fine }>('/bus_tracking/driver/fines/appeal', lang ? { id, text, lang } : { id, text });
     },
   };
 }
