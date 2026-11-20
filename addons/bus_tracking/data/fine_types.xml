@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The fines the system proposes, one per rule. Demonstration amounts in dollars: the company sets its own in
+     Buses > Fines > Fine types. noupdate: an update of the module never overwrites what a manager changed. -->
+<odoo noupdate="1">
+    <record id="fine_type_speeding" model="bus.fine.type">
+        <field name="name">Speeding</field>
+        <field name="sequence">10</field>
+        <field name="rule">speeding</field>
+        <field name="severity">serious</field>
+        <field name="amount">25</field>
+        <field name="threshold">70</field>
+        <field name="min_seconds">30</field>
+        <field name="description">The speed limit is 50 km/h with a tolerance up to 70 km/h: above 70 km/h for at least 30 seconds in a row is fined. A single reading above it is not, it may be a GPS jump.</field>
+    </record>
+    <record id="fine_type_off_route" model="bus.fine.type">
+        <field name="name">Route deviation</field>
+        <field name="sequence">20</field>
+        <field name="rule">off_route</field>
+        <field name="severity">serious</field>
+        <field name="amount">20</field>
+        <field name="threshold">300</field>
+        <field name="min_seconds">180</field>
+        <field name="description">The bus left the road of its route by more than 300 m for at least 3 minutes, with no incident reported that explains it.</field>
+    </record>
+    <record id="fine_type_long_stop" model="bus.fine.type">
+        <field name="name">Long stop</field>
+        <field name="sequence">30</field>
+        <field name="rule">long_stop</field>
+        <field name="severity">minor</field>
+        <field name="amount">10</field>
+        <field name="threshold">20</field>
+        <field name="min_seconds">0</field>
+        <field name="description">The bus stood still for more than 20 minutes away from any stop of its route, with no incident reported.</field>
+    </record>
+    <record id="fine_type_skipped_stop" model="bus.fine.type">
+        <field name="name">Skipped stop</field>
+        <field name="sequence">40</field>
+        <field name="rule">skipped_stop</field>
+        <field name="severity">minor</field>
+        <field name="amount">10</field>
+        <field name="threshold">0</field>
+        <field name="min_seconds">0</field>
+        <field name="description">The bus drove past a stop of its trip without entering its radius, and the GPS was reporting at that time.</field>
+    </record>
+    <record id="fine_type_late_start" model="bus.fine.type">
+        <field name="name">Late start</field>
+        <field name="sequence">50</field>
+        <field name="rule">late_start</field>
+        <field name="severity">minor</field>
+        <field name="amount">5</field>
+        <field name="threshold">10</field>
+        <field name="min_seconds">0</field>
+        <field name="description">The scheduled trip started more than 10 minutes after its planned time, or never started.</field>
+    </record>
+    <record id="fine_type_incomplete_trip" model="bus.fine.type">
+        <field name="name">Incomplete trip</field>
+        <field name="sequence">60</field>
+        <field name="rule">incomplete_trip</field>
+        <field name="severity">serious</field>
+        <field name="amount">15</field>
+        <field name="threshold">1</field>
+        <field name="min_seconds">0</field>
+        <field name="description">The scheduled trip ended with stops never reached, with no incident reported during the trip.</field>
+    </record>
+</odoo>
