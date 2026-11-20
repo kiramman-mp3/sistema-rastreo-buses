@@ -110,6 +110,20 @@ class ResConfigSettings(models.TransientModel):
         default=90,
         help="Email and phone left in a complaint are erased this many days after it is resolved. 0 keeps them.")
 
+    bus_fines_monthly_cap = fields.Integer(
+        string="Monthly cap of fines per driver ($)", config_parameter='bus_tracking.fines_monthly_cap', default=0,
+        help="A confirmed fine never takes a driver over this in a month (in Ecuador, fines may not exceed 10 % of "
+             "the pay). 0: no cap.")
+    bus_fines_real = fields.Boolean(
+        string="The fines are real", config_parameter='bus_tracking.fines_real',
+        help="Without it every fine says it is a demonstration with fictitious amounts.")
+
+    @api.constrains('bus_fines_monthly_cap')
+    def _check_fines_cap(self):
+        for settings in self:
+            if settings.bus_fines_monthly_cap < 0:
+                raise ValidationError(_("The monthly cap of fines cannot be negative."))
+
     def action_traccar_test_connection(self):
         conf = {
             'url': (self.traccar_url or '').rstrip('/'),

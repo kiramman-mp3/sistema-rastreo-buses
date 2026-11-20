@@ -45,6 +45,9 @@ class BusAlert(models.Model):
     trip_id = fields.Many2one('bus.trip', string="Trip", ondelete='set null', index=True)
     stop_id = fields.Many2one('bus.route.stop', string="Stop", ondelete='set null')
     delay_min = fields.Float(help="Minutes after the planned time.")
+    fine_checked = fields.Boolean(
+        default=False, index=True, copy=False,
+        help="The fine detector already looked at this alert (bus.fine._cron_detect).")
 
     def init(self):
         # One open alert per bus and kind, enforced by the database.
