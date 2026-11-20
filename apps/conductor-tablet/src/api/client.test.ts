@@ -88,4 +88,22 @@ describe('driver API client', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('http://odoo:8069/bus_tracking/driver/client_error');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual(report);
   });
+
+  test('asks for the fines in the language of the app', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(json(200, { demo: true, fines: [] }));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: store(), fetch: fetchMock });
+    await expect(client.fines('qu')).resolves.toEqual({ demo: true, fines: [] });
+    expect(fetchMock.mock.calls[0][0]).toBe('http://odoo:8069/bus_tracking/driver/fines');
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ lang: 'qu' });
+  });
+
+  test('sends the statement on a fine and keeps the reason it was refused', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(json(409, { error: 'closed' }));
+    const client = createClient({ baseUrl: 'http://odoo:8069', store: store(), fetch: fetchMock });
+    const failure = client.appealFine(7, 'Iba al hospital', 'es');
+    await expect(failure).rejects.toBeInstanceOf(ApiError);
+    await expect(failure).rejects.toMatchObject({ status: 409, code: 'closed' });
+    expect(fetchMock.mock.calls[0][0]).toBe('http://odoo:8069/bus_tracking/driver/fines/appeal');
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ id: 7, text: 'Iba al hospital', lang: 'es' });
+  });
 });
