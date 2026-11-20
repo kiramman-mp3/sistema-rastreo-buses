@@ -467,6 +467,28 @@ class BusFineDetect(models.Model):
             pass
         return ''
 
+    def _headline_text(self):
+        """One line for a kanban card: the figure that makes the fine."""
+        self.ensure_one()
+        f = self._evidence().get('facts') or {}
+        try:
+            if self.rule == 'speeding':
+                return _("%(max)s km/h · %(seconds)s s above %(threshold)s", **f)
+            if self.rule == 'off_route':
+                return _("%(max_m)s m off the route · %(minutes)s min", max_m=f['max_m'],
+                         minutes=round(f['seconds'] / 60.0, 1))
+            if self.rule == 'long_stop':
+                return _("Stopped %(minutes)s min", **f)
+            if self.rule == 'skipped_stop':
+                return _("%(stop)s · passed %(min_m)s m away", **f)
+            if self.rule == 'late_start':
+                return _("%(delay)s min late", **f) if f.get('started') else _("Never started")
+            if self.rule == 'incomplete_trip':
+                return _("%(reached)s of %(total)s stops", **f)
+        except (KeyError, TypeError, ValueError):
+            pass
+        return ''
+
     def _check_text(self, check):
         """(label, detail) of one check, in the language of the reader."""
         key, ok, p = check.get('key'), check.get('ok'), check.get('params') or {}
