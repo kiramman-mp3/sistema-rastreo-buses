@@ -365,7 +365,7 @@ class BusFine(models.Model):
         if not self.can_appeal:
             raise UserError(_("This fine can no longer be appealed."))
         self._set({'state': 'appealed', 'appeal_text': text, 'appeal_date': fields.Datetime.now()})
-        self.message_post(body=_("The driver appealed: %s", text))
+        self.message_post(body=_("The driver appealed: %s", text), author_id=self.driver_id.partner_id.id)
         return True
 
     def action_accept_appeal(self):
