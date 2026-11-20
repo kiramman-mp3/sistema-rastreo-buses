@@ -144,6 +144,8 @@ Antes de la primera puesta en marcha real, fija las versiones de `ODOO_IMAGE` y 
 
 Si una versión renombra menús o textos, agrega `--i18n-overwrite` al paso 4: sin él, Odoo conserva las traducciones que ya estaban en la base. La 16.0.1.9.0 recarga sola las del módulo; en el despliegue del 18-nov se corrió con `--i18n-overwrite` porque la migración aún no lo hacía (DEF-077). La 16.0.1.9.0 también retira Grafana: borra sus vistas, su tabla y el rol `grafana_reader` (en Supabase se concede primero al usuario actual, DEF-076); después quita las variables `GRAFANA_*` de `.env.prod` y corre `up -d --remove-orphans` para eliminar su contenedor.
 
+La 16.0.1.10.0 agrega las multas: marca como revisadas por el detector todas las alertas que ya existían (no se multa con historia) y activa el dólar. Corre el paso 4 con `--i18n-overwrite` para cargar sus textos en español y kichwa.
+
 La versión 16.0.1.2.0 del módulo convierte a los choferes existentes en usuarios de portal y la 16.0.1.3.0 rellena la hora de los incidentes viejos; las dos corren solas en el paso 4. La 16.0.1.8.0 borra las credenciales QR guardadas y las revoca, porque las copias de seguridad anteriores las contienen: **genera e imprime una credencial nueva para cada chofer** después de actualizar (mientras tanto entran con usuario y contraseña).
 
 ## Empezar de cero

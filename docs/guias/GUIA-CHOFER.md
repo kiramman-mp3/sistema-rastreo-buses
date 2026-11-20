@@ -46,11 +46,21 @@ Si la oficina te asigna un recorrido (campo **Chofer** del horario o del recorri
 
 La tableta toma los recorridos de las próximas 24 horas cada vez que entras o la app se reconecta; si la oficina cambia o quita uno, el aviso se actualiza la próxima vez. Al cerrar sesión se borran, para que el siguiente chofer no reciba los tuyos. La primera vez, Android pide permiso para notificaciones: acéptalo. En Android 14, para que el aviso salga al minuto exacto, activa *Alarmas y recordatorios* para Buses UTA en los ajustes de la app; sin eso puede llegar unos minutos tarde.
 
+### Mis multas
+
+En la pantalla de elegir bus, antes de iniciar el turno, el botón **Mis multas** muestra las multas que la oficina **ya confirmó** (las que todavía revisa no aparecen). Durante el turno no se puede abrir: no distrae mientras manejas. Mientras la empresa no use multas reales, un aviso arriba dice que son de demostración y que los montos son ficticios.
+
+- Cada multa dice el tipo (exceso de velocidad, desvío de ruta, parada larga, parada omitida, salida tardía o recorrido incompleto), el monto, la fecha, el bus y su estado: **Multada**, **Descargo enviado: en revisión**, **Descargo rechazado** o **Descargo aceptado: multa anulada**.
+- Al abrirla ves **Por qué** (lo que midió el sistema, por ejemplo «circuló por encima de 70 km/h durante 47 s seguidos») y **Lo que el sistema comprobó**: que eras el chofer del turno o del recorrido, que no habías reportado un incidente que lo explique y que el GPS tenía señal suficiente.
+- **Descargo**: si no estás de acuerdo, escribe qué pasó (hasta 1000 caracteres) y pulsa **Enviar descargo**. Se envía **una sola vez** y no se puede cambiar, y solo durante el plazo que indica la tarjeta (3 días por defecto). Cuando la oficina lo resuelve, ves su respuesta en la misma multa.
+- Desliza hacia abajo para actualizar la lista. Necesita señal: las multas no se guardan en la tableta.
+
 ## Qué ve el sistema de ti
 
 - Posición, rumbo y hora del bus **solo con turno abierto**.
 - Tu nombre en el mapa en vivo del personal (el pasajero no ve tu nombre ni la placa).
 - Incidentes que reportes.
+- Las multas que propone a partir de las alertas del bus durante tu turno o tu recorrido. Una persona de la oficina las revisa antes de confirmarlas, y tú puedes responder a cada una.
 
 No ve mensajes, fotos ni contactos. Tu empresa debe pedirte que aceptes este seguimiento por escrito.
 
