@@ -1387,3 +1387,41 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Suite completa: 557 de 557 pruebas de Odoo.
 - Siguen pendientes, fuera del alcance de este trabajo: firmar el IPA (necesita cuenta de Apple) y la fase 46 (jornada real con tabletas).
 
+
+## 2026-11-20: control de multas (demostración)
+
+### Qué se hizo
+
+- Pedido del usuario: un control de multas para demostrar cómo el sistema apoyaría las multas reales de la empresa. Las multas son ficticias, pero cada una se puede verificar con los datos del GPS. Decisiones: columna *Apelada* con descargo desde la tableta, montos en dólares, multas también de los recorridos simulados, límite de 50 km/h con tolerancia hasta 70 km/h. Plan en [`PLAN-MULTAS.md`](../arquitectura/PLAN-MULTAS.md).
+- M1 (`feature/multas-modelo`): `bus.fine.type` con 6 reglas iniciales (velocidad, desvío, parada larga, parada omitida, salida tardía, recorrido incompleto) y `bus.fine` con sus estados *Nueva, En revisión, Multada, Apelada, Descartada*, descarte con motivo, descargo único dentro del plazo, reincidencia y tope mensual. Migración 16.0.1.10.0: las alertas que ya existían quedan revisadas, no se multa con historia.
+- M2 (`feature/multas-deteccion`): detector que mide de nuevo cada alerta cerrada con las posiciones guardadas, congela la evidencia en la multa y hace las comprobaciones (chofer identificado, sin incidentes, señal GPS suficiente). Si falla una, la multa nace descartada por el sistema. La parada larga ahora también se detecta cuando el bus vuelve a moverse. Simulador: exceso a 82 km/h, nuevos escenarios *exceso tolerado* y *parada larga*, chofer opcional y el juego *Escenarios de multas*.
+- M3 (`feature/multas-panel`): kanban, ficha con el porqué, las comprobaciones, el mapa (ruta, corredor en metros, tramo en rojo) y el gráfico de velocidad, lista, gráfico y pivote; menú *Multas* y *Tipos de multa*.
+- M4 (`feature/multas-tableta`): `/bus_tracking/driver/fines` y `/bus_tracking/driver/fines/appeal`; pantalla *Mis multas* en la tableta (solo antes del turno), app 1.4.0.
+- M5 (`feature/multas-reportes`): pestaña *Multas* del tablero (5 cifras, 4 gráficos, mapa y tabla por chofer) y multas por chofer y por tipo en el PDF.
+- Traducciones al español y al kichwa de todo lo nuevo y de 30 textos del panel que ya faltaban (`chore/traducir-multas`).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo al cerrar cada fase (comando del CI) | M1 584/586, M2 603/605, M3 610/612, M4 618/620, M5 622/624; las 2 que fallan siempre son de Grafana (DEF-084) |
+| Pruebas nuevas de multas | 59: estados (16), detección (19), panel (7), API del chofer (8), estadísticas (4) y escenarios del simulador |
+| Tableta: lint, typecheck y Jest | Sin errores; 197 de 197 |
+| `qa/traducciones.py` | `es.po`: 0 sin traducir, 0 modelos inexistentes |
+| Revisión visual en una base de demostración aparte (`fines_demo`, con `dev_seed.py` y los escenarios de multas en L2 y L4) | Kanban, ficha de velocidad y de desvío, tipos de multa, tablero y la tableta en web: sin errores de consola después de corregir DEF-081 a DEF-083 |
+| Textos en el idioma de quien lee | Resumen, comprobaciones y tipos en español; titular en kichwa |
+
+### Problemas encontrados
+
+- Cada contenedor temporal de Odoo tenía su propio almacén de archivos y los assets respondían 500: el servidor de demostración se levantó con un volumen fijo.
+- El servidor de demostración seguía con el código de antes y la tableta no encontraba los endpoints nuevos: se reinició.
+- Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit: como era local y el último, se deshizo con `reset --soft` y se rehízo en dos.
+- Un heredoc de Git Bash cambió las barras invertidas de una expresión regular: el script se escribió como archivo.
+- La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo `buses` sigue en 16.0.1.6.0 y su rol `grafana_reader` conserva 9 permisos (DEF-084).
+
+### Pendiente o sin confirmar
+
+- DEF-084: actualizar la base de desarrollo `buses` a 16.0.1.10.0 o hacer que la prueba de Grafana use su propio rol.
+- Multas reales: reglamento interno aprobado por el Ministerio del Trabajo, montos reales y plazo de conservación de las multas.
+- Revisión del kichwa de las multas por una persona hablante.
+- Nada de esto está desplegado ni etiquetado: `develop` sin integrar a `main`, sin build de la app 1.4.0 y sin `push`.
