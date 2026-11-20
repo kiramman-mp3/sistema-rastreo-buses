@@ -388,3 +388,14 @@
     .o_dash_card_value b { font-size: 34px; }
 }
 
+
+/* Fines tab: the map of where they happened and its legend. */
+.o_dash_map_figure { margin-top: 16px; }
+.o_dash_fines_map { height: 360px; border-radius: 6px; border: 1px solid rgba(23, 32, 37, 0.12); }
+.o_dash_fines_legend { display: flex; flex-wrap: wrap; gap: 16px; list-style: none; padding: 0; margin: 8px 0 0; }
+.o_dash_fines_dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.o_dash_fines_dot.is-new { background: #3D4F8A; }
+.o_dash_fines_dot.is-review { background: #C98A00; }
+.o_dash_fines_dot.is-fined { background: #7A1A22; }
+.o_dash_fines_dot.is-appealed { background: #9A4A12; }
+.o_dash_fines_dot.is-discarded { background: #8A9499; }
