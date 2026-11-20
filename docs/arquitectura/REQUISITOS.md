@@ -46,7 +46,7 @@ Cada uno tiene un criterio de aceptación comprobable y la prueba o evidencia qu
 | RF-14 | **Demostrar el sistema con Traccar Client** desde un celular por datos móviles (R9) | Un gestor activa «Start demo report» en un bus: solo ese bus acepta posiciones sin turno, por 8 horas | `tests/test_demo_report.py`; `docs/guias/DEMO-TRACCAR-CLIENT.md` |
 | RF-15 | **Turnos y app del chofer**: iniciar y terminar turno, GPS, incidentes y SOS, avisos | Un chofer solo ve su turno; el GPS se apaga al terminar; el SOS exige mantener pulsado | `tests/test_driver_*.py`; 167 pruebas de Jest; `qa/tablet_*.py` |
 | RF-16 | **Quejas de pasajeros** con protección contra abuso | Folio, límite por IP, contacto borrado a los 90 días de resuelta | `tests/test_complaints.py` |
-| RF-17 | **Idiomas**: español por defecto, inglés y kichwa en web, tableta y oficina | Los 769 textos del módulo traducidos, sin entradas vacías | `qa/traducciones.py`, `TestLanguages`; `docs/guias/GLOSARIO-KICHWA.md` |
+| RF-17 | **Idiomas**: español por defecto, inglés y kichwa en web, tableta y oficina | Los 1046 textos del módulo traducidos, sin entradas vacías | `qa/traducciones.py`, `TestLanguages`; `docs/guias/GLOSARIO-KICHWA.md` |
 
 ## 4. Requisitos no funcionales
 

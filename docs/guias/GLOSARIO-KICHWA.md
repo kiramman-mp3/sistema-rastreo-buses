@@ -52,7 +52,7 @@ accidente, tráfico, cámara, multa.
 ## El panel de Odoo (la oficina)
 
 Odoo no trae kichwa. El módulo agrega el idioma `qu_EC` (`data/languages.xml`) y su catálogo
-`addons/bus_tracking/i18n/qu.po` con los 769 textos del módulo. Cada persona lo elige en
+`addons/bus_tracking/i18n/qu.po` con los 1046 textos del módulo. Cada persona lo elige en
 **Preferencias > Idioma**. La tableta también lo pide, y por eso los avisos del servidor («Hasta 60 km/h»,
 etc.) salen en kichwa.
 
