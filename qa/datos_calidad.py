@@ -89,7 +89,7 @@ PROBLEMAS = [
     ('Multas (20-nov)', 'Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit', 'H'),
     ('Multas (20-nov)', 'Un heredoc de Git Bash cambió las barras invertidas de una expresión regular', 'H'),
     ('Multas (20-nov)', 'La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo sigue en 16.0.1.6.0', 'P'),
-    ('Reinstalación (20-nov)', 'Puerto 8069 ocupado por el Odoo de otro proyecto de la máquina (odoo16): se detuvo sin borrarlo', 'E'),
+    ('Reinstalación (20-nov)', 'Puerto 8069 ocupado por el Odoo de otro proyecto de la máquina (odoo16): se volvió a encender y el Odoo del proyecto quedó en 8070 con ODOO_PORT', 'E'),
 ]
 
 # Defect log: id, date, who found it, description, where, root cause, category, status, test that guards it.
