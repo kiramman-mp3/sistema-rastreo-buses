@@ -170,6 +170,29 @@
                             </div>
                         </div>
                     </div>
+                    <h2>Fines</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="bus_fines_monthly_cap"/>
+                                <div class="text-muted">
+                                    The thresholds and amounts of each rule are in Buses &gt; Fines &gt; Fine types.
+                                </div>
+                                <field name="bus_fines_monthly_cap"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="bus_fines_real"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="bus_fines_real"/>
+                                <div class="text-muted">
+                                    Leave it off while the fines are a demonstration with fictitious amounts.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <h2>Passenger site</h2>
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box">
