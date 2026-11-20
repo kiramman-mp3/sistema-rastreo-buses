@@ -175,13 +175,9 @@ export class FineEvidence extends Component {
             }
             const first = run[0];
             const last = run[run.length - 1];
-            L.marker([first[1], first[2]], { title: _t("Start"), alt: _t("Start") })
-                .bindTooltip(`${escapeHtml(_t("Start"))} · ${escapeHtml(localTime(first[0]))}`)
-                .addTo(map);
+            this.flag(first, _t("Start"), "start").addTo(map);
             if (last !== first) {
-                L.marker([last[1], last[2]], { title: _t("End"), alt: _t("End"), opacity: 0.75 })
-                    .bindTooltip(`${escapeHtml(_t("End"))} · ${escapeHtml(localTime(last[0]))}`)
-                    .addTo(map);
+                this.flag(last, _t("End"), "end").addTo(map);
             }
             focusBounds.push(...line);
         }
@@ -200,6 +196,22 @@ export class FineEvidence extends Component {
         }
         // The form may lay out after the map: measure again once the browser painted it.
         setTimeout(() => map.invalidateSize(), 50);
+    }
+
+    /** A labelled pin drawn with HTML: Leaflet's default marker needs pictures this module does not ship. */
+    flag(point, label, kind) {
+        const L = window.L;
+        const text = `${escapeHtml(label)} · ${escapeHtml(localTime(point[0]))}`;
+        return L.marker([point[1], point[2]], {
+            title: `${label} · ${localTime(point[0])}`,
+            keyboard: false,
+            icon: L.divIcon({
+                className: "",
+                html: `<span class="o_bus_fine_flag o_bus_fine_flag_${kind}">${text}</span>`,
+                iconSize: null,
+                iconAnchor: [0, 0],
+            }),
+        });
     }
 
     drawChart() {
