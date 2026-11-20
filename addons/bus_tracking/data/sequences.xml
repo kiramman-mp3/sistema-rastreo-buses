@@ -6,4 +6,10 @@
         <field name="prefix">Q-</field>
         <field name="padding">5</field>
     </record>
+    <record id="seq_bus_fine" model="ir.sequence">
+        <field name="name">Driver fines</field>
+        <field name="code">bus.fine</field>
+        <field name="prefix">MUL-</field>
+        <field name="padding">4</field>
+    </record>
 </odoo>
