@@ -170,7 +170,7 @@ class BusFine(models.Model):
     amount_note = fields.Char(readonly=True)
     recurrent = fields.Boolean(string="Repeat offence", readonly=True)
 
-    reviewer_id = fields.Many2one('res.users', string="Decided by", readonly=True, tracking=True)
+    reviewer_id = fields.Many2one('res.users', string="Reviewer", readonly=True, tracking=True)
     decided_at = fields.Datetime(string="Decided at", readonly=True)
     discard_reason = fields.Selection(DISCARD_REASONS, tracking=True)
     discard_note = fields.Text(string="Discard note")
