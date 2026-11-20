@@ -17,7 +17,12 @@
 .o_bus_fine_checks li.o_bus_fine_ko span,
 .o_bus_fine_checks li.o_bus_fine_ko b { color: var(--bus-rojo, #B3261E); }
 
-.o_bus_fine_evidence { width: 100%; }
+.o_field_widget.o_field_bus_fine_evidence,
+.o_bus_fine_evidence { display: block; width: 100%; }
+.o_bus_fine_flag { display: inline-block; transform: translate(-50%, -130%); white-space: nowrap; padding: 2px 8px;
+    border-radius: 10px; font-size: 12px; font-weight: 700; color: #FFFFFF; background: #B3261E;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.o_bus_fine_flag_end { background: #172025; }
 .o_bus_fine_map { height: 380px; width: 100%; border-radius: 6px; border: 1px solid var(--bus-line-dark, #C9D1CE); }
 .o_bus_fine_legend { display: flex; flex-wrap: wrap; gap: 16px; list-style: none; padding: 0; margin: 8px 0 0; font-size: 0.9em; }
 .o_bus_fine_swatch { display: inline-block; width: 14px; height: 4px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
