@@ -193,8 +193,18 @@ class BusAlert(models.Model):
         ))
         return alert
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        alerts = super().create(vals_list)
+        if any(alert.state == 'closed' for alert in alerts):
+            self.env['bus.fine']._trigger_detection()
+        return alerts
+
     def _close(self, end_time):
-        self.filtered(lambda a: a.state == 'open').write({'state': 'closed', 'end_time': end_time})
+        closing = self.filtered(lambda a: a.state == 'open')
+        closing.write({'state': 'closed', 'end_time': end_time})
+        if closing:
+            self.env['bus.fine']._trigger_detection()
 
     @api.model
     def _on_position(self, vehicle, speed, fix_time):
