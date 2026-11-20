@@ -125,4 +125,4 @@ Categorías: Pruebas y su entorno; Herramientas de shell y edición; Entorno, de
 | 60 | Multas (20-nov) | Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit | Herramientas de shell y edición |
 | 61 | Multas (20-nov) | Un heredoc de Git Bash cambió las barras invertidas de una expresión regular | Herramientas de shell y edición |
 | 62 | Multas (20-nov) | La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo sigue en 16.0.1.6.0 | Pruebas y su entorno |
-| 63 | Reinstalación (20-nov) | Puerto 8069 ocupado por el Odoo de otro proyecto de la máquina (odoo16): se detuvo sin borrarlo | Entorno, dependencias y configuración |
+| 63 | Reinstalación (20-nov) | Puerto 8069 ocupado por el Odoo de otro proyecto de la máquina (odoo16): se volvió a encender y el Odoo del proyecto quedó en 8070 con ODOO_PORT | Entorno, dependencias y configuración |

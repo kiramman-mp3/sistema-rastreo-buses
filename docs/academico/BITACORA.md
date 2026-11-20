@@ -1451,7 +1451,7 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 
 ### Problemas encontrados
 
-- El puerto 8069 lo ocupaba el Odoo de otro proyecto de la máquina (`odoo16`): se detuvo sin borrarlo (`docker start odoo16` lo enciende de nuevo).
+- El puerto 8069 lo ocupaba el Odoo de otro proyecto de la máquina (`odoo16`): se detuvo durante la instalación y se volvió a encender; el Odoo del proyecto queda en el puerto 8070 con `ODOO_PORT=8070` en el `.env` local.
 - Al cerrar las fases de multas no se corrió flake8 del módulo (DEF-085).
 - Las pruebas del simulador usaban una ruta de tramos de 5,5 km y no cubrían una línea corta como L1 (DEF-086).
 
