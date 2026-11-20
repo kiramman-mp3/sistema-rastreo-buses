@@ -177,7 +177,7 @@ class BusTripSimulator(models.AbstractModel):
         arrival = [ln.planned_time + timedelta(minutes=d) for ln, d in zip(lines, delays)]
         skip = {n // 2} if spec.get('skip') == 'middle' else set()
         last = n - 2 if spec.get('stop_before_end') else n - 1
-        # the longest stretch carries the deviation and the long stop
+        # the longest stretch carries the speeding run, the deviation and the long stop
         durations = [(arrival[i + 1] - arrival[i]).total_seconds() for i in range(n - 1)]
         long_leg = max(range(n - 1), key=lambda i: durations[i]) if n > 1 else 0
         if spec.get('long_stop'):
@@ -211,7 +211,7 @@ class BusTripSimulator(models.AbstractModel):
             driving = max(seconds - stand, 1.0)
             kmh = distance / 1000.0 / (driving / 3600.0)
             every = POSITION_EVERY_S
-            if spec.get('speeding') and i == 0:
+            if spec.get('speeding') and i == long_leg:
                 kmh, every = spec['speeding'], FAST_EVERY_S
             count = max(int(driving // every), 4 if stand else 0)
             halted = False
@@ -243,8 +243,32 @@ class BusTripSimulator(models.AbstractModel):
         return lat, lon
 
     @api.model
+    def _off_route_seconds(self, route):
+        """How long the deviation scenario keeps the bus off the line on the longest stretch of a route: the same
+        sampling as `_replay`, one position a minute pushed aside between 10 % and 90 % of the way."""
+        self._ensure_plan(route)
+        offsets = [s.planned_offset_min for s in route.stop_ids.sorted(lambda s: (s.sequence, s.id))]
+        longest = max((b - a for a, b in zip(offsets, offsets[1:])), default=0)
+        driving = longest * 60.0 - DWELL_S - 30
+        count = int(driving // POSITION_EVERY_S)
+        aside = [k for k in range(1, count) if 0.1 < k / float(count) < 0.9]
+        return driving * (aside[-1] - aside[0]) / count if len(aside) > 1 else 0.0
+
+    @api.model
     def _simulate_fines_set(self, route, driver=None):
-        """One simulated trip per scenario of FINES_SET on a route, each on its own past day."""
+        """One simulated trip per scenario of FINES_SET on a route, each on its own past day.
+
+        The deviation and the speeding run need a stretch of several minutes: on a route of short stretches they
+        would leave no alert and their fines would be missing without a word, so such a route is refused and the
+        routes that fit are named."""
+        needed = self.env['bus.alert']._param('off_route_minutes', 3) * 60
+        if self._off_route_seconds(route) < needed:
+            fit = self.env['bus.route'].search([('id', '!=', route.id)]).filtered(
+                lambda r: len(r.stop_ids) > 1 and self._off_route_seconds(r) >= needed)
+            raise UserError(_("The stretches of %(route)s are too short to show a deviation of %(minutes)s minutes "
+                              "and a sustained speeding run. Choose a route with a longer stretch: %(routes)s.",
+                              route=route.display_name, minutes=needed // 60,
+                              routes=', '.join(fit.mapped('display_name')) or _("none")))
         trips = self.env['bus.trip']
         for days_ago, scenario in enumerate(FINES_SET, start=1):
             trips |= self._simulate(route, scenario, days_ago=days_ago, driver=driver)
