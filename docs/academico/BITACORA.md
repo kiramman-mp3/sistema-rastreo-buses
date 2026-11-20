@@ -1421,7 +1421,41 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 
 ### Pendiente o sin confirmar
 
-- DEF-084: actualizar la base de desarrollo `buses` a 16.0.1.10.0 o hacer que la prueba de Grafana use su propio rol.
 - Multas reales: reglamento interno aprobado por el Ministerio del Trabajo, montos reales y plazo de conservación de las multas.
 - Revisión del kichwa de las multas por una persona hablante.
 - Nada de esto está desplegado ni etiquetado: `develop` sin integrar a `main`, sin build de la app 1.4.0 y sin `push`.
+
+## 2026-11-20: reinstalación del entorno de desarrollo y prueba del control de multas
+
+### Qué se hizo
+
+- Pedido del usuario: el contenedor del proyecto estaba desactualizado; borrarlo, instalarlo de nuevo con los pasos del README y probar el control de multas. Grafana ya no es parte del sistema.
+- Respaldo de la base `buses` anterior (`pg_dump`, 4,8 MB) antes de borrar nada.
+- `docker compose down --volumes --remove-orphans`: se borraron los contenedores de Odoo, Postgres y Grafana, sus volúmenes (también `grafana-data`) y las imágenes `rastreo-odoo:16.0` y `grafana-oss:11.6.0`.
+- Instalación según el README: `.env` desde `.env.example`, imagen reconstruida sin caché, `docker compose up -d` (Postgres, Odoo y Traccar 6.16.0), base `buses` con `-i bus_tracking --load-language=es_EC` y `scripts/dev_seed.py` (4 líneas, 6 buses, `chofer1` y `chofer2`).
+- `fix/fines-flake8`: los 6 avisos de flake8 del código de multas (DEF-085).
+- `fix/fines-set-short-stretches`: *Escenarios de multas* en L1 no daba las multas de velocidad ni de desvío (DEF-086). El exceso va ahora en el tramo más largo y el asistente rechaza una línea donde no cabe un desvío de 3 minutos, nombrando las que sirven. Prueba nueva y traducción al español y al kichwa del aviso.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Instalación del módulo en la base nueva | Sin errores; versión 16.0.1.10.0, 6 tipos de multa, sin el rol `grafana_reader` |
+| Suite de Odoo (comando del CI) antes y después de las correcciones | 624/624 y 625/625 (DEF-084 cerrado: era el estado de la base vieja) |
+| `python -m flake8 addons/bus_tracking` | Sin avisos tras DEF-085 |
+| Tableta: lint, typecheck y Jest | Sin errores; 197 de 197 |
+| `qa/traducciones.py` | `es.po`: 0 sin traducir, 0 modelos inexistentes |
+| Escenarios de multas con `chofer1` en L4 | 6 multas: velocidad (82 km/h, 820 s sobre 70, $25), desvío (501 m, 10 min, $20), parada larga (26 min, $10), parada omitida ($10), recorrido incompleto ($15) y salida tardía descartada por el sistema ($5); el exceso dentro de la tolerancia no genera multa |
+| Escenarios de multas en L1 | Aviso en español y kichwa que nombra L2, L3 y L4 |
+| Panel por HTTP como admin | Vistas kanban, ficha, lista y búsqueda; agrupación por estado; pestaña de multas del tablero; paquete JS del panel 200 |
+
+### Problemas encontrados
+
+- El puerto 8069 lo ocupaba el Odoo de otro proyecto de la máquina (`odoo16`): se detuvo sin borrarlo (`docker start odoo16` lo enciende de nuevo).
+- Al cerrar las fases de multas no se corrió flake8 del módulo (DEF-085).
+- Las pruebas del simulador usaban una ruta de tramos de 5,5 km y no cubrían una línea corta como L1 (DEF-086).
+
+### Pendiente o sin confirmar
+
+- La revisión visual en el navegador de esta reinstalación no se repitió: la del día se hizo en la base `fines_demo`.
+- Los mismos pendientes de la entrada anterior: multas reales, revisión del kichwa, sin `push`, sin integrar a `main` y sin build de la app 1.4.0.

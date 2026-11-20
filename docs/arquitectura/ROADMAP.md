@@ -32,7 +32,7 @@ Cifras tras la fase 45 (17-nov): 579 pruebas de Odoo, 179 de Jest, 97 % de cober
 
 Cifras al 18-nov: 555 pruebas de Odoo (bajan al retirar las de Grafana), 186 de Jest, 75 defectos registrados y cerrados.
 
-Cifras al 20-nov (control de multas): 624 pruebas de Odoo, de las que pasan 622; las 2 que fallan son de la migración de Grafana y dependen de la base de desarrollo, que sigue en 16.0.1.6.0 (DEF-084). 197 pruebas de Jest. 84 defectos registrados, 82 cerrados (abiertos: DEF-079 y DEF-084).
+Cifras al 20-nov (control de multas, tras reinstalar el entorno de desarrollo desde cero): 625 pruebas de Odoo, todas pasan (DEF-084 cerrado). 197 pruebas de Jest. 86 defectos registrados, 85 cerrados (abierto: DEF-079).
 
 ## 2. Lo que falta
 
