@@ -10,7 +10,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 from .bus_trip import LOCAL_OFFSET
-from .utils import int_param
+from .utils import int_param, tile_url
 
 RULES = [
     ('speeding', "Speeding"),
@@ -170,7 +170,7 @@ class BusFine(models.Model):
     amount_note = fields.Char(readonly=True)
     recurrent = fields.Boolean(string="Repeat offence", readonly=True)
 
-    reviewer_id = fields.Many2one('res.users', string="Decided by", readonly=True, tracking=True)
+    reviewer_id = fields.Many2one('res.users', string="Reviewer", readonly=True, tracking=True)
     decided_at = fields.Datetime(string="Decided at", readonly=True)
     discard_reason = fields.Selection(DISCARD_REASONS, tracking=True)
     discard_note = fields.Text(string="Discard note")
@@ -183,6 +183,8 @@ class BusFine(models.Model):
     appeal_answer = fields.Text(string="Answer to the driver")
     can_appeal = fields.Boolean(compute='_compute_can_appeal')
     color = fields.Integer(compute='_compute_color')
+    headline = fields.Char(string="In short", compute='_compute_headline')
+    map_tile_url = fields.Char(compute='_compute_map_tile_url')
     demo_notice = fields.Boolean(compute='_compute_demo_notice')
 
     _sql_constraints = [
@@ -198,6 +200,17 @@ class BusFine(models.Model):
     def _compute_color(self):
         for fine in self:
             fine.color = SEVERITY_COLOR.get(fine.severity, 0)
+
+    @api.depends('evidence_json', 'rule')
+    @api.depends_context('lang')
+    def _compute_headline(self):
+        for fine in self:
+            fine.headline = fine._headline_text()
+
+    def _compute_map_tile_url(self):
+        url = tile_url(self.env)
+        for fine in self:
+            fine.map_tile_url = url
 
     def _compute_demo_notice(self):
         real = self.env['ir.config_parameter'].sudo().get_param('bus_tracking.fines_real') in ('1', 'True', 'true')

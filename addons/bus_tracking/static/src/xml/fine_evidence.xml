@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="bus_tracking.FineEvidence" owl="1">
+        <div class="o_bus_fine_evidence">
+            <t t-if="hasMap">
+                <div class="o_bus_fine_map" t-ref="map" role="img" aria-label="Map of the evidence of the fine"/>
+                <ul class="o_bus_fine_legend">
+                    <li t-foreach="legend" t-as="item" t-key="item.label">
+                        <span class="o_bus_fine_swatch" t-attf-style="background: {{item.color}}"/>
+                        <t t-esc="item.label"/>
+                    </li>
+                </ul>
+            </t>
+            <p t-else="" class="text-muted">This fine has no positions to show.</p>
+            <div t-if="showChart" class="o_bus_fine_chart">
+                <canvas t-ref="chart" role="img" aria-label="Speed of the bus over time"/>
+            </div>
+        </div>
+    </t>
+</templates>
