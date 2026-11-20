@@ -347,7 +347,8 @@ class BusFineDetect(models.Model):
                  'at': _local_clock(when), 'planned': _local_clock(line.planned_time) if trip else ''}
         return {
             'start': when, 'end': when, 'value': closest_m or 0.0, 'seconds': 0,
-            'lat': closest.latitude if closest else stop.latitude, 'lon': closest.longitude if closest else stop.longitude,
+            'lat': closest.latitude if closest else stop.latitude,
+            'lon': closest.longitude if closest else stop.longitude,
             'facts': facts, 'checks': [self._gps_check(around, 'skipped_stop')],
             'evidence': {'track': _track(positions, [closest.id] if closest else []),
                          'route': self._route_line(route), 'stops': self._stops(route, statuses),
@@ -512,9 +513,9 @@ class BusFineDetect(models.Model):
         if key == 'stood':
             if ok:
                 return _("The bus stopped"), _("The last position shows it standing still: the signal did not cut out "
-                                                "while driving")
+                                               "while driving")
             return _("The signal cut out while driving"), _("The last position was moving: the end of the trip may "
-                                                             "be a lost signal")
+                                                            "be a lost signal")
         if key == 'threshold':
             return _("Beyond the threshold of the rule"), self.type_id.description or ''
         return key or '', ''
