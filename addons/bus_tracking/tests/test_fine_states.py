@@ -36,7 +36,7 @@ class TestFineStates(BusCase):
         values = {
             'type_id': self.speeding.id, 'rule': 'speeding', 'severity': 'serious', 'driver_id': self.driver.id,
             'vehicle_id': self.bus.id, 'occurred_at': fields.Datetime.now() - timedelta(hours=1),
-            'amount_proposed': 25.0, 'summary': 'test',
+            'amount_proposed': 25.0,
         }
         values.update(vals)
         return self.env['bus.fine'].sudo().create(values)

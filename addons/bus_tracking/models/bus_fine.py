@@ -155,7 +155,8 @@ class BusFine(models.Model):
     measured_seconds = fields.Integer(string="Duration (s)")
     threshold = fields.Float(string="Fine above", digits=(10, 1))
     unit = fields.Char()
-    summary = fields.Text(string="Why", help="Why the system proposes this fine, in plain words.")
+    summary = fields.Text(string="Why", compute='_compute_summary',
+                          help="Why the system proposes this fine, in plain words.")
     evidence_json = fields.Text(string="Evidence",
                                 help="The positions, the route and the stops seen by the system, kept with the fine "
                                      "because the positions themselves are deleted after a while.")
@@ -218,16 +219,21 @@ class BusFine(models.Model):
         return checks if isinstance(checks, list) else []
 
     @api.depends('checks_json')
+    @api.depends_context('lang')
     def _compute_check_lines(self):
         for fine in self:
             rows = []
-            for check in fine._checks():
-                ok = check.get('ok')
+            for check in fine._checks_rendered():
                 rows.append('<li class="%s"><span>%s</span> <b>%s</b>%s</li>' % (
-                    'o_bus_fine_ok' if ok else 'o_bus_fine_ko', '✔' if ok else '✘',
-                    _escape(check.get('label', '')),
-                    (' · %s' % _escape(check['detail'])) if check.get('detail') else ''))
+                    'o_bus_fine_ok' if check['ok'] else 'o_bus_fine_ko', '✔' if check['ok'] else '✘',
+                    _escape(check['label']), (' · %s' % _escape(check['detail'])) if check['detail'] else ''))
             fine.check_lines = '<ul class="o_bus_fine_checks">%s</ul>' % ''.join(rows) if rows else False
+
+    @api.depends('evidence_json', 'rule', 'vehicle_id.name')
+    @api.depends_context('lang')
+    def _compute_summary(self):
+        for fine in self:
+            fine.summary = fine._summary_text()
 
     @api.model_create_multi
     def create(self, vals_list):
