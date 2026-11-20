@@ -160,7 +160,10 @@ export default function Select() {
             {t('selectTitle')}
           </Txt>
         </View>
-        <Action label={t('signOut')} onPress={signOut} kind="quiet" />
+        <View style={styles.headActions}>
+          <Action label={t('finesOpen')} onPress={() => router.push('/fines')} kind="quiet" />
+          <Action label={t('signOut')} onPress={signOut} kind="quiet" />
+        </View>
       </View>
 
       {offline ? (
@@ -299,6 +302,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: space[4],
+  },
+  headActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: space[3],
   },
   note: {
     paddingHorizontal: space[4],
