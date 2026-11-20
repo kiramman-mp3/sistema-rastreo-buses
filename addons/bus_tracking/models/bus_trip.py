@@ -391,6 +391,8 @@ class BusTrip(models.Model):
             })
             trip._compute_real_figures()
             trip._evaluate_rules(len(skipped), bool(visited))
+        # The rules of a trip wait for it to close before they become fines.
+        self.env['bus.fine']._trigger_detection()
 
     def _evaluate_rules(self, skipped, visited):
         """The rules that need the whole trip: stops never reached, an incomplete trip, a duration far from the plan."""

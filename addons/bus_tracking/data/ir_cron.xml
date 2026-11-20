@@ -129,4 +129,14 @@
         <field name="interval_type">days</field>
         <field name="numbercall">-1</field>
     </record>
+
+    <record id="cron_detect_fines" model="ir.cron">
+        <field name="name">Bus Tracking: propose fines from the closed alerts</field>
+        <field name="model_id" ref="model_bus_fine"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_detect()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+    </record>
 </odoo>

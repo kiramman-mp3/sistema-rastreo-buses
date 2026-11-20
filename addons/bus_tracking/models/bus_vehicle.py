@@ -182,6 +182,7 @@ class BusVehicle(models.Model):
         except IntegrityError:
             return False
         if not self.last_fix_time or fix_time >= self.last_fix_time:
+            resumed = bool(self.last_fix_time and self.last_speed <= MOVING_ABOVE_KMH < speed)
             self.write({
                 'last_latitude': lat,
                 'last_longitude': lon,
@@ -191,6 +192,8 @@ class BusVehicle(models.Model):
             })
             self._update_current_stop(lat, lon, fix_time)
             self.env['bus.alert']._on_position(self, speed, fix_time)
+            if resumed:
+                self.env['bus.alert']._on_resume(self, fix_time)
         return record
 
     def _update_current_stop(self, lat, lon, when):
