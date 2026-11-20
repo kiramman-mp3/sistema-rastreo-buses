@@ -84,6 +84,13 @@ Una sola cosa con significado por superficie; lo demás es inmediato.
 - **Color de la línea.** El texto del código sobre el chip de la línea es blanco o la tinta, según cuál contraste más con el color que puso la oficina (`readableOn`).
 - **Texto grande.** Con la fuente del sistema al 130 % o más no hay forma de que todo quepa en una vista: el turno y la selección pasan a hacer scroll, con los botones principales abajo, y las listas y la franja de paradas se acortan para que ningún nombre se parta.
 
+## Multas
+
+- **Kanban por estado** (*Nueva, En revisión, Multada, Apelada, Descartada*): el color de la tarjeta es la gravedad (amarillo leve, naranja grave, rojo muy grave) y nunca va solo, la gravedad también se lee en la barra de la columna. La tarjeta lleva una sola cifra, la que hace la multa (*82 km/h · 47 s sobre 70*).
+- **Ficha:** primero el porqué en palabras, después las comprobaciones con ✔ o ✘ y una frase, y al final la evidencia. El mapa usa la paleta del panel: la ruta en azul petróleo, lo que hizo el bus en tinta punteada y la infracción en rojo. El corredor permitido se dibuja en metros, no en píxeles, para que no engañe al hacer zoom. Inicio y fin son etiquetas de texto, no los marcadores de Leaflet (sin imágenes que puedan faltar).
+- **Gráfico de velocidad:** las líneas de 50 (límite) y 70 km/h (multa) van punteadas y con su nombre en la leyenda; los puntos del tramo multado van en rojo y más grandes.
+- **Tableta:** *Mis multas* está en la pantalla de selección, no en la del turno. Cada multa es una tarjeta con el tipo, el monto y su estado en palabras; el detalle repite el porqué y las comprobaciones que vio la oficina, y el descargo pide confirmación porque se envía una sola vez.
+
 ## No hacer
 
 Emojis como íconos · etiquetas en mayúsculas sobre los títulos · degradados · sombras en cosas quietas · *glassmorphism* · pulsos decorativos infinitos · tarjetas iguales en fila · números de ejemplo que parecen datos · imágenes IA · *mockups* de teléfono · `!important` salvo para ganarle a Odoo.
@@ -99,6 +106,8 @@ Emojis como íconos · etiquetas en mayúsculas sobre los títulos · degradados
 | `apps/conductor-tablet/src/ui/theme.ts` | Los mismos tokens para la tableta, modos día y noche |
 | `qa/contraste.py` | Medición de contrastes |
 | `qa/capturas_ui.py` | Capturas del portal y del panel para revisión visual |
+| `static/src/css/fines.css`, `static/src/js/fine_evidence.js` | Tarjetas, comprobaciones, mapa y gráfico de la evidencia de una multa |
+| `apps/conductor-tablet/app/fines.tsx` | Pantalla *Mis multas* de la tableta |
 
 ## Créditos
 
