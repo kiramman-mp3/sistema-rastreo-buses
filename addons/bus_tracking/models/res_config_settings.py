@@ -114,9 +114,6 @@ class ResConfigSettings(models.TransientModel):
         string="Monthly cap of fines per driver ($)", config_parameter='bus_tracking.fines_monthly_cap', default=0,
         help="A confirmed fine never takes a driver over this in a month (in Ecuador, fines may not exceed 10 % of "
              "the pay). 0: no cap.")
-    bus_fines_real = fields.Boolean(
-        string="The fines are real", config_parameter='bus_tracking.fines_real',
-        help="Without it every fine says it is a demonstration with fictitious amounts.")
 
     @api.constrains('bus_fines_monthly_cap')
     def _check_fines_cap(self):
