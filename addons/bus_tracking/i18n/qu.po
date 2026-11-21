@@ -162,8 +162,8 @@ msgstr "%(n)s chaskishka"
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_fine_stats.py:0
 #, python-format
-msgid "%(n)s confirmed fines (fictitious amounts while in demonstration)"
-msgstr "%(n)s multakuna chiqanchishka (rikuchinapak kashkakama kullkika mana chiqanchu)"
+msgid "%(n)s confirmed fines"
+msgstr "%(n)s multakuna chiqanchishka"
 
 #. module: bus_tracking
 #. odoo-python
@@ -432,13 +432,6 @@ msgstr "<span>Huachi</span>\n                            <span>Ingahurco</span>\
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "<strong>Data:</strong>"
 msgstr "<strong>Willaykuna:</strong>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
-msgid ""
-"<strong>Demonstration fine.</strong>\n"
-"                    The amounts are fictitious: they show how the system would support the fines of the company."
-msgstr "<strong>Rikuchinapak multa.</strong>\n                    Kullkika mana chiqanchu: empresapak multakunata sistema imashina yanapanata rikuchin."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
@@ -730,8 +723,8 @@ msgstr "Multashka kullki"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__amount
-msgid "Amount of a first fine of this type. Demonstration amounts."
-msgstr "Kay laya ñawpa multapak kullki. Rikuchinapak kullkikuna."
+msgid "Amount of a first fine of this type."
+msgstr "Kay laya ñawpa multapak kullki."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__active
@@ -3223,12 +3216,6 @@ msgstr "Latitudka -90 y 90 chawpipi, longitudka -180 y 180 chawpipi kana kan."
 #: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__password
 msgid "Leave it empty to keep the current password."
 msgstr "Kunan pakashka shimita sakinkapak chushakta sakiy."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid ""
-"Leave it off while the fines are a demonstration with fictitious amounts."
-msgstr "Multakuna mana chiqan kullkiwan rikuchinapak kashkakama wañuchishkata sakiy."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__has_contact
@@ -5761,11 +5748,6 @@ msgid "The fine stays confirmed. The driver cannot appeal it again."
 msgstr "Multaka chiqanchishkallatami sakirin. Pushakka mana kutin kutichiy ushanchu."
 
 #. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_fines_real
-msgid "The fines are real"
-msgstr "Multakunaka chiqanmi"
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
@@ -6762,12 +6744,6 @@ msgstr "Sistema kay multata imamanta rikuchin, shutilla shimikunawan."
 #, python-format
 msgid "With alert"
 msgstr "Yuyachikwan"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_fines_real
-msgid ""
-"Without it every fine says it is a demonstration with fictitious amounts."
-msgstr "Kay illakpika tukuy multami mana chiqan kullkiwan rikuchinapak kashkata nin."
 
 #. module: bus_tracking
 #. odoo-python

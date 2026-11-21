@@ -83,7 +83,7 @@ class BusFineStats(models.Model):
                  'detail': _("New, in review or appealed")},
                 {'code': 'F3', 'name': _("Amount fined"), 'value': round(sum(confirmed.mapped('amount')), 2),
                  'unit': currency, 'status': 'info',
-                 'detail': _("%(n)s confirmed fines (fictitious amounts while in demonstration)", n=len(confirmed))},
+                 'detail': _("%(n)s confirmed fines", n=len(confirmed))},
                 {'code': 'F4', 'name': _("Detector precision"), 'value': _pct(len(confirmed), decided_by_person),
                  'unit': '%', 'status': 'info',
                  'detail': _("Confirmed fines over the ones a person decided on")},

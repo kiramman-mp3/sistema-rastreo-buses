@@ -66,7 +66,7 @@ class BusFineType(models.Model):
     severity = fields.Selection(SEVERITIES, required=True, default='minor')
     currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self._default_currency())
     amount = fields.Monetary(string="Amount", required=True, default=10.0,
-                             help="Amount of a first fine of this type. Demonstration amounts.")
+                             help="Amount of a first fine of this type.")
     threshold = fields.Float(
         string="Fine above",
         help="The measured value must go beyond this to be fined: km/h for speeding, metres for a deviation or a "
