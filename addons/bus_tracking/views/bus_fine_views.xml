@@ -89,12 +89,7 @@
                             confirm="The fine stays confirmed. The driver cannot appeal it again."/>
                     <field name="state" widget="statusbar" statusbar_visible="new,review,fined,appealed,discarded"/>
                 </header>
-                <div class="alert alert-warning mb-0" role="status" attrs="{'invisible': [('demo_notice', '=', False)]}">
-                    <strong>Demonstration fine.</strong>
-                    The amounts are fictitious: they show how the system would support the fines of the company.
-                </div>
                 <sheet>
-                    <field name="demo_notice" invisible="1"/>
                     <field name="simulated" invisible="1"/>
                     <field name="rule" invisible="1"/>
                     <field name="currency_id" invisible="1"/>
