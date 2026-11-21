@@ -32,16 +32,27 @@ Vocabulario de los recorridos, los indicadores y el tablero (R1 a R11):
 | horario | ruray pacha | alerta | yuyachik |
 | incidente | pasashka | día | punchay |
 
+Vocabulario de las multas (20-nov-2026):
+
+| Español | Kichwa | Español | Kichwa |
+|---|---|---|---|
+| multa | multa | descargo, apelar | kutichishka, kutichiy |
+| confirmar | chiqanchiy | descartar, anular | anchuchiy |
+| aceptar | chaskiy | regla | kamachik |
+| comprobación | tupuy | evidencia | rikuchina |
+| exceso de velocidad | utka purishka | parada omitida | yallishka sayana |
+| salida tardía | kipa kallarishka | grave | llaki |
+
 Los días de la semana, Fleet, SQL, p95 y los nombres de campos técnicos se dejaron como en español o en inglés.
 Las frases largas (ayudas y explicaciones de los indicadores) son las que más necesitan la revisión de una persona hablante.
 
 Se dejaron como en español las palabras que ya se dicen así: bus, GPS, QR, SOS, correo, telefono, servidor,
-accidente, tráfico, cámara.
+accidente, tráfico, cámara, multa.
 
 ## El panel de Odoo (la oficina)
 
 Odoo no trae kichwa. El módulo agrega el idioma `qu_EC` (`data/languages.xml`) y su catálogo
-`addons/bus_tracking/i18n/qu.po` con los 769 textos del módulo. Cada persona lo elige en
+`addons/bus_tracking/i18n/qu.po` con los 1046 textos del módulo. Cada persona lo elige en
 **Preferencias > Idioma**. La tableta también lo pide, y por eso los avisos del servidor («Hasta 60 km/h»,
 etc.) salen en kichwa.
 

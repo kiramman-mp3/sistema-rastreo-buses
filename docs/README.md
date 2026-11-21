@@ -19,6 +19,8 @@ docs/
 │   ├── PLAN-AUDITORIA.md          # Primera auditoría integral (2-nov) y su remediación, cerrada
 │   ├── PLAN-AUDITORIA-2.md        # Segunda auditoría integral (17-nov) y plan de las fases 38 a 47
 │   ├── PLAN-RUBRICA.md            # Plan para cubrir la rúbrica del proyecto final (fases R1 a R12) y su estado final
+│   ├── PLAN-MULTAS.md             # Control de multas de demostración (fases M1 a M6): reglas, evidencia, kanban y descargo
+│   ├── PLAN-MULTAS-REALES.md      # Multas como reales y cierre previo a main: retiro del modo demostración
 │   ├── REQUISITOS.md              # Análisis del problema y requisitos funcionales y no funcionales con criterio de aceptación
 │   ├── ARQUITECTURA-Y-DATOS.md    # Arquitectura, flujo de un dato y modelo de datos
 │   └── FLEET.md                   # Integración con Odoo Fleet: decisión, reglas y migración
@@ -110,6 +112,8 @@ Para saber en qué punto está el proyecto, empieza por [`arquitectura/ROADMAP.m
 | **Arquitectura** | [`ROADMAP.md`](arquitectura/ROADMAP.md) | Lo hecho, lo pendiente y los hitos de versión | Todo el equipo |
 | **Arquitectura** | [`PLAN.md`](arquitectura/PLAN.md) | Plan maestro de fases 0 a 15 | Desarrolladores, Arquitectos |
 | **Arquitectura** | [`PLAN-APP-CHOFER.md`](arquitectura/PLAN-APP-CHOFER.md) | Diseño de la app del conductor | Desarrolladores móviles |
+| **Arquitectura** | [`PLAN-MULTAS.md`](arquitectura/PLAN-MULTAS.md) | Reglas, detector y revisión de las multas | Desarrolladores y oficina de transporte |
+| **Arquitectura** | [`PLAN-MULTAS-REALES.md`](arquitectura/PLAN-MULTAS-REALES.md) | Plan para tratar las multas como reales y cerrar hacia `main` | Desarrolladores |
 | **Arquitectura** | [`PLAN-UX.md`](arquitectura/PLAN-UX.md) | Decisiones de interacción y flujo | Diseñadores, Frontend |
 | **Arquitectura** | [`PLAN-RUBRICA.md`](arquitectura/PLAN-RUBRICA.md) | Plan de implementación para cubrir la rúbrica del proyecto final | Equipo, docente |
 | **Arquitectura** | [`PLAN-UI-MOVIL.md`](arquitectura/PLAN-UI-MOVIL.md) | Accesibilidad y ergonomía táctil | Desarrolladores móviles |

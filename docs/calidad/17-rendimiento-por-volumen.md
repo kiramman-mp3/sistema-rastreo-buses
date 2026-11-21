@@ -78,3 +78,19 @@ El detalle de cada escenario (con el máximo y el tamaño de cada respuesta) est
 | **Caja blanca** del cálculo de retraso, parada omitida e indicadores, con casos hechos a mano y resultado conocido | `tests/test_trip_run.py`, `tests/test_kpi.py` (cada fórmula contra datos construidos) |
 | **Integración Traccar–Odoo con la auditoría de sincronización (S2)**: el webhook guarda lo que Traccar reenvía; un reenvío perdido aparece como «falta» y baja la exactitud a 80 %; un reenvío repetido no duplica; un secreto malo no guarda nada; la consulta periódica recupera la última posición perdida y la exactitud vuelve a 100 % | `tests/test_traccar_consistency.py` (6), `tests/test_quality.py` |
 | Cobertura de líneas de los módulos nuevos | `bus_trip.py` 98 %, `bus_kpi.py` 99 %, `trip_simulator.py` 99 %, `bus_fleet.py` 99 %, `bus_grafana.py` y `bus_kpi_views.py` 100 % (informe de `scripts/sonar-coverage.sh`) |
+
+## 6. Detector de multas y migración 16.0.1.10.0 (21-nov-2026)
+
+Mediciones puntuales de la etapa de multas como reales (`PLAN-MULTAS-REALES.md`, etapas 3 y 4). No usan los escenarios de las secciones anteriores.
+
+| Qué se midió | Cómo | Resultado |
+|---|---|---|
+| Un disparo de `bus.fine._trigger_detection` | 300 llamadas seguidas en `odoo shell` sobre una base instalada de pruebas, sin buses | p50 0,84 ms, p95 1,21 ms, 273 ms en total; deja una fila en `ir.cron.trigger` por llamada |
+| `UPDATE` de la migración 16.0.1.10.0 (`fine_checked`) | Tabla temporal de 500 000 filas con índice sobre la columna | 1,16 s la primera vez; 0 filas y 82 ms la segunda (se puede repetir sin daño) |
+
+Lectura:
+
+- El disparo se llama cuando una alerta nace ya cerrada, cuando se cierra y cuando se cierra un recorrido; no con cada posición. Con 0,84 ms por llamada queda muy por debajo de la meta de 2 s del indicador S3, así que no se cambió el código.
+- La migración usa una sola sentencia sobre una columna indexada: medio millón de alertas tardan poco más de un segundo.
+
+Límites: la medición del disparo se hizo sin tráfico de posiciones y sin buses, y la de la migración sobre una tabla temporal con la misma forma de columnas, no sobre `bus_alert` real. Las filas de `ir.cron.trigger` las limpia Odoo al ejecutar el cron.

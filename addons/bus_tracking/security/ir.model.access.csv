@@ -44,3 +44,8 @@ access_bus_sync_audit_manager,bus.sync.audit manager,model_bus_sync_audit,group_
 access_bus_perf_sample_user,bus.perf.sample user,model_bus_perf_sample,group_bus_user,1,0,0,0
 access_bus_perf_sample_manager,bus.perf.sample manager,model_bus_perf_sample,group_bus_manager,1,0,0,1
 access_bus_report_wizard_user,bus.report.wizard user,model_bus_report_wizard,group_bus_user,1,1,1,0
+access_bus_fine_type_user,bus.fine.type user,model_bus_fine_type,group_bus_user,1,0,0,0
+access_bus_fine_type_manager,bus.fine.type manager,model_bus_fine_type,group_bus_manager,1,1,1,1
+access_bus_fine_user,bus.fine user,model_bus_fine,group_bus_user,1,0,0,0
+access_bus_fine_manager,bus.fine manager,model_bus_fine,group_bus_manager,1,1,0,0
+access_bus_fine_discard_manager,bus.fine.discard manager,model_bus_fine_discard,group_bus_manager,1,1,1,0

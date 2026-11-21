@@ -88,8 +88,17 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-078 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | El emulador perdió el DNS y la app mostraba «Sin conexión» al iniciar sesión | Entorno (emulador Android 17) | Cerrado |
 | DEF-079 | 18-nov-2026 | Prueba de la tableta en el emulador de Android Studio | Android muestra «la aplicación no responde» durante el turno aunque la app sigue funcionando | expo-task-manager (TaskJobService) en Android 17 | Abierto |
 | DEF-080 | 18-nov-2026 | Uso en producción (gestor creando un recorrido) | Un gestor no podía crear recorridos, sincronizar un bus ni simular: «No puede crear Parada de un recorrido programado» | models/bus_trip.py, models/bus_vehicle.py, models/trip_simulator.py | Cerrado |
+| DEF-081 | 20-nov-2026 | Revisión visual de la ficha de una multa | Los marcadores de inicio y fin del tramo daban 404 y salían como imagen rota | static/src/js/fine_evidence.js | Cerrado |
+| DEF-082 | 20-nov-2026 | Revisión visual del kanban de multas | Los montos de las multas salían sin el símbolo $ | data/fine_types.xml | Cerrado |
+| DEF-083 | 20-nov-2026 | Revisión visual de la ficha de una multa | El mapa de la evidencia ocupaba solo unos 300 px de ancho | static/src/css/fines.css | Cerrado |
+| DEF-084 | 20-nov-2026 | Suite completa de las fases de multas | test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader | tests/test_migration_grafana.py | Cerrado |
+| DEF-085 | 20-nov-2026 | Reinstalación del entorno y verificación con flake8 | flake8 marcaba 6 avisos de estilo (sangría y largo de línea) en el código de multas | models/bus_fine.py, models/bus_fine_detect.py, models/trip_simulator.py, tests/test_fine_panel.py | Cerrado |
+| DEF-086 | 20-nov-2026 | Demostración en la base reinstalada (línea L1) | Escenarios de multas en una línea de tramos cortos no generaba las multas de velocidad ni de desvío, y no avisaba | models/trip_simulator.py | Cerrado |
+| DEF-087 | 21-nov-2026 | Revisión de versiones antes de pasar a main | La versión de la app de tableta no coincidía: package.json decía 1.0.0 y app.json 1.4.0 | apps/conductor-tablet/package.json, package-lock.json | Cerrado |
+| DEF-088 | 21-nov-2026 | Revisión de los documentos antes de pasar a main | El documento de arquitectura decía versión 16.0.1.6.0 y el ROADMAP daba como última etiqueta v1.0.0-rc1 con la app en 1.2.0 | docs/arquitectura/ARQUITECTURA-Y-DATOS.md, docs/arquitectura/ROADMAP.md | Cerrado |
+| DEF-089 | 21-nov-2026 | Retiro del modo demostración de las multas | Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa | models/bus_fine_stats.py, models/bus_fine.py, i18n/*.po | Cerrado |
 
-Resumen: 80 registrados, 79 cerrados (99 %), 1 abiertos. Densidad: 15,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 89 registrados, 88 cerrados (99 %), 1 abiertos. Densidad: 17,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -572,6 +581,60 @@ Resumen: 80 registrados, 79 cerrados (99 %), 1 abiertos. Densidad: 15,9 defectos
 - **Causa raíz:** Crear un recorrido arma sus paradas, y sincronizar o simular guarda posiciones, con el usuario que pulsa el botón; los gestores no pueden crear esos registros del sistema. Las pruebas corrían como superusuario y no lo veían.
 - **Categoría:** Permisos
 - **Prueba que lo protege:** TestTripCreation y TestManagerActions crean, sincronizan y simulan con un gestor real; un usuario de solo lectura no puede sincronizar
+
+### DEF-081: Los marcadores de inicio y fin del tramo daban 404 y salían como imagen rota
+
+- **Causa raíz:** Leaflet busca las imágenes de su marcador por defecto junto a su CSS, y el módulo solo trae leaflet.js y leaflet.css.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** Inicio y fin son etiquetas HTML (divIcon); captura sin errores de consola ni 404
+
+### DEF-082: Los montos de las multas salían sin el símbolo $
+
+- **Causa raíz:** La compañía de una base nueva usa EUR y el dólar viene inactivo: el panel solo conoce las monedas activas.
+- **Categoría:** Configuración
+- **Prueba que lo protege:** Los datos del módulo activan USD en cada instalación y actualización; captura del kanban con $
+
+### DEF-083: El mapa de la evidencia ocupaba solo unos 300 px de ancho
+
+- **Causa raíz:** Odoo envuelve cada campo en un elemento que no ocupa todo el ancho cuando está fuera de un grupo.
+- **Categoría:** Interfaz
+- **Prueba que lo protege:** CSS de ancho completo para o_field_bus_fine_evidence; captura del mapa a todo el ancho
+
+### DEF-084: test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader
+
+- **Causa raíz:** El rol es del servidor, no de una base: la base de desarrollo buses sigue en 16.0.1.6.0 con 9 permisos del rol, y DROP ROLE no puede borrarlo. La prueba supone que ninguna otra base lo usa.
+- **Categoría:** Entorno
+- **Prueba que lo protege:** Reinstalación del entorno de desarrollo desde cero (20-nov): base buses nueva en 16.0.1.10.0, sin el rol grafana_reader; suite completa 624 de 624
+
+### DEF-085: flake8 marcaba 6 avisos de estilo (sangría y largo de línea) en el código de multas
+
+- **Causa raíz:** Al cerrar las fases de multas solo se corrió el linter de la tableta, no flake8 del módulo.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** python -m flake8 addons/bus_tracking sin avisos; mismas pruebas de multas en verde
+
+### DEF-086: Escenarios de multas en una línea de tramos cortos no generaba las multas de velocidad ni de desvío, y no avisaba
+
+- **Causa raíz:** Los tramos de L1 son de 2 a 4 minutos: no cabe un desvío de 3 minutos ni un exceso sostenido de 30 s; además el exceso iba siempre en el primer tramo y no en el más largo. Las pruebas usaban una ruta de tramos de 5,5 km.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** TestFineDetection.test_the_fines_set_refuses_a_route_of_short_stretches; el exceso va en el tramo más largo; en L1 el asistente nombra las líneas que sirven y en L4 salen las 6 reglas
+
+### DEF-087: La versión de la app de tableta no coincidía: package.json decía 1.0.0 y app.json 1.4.0
+
+- **Causa raíz:** La versión se subía solo en app.json al publicar cada compilación y nadie actualizaba package.json.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** Misma versión en app.json, package.json y package-lock.json (1.4.1); lint, typecheck y Jest en verde
+
+### DEF-088: El documento de arquitectura decía versión 16.0.1.6.0 y el ROADMAP daba como última etiqueta v1.0.0-rc1 con la app en 1.2.0
+
+- **Causa raíz:** Las versiones se escribieron a mano en cada documento y no se revisaron al cerrar las etapas posteriores.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** Versiones tomadas de __manifest__.py, app.json y git tag (16.0.1.11.0, 1.4.1, v1.0.6-rc3)
+
+### DEF-089: Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa
+
+- **Causa raíz:** El aviso se había escrito en varios sitios sin una sola fuente: el interruptor fines_real, la ficha, la API y dos textos sueltos.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** TestFineApi y TestFinePanel (sin demo en la API ni aviso en la ficha); TestFinesRealCleanup (migración 16.0.1.11.0); qa/traducciones.py
 
 ## 3. Qué falta para cerrar los abiertos
 

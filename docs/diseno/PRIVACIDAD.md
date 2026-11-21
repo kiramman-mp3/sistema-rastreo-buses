@@ -12,6 +12,7 @@ Qué datos trata el sistema, por qué, cuánto tiempo y cómo atender a quien pi
 | Turnos (inicio, fin, bus, ruta, chofer) | Choferes | Operación, auditoría | `bus.shift` | `bus_tracking.history_retention_days` (Ajustes: *Conservar historial (días)*, 365 por defecto; **0 = no se borra**). Un turno con incidentes sigue mientras existan sus incidentes | Personal |
 | Incidentes y SOS (tipo, nota, hora, posición, quién lo atendió) | Choferes | Atender emergencias | `bus.incident` | Los ya vistos, el plazo del historial; uno sin ver no se borra nunca | Personal |
 | Llegadas a paradas, alertas cerradas, viajes y recorridos terminados | Buses (indirecto: el chofer del turno) | Reportes | `bus.stop.arrival`, `bus.alert`, `bus.trip`, `bus.run` | El plazo del historial; una alerta abierta no se borra | Personal; Grafana sin datos personales |
+| Multas (tipo, hora, bus, ruta, valor medido, evidencia con las posiciones del tramo, comprobaciones, monto, decisión, descargo y respuesta) | Choferes | Proponer y revisar sanciones con pruebas; en este montaje de demostración los montos son de ejemplo y no se descuenta nada a nadie | `bus.fine` (la evidencia queda dentro de la multa aunque las posiciones se borren) | **No se borran solas**: son el registro de una decisión. Los gestores no pueden borrarlas desde el panel | Personal (lectura) y gestores (deciden); el chofer ve en la tableta solo las suyas ya confirmadas, nunca las propuestas en revisión |
 | Usuario, nombre, contraseña (con hash) | Choferes | Entrar a la app | `res.users` | Mientras exista el usuario | Administradores |
 | Sesiones de la app | Choferes | Mantener la sesión | `bus.driver.token` (solo la huella) | 30 días; cron de purga | Nadie (solo huella) |
 | Credencial QR (365 días) | Choferes | Iniciar sesión | `bus.driver.token` (solo la huella). Odoo la muestra una vez al generarla y no la guarda | Hasta que se revoque o venza | Nadie (solo huella); el manager la ve una vez para imprimirla |
@@ -39,7 +40,7 @@ Responde por el contacto público de *Ajustes*. Para **pasajeros** (solo existen
 
 Para **choferes**:
 
-1. **Acceso:** *Flota > Choferes* (datos de la cuenta) y *Turnos* e *Incidentes* filtrados por su nombre. Las posiciones son del bus, no de la persona: se obtienen por los turnos.
+1. **Acceso:** *Flota > Choferes* (datos de la cuenta) y *Turnos*, *Incidentes* y *Multas* filtrados por su nombre. Las posiciones son del bus, no de la persona: se obtienen por los turnos. Cada multa ya trae su evidencia y sus comprobaciones.
 2. **Baja:** *Archivar* al usuario y *Revocar credencial*. El historial de turnos e incidentes se conserva por seguridad operativa; si hay que anonimizarlo, hazlo con una decisión escrita de la universidad.
 3. Responde dentro del plazo que fije la normativa aplicable y deja constancia.
 
@@ -49,10 +50,13 @@ Para **choferes**:
 - El pasajero no ve choferes, placas ni velocidades.
 - La tableta avisa al chofer, al ingresar y antes de iniciar turno, de que la oficina ve la posición mientras el turno esté abierto.
 - Las contraseñas y las sesiones se guardan con hash, nunca en claro.
+- El sistema no multa solo: propone, una persona decide y el chofer puede responder una vez desde la tableta. Las multas que no se pueden probar (sin chofer, con un incidente reportado o sin suficientes posiciones) nacen descartadas por el sistema.
+- La tableta muestra *Mis multas* solo antes de iniciar el turno, nunca mientras se conduce.
 
 ## Pendiente para la universidad
 
 - Revisión legal del texto y decisión de la política oficial (y su enlace en *Ajustes*).
 - Decidir plazos para turnos e incidentes (hoy no se borran solos) y poner `retention_days` en un valor distinto de 0 si no se quiere guardar para siempre.
 - Informar a los choferes por escrito (contrato o reglamento interno) del rastreo durante el turno; el aviso en la app no sustituye eso.
+- Solo si el sistema saliera de esta demostración y se usara con choferes reales: que las multas consten en el reglamento interno aprobado por el Ministerio del Trabajo, con sus montos (el Código del Trabajo, art. 44 literal b, impide descontar más del 10 % de la remuneración por multas; *Ajustes > Tope mensual de multas*), y decidir cuánto tiempo se conservan las multas y su evidencia.
 - Registro de actividades de tratamiento y, si corresponde, delegado de protección de datos.

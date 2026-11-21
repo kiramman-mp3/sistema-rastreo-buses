@@ -1,0 +1,33 @@
+/* Fines: kanban cards, the checks and the evidence of a fine. */
+.o_bus_fine_card { display: flex; flex-direction: column; gap: 2px; }
+.o_bus_fine_card_top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.o_bus_fine_card_amount { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.o_bus_fine_card_headline { font-weight: 600; color: var(--bus-ink, #172025); margin-top: 2px; }
+.o_bus_fine_card_tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.o_bus_fine_card_bottom { font-size: 0.85em; margin-top: 4px; }
+
+.o_bus_fine_why { margin-top: 12px; padding: 12px 16px; border-left: 4px solid var(--bus-uta-primary, #7A1A22);
+    background: var(--bus-uta-light, #F6EDEE); border-radius: 4px; }
+.o_bus_fine_why h4 { margin-bottom: 4px; }
+
+.o_bus_fine_checks { list-style: none; padding: 0; margin: 0; }
+.o_bus_fine_checks li { padding: 4px 0; }
+.o_bus_fine_checks li span { display: inline-block; width: 1.4em; font-weight: 700; }
+.o_bus_fine_checks li.o_bus_fine_ok span { color: var(--bus-ok, #1D6B44); }
+.o_bus_fine_checks li.o_bus_fine_ko span,
+.o_bus_fine_checks li.o_bus_fine_ko b { color: var(--bus-rojo, #B3261E); }
+
+.o_field_widget.o_field_bus_fine_evidence,
+.o_bus_fine_evidence { display: block; width: 100%; }
+.o_bus_fine_flag { display: inline-block; transform: translate(-50%, -130%); white-space: nowrap; padding: 2px 8px;
+    border-radius: 10px; font-size: 12px; font-weight: 700; color: #FFFFFF; background: #B3261E;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.o_bus_fine_flag_end { background: #172025; }
+.o_bus_fine_map { height: 380px; width: 100%; border-radius: 6px; border: 1px solid var(--bus-line-dark, #C9D1CE); }
+.o_bus_fine_legend { display: flex; flex-wrap: wrap; gap: 16px; list-style: none; padding: 0; margin: 8px 0 0; font-size: 0.9em; }
+.o_bus_fine_swatch { display: inline-block; width: 14px; height: 4px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+.o_bus_fine_chart { position: relative; height: 240px; margin-top: 16px; }
+
+@media (max-width: 767px) {
+    .o_bus_fine_map { height: 280px; }
+}

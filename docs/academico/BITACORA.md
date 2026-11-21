@@ -1387,3 +1387,115 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Suite completa: 557 de 557 pruebas de Odoo.
 - Siguen pendientes, fuera del alcance de este trabajo: firmar el IPA (necesita cuenta de Apple) y la fase 46 (jornada real con tabletas).
 
+
+## 2026-11-20: control de multas (demostración)
+
+### Qué se hizo
+
+- Pedido del usuario: un control de multas para demostrar cómo el sistema apoyaría las multas reales de la empresa. Las multas son ficticias, pero cada una se puede verificar con los datos del GPS. Decisiones: columna *Apelada* con descargo desde la tableta, montos en dólares, multas también de los recorridos simulados, límite de 50 km/h con tolerancia hasta 70 km/h. Plan en [`PLAN-MULTAS.md`](../arquitectura/PLAN-MULTAS.md).
+- M1 (`feature/multas-modelo`): `bus.fine.type` con 6 reglas iniciales (velocidad, desvío, parada larga, parada omitida, salida tardía, recorrido incompleto) y `bus.fine` con sus estados *Nueva, En revisión, Multada, Apelada, Descartada*, descarte con motivo, descargo único dentro del plazo, reincidencia y tope mensual. Migración 16.0.1.10.0: las alertas que ya existían quedan revisadas, no se multa con historia.
+- M2 (`feature/multas-deteccion`): detector que mide de nuevo cada alerta cerrada con las posiciones guardadas, congela la evidencia en la multa y hace las comprobaciones (chofer identificado, sin incidentes, señal GPS suficiente). Si falla una, la multa nace descartada por el sistema. La parada larga ahora también se detecta cuando el bus vuelve a moverse. Simulador: exceso a 82 km/h, nuevos escenarios *exceso tolerado* y *parada larga*, chofer opcional y el juego *Escenarios de multas*.
+- M3 (`feature/multas-panel`): kanban, ficha con el porqué, las comprobaciones, el mapa (ruta, corredor en metros, tramo en rojo) y el gráfico de velocidad, lista, gráfico y pivote; menú *Multas* y *Tipos de multa*.
+- M4 (`feature/multas-tableta`): `/bus_tracking/driver/fines` y `/bus_tracking/driver/fines/appeal`; pantalla *Mis multas* en la tableta (solo antes del turno), app 1.4.0.
+- M5 (`feature/multas-reportes`): pestaña *Multas* del tablero (5 cifras, 4 gráficos, mapa y tabla por chofer) y multas por chofer y por tipo en el PDF.
+- Traducciones al español y al kichwa de todo lo nuevo y de 30 textos del panel que ya faltaban (`chore/traducir-multas`).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo al cerrar cada fase (comando del CI) | M1 584/586, M2 603/605, M3 610/612, M4 618/620, M5 622/624; las 2 que fallan siempre son de Grafana (DEF-084) |
+| Pruebas nuevas de multas | 59: estados (16), detección (19), panel (7), API del chofer (8), estadísticas (4) y escenarios del simulador |
+| Tableta: lint, typecheck y Jest | Sin errores; 197 de 197 |
+| `qa/traducciones.py` | `es.po`: 0 sin traducir, 0 modelos inexistentes |
+| Revisión visual en una base de demostración aparte (`fines_demo`, con `dev_seed.py` y los escenarios de multas en L2 y L4) | Kanban, ficha de velocidad y de desvío, tipos de multa, tablero y la tableta en web: sin errores de consola después de corregir DEF-081 a DEF-083 |
+| Textos en el idioma de quien lee | Resumen, comprobaciones y tipos en español; titular en kichwa |
+
+### Problemas encontrados
+
+- Cada contenedor temporal de Odoo tenía su propio almacén de archivos y los assets respondían 500: el servidor de demostración se levantó con un volumen fijo.
+- El servidor de demostración seguía con el código de antes y la tableta no encontraba los endpoints nuevos: se reinició.
+- Un script para partir un commit falló a la mitad y dejó dos cambios en el mismo commit: como era local y el último, se deshizo con `reset --soft` y se rehízo en dos.
+- Un heredoc de Git Bash cambió las barras invertidas de una expresión regular: el script se escribió como archivo.
+- La suite completa falla en 2 pruebas de Grafana porque la base de desarrollo `buses` sigue en 16.0.1.6.0 y su rol `grafana_reader` conserva 9 permisos (DEF-084).
+
+### Pendiente o sin confirmar
+
+- Multas reales: reglamento interno aprobado por el Ministerio del Trabajo, montos reales y plazo de conservación de las multas.
+- Revisión del kichwa de las multas por una persona hablante.
+- Nada de esto está desplegado ni etiquetado: `develop` sin integrar a `main`, sin build de la app 1.4.0 y sin `push`.
+
+## 2026-11-20: reinstalación del entorno de desarrollo y prueba del control de multas
+
+### Qué se hizo
+
+- Pedido del usuario: el contenedor del proyecto estaba desactualizado; borrarlo, instalarlo de nuevo con los pasos del README y probar el control de multas. Grafana ya no es parte del sistema.
+- Respaldo de la base `buses` anterior (`pg_dump`, 4,8 MB) antes de borrar nada.
+- `docker compose down --volumes --remove-orphans`: se borraron los contenedores de Odoo, Postgres y Grafana, sus volúmenes (también `grafana-data`) y las imágenes `rastreo-odoo:16.0` y `grafana-oss:11.6.0`.
+- Instalación según el README: `.env` desde `.env.example`, imagen reconstruida sin caché, `docker compose up -d` (Postgres, Odoo y Traccar 6.16.0), base `buses` con `-i bus_tracking --load-language=es_EC` y `scripts/dev_seed.py` (4 líneas, 6 buses, `chofer1` y `chofer2`).
+- `fix/fines-flake8`: los 6 avisos de flake8 del código de multas (DEF-085).
+- `fix/fines-set-short-stretches`: *Escenarios de multas* en L1 no daba las multas de velocidad ni de desvío (DEF-086). El exceso va ahora en el tramo más largo y el asistente rechaza una línea donde no cabe un desvío de 3 minutos, nombrando las que sirven. Prueba nueva y traducción al español y al kichwa del aviso.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Instalación del módulo en la base nueva | Sin errores; versión 16.0.1.10.0, 6 tipos de multa, sin el rol `grafana_reader` |
+| Suite de Odoo (comando del CI) antes y después de las correcciones | 624/624 y 625/625 (DEF-084 cerrado: era el estado de la base vieja) |
+| `python -m flake8 addons/bus_tracking` | Sin avisos tras DEF-085 |
+| Tableta: lint, typecheck y Jest | Sin errores; 197 de 197 |
+| `qa/traducciones.py` | `es.po`: 0 sin traducir, 0 modelos inexistentes |
+| Escenarios de multas con `chofer1` en L4 | 6 multas: velocidad (82 km/h, 820 s sobre 70, $25), desvío (501 m, 10 min, $20), parada larga (26 min, $10), parada omitida ($10), recorrido incompleto ($15) y salida tardía descartada por el sistema ($5); el exceso dentro de la tolerancia no genera multa |
+| Escenarios de multas en L1 | Aviso en español y kichwa que nombra L2, L3 y L4 |
+| Panel por HTTP como admin | Vistas kanban, ficha, lista y búsqueda; agrupación por estado; pestaña de multas del tablero; paquete JS del panel 200 |
+
+### Problemas encontrados
+
+- El puerto 8069 lo ocupaba el Odoo de otro proyecto de la máquina (`odoo16`): se detuvo durante la instalación y se volvió a encender; el Odoo del proyecto queda en el puerto 8070 con `ODOO_PORT=8070` en el `.env` local.
+- Al cerrar las fases de multas no se corrió flake8 del módulo (DEF-085).
+- Las pruebas del simulador usaban una ruta de tramos de 5,5 km y no cubrían una línea corta como L1 (DEF-086).
+
+### Pendiente o sin confirmar
+
+- La revisión visual en el navegador de esta reinstalación no se repitió: la del día se hizo en la base `fines_demo`.
+- Los mismos pendientes de la entrada anterior: multas reales, revisión del kichwa, sin `push`, sin integrar a `main` y sin build de la app 1.4.0.
+
+## 2026-11-21: multas como reales y cierre previo a `main`
+
+### Qué se hizo
+
+- Pedido del usuario: el sistema es solo una demostración de capacidades y no irá a producción, así que las multas se tratan como reales. Se quitó el campo `demo` de la API (no se dejó en `false`). Plan en [`PLAN-MULTAS-REALES.md`](../arquitectura/PLAN-MULTAS-REALES.md).
+- `fix/version-tableta`: `package.json` y `package-lock.json` en 1.4.0, igual que `app.json` (DEF-087).
+- `feature/multas-como-reales`: sin `demo` en `/bus_tracking/driver/fines`; sin aviso en *Mis multas* ni en la ficha de la multa; sin la casilla *The fines are real* ni el campo `demo_notice`; migración 16.0.1.11.0 que borra `bus_tracking.fines_real`; dos textos que aún decían demostración, reescritos y retraducidos (DEF-089); tableta 1.4.1. La etiqueta `simulated` y los montos no cambian.
+- Etapa 3 (medida, sin cambios de código): un disparo de `bus.fine._trigger_detection` cuesta 0,84 ms de mediana y 1,2 ms en p95 (300 disparos en una base de pruebas). Cada disparo deja una fila en `ir.cron.trigger`. Se llama al abrirse ya cerrada una alerta, al cerrarse y al cerrar un recorrido, no con cada posición.
+- Etapa 4 (medida, sin cambios de código): el `UPDATE` de la migración 16.0.1.10.0 sobre una tabla temporal de 500.000 filas tardó 1,16 s y una segunda pasada actualizó 0 filas, es decir se puede repetir sin daño. No se midió con filas reales de `bus_alert`.
+- `docs/multas-reales`: guías, privacidad, arquitectura, README, roadmap y defectos DEF-087 a DEF-089 (DEF-088: versiones viejas en el documento de arquitectura y en el roadmap).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo (comando del CI) en `develop` antes de cambiar | 625/625 |
+| Suite de Odoo en `feature/multas-como-reales` | 626/626 (se retira 1 prueba del interruptor y se agregan 2 de la migración) |
+| Suite de Odoo en `develop` con todo integrado (etapa 6) | 626/626, 0 fallos |
+| Escaneo de secretos (gitleaks v8.30.1 del CI) y `qa/xss_tooltips.js` | Sin hallazgos |
+| Actualización 16.0.1.10.0 a 16.0.1.11.0 de una base con `fines_real = True` | Corre la migración y el parámetro queda en 0 filas |
+| `python -m flake8 addons/bus_tracking scripts/dev_seed.py` | Sin avisos |
+| Tableta: lint, typecheck, Jest y `expo export` | Sin errores; 197 de 197 |
+| `qa/traducciones.py` | `es.po`: 0 sin traducir, 0 modelos inexistentes |
+| Base `buses` nueva (README, `dev_seed.py`) y *Escenarios de multas* con `chofer1` en L4 | 6 multas: velocidad, desvío, parada larga, parada omitida, recorrido incompleto y salida tardía descartada por el sistema |
+| `POST /bus_tracking/driver/fines` como `chofer1` tras confirmar 2 multas | Responde solo `fines` (sin `demo`), con MUL-0001 ($25) y MUL-0002 ($20) |
+
+### Problemas encontrados
+
+- Un script que reescribía los `.po` unía los bloques con un solo salto de línea y borraba las líneas en blanco (3.200 líneas de diff); se vio en `git diff --stat`, se revirtió y se rehízo antes de hacer commit.
+- La base de pruebas no tenía el idioma `es_EC` y `dev_seed.py` falló: se creó la base `buses` con los pasos del README.
+- Con varias bases en Postgres, Odoo respondía 404 en `/bus_tracking/driver/login`: se borraron las bases de prueba.
+- Docker Desktop estaba apagado al empezar; se inició y se reconstruyó la imagen.
+
+### Pendiente o sin confirmar
+
+- Fase 46 (jornada real con tabletas, Supabase y VM Linux), revisión del kichwa y pruebas de usabilidad, igual que antes.
+- Build de la app 1.4.1 con EAS y despliegue: no se hicieron.
+- El `merge` a `main`, la etiqueta y el `push` esperan confirmación del usuario.
+- El `CLAUDE.md` de la copia de trabajo difiere del commiteado (le faltan la sección de documentación y la última línea); no se tocó.

@@ -30,3 +30,9 @@ from . import test_traccar_consistency
 from . import test_report
 from . import test_discuss
 from . import test_migration_grafana
+from . import test_fine_states
+from . import test_fine_detect
+from . import test_fine_panel
+from . import test_fine_api
+from . import test_fine_stats
+from . import test_migration_fines

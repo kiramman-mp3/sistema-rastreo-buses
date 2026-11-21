@@ -4,7 +4,7 @@ from psycopg2 import IntegrityError
 
 from odoo import _, api, fields, models
 
-from .utils import MOVING_ABOVE_KMH, int_param
+from .utils import MOVING_ABOVE_KMH, haversine_m, int_param
 
 KINDS = [
     ('speeding', "Speeding"),
@@ -45,6 +45,9 @@ class BusAlert(models.Model):
     trip_id = fields.Many2one('bus.trip', string="Trip", ondelete='set null', index=True)
     stop_id = fields.Many2one('bus.route.stop', string="Stop", ondelete='set null')
     delay_min = fields.Float(help="Minutes after the planned time.")
+    fine_checked = fields.Boolean(
+        default=False, index=True, copy=False,
+        help="The fine detector already looked at this alert (bus.fine._cron_detect).")
 
     def init(self):
         # One open alert per bus and kind, enforced by the database.
@@ -190,8 +193,52 @@ class BusAlert(models.Model):
         ))
         return alert
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        alerts = super().create(vals_list)
+        if any(alert.state == 'closed' for alert in alerts):
+            self.env['bus.fine']._trigger_detection()
+        return alerts
+
     def _close(self, end_time):
-        self.filtered(lambda a: a.state == 'open').write({'state': 'closed', 'end_time': end_time})
+        closing = self.filtered(lambda a: a.state == 'open')
+        closing.write({'state': 'closed', 'end_time': end_time})
+        if closing:
+            self.env['bus.fine']._trigger_detection()
+
+    @api.model
+    def _on_resume(self, vehicle, fix_time):
+        """The bus moves again after standing still. The cron only sees a long stop while it lasts, and only for a
+        bus reporting now: a stop it missed (a replayed trip, a cron that did not run) is written now, closed."""
+        minutes = self._param('long_stop_minutes', 15)
+        if minutes <= 0:
+            return
+        Position = self.env['bus.position']
+        moving = Position.search([('vehicle_id', '=', vehicle.id), ('fix_time', '<', fix_time),
+                                  ('speed', '>', MOVING_ABOVE_KMH)], order='fix_time desc', limit=1)
+        if not moving or fix_time - moving.fix_time < timedelta(minutes=minutes):
+            return
+        if self.search_count([('vehicle_id', '=', vehicle.id), ('kind', '=', 'long_stop'),
+                              ('start_time', '<=', fix_time),
+                              '|', ('end_time', '=', False), ('end_time', '>=', moving.fix_time)]):
+            return
+        if self.env['bus.stop.arrival'].search_count([('vehicle_id', '=', vehicle.id),
+                                                      ('arrival_time', '>', moving.fix_time),
+                                                      ('arrival_time', '<', fix_time)]):
+            return                      # it was waiting at a stop
+        parked = Position.search([('vehicle_id', '=', vehicle.id), ('fix_time', '>', moving.fix_time),
+                                  ('fix_time', '<', fix_time)], order='fix_time asc', limit=1)
+        if not parked:
+            return
+        for stop in vehicle.route_id.stop_ids:
+            if haversine_m(parked.latitude, parked.longitude, stop.latitude, stop.longitude) <= stop.radius:
+                return
+        self.create({
+            'vehicle_id': vehicle.id, 'route_id': vehicle.route_id.id, 'kind': 'long_stop', 'state': 'closed',
+            'start_time': moving.fix_time, 'end_time': fix_time, 'threshold': minutes,
+            'trip_id': self.env['bus.trip']._trip_at(vehicle, moving.fix_time).id,
+            'latitude': parked.latitude, 'longitude': parked.longitude,
+        })
 
     @api.model
     def _on_position(self, vehicle, speed, fix_time):

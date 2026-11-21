@@ -17,6 +17,9 @@ from . import bus_shift
 from . import bus_fleet
 from . import bus_driver_token
 from . import bus_incident
+from . import bus_fine
+from . import bus_fine_detect
+from . import bus_fine_stats
 from . import res_users
 from . import bus_driver_edit
 from . import res_config_settings

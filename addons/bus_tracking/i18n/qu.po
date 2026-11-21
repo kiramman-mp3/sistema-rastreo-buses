@@ -6,15 +6,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0-20250909\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 02:15+0000\n"
-"PO-Revision-Date: 2026-11-05 02:15+0000\n"
+"POT-Creation-Date: 2026-11-20 18:25+0000\n"
+"PO-Revision-Date: 2026-11-20 18:25+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: qu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid " The nearest stop, %(nearest)s, was %(nearest_m)s m away."
+msgstr " Ashtawan kuchu sayana, %(nearest)s, %(nearest_m)s m karupi karka."
 
 #. module: bus_tracking
 #. odoo-python
@@ -33,6 +39,68 @@ msgstr ""
 #, python-format
 msgid "%(bus)s already has the trip %(trip)s at that time."
 msgstr "%(bus)s ñawpaman kay pachapi %(trip)s purishkata charin."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"%(bus)s drove above %(threshold)s km/h for %(seconds)s s in a row (the rule "
+"asks for %(min_seconds)s s): up to %(max)s km/h, %(avg)s km/h on average "
+"over %(meters)s m. The limit is %(limit)s km/h, tolerated up to "
+"%(threshold)s km/h."
+msgstr "%(bus)s %(threshold)s km/h yallishpa %(seconds)s s purirka (kamachika %(min_seconds)s s mañan): %(max)s km/h kama, chawpipi %(avg)s km/h, %(meters)s m ukupi. Tupuka %(limit)s km/h, %(threshold)s km/h kamami sakirin."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"%(bus)s drove past %(stop)s at %(at)s without stopping: it came no closer "
+"than %(min_m)s m, and the stop has a radius of %(radius)s m."
+msgstr "%(bus)s %(stop)s sayanata %(at)s pachapi mana sayashpa yallirka: %(min_m)s m yalli mana kuchuyarkachu, sayanaka %(radius)s m muyuyta charin."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"%(bus)s left its route at %(exit)s and went up to %(max_m)s m away from it "
+"(the rule asks for more than %(threshold)s m); it drove %(km)s km outside "
+"the %(corridor)s m corridor for %(seconds)s s."
+msgstr "%(bus)s %(exit)s pachapi ñanmanta llukshirka, %(max_m)s m kama karuyarka (kamachika %(threshold)s m yallita mañan); %(corridor)s m ñan ukumanta hawapi %(km)s km purirka, %(seconds)s s."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"%(bus)s reached %(reached)s of the %(total)s stops of the trip and stopped "
+"after %(last_stop)s; it never reached %(missing_names)s."
+msgstr "%(bus)s purishkapak %(total)s sayanakunamanta %(reached)s sayanaman chayarka, %(last_stop)s kipa sayarka; %(missing_names)s sayanaman mana chayarkachu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"%(bus)s stood still for %(minutes)s min, from %(from)s to %(to)s, away from "
+"the stops of its route (the rule allows %(threshold)s min)."
+msgstr "%(bus)s %(minutes)s min sayashka karka, %(from)s pachamanta %(to)s pachakama, ñanpak sayanakunamanta karupi (kamachika %(threshold)s min sakin)."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(count)s incident(s): %(kinds)s"
+msgstr "%(count)s llaki: %(kinds)s"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(delay)s min late"
+msgstr "%(delay)s min kipa"
 
 #. module: bus_tracking
 #. odoo-python
@@ -57,6 +125,20 @@ msgstr "%(matched)s %(total)s posicionkunamanta %(audits)s mashnashka rikuypi"
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(max)s km/h · %(seconds)s s above %(threshold)s"
+msgstr "%(max)s km/h · %(seconds)s s %(threshold)s yallishpa"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(max_m)s m off the route · %(minutes)s min"
+msgstr "%(max_m)s m ñanmanta karupi · %(minutes)s min"
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/bus_alert.py:0
 #, python-format
 msgid "%(minutes)d min late at %(stop)s (tolerance %(limit)d min)"
@@ -71,10 +153,31 @@ msgstr "Purishkapi %(n)d sayanakunaman mana chayarka"
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "%(n)s accepted"
+msgstr "%(n)s chaskishka"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "%(n)s confirmed fines"
+msgstr "%(n)s multakuna chiqanchishka"
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
 msgid "%(n)s late arrivals, the worst of %(worst)s min"
 msgstr "%(n)s kipa chayaykuna, ashtawan %(worst)s min"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "%(n)s more filtered out by the checks of the system"
+msgstr "%(n)s ashtawan sistemapak tupuykunawan anchuchishka"
 
 #. module: bus_tracking
 #. odoo-python
@@ -103,6 +206,35 @@ msgstr "%(points)s punto %(positions)s posicionkunamanta."
 #, python-format
 msgid "%(points)s points from %(total)s."
 msgstr "%(points)s punto %(total)smanta."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(points)s positions around the planned time"
+msgstr "%(points)s maypi kashkakuna yuyashka pacha muyupi"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"%(points)s positions, largest silence %(gap)s s (at most %(max_gap)s s)"
+msgstr "%(points)s maypi kashkakuna, ashtawan hatun upalla %(gap)s s (%(max_gap)s s kama)"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(reached)s of %(total)s stops"
+msgstr "%(total)s sayanakunamanta %(reached)s"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "%(stop)s · passed %(min_m)s m away"
+msgstr "%(stop)s · %(min_m)s m karupi yallirka"
 
 #. module: bus_tracking
 #. odoo-python
@@ -168,11 +300,21 @@ msgid "%s stops created."
 msgstr "%s sayana rurashka."
 
 #. module: bus_tracking
+#: model:ir.actions.report,print_report_name:bus_tracking.action_report_operation
+msgid "'Reporte-buses-%s-%s' % (object.date_from, object.date_to)"
+msgstr "'Reporte-buses-%s-%s' % (object.date_from, object.date_to)"
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
 msgid "(km driven − km estimated) ÷ km estimated × 100"
 msgstr "(km purishka − km yuyashka) ÷ km yuyashka × 100"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "(simulated)"
+msgstr "(yanapashka)"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -225,6 +367,92 @@ msgid "<br/>Let us see how the buses are doing."
 msgstr "<br/>Bus kuna imashina purikushkata rikushun."
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_kanban
+msgid "<i class=\"fa fa-user me-1\" title=\"Driver\" role=\"img\" aria-label=\"Driver\"/>"
+msgstr "<i class=\"fa fa-user me-1\" title=\"Pushak\" role=\"img\" aria-label=\"Pushak\"/>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<span class=\"bt-brand-mark\">BUS</span>"
+msgstr "<span class=\"bt-brand-mark\">BUS</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid ""
+"<span class=\"bt-dot bt-good\"/>within the goal <span class=\"bt-dot bt-warn\"/>watch <span class=\"bt-dot bt-bad\"/>out of range\n"
+"                        <span class=\"bt-dot\"/>no goal or no data"
+msgstr ""
+"<span class=\"bt-dot bt-good\"/>paktashka <span class=\"bt-dot bt-warn\"/>rikuna <span class=\"bt-dot bt-bad\"/>mana paktashka\n"
+"                        <span class=\"bt-dot\"/>mana paktana, mana willaykunapash"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "<span class=\"o_stat_text\">Live Map</span>"
+msgstr "<span class=\"o_stat_text\">Kunan mapa</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num\">1</span>"
+msgstr "<span class=\"paso-num\">1</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num\">2</span>"
+msgstr "<span class=\"paso-num\">2</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num\">3</span>"
+msgstr "<span class=\"paso-num\">3</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num-badge\">01</span>"
+msgstr "<span class=\"paso-num-badge\">01</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num-badge\">02</span>"
+msgstr "<span class=\"paso-num-badge\">02</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "<span class=\"paso-num-badge\">03</span>"
+msgstr "<span class=\"paso-num-badge\">03</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
+msgid ""
+"<span>Huachi</span>\n"
+"                            <span>Ingahurco</span>\n"
+"                            <span>Querochaca</span>"
+msgstr "<span>Huachi</span>\n                            <span>Ingahurco</span>\n                            <span>Querochaca</span>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<strong>Data:</strong>"
+msgstr "<strong>Willaykuna:</strong>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<strong>Lines:</strong>"
+msgstr "<strong>Ñankuna:</strong>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "<strong>Period:</strong>"
+msgstr "<strong>Pacha:</strong>"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
+msgid ""
+"A PDF with the indicators, the lines, each day, the delays, the incidents "
+"and the latest trips of the period."
+msgstr ""
+"Shuk PDF: rikuchikkuna, ñankuna, sapan puncha, unaykuna, llakikuna, kay "
+"pachapi kipa purikunapash."
+
+#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_speed_limit
 msgid "A bus above this speed raises a speeding alert. 0 disables the alert."
 msgstr ""
@@ -239,6 +467,32 @@ msgid ""
 msgstr ""
 "Purishka rurachikpak rurashka bus. Kunan mapapash, llaktapak pankakunapash "
 "mana rikuchinkachu."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_kanban
+msgid "A check failed"
+msgstr "Shuk tupuy mana allichu"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_fines_monthly_cap
+msgid ""
+"A confirmed fine never takes a driver over this in a month (in Ecuador, "
+"fines may not exceed 10 % of the pay). 0: no cap."
+msgstr "Chiqanchishka multaka shuk killapi pushakta kaymanta mana yallichinchu (Ecuadorpi multakunaka pagopak 10 % mana yallinchu). 0: mana tupu."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__recurrence_days
+msgid ""
+"A driver with a confirmed fine of this type in this many days before is a "
+"repeat offender. 0: never."
+msgstr "Kay punllakunapi kay laya chiqanchishka multata charik pushakka kutin ruraklla. 0: mana haykapish."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "A fine cannot go from %(from)s to %(to)s."
+msgstr "Multaka %(from)s manta %(to)s man mana rinchu."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_time_diff_pct
@@ -286,6 +540,16 @@ msgid "Accept positions without a shift"
 msgstr "Llankay pacha illakpi posicionkunata chaskiy"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Accept the appeal"
+msgstr "Kutichishkata chaskiy"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__appeal_result__accepted
+msgid "Accepted"
+msgstr "Chaskishka"
+
+#. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__accident
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 msgid "Accident"
@@ -297,7 +561,13 @@ msgid "Accuracy (%)"
 msgstr "Chiqan kay (%)"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_needaction
+msgid "Action Needed"
+msgstr "Rurana kan"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__active
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__active
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__active
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__active
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__active
@@ -320,6 +590,11 @@ msgstr "Sayanata yapay"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__address
 msgid "Address"
 msgstr "Direccion"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__alert_id
+msgid "Alert"
+msgstr "Willay"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__alert_count
@@ -407,6 +682,13 @@ msgid "All lines"
 msgstr "Tukuy ñankuna"
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
+#, python-format
+msgid "Allowed corridor (%s m)"
+msgstr "Sakishka ñan uku (%s m)"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__altitude
 msgid "Altitude"
 msgstr "Altitud"
@@ -415,6 +697,39 @@ msgstr "Altitud"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
 msgid "Ambato from above. Photo: Martín Vasco, CC BY-SA 4.0"
 msgstr "Ambato hawamanta. Rikuchi: Martín Vasco, CC BY-SA 4.0"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__amount
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__amount
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_form
+msgid "Amount"
+msgstr "Kullki"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__amount_note
+msgid "Amount Note"
+msgstr "Kullkipak killka"
+
+#. module: bus_tracking
+#. odoo-javascript
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+#, python-format
+msgid "Amount fined"
+msgstr "Multashka kullki"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__amount
+msgid "Amount of a first fine of this type."
+msgstr "Kay laya ñawpa multapak kullki."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__active
+msgid "An archived driver cannot sign in on the tablet."
+msgstr "Waqaychashka pushakka tabletapi mana yaykuyta ushanchu."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -440,6 +755,49 @@ msgid "Another bus already has this name."
 msgstr "Shuk busmi ña kay shutita charin."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__appeal_answer
+msgid "Answer to the driver"
+msgstr "Pushakman kutichiy"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Appeal"
+msgstr "Kutichishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__appeal_result
+msgid "Appeal Result"
+msgstr "Kutichishkapak tukuri"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__discard_reason__appeal_accepted
+msgid "Appeal accepted"
+msgstr "Kutichishka chaskishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__appeal_deadline
+msgid "Appeal until"
+msgstr "Kutichinkapak kama"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__state__appealed
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_kanban
+msgid "Appealed"
+msgstr "Kutichishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__appeal_date
+msgid "Appealed at"
+msgstr "Kutichishka pacha"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "Appeals"
+msgstr "Kutichishkakuna"
+
+#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_brand_name
 msgid "Appears on the public pages, the sign-in page and the page titles."
 msgstr "Llaktapa rakukunapi, yaykuy rakupi y raku umakunapi rikurin."
@@ -450,6 +808,7 @@ msgid "Applies to the optional email and phone of passengers."
 msgstr "Purikkunapa munashpa correo y telefonopi llankan."
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_search
@@ -472,6 +831,16 @@ msgstr "Chayay pacha"
 #: model:ir.model.fields,help:bus_tracking.field_bus_route_stop__radius
 msgid "Arrival radius in meters."
 msgstr "Chayay muyuy metrokunapi."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Arrivals"
+msgstr "Chayamukkuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Arrivals by delay"
+msgstr "Unaypi chayamukkuna"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_run__state__done
@@ -508,6 +877,11 @@ msgstr "Shuk kutipi kimsa killakamallata kuy."
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
 msgid "Assigned to me"
 msgstr "Ñukaman kushka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_attachment_count
+msgid "Attachment Count"
+msgstr "Pakta killkakunapak yupay"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -569,6 +943,11 @@ msgid "Average trip time"
 msgstr "Purishkapak pacha chawpi"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Avg. delay"
+msgstr "Chawpi unay"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_users__driver_badge_active
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid "Badge active"
@@ -578,6 +957,13 @@ msgstr "Credencial kawsak"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid "Base URL reachable from the Odoo server."
 msgstr "Odoo servidormanta chayana URL."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "Beyond the threshold of the rule"
+msgstr "Kamachikpak tuputa yallin"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__breakdown
@@ -595,6 +981,7 @@ msgstr "Navegador push suscripción"
 #: code:addons/bus_tracking/models/bus_fleet.py:0
 #: model:ir.model,name:bus_tracking.model_bus_vehicle
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__vehicle_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__vehicle_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__vehicle_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__vehicle_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__vehicle_id
@@ -611,6 +998,11 @@ msgstr "Navegador push suscripción"
 #, python-format
 msgid "Bus"
 msgstr "Bus"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Bus & Route"
+msgstr "Bus, ñan"
 
 #. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_bus_alert
@@ -697,6 +1089,12 @@ msgid "Bus Tracking: measure the response time of the main queries"
 msgstr "Bus Tracking: ñawpak tapuykunapak kutichina pachata tupuy"
 
 #. module: bus_tracking
+#: model:ir.actions.server,name:bus_tracking.cron_detect_fines_ir_actions_server
+#: model:ir.cron,cron_name:bus_tracking.cron_detect_fines
+msgid "Bus Tracking: propose fines from the closed alerts"
+msgstr "Bus katiy: wichkashka willaykunamanta multakunata rikuchiy"
+
+#. module: bus_tracking
 #: model:ir.actions.server,name:bus_tracking.cron_sync_positions_ir_actions_server
 #: model:ir.cron,cron_name:bus_tracking.cron_sync_positions
 msgid "Bus Tracking: pull positions from Traccar"
@@ -745,9 +1143,15 @@ msgid "Buses"
 msgstr "Buses"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__can_appeal
+msgid "Can Appeal"
+msgstr "Kutichiy ushan"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/stop_picker.xml:0
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_discard_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_gpx_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_record_form
@@ -781,11 +1185,27 @@ msgid "Capacity"
 msgstr "Mashna runa yaykun"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Change"
+msgstr "Shukyay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__check_lines
+msgid "Check Lines"
+msgstr "Tupuy kuskakuna"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
 msgid "Checking this device…"
 msgstr "Kay dispositivota rikushpa…"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__checks_json
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Checks"
+msgstr "Tupuykuna"
 
 #. module: bus_tracking
 #. odoo-python
@@ -807,6 +1227,13 @@ msgstr "Ima mana kashpapash shuk semana punchata akllay."
 #, python-format
 msgid "Choose dates…"
 msgstr "Punchakunata akllay…"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "Choose the period of the report again."
+msgstr "Willay pachata kutin akllay."
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__kind__cleanliness
@@ -844,9 +1271,15 @@ msgid "Code"
 msgstr "Código"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__color
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__color
 msgid "Color"
 msgstr "Llimpi"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__simulated
+msgid "Comes from a trip of the simulator, not from a real bus."
+msgstr "Rurashka purishkamanta shamun, mana chiqan busmantachu."
 
 #. module: bus_tracking
 #. odoo-python
@@ -859,9 +1292,19 @@ msgstr ""
 "Yuyashka pachawan tupuchiy: yuyashkamanta 15 % ukupi kashpa pacha allimi."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__compare
+msgid "Compare with the previous period"
+msgstr "Ñawpa pachawan chimpapuray"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid "Complaints"
 msgstr "Llaki willaykuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Compliance"
+msgstr "Paktachiy"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -879,6 +1322,18 @@ msgstr "Churana ajustekuna"
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_config
 msgid "Configuration"
 msgstr "Churana"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Confirm fine"
+msgstr "Multata chiqanchiy"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "Confirmed fines over the ones a person decided on"
+msgstr "Runa akllashkakunamanta chiqanchishka multakuna"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__connected
@@ -983,6 +1438,17 @@ msgid "Course"
 msgstr "Rumbo"
 
 #. module: bus_tracking
+#: model_terms:ir.actions.act_window,help:bus_tracking.action_bus_driver
+msgid ""
+"Create a driver with Fleet &gt; New driver, then generate their QR badge."
+msgstr "Flota &gt; Musuk pushak nishkawan pushakta rurariy, kipaka QR rikuchinata rurariy."
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_driver_edit
+msgid "Create or edit a driver"
+msgstr "Pushakta ruray o allichiy"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_trip_horizon_days
 msgid "Create scheduled trips for the next (days)"
 msgstr "Shamuk (punchakunapak) yuyashka purishkakunata rurana"
@@ -1008,6 +1474,9 @@ msgstr "Rurashka"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__create_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__create_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__create_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__create_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_uid
@@ -1046,6 +1515,9 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__create_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__create_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__create_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__create_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__create_date
@@ -1076,6 +1548,11 @@ msgid "Creates a device in Traccar with a random identifier for this bus."
 msgstr "Kay buspak Traccarpi dispositivota ima ima identificadorwan ruran."
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Cumulative"
+msgstr "Tantachishka"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #, python-format
@@ -1083,10 +1560,28 @@ msgid "Cumulative %"
 msgstr "Tantashka %"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__currency_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__currency_id
+msgid "Currency"
+msgstr "Kullki laya"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__current_stop_id
 #: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_current_stop_id
 msgid "Current Stop"
 msgstr "Kunan sayana"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Cut to the monthly cap of %(cap)s per driver."
+msgstr "Shuk pushakpak killa tupuman %(cap)s kama kuchushka."
+
+#. module: bus_tracking
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_dashboard
+msgid "Dashboard"
+msgstr "Rikuchina pirka"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1101,6 +1596,7 @@ msgstr "Willaykuna"
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_stop__date
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
 #, python-format
 msgid "Date"
 msgstr "Punchay"
@@ -1129,9 +1625,35 @@ msgid "Day"
 msgstr "Punchay"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Day by day"
+msgstr "Puncha puncha"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_schedule_form
 msgid "Days"
 msgstr "Punchakuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__appeal_days
+msgid "Days to appeal"
+msgstr "Kutichinkapak punllakuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__decided_at
+msgid "Decided at"
+msgstr "Akllashka pacha"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Decision"
+msgstr "Akllay"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__retired
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Decommissioned"
+msgstr "Llamkaymanta llukchishka"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__vehicle_id
@@ -1160,6 +1682,11 @@ msgid "Delay Min"
 msgstr "Kipa pacha (min)"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Delay at the end"
+msgstr "Tukuripi unay"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
@@ -1177,6 +1704,30 @@ msgid "Delay or missed bus"
 msgstr "Unay tukushka o mana pasashka bus"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__demo_notice
+msgid "Demo Notice"
+msgstr "Rikuchinapak willay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__demo_report
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_demo_report
+msgid "Demo report"
+msgstr "Rikuchinapak willay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__demo_report_until
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_demo_report_until
+msgid "Demo report until"
+msgstr "Rikuchinapak willay kama"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid ""
+"Demo report: this bus keeps the positions of its phone without a shift until"
+msgstr "Rikuchinapak willay: kay busmi llankay pacha illakpi telefonopak maypi kashkata waqaychan, kaykama"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__departure
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_run_tree
 msgid "Departure"
@@ -1189,6 +1740,7 @@ msgstr "Lluksina pacha"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__description
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__description
 msgid "Description"
 msgstr "Willay"
 
@@ -1213,6 +1765,27 @@ msgstr "Tarishka rikuchikkuna"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__detection_ok
 msgid "Detection Ok"
 msgstr "Allita tarishka"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "Detector precision"
+msgstr "Taripakpak chiqanlla"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Detector precision by type"
+msgstr "Taripakpak chiqanlla layamanta"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Detector precision by type (%)"
+msgstr "Taripakpak chiqanlla layamanta (%)"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__deviation_avg_m
@@ -1256,11 +1829,55 @@ msgid "Did not stop at %(stop)s"
 msgstr "%(stop)s sayanapi mana sayarka"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_discard_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Discard"
+msgstr "Anchuchiy"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__discard_reason
+msgid "Discard Reason"
+msgstr "Anchuchinapak imamanta"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#: model:ir.model,name:bus_tracking.model_bus_fine_discard
+#, python-format
+msgid "Discard fine"
+msgstr "Multata anchuchiy"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__discard_note
+msgid "Discard note"
+msgstr "Anchuchishkapak killka"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__state__discarded
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+msgid "Discarded"
+msgstr "Anchuchishka"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Discarded by a person"
+msgstr "Runa anchuchishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__discard_reason__system
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+msgid "Discarded by the system"
+msgstr "Sistema anchuchishka"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__display_name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__display_name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__display_name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__display_name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__display_name
@@ -1331,6 +1948,26 @@ msgstr "Wichkashka"
 
 #. module: bus_tracking
 #. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
+#, python-format
+msgid "Download PDF"
+msgstr "PDF uraykuchiy"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_wizard
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_pdf
+msgid "Download report"
+msgstr "Willayta uraykuchiy"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_report_wizard
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
+msgid "Download the operation report"
+msgstr "Llamkaymanta willayta uraykuchiy"
+
+#. module: bus_tracking
+#. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #, python-format
 msgid "Driven"
@@ -1344,16 +1981,23 @@ msgid "Driven km"
 msgstr "Purishka km"
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__user_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__driver_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__driver_user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__driver_user_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_simulate__driver_user_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__driver_id
 #: model:res.groups,name:bus_tracking.group_bus_driver
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+#, python-format
 msgid "Driver"
 msgstr "Pushak"
 
@@ -1373,6 +2017,18 @@ msgid "Driver Shift"
 msgstr "Llankay pacha"
 
 #. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_fine
+msgid "Driver fine"
+msgstr "Pushakpak multa"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "Driver identified"
+msgstr "Pushak riksishka"
+
+#. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__kind__behavior
 msgid "Driver or staff behavior"
 msgstr "Pushak o llankakkunapa ruraykuna"
@@ -1390,6 +2046,11 @@ msgid "Driver's full name"
 msgstr "Pushakpa tukuy shuti"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__appeal_text
+msgid "Driver's statement"
+msgstr "Pushakpak kutichishka"
+
+#. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_driver
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_driver
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_tree
@@ -1400,6 +2061,11 @@ msgstr "Pushakkuna"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.login_layout
 msgid "Drivers sign in from the bus tablet, not from here."
 msgstr "Pushakkunaka busmanta tabletamanta yaykun, kaymanta mana."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_on_route
+msgid "Driving a shift"
+msgstr "Turnopi purikun"
 
 #. module: bus_tracking
 #: model:ir.model.constraint,message:bus_tracking.constraint_bus_position_vehicle_fix_uniq
@@ -1417,6 +2083,11 @@ msgstr "Mashna pacha"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_run_tree
 msgid "Duration (h:min)"
 msgstr "Mashna pacha (h:min)"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__measured_seconds
+msgid "Duration (s)"
+msgstr "Unay (s)"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__duration_minutes
@@ -1452,6 +2123,19 @@ msgid "Early"
 msgstr "Ñawpa"
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/res_users.py:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
+#, python-format
+msgid "Edit driver"
+msgstr "Pushakta allichiy"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__email
+msgid "Email"
+msgstr "Correo"
+
+#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_complaint_retention_days
 msgid ""
 "Email and phone left in a complaint are erased this many days after it is "
@@ -1472,6 +2156,11 @@ msgid "Emergency (SOS)"
 msgstr "Utkalla yanapay (SOS)"
 
 #. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_report_wizard__route_ids
+msgid "Empty: every line."
+msgstr "Chusak: tukuy ñankuna."
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
@@ -1479,7 +2168,10 @@ msgid "Enable on this device"
 msgstr "Kay dispositivopi kawsachiy"
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__end
+#, python-format
 msgid "End"
 msgstr "Tukuy"
 
@@ -1487,6 +2179,11 @@ msgstr "Tukuy"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__end_time
 msgid "End Time"
 msgstr "Tukuy pacha"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__ended_at
+msgid "Ended at"
+msgstr "Tukurirka"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_push_subscription__endpoint
@@ -1546,6 +2243,16 @@ msgid "Estimated km"
 msgstr "Yuyashka km"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
+msgid "Estudiantes universitarios en Ambato"
+msgstr "Ambatopi hatun yachana wasipi yachakukkuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__checks_ok
+msgid "Every check passed"
+msgstr "Tukuy tupuykuna allimi"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
@@ -1566,6 +2273,19 @@ msgstr ""
 "purishkakunata ñawpaman rurankuna."
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "Every line"
+msgstr "Tukuy ñankuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__evidence_json
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Evidence"
+msgstr "Rikuchina"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__expected_flags
 msgid "Expected Flags"
 msgstr "Shuyashka rikuchikkuna"
@@ -1581,6 +2301,129 @@ msgstr "Tukurin"
 #, python-format
 msgid "Filter buses"
 msgstr "Bus kunata akllay"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Filtered by the system"
+msgstr "Sistema akllashka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__fine_checked
+msgid "Fine Checked"
+msgstr "Multapak rikushka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__fine_count
+msgid "Fine Count"
+msgstr "Multakunapak yupay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__threshold
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__threshold
+msgid "Fine above"
+msgstr "Kayta yallikpi multana"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_fine_type
+msgid "Fine type"
+msgstr "Multa laya"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_fine_type
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_fine_type
+msgid "Fine types"
+msgstr "Multa layakuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__state__fined
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_tree
+msgid "Fined"
+msgstr "Multashka"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
+#, python-format
+msgid "Fined above %s km/h"
+msgstr "%s km/h yallikpi multa"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_fine
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_fine
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_fines
+#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_graph
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_pivot
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_tree
+#, python-format
+msgid "Fines"
+msgstr "Multakuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Fines by driver"
+msgstr "Pushakmanta multakuna"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Fines by driver and state"
+msgstr "Pushakmanta, imashina kashkamanta multakuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Fines by type"
+msgstr "Layamanta multakuna"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Fines by type and state"
+msgstr "Layamanta, imashina kashkamanta multakuna"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/trip_simulator.py:0
+#, python-format
+msgid "Fines of the simulated trips"
+msgstr "Rurashka purishkakunapak multakuna"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Fines per week"
+msgstr "Hunkaymanta multakuna"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "Fines proposed"
+msgstr "Rikuchishka multakuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_simulate_form
+msgid "Fines scenarios (7 trips)"
+msgstr "Multapak rurashkakuna (7 purishka)"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_simulate_form
+msgid ""
+"Fines scenarios: seven trips on the chosen route, one per rule of a fine, plus a speeding inside\n"
+"                    the tolerance (no fine) and a trip without GPS data (discarded by the system). Choose a driver to\n"
+"                    give them the fines."
+msgstr "Multapak rurashkakuna: akllashka ñanpi kanchis purishka, multapak kamachikmanta shukta, tupu ukupi utka purishka (mana multa) shinallatak GPS illak purishka (sistema anchuchin). Multakunata kunkapak pushakta akllay."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__fix_time
@@ -1608,6 +2451,21 @@ msgstr "Bus tantapak wanra"
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_fleet_vehicles
 msgid "Fleet vehicles"
 msgstr "Bus tantapak wanrakuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_follower_ids
+msgid "Followers"
+msgstr "Katikkuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Katikkuna (riksishkakuna)"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__min_seconds
+msgid "For at least (seconds)"
+msgstr "Ashtawan uchilla (segundokuna)"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.login
@@ -1666,11 +2524,24 @@ msgid "GPS device (Traccar)"
 msgstr "GPS rurana (Traccar)"
 
 #. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__discard_reason__gps
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_discard__reason__gps
+msgid "GPS false positive"
+msgstr "GPS llulla"
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
 msgid "GPS record integrity"
 msgstr "GPS killkashkakunapak tukuy kay"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "GPS signal enough"
+msgstr "GPS rikurin allimi"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
@@ -1738,6 +2609,7 @@ msgid "Group By"
 msgstr "Tantachiy"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_run_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
 msgid "Group by"
@@ -1750,6 +2622,11 @@ msgid ""
 msgstr ""
 "Mapapa rikuchikunapa HTTPS direccion, {z}/{x}/{y}wan. Illakpika CARTO "
 "Voyager llankan."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__has_message
+msgid "Has Message"
+msgstr "Willayta charin"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__has_stops
@@ -1801,6 +2678,18 @@ msgid "How late or early the buses arrive"
 msgstr "Busakuna ima kipa ñawpa chayan"
 
 #. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__appeal_days
+msgid "How long the driver may answer a confirmed fine from the tablet."
+msgstr "Pushak tabletamanta chiqanchishka multata ima pacha kama kutichiy ushan."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__min_seconds
+msgid ""
+"How long the infraction must last. 0: any duration. A single position never "
+"counts as a duration."
+msgstr "Pantayka ima pacha kama unanami kan. 0: ima unaypish. Shuk maypi kashkalla mana unay shina yupanchu."
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
@@ -1828,6 +2717,9 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__id
@@ -1850,6 +2742,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__id
 msgid "ID"
 msgstr "ID"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Akllashka kakpika musuk willaykunata rikunami kanki."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Akllashka kakpika wakin willaykuna mana chayarkachu."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__traccar_token
@@ -1875,9 +2777,15 @@ msgstr "Ishkaypi kan, shuktak pachapi."
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__state__review
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__state__review
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
 msgid "In review"
 msgstr "Rikuypi"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__headline
+msgid "In short"
+msgstr "Uchillapi"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
@@ -1895,6 +2803,13 @@ msgid "Incident Count"
 msgstr "Pasashkakunapak yupay"
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "Incident reported"
+msgstr "Llaki willashka"
+
+#. module: bus_tracking
 #. odoo-javascript
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
@@ -1907,6 +2822,11 @@ msgstr "Pasashkakunapak yupay"
 #, python-format
 msgid "Incidents"
 msgstr "Pasashkakuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Incidents and alerts by kind"
+msgstr "Llakikuna, willachikunapash, imashina kashkamanta"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -1930,7 +2850,10 @@ msgid "Incomplete"
 msgstr "Mana tukuk"
 
 #. module: bus_tracking
+#: model:bus.fine.type,name:bus_tracking.fine_type_incomplete_trip
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__incomplete_trip
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__rule__incomplete_trip
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__rule__incomplete_trip
 msgid "Incomplete trip"
 msgstr "Mana tukuk purishka"
 
@@ -1978,9 +2901,25 @@ msgid "Invalid fixTime format."
 msgstr "fixTime shina mana allichu."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_is_follower
+msgid "Is Follower"
+msgstr "Katikmi"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_users__is_bus_driver
 msgid "Is a driver"
 msgstr "Pushakmi"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__discard_reason__justified
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_discard__reason__justified
+msgid "Justified by the circumstances"
+msgstr "Tukushkakunawan allichishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_history_retention_days
+msgid "Keep history (days)"
+msgstr "Yallishkata waqaychay (punllakuna)"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_position_retention_days
@@ -1997,6 +2936,16 @@ msgstr "Posicionkunata waqaychay (punchakuna)"
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 msgid "Kind"
 msgstr "Rikchak"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Km driven"
+msgstr "Purishka km"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Km planned"
+msgstr "Yuyashka km"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_complaint__lang
@@ -2037,6 +2986,11 @@ msgid "Last 90 days"
 msgstr "Ñawpa 90 punchakuna"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Last Coordinates"
+msgstr "Tukuri maypi kashka"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__last_course
 #: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_last_course
 msgid "Last Course"
@@ -2063,6 +3017,9 @@ msgstr "Tukuri longitud"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token____last_update
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine____last_update
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard____last_update
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample____last_update
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position____last_update
@@ -2098,6 +3055,9 @@ msgstr "Tukuri utkay"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__write_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__write_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__write_uid
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__write_uid
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_uid
@@ -2127,6 +3087,9 @@ msgstr "Tukuri musuyachik"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_token__write_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__write_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__write_date
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__write_date
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__write_date
@@ -2192,7 +3155,10 @@ msgid "Late arrivals"
 msgstr "Kipa chayaykuna"
 
 #. module: bus_tracking
+#: model:bus.fine.type,name:bus_tracking.fine_type_late_start
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__late_start
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__rule__late_start
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__rule__late_start
 msgid "Late start"
 msgstr "Kipa lluksiy"
 
@@ -2208,7 +3174,13 @@ msgid "Late-start alert after (minutes)"
 msgstr "Kipa lluksiy yuyachiy washa (minutokuna)"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Latest trips"
+msgstr "Kipa purikuna"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__latitude
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__latitude
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__latitude
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__latitude
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__latitude
@@ -2241,6 +3213,11 @@ msgid ""
 msgstr "Latitudka -90 y 90 chawpipi, longitudka -180 y 180 chawpipi kana kan."
 
 #. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__password
+msgid "Leave it empty to keep the current password."
+msgstr "Kunan pakashka shimita sakinkapak chushakta sakiy."
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__has_contact
 msgid "Left contact data"
 msgstr "Contacto willayta saquirka"
@@ -2253,6 +3230,13 @@ msgid ""
 msgstr ""
 "Ñan layapak mashna kashka (killkashka ñan, kashpaka sayanakuna ñawpamanta "
 "katishpa tantashka): yuyashka karu."
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
+#, python-format
+msgid "Limit %s km/h"
+msgstr "Tupu %s km/h"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_alert__threshold
@@ -2278,6 +3262,11 @@ msgstr "Ñan"
 #, python-format
 msgid "Lines"
 msgstr "Ñankuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__link
+msgid "Link"
+msgstr "Tinkiy"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2340,10 +3329,18 @@ msgstr ""
 "Busa ñawpa sayanamanta lluksina kikin llaktapak pacha (urakuna minutokuna)."
 
 #. module: bus_tracking
+#: model:bus.fine.type,name:bus_tracking.fine_type_long_stop
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__long_stop
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__rule__long_stop
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__rule__long_stop
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
 msgid "Long stop"
 msgstr "Unay sayashka"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_simulate__scenario__long_stop
+msgid "Long stop away from the stops"
+msgstr "Sayanakunamanta karupi unay sayashka"
 
 #. module: bus_tracking
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_report_long_stop
@@ -2358,6 +3355,7 @@ msgstr "Unay sayashka yuyachik (minutu washa)"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__longitude
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__longitude
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__longitude
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position__longitude
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__longitude
@@ -2366,14 +3364,38 @@ msgid "Longitude"
 msgstr "Longitud"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Hatun pakta killka"
+
+#. module: bus_tracking
 #: model:res.groups,name:bus_tracking.group_bus_manager
 msgid "Manager"
 msgstr "Kamachik"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__map_tile_url
+msgid "Map Tile Url"
+msgstr "Mapapak URL"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_map_center
 msgid "Map center (latitude, longitude)"
 msgstr "Mapapa chawpi (latitud, longitud)"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/fine_evidence.xml:0
+#, python-format
+msgid "Map of the evidence of the fine"
+msgstr "Multapak rikuchinapak mapa"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Map of the fines of the period"
+msgstr "Pachapak multakunapak mapa"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_tile_url
@@ -2417,6 +3439,16 @@ msgid "Measure the response time now"
 msgstr "Kutichina pachata kunan tupuy"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__measured_value
+msgid "Measured"
+msgstr "Tupushka"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Measurement"
+msgstr "Tupuy"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #, python-format
@@ -2424,9 +3456,25 @@ msgid "Median"
 msgstr "Chawpi"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_has_error
+msgid "Message Delivery error"
+msgstr "Willay mana chayarka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_ids
+msgid "Messages"
+msgstr "Willaykuna"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__ms
 msgid "Milliseconds"
 msgstr "Milisikundukuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__severity__minor
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__severity__minor
+msgid "Minor"
+msgstr "Uchilla"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_route_stop__planned_offset_min
@@ -2448,6 +3496,16 @@ msgid "Minutes after the planned time."
 msgstr "Yuyashka pacha washa minutokuna."
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid "Minutes by distance"
+msgstr "Karumanta minutukuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid "Minutes from real trips"
+msgstr "Purishkamanta minutukuna"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_sync_audit__mismatched
 msgid "Mismatched"
 msgstr "Mana tupashka"
@@ -2463,12 +3521,23 @@ msgid "Monday"
 msgstr "Lunes"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+msgid "Month"
+msgstr "Killa"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_fines_monthly_cap
+msgid "Monthly cap of fines per driver ($)"
+msgstr "Shuk pushakpak killa multa tupu ($)"
+
+#. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__status__moving
 msgid "Moving"
 msgstr "Purishka"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__name
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__name
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_schedule__name
@@ -2491,15 +3560,25 @@ msgid "Needs attention"
 msgstr "Rikuyta mutsurin"
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_simulate__scenario__not_started
+#, python-format
 msgid "Never started"
 msgstr "Mana kallarishka"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__state__new
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__state__new
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
 msgid "New"
 msgstr "Mushuk"
+
+#. module: bus_tracking
+#: model:ir.actions.act_window,name:bus_tracking.action_bus_driver_new
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_driver_new
+msgid "New driver"
+msgstr "Musuk pushak"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2507,6 +3586,13 @@ msgstr "Mushuk"
 #, python-format
 msgid "New passenger messages"
 msgstr "Purikkunapa mushuk willaykuna"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "New, in review or appealed"
+msgstr "Musuk, rikushpa o kutichishka"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2521,6 +3607,51 @@ msgstr "Mana ima bus kay akllaywan tupunchu."
 #, python-format
 msgid "No data"
 msgstr "Mana willaykuna"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_kanban
+#, python-format
+msgid "No driver"
+msgstr "Mana pushak"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "No driver identified"
+msgstr "Mana pushak riksishkachu"
+
+#. module: bus_tracking
+#: model_terms:ir.actions.act_window,help:bus_tracking.action_bus_fine
+msgid "No fine proposed yet"
+msgstr "Ñapash mana multa rikuchishkachu"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+#, python-format
+msgid "No fines in this period."
+msgstr "Kay pachapi mana multa tiyanchu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "No incident reported"
+msgstr "Mana llaki willashkachu"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "No incidents or alerts in this period."
+msgstr "Kay pachapi mana llakikuna, mana willachikunapash tiyarkachu."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "No late arrivals in this period."
+msgstr "Kay pachapi mana unaypi chayamukkuna tiyarkachu."
 
 #. module: bus_tracking
 #. odoo-python
@@ -2539,6 +3670,32 @@ msgid ""
 msgstr ""
 "L1 manta L4 kama shutiyuk ñan mana kanchu: shuk kikin ñanpi rurachikta "
 "llankachiy."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/trip_simulator.py:0
+#, python-format
+msgid ""
+"The stretches of %(route)s are too short to show a deviation of %(minutes)s "
+"minutes and a sustained speeding run. Choose a route with a longer stretch: "
+"%(routes)s."
+msgstr "%(route)s ñanpa chakikuna ashalla kan %(minutes)s minutu ñanmanta "
+"llukshishkata, sinchi utka rishkatapash rikuchinkapak. Shuk ashtawan unay "
+"chakiyuk ñanta akllay: %(routes)s."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/trip_simulator.py:0
+#, python-format
+msgid "none"
+msgstr "mana maykanpash"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "No shift of the bus and no driver on the trip at that time"
+msgstr "Chay pachapi busmanka mana llankay pacha, purishkapika mana pushak"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2566,6 +3723,13 @@ msgid "No-signal alert after (minutes)"
 msgstr "Mana rikurik yuyachik (minutu washa)"
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "Not enough GPS data to prove it"
+msgstr "Rikuchinkapak GPS willaykuna mana pakta"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 msgid "Not seen yet"
 msgstr "Ñapash mana rikushka"
@@ -2578,6 +3742,7 @@ msgid "Not started"
 msgstr "Mana lluksishka"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__note
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__note
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_form
 msgid "Note"
@@ -2589,6 +3754,18 @@ msgstr "Yuyay"
 #, python-format
 msgid "Nothing needs attention right now."
 msgstr "Kunan mana ima rikuyta mutsurinchu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "Nothing reported by the bus that explains it"
+msgstr "Bus mana imatapish willarkachu"
+
+#. module: bus_tracking
+#: model:ir.ui.menu,name:bus_tracking.menu_bus_reports
+msgid "Notifications"
+msgstr "Willachikuna"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2617,6 +3794,31 @@ msgid "Notified"
 msgstr "Willashka"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__name
+msgid "Number"
+msgstr "Yupay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Rurana yupay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__message_has_error_counter
+msgid "Number of errors"
+msgstr "Pantay yupay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Rurana willaykunapak yupay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Mana chayashka willaykunapak yupay"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__off_route_since
 msgid "Off Route Since"
 msgstr "Ñanmanta llukshishka"
@@ -2625,6 +3827,8 @@ msgstr "Ñanmanta llukshishka"
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__off_route
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__rule__off_route
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__rule__off_route
 #, python-format
 msgid "Off route"
 msgstr "Ñanmanta llukshishka"
@@ -2665,6 +3869,13 @@ msgstr ""
 "rakukunapi mana telefono rikurinchu."
 
 #. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_position_retention_days
+msgid ""
+"Older positions are deleted daily, with the rejected positions and the "
+"synchronisation audits. 0 keeps everything."
+msgstr "Ñawpa maypi kashkakunaka tukuy punlla pichashka kan, mana chaskishkakunawan shinallatak tinkiy rikuykunawan. 0 tukuyta waqaychan."
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/live_map.js:0
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
@@ -2673,6 +3884,15 @@ msgstr ""
 #, python-format
 msgid "On route"
 msgstr "Ñanpi"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_service
+msgid ""
+"On route while its bus drives a shift; decommissioned when archived or in "
+"the Downgraded state of Fleet."
+msgstr ""
+"Antawa turnopi purikukpika ñanpimi kan; pakashka kakpi, Flotapi llukchishka "
+"kakpipash, llamkaymanta llukchishkami kan."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -2694,6 +3914,42 @@ msgstr "Purinpi"
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_stop__status__on_time
 msgid "On time"
 msgstr "Pachapi"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Only a new fine or one in review can be confirmed."
+msgstr "Musuk o rikushpa multallatami chiqanchiy ushan."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Only a new fine or one in review can be discarded."
+msgstr "Musuk o rikushpa multallatami anchuchiy ushan."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Only a new or discarded fine can be reviewed."
+msgstr "Musuk o anchuchishka multallatami rikuy ushan."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Only an appealed fine can be resolved."
+msgstr "Kutichishka multallatami tukuchiy ushan."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_driver_edit.py:0
+#, python-format
+msgid "Only drivers can be edited here."
+msgstr "Kaypika pushakkunallatami allichiy ushan."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -2724,6 +3980,20 @@ msgstr ""
 #, python-format
 msgid "Only managers can audit the synchronisation."
 msgstr "Kamachikkunallami tupuchiyta rikuy ushanku."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_driver_edit.py:0
+#, python-format
+msgid "Only managers can create or edit drivers."
+msgstr "Pushakkunataka kamachikkunallami ruray o allichiy ushan."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Only managers can decide on a fine."
+msgstr "Multataka kamachikkunallami akllay ushan."
 
 #. module: bus_tracking
 #. odoo-python
@@ -2763,6 +4033,13 @@ msgstr "Kamachikkunalla willaykunata chaskiyta ushan."
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_vehicle.py:0
+#, python-format
+msgid "Only managers can register a GPS device."
+msgstr "GPSta kamachikkunallami killkachiy ushan."
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/bus_shift.py:0
 #, python-format
 msgid "Only managers can sign a tablet out."
@@ -2781,6 +4058,13 @@ msgstr "Kamachikkunallami rikuchina willayta kallarichiy ushanku."
 #, python-format
 msgid "Only managers can stop a demo report."
 msgstr "Kamachikkunallami rikuchina willayta tukuchiy ushanku."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Only the driver can appeal a fine, from the tablet."
+msgstr "Multataka pushakllami tabletamanta kutichiy ushan."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -2835,6 +4119,17 @@ msgid "Open the messages"
 msgstr "Willaykunata kichay"
 
 #. module: bus_tracking
+#: model:ir.actions.report,name:bus_tracking.action_report_operation
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Operation report"
+msgstr "Llamkaymanta willay"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_report_bus_tracking_report_operation
+msgid "Operation report (PDF)"
+msgstr "Llamkaymanta willay (PDF)"
+
+#. module: bus_tracking
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_operation
 msgid "Operations"
 msgstr "Llankaykuna"
@@ -2850,10 +4145,17 @@ msgstr ""
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_complaint__kind__other
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__discard_reason__other
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_discard__reason__other
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_incident__kind__other
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 msgid "Other"
 msgstr "Shuk"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_simulate__scenario__speeding_tolerated
+msgid "Over the limit, inside the tolerance"
+msgstr "Tuputa yallishka, sakishka ukupi"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_simulate__scenario__speeding
@@ -2878,6 +4180,12 @@ msgstr "Pasashkakunapak Pareto"
 #, python-format
 msgid "Pareto: the few kinds that cause most incidents"
 msgstr "Pareto: pishi layakuna ashka pasashkakunata rurakun"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__parked
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Parked (not on route)"
+msgstr "Sayashka (mana ñanpi)"
 
 #. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_bus_complaint
@@ -2917,6 +4225,11 @@ msgstr "Shuyashka"
 #, python-format
 msgid "Period"
 msgstr "Pacha"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_edit__phone
+msgid "Phone"
+msgstr "Telefono"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
@@ -2997,9 +4310,53 @@ msgstr ""
 "kuyaymi."
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Precision"
+msgstr "Chiqanlla"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Preparing the PDF…"
+msgstr "PDFta allichikun…"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Previous period"
+msgstr "Ñawpa pacha"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_badge_form
+msgid ""
+"Print or save this badge now: Odoo shows it only once and does not keep it."
+msgstr "Kay rikuchinata kunanlla imprimiy o waqaychay: Odooka shuk kutillami rikuchin, mana waqaychanchu."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Printed"
+msgstr "Llukchishka"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_privacy_url
 msgid "Privacy policy link"
 msgstr "Pakashka willaykunapa kamachiy enlace"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_tree
+msgid "Proposed"
+msgstr "Rikuchishka"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__amount_proposed
+msgid "Proposed amount"
+msgstr "Rikuchishka kullki"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Proposed by the system from its alerts and decided by a person."
+msgstr "Sistema willaykunamanta rikuchishka, runa akllashka."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_gps_url
@@ -3061,9 +4418,27 @@ msgid "Punctuality tolerance (minutes)"
 msgstr "Pachapi chayaypak ushashka (minutokuna)"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_driver_badge__qr
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_badge_form
+msgid "QR badge"
+msgstr "QR rikuchina"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_tree
 msgid "QR badge active"
 msgstr "QR credencial kawsak"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/res_users.py:0
+#, python-format
+msgid "QR badge of %s"
+msgstr "%s pak QR rikuchina"
+
+#. module: bus_tracking
+#: model:ir.model,name:bus_tracking.model_bus_driver_badge
+msgid "QR badge shown once"
+msgstr "QR rikuchina shuk kutilla rikuchishka"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_badge_form
@@ -3090,6 +4465,7 @@ msgid "Radius (m)"
 msgstr "Muyuy (m)"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
 msgid "Real"
 msgstr "Chiqan"
@@ -3145,6 +4521,7 @@ msgid "Real only"
 msgstr "Chiqankunallata"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_discard__reason
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_position_reject__reason
 msgid "Reason"
 msgstr "Imarayku"
@@ -3195,14 +4572,46 @@ msgid "Register GPS in Traccar"
 msgstr "GPSta Traccarpi killkay"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Reject the appeal"
+msgstr "Kutichishkata mana chaskiy"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__appeal_result__rejected
+msgid "Rejected"
+msgstr "Mana chaskishka"
+
+#. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_bus_position_reject
 msgid "Rejected GPS position"
 msgstr "Mana chaskishka GPS posicion"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
 msgid "Reopen"
 msgstr "Kutin kichay"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__recurrence_factor
+msgid "Repeat factor"
+msgstr "Kutin rurashkapak mirachik"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__recurrent
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_kanban
+msgid "Repeat offence"
+msgstr "Kutin rurashka"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+msgid "Repeat offences"
+msgstr "Kutin rurashkakuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__recurrence_days
+msgid "Repeat window (days)"
+msgstr "Kutin rurashkapak pacha (punllakuna)"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_stale_minutes
@@ -3279,6 +4688,11 @@ msgid "Result"
 msgstr "Tukuy"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__reviewer_id
+msgid "Reviewer"
+msgstr "Rikuk"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
 msgid "Revoke badge"
 msgstr "Credencialta hurkuy"
@@ -3294,9 +4708,11 @@ msgstr ""
 
 #. module: bus_tracking
 #. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
 #: code:addons/bus_tracking/static/src/xml/stop_picker.xml:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__route_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_gpx__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_record__route_id
@@ -3311,6 +4727,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__route_id
 #: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_route_id
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_run_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_shift_search
@@ -3353,6 +4770,7 @@ msgid "Route compliance by line (%)"
 msgstr "Ñan rurashka sapa ñanpi (%)"
 
 #. module: bus_tracking
+#: model:bus.fine.type,name:bus_tracking.fine_type_off_route
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
 msgid "Route deviation"
 msgstr "Ñanmanta llukshishka"
@@ -3373,6 +4791,13 @@ msgstr "Ñankuna"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_perf_sample__rows
 msgid "Rows"
 msgstr "Siwikuna"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__rule
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__rule
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_form
+msgid "Rule"
+msgstr "Kamachik"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_sync_audit__run_at
@@ -3401,6 +4826,13 @@ msgstr "Sábado"
 #, python-format
 msgid "Save"
 msgstr "Waqaychay"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Say why the fine is discarded: open it and press Discard."
+msgstr "Multata imamanta anchuchishkata willay: paskashpa Anchuchiyta ñitiy."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -3492,10 +4924,23 @@ msgid "Send a test"
 msgstr "Pruebata kachay"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__sequence
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route_stop__sequence
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_stop__sequence
 msgid "Sequence"
 msgstr "Katik"
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__severity__serious
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__severity__serious
+msgid "Serious"
+msgstr "Llaki"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_service
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
+msgid "Service"
+msgstr "Llamkay"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_edit_form
@@ -3507,6 +4952,17 @@ msgstr "Pakashka shimita churay o tikrachiy"
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_settings
 msgid "Settings"
 msgstr "Ajustekuna"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_simulate_form
+msgid "Seven simulated trips are created on this route, each on a past day."
+msgstr "Kay ñanpi kanchis rurashka purishkakuna rurarin, shukka yallishka punllapi."
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__severity
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__severity
+msgid "Severity"
+msgstr "Llakipak hatunkay"
 
 #. module: bus_tracking
 #. odoo-python
@@ -3554,6 +5010,7 @@ msgstr ""
 " rurayka purikkunapak mana allichu."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__shift_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__shift_id
 msgid "Shift"
 msgstr "Llankay pacha"
@@ -3623,8 +5080,12 @@ msgid "Simulate trips"
 msgstr "Purishkakunata rurachiy"
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__simulated
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__simulated
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_vehicle__simulated
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_kanban
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
 msgid "Simulated"
 msgstr "Rurashka"
@@ -3673,7 +5134,10 @@ msgstr "Mana sayashka"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:bus.fine.type,name:bus_tracking.fine_type_skipped_stop
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__skipped_stop
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__rule__skipped_stop
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__rule__skipped_stop
 #, python-format
 msgid "Skipped stop"
 msgstr "Mana sayashka sayana"
@@ -3714,17 +5178,35 @@ msgid "Speed"
 msgstr "Utkay"
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
+#, python-format
+msgid "Speed (km/h)"
+msgstr "Utkalla (km/h)"
+
+#. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_speed_limit
 msgid "Speed limit (km/h)"
 msgstr "Utkay límite (km/h)"
 
 #. module: bus_tracking
 #. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/fine_evidence.xml:0
+#, python-format
+msgid "Speed of the bus over time"
+msgstr "Bus utkalla pachapi"
+
+#. module: bus_tracking
+#. odoo-javascript
 #: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#: model:bus.fine.type,name:bus_tracking.fine_type_speeding
 #: model:ir.actions.act_window,name:bus_tracking.action_bus_report_speeding
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_alert__kind__speeding
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__rule__speeding
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__rule__speeding
 #: model:ir.ui.menu,name:bus_tracking.menu_bus_report_speeding
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_alert_search
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_form
 #, python-format
 msgid "Speeding"
 msgstr "Sinchi utka"
@@ -3735,7 +5217,10 @@ msgid "Staff sign-in"
 msgstr "Llankakkunapa yaykuy"
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__start
+#, python-format
 msgid "Start"
 msgstr "Kallari"
 
@@ -3745,9 +5230,21 @@ msgid "Start Time"
 msgstr "Kallari pacha"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Start demo report"
+msgstr "Rikuchinapak willayta kallarichiy"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
 msgid "Start review"
 msgstr "Rikuyta kallarichiy"
+
+#. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__occurred_at
+msgid "Started at"
+msgstr "Kallarirka"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -3755,12 +5252,14 @@ msgstr "Rikuyta kallarichiy"
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__state
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_shift__state
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip__state
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_search
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_search
 #, python-format
 msgid "State"
@@ -3802,6 +5301,20 @@ msgid "Stop arrivals"
 msgstr "Sayanaman chayay"
 
 #. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_history_retention_days
+msgid ""
+"Stop arrivals, closed alerts, incidents already seen, finished trips and "
+"closed shifts older than this are deleted daily. Open alerts and unseen "
+"incidents are kept. 0 keeps everything."
+msgstr "Sayanaman chayashka, wichkashka willaykuna, ña rikushka llakikuna, tukurishka purishkakuna, wichkashka llankay pachakuna kaymanta ñawpakunaka tukuy punlla pichashka kan. Paskashka willaykuna, mana rikushka llakikunaka waqaychashka kan. 0 tukuyta waqaychan."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Stop demo report"
+msgstr "Rikuchinapak willayta sayachiy"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/stop_picker.xml:0
 #, python-format
@@ -3828,6 +5341,13 @@ msgstr "Mapapi sayana"
 #, python-format
 msgid "Stopped"
 msgstr "Sayashka"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "Stopped %(minutes)s min"
+msgstr "%(minutes)s min sayashka"
 
 #. module: bus_tracking
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_trip_simulate__scenario__incomplete_end
@@ -3897,6 +5417,11 @@ msgstr "Ashtawan kipa chawpiyuk sayanakuna"
 #, python-format
 msgid "Stops with the largest average delay (min)"
 msgstr "Ashtawan kipa chawpiyuk sayanakuna (min)"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Stops with the most delay"
+msgstr "Ashtawan unayyuk sayanakuna"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -3995,6 +5520,30 @@ msgid "The GPS address must look like https://gps.example.com."
 msgstr "GPS direccionka https://gps.example.com shinami kana kan."
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/dashboard.js:0
+#, python-format
+msgid "The PDF could not be prepared. Try again in a moment."
+msgstr "PDFta mana allichiyta usharkachu. Ashata shuyashpa kutin ruray."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__rule
+msgid "The alert of the system this fine is proposed from."
+msgstr "Kay multa rikuchishka sistemapak willay."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__recurrence_factor
+msgid "The amount of a repeat offence is multiplied by this."
+msgstr "Kutin rurashkapak kullkika kaywan mirachishka kan."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "The amount, the threshold and the duration cannot be negative."
+msgstr "Kullki, tupu, unaypish mana negativo kanchu."
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_route.py:0
 #: code:addons/bus_tracking/models/bus_route.py:0
@@ -4019,6 +5568,13 @@ msgstr ""
 "                    Bus tukuy ñanta, shuk tukurimanta shukkama, purishka pachata akllay."
 
 #. module: bus_tracking
+#: model:bus.fine.type,description:bus_tracking.fine_type_skipped_stop
+msgid ""
+"The bus drove past a stop of its trip without entering its radius, and the "
+"GPS was reporting at that time."
+msgstr "Bus purishkapak sayanata muyunman mana yaykushpa yallirka, chay pachapi GPSka willakurkami."
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_assign_form
 msgid ""
 "The bus gets a scheduled trip on each day of the period on which the schedule runs.\n"
@@ -4027,6 +5583,33 @@ msgstr ""
 "Busaka ruray pacha purishka punchakunapi sapa punchapi yuyashka purishkata "
 "chaskin. Shuk busaka ishkay purishkata shuk pachapi mana charinchu; shuktak "
 "ñankunata shuktak pachakunapi purinman."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_vehicle__demo_report
+#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_demo_report
+msgid "The bus is accepting positions without a shift right now."
+msgstr "Kunanka busmi llankay pacha illakpi maypi kashkata chaskikun."
+
+#. module: bus_tracking
+#: model:bus.fine.type,description:bus_tracking.fine_type_off_route
+msgid ""
+"The bus left the road of its route by more than 300 m for at least 3 "
+"minutes, with no incident reported that explains it."
+msgstr "Bus ñanmanta 300 m yallita, 3 minutokama, llukshirka, mana ima llakita willashpa."
+
+#. module: bus_tracking
+#: model:bus.fine.type,description:bus_tracking.fine_type_long_stop
+msgid ""
+"The bus stood still for more than 20 minutes away from any stop of its "
+"route, with no incident reported."
+msgstr "Bus ñanpak sayanakunamanta karupi 20 minuto yallita sayashka karka, mana ima llakita willashpa."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "The bus stopped"
+msgstr "Bus sayarka"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_route_schedule__vehicle_id
@@ -4046,6 +5629,13 @@ msgstr "Llimpika #1e5560 shinami kana kan."
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "The days cannot be negative."
+msgstr "Punllakuna mana negativo kanchu."
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/bus_trip.py:0
 #, python-format
 msgid "The departure time must be between 00:00 and 23:59."
@@ -4057,6 +5647,47 @@ msgstr "Lluksina pachaka 00:00 manta 23:59 kama kana kan."
 #, python-format
 msgid "The description cannot be longer than %s characters."
 msgstr "Willayka %s killkamanta mana yallinachu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "The driver appealed: %s"
+msgstr "Pushak kutichirka: %s"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_route_schedule__driver_user_id
+msgid ""
+"The driver of its trips. Their tablet reminds them 10 minutes before each "
+"trip and at its start."
+msgstr ""
+"Purikunapa antawa pushak. Paypa tabletaka sapan purina chunka minuto "
+"ñawpaman, llukshina pachapipash willan."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_trip__driver_user_id
+msgid ""
+"The driver of this trip. Their tablet reminds them 10 minutes before and at "
+"the planned start."
+msgstr ""
+"Kay purinapa antawa pushak. Paypa tabletaka chunka minuto ñawpaman, yuyashka"
+" llukshina pachapipash willan."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_driver_form
+msgid ""
+"The driver scans the QR badge with the tablet to sign in without typing a user or password.\n"
+"                        Odoo shows a badge only once, when it is generated, and does not keep it: print it then.\n"
+"                        If it is lost, generate a new one; the old one stops working."
+msgstr "Pushakka QR rikuchinata tabletawan rikun, yaykukta pakashka shimitapish mana killkashpa yaykunkapak. Odooka rikuchinata rurashka pachallami shuk kutilla rikuchin, mana waqaychanchu: chay pachapi imprimiy. Chinkashka kakpika musukta rurariy; ñawpaka mana llankanchu."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_trip_simulate__driver_user_id
+msgid ""
+"The driver the simulated trips are given to, so their fines have someone to "
+"be proposed to. Without one, the fines are discarded by the system: nobody "
+"drove."
+msgstr "Rurashka purishkakuna kunkapak pushak, multakunata pimanpish rikuchinkapak. Mana pushak kakpika sistema multakunata anchuchin: pipish mana pusharkachu."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_shift_form
@@ -4094,6 +5725,39 @@ msgid "The file is too big (5 MB at most)."
 msgstr "Kay killka sinchi hatunmi (5 MBkama)."
 
 #. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_alert__fine_checked
+msgid ""
+"The fine detector already looked at this alert (bus.fine._cron_detect)."
+msgstr "Multa taripakka kay willayta ña rikurka (bus.fine._cron_detect)."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid ""
+"The fine is confirmed and the driver can see it and appeal it from the "
+"tablet."
+msgstr "Multaka chiqanchishkami, pushakka tabletamanta rikuy, kutichiy ushan."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "The fine is discarded and its amount goes to zero."
+msgstr "Multaka anchuchishkami, kullkika illakman tikran."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "The fine stays confirmed. The driver cannot appeal it again."
+msgstr "Multaka chiqanchishkallatami sakirin. Pushakka mana kutin kutichiy ushanchu."
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid ""
+"The fines the system proposed in the period, as the kanban of Fines shows them. The precision\n"
+"                        is the share of the fines a person decided on that were confirmed: a low one means the\n"
+"                        threshold of that rule is too strict."
+msgstr "Kay pachapi sistema rikuchishka multakuna, Multakunapak kanbanpi shina. Chiqanllaka runa akllashka multakunamanta chiqanchishkakunami: uchilla kakpika chay kamachikpak tupu ashtawan sinchimi."
+
+#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_stale_minutes
 msgid ""
 "The health check at /bus_tracking/health fails when no bus has reported for "
@@ -4103,11 +5767,34 @@ msgstr ""
 "0wanka rikuyka mana kawsanchu."
 
 #. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
+#, python-format
+msgid "The infraction"
+msgstr "Pantay"
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_trip.py:0
 #, python-format
 msgid "The last day cannot be before the first day."
 msgstr "Tukuy punchaka ñawpa punchamanta ñawpa mana kanchu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"The last position shows it standing still: the signal did not cut out while "
+"driving"
+msgstr "Tukuri maypi kashkaka sayashkata rikuchin: purikukpi GPS mana chinkarkachu"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "The last position was moving: the end of the trip may be a lost signal"
+msgstr "Tukuri maypi kashkaka purishkami karka: purishkapak tukuri chinkashka GPS kanmanmi"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -4121,6 +5808,13 @@ msgstr ""
 " yuyachikunata, pasashkakunatapash rikuy."
 
 #. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route.py:0
+#, python-format
+msgid "The line needs at least two stops to measure the distance."
+msgstr "Karuta tupunkapakka ñanka ishkay sayanakunatami charina."
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_gpx_form
 msgid ""
 "The line of the route is drawn along the track of the file (the longest one, or the route\n"
@@ -4130,6 +5824,21 @@ msgstr ""
 "Ñanpa siglla killkapa ñan llimpishkawan llimpishka kan (hatun shinaka, o ñan"
 " llimpishka illakpi ñan). Killkaka pishi puntukunaman uchiyachishka kan; "
 "telefono appmanta o mapa rakumanta shamunmanmi."
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__threshold
+msgid ""
+"The measured value must go beyond this to be fined: km/h for speeding, "
+"metres for a deviation or a skipped stop, minutes for a late start or a long"
+" stop, stops for an incomplete trip."
+msgstr "Multankapak tupushkaka kayta yallinami kan: utka purishkapi km/h, ñanmanta llukshishkapi o yallishka sayanapi metrokuna, kipa kallarishkapi o unay sayashkapi minutokuna, mana tukushka purishkapi sayanakuna."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/res_config_settings.py:0
+#, python-format
+msgid "The monthly cap of fines cannot be negative."
+msgstr "Killa multa tupuka mana negativo kanchu."
 
 #. module: bus_tracking
 #. odoo-python
@@ -4146,6 +5855,29 @@ msgid ""
 "The planned minutes of the stops cannot go back along the route (check %s)."
 msgstr ""
 "Sayanakunapak yuyashka minutokuna ñanpi kipaman mana kutinkachu (%s rikuy)."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid ""
+"The planned minutes will be calculated from the distance and the speed. "
+"Continue?"
+msgstr "Minutukunaka karumanta, utkamantapash yupashkami kanka. ¿Katinkichu?"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
+msgid ""
+"The planned minutes will be the average time the bus takes to reach each "
+"stop. Continue?"
+msgstr ""
+"Minutukunaka bus sapan sayanaman chayankakama chawpi pachami kanka. "
+"¿Katinkichu?"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__evidence_json
+msgid ""
+"The positions, the route and the stops seen by the system, kept with the "
+"fine because the positions themselves are deleted after a while."
+msgstr "Sistema rikushka maypi kashkakuna, ñan, sayanakuna, multawan waqaychashka, maypi kashkakunaka shuk pacha kipa pichashka kakpimi."
 
 #. module: bus_tracking
 #. odoo-python
@@ -4166,6 +5898,20 @@ msgstr "Chiqan pachaka yuyashka pachamanta ushashka manta ashtawan shuktakmi."
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "The repeat factor is 1 or more: a repeat offence never costs less."
+msgstr "Kutin rurashkapak mirachikka 1 o yallimi: kutin rurashkaka mana haykapish ashalla kanchu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "The report covers at most one year."
+msgstr "Willayka shuk watallatami charin."
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/trip_simulator.py:0
 #, python-format
 msgid "The route needs at least two stops."
@@ -4183,6 +5929,20 @@ msgid "The same position (device, time, place) is in Odoo."
 msgstr "Kikin posicion (rurana, pacha, pacha) Odoopi kan."
 
 #. module: bus_tracking
+#: model:bus.fine.type,description:bus_tracking.fine_type_incomplete_trip
+msgid ""
+"The scheduled trip ended with stops never reached, with no incident reported"
+" during the trip."
+msgstr "Yuyashka purishkaka mana chayashka sayanakunawan tukurirka, purishkapi mana ima llakita willashpa."
+
+#. module: bus_tracking
+#: model:bus.fine.type,description:bus_tracking.fine_type_late_start
+msgid ""
+"The scheduled trip started more than 10 minutes after its planned time, or "
+"never started."
+msgstr "Yuyashka purishkaka yuyashka pachamanta 10 minuto yallita kipa kallarirka, o mana kallarirkachu."
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
@@ -4192,6 +5952,28 @@ msgid ""
 msgstr ""
 "Servidorka ñapash push willaykunata mana kachayta ushanchu. Administradorta "
 "push componentetaka churachun mañay."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "The signal cut out while driving"
+msgstr "Purikukpi GPS chinkarka"
+
+#. module: bus_tracking
+#: model:bus.fine.type,description:bus_tracking.fine_type_speeding
+msgid ""
+"The speed limit is 50 km/h with a tolerance up to 70 km/h: above 70 km/h for"
+" at least 30 seconds in a row is fined. A single reading above it is not, it"
+" may be a GPS jump."
+msgstr "Utkalla tupuka 50 km/h, 70 km/h kama sakishka: 70 km/h yallishpa 30 segundo katishpa purishkaka multami. Shuk kutilla yallishkaka mana, GPS pantay kanmanmi."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_report.py:0
+#, python-format
+msgid "The start of the period must come before its end."
+msgstr "Pachapa kallarika tukurimanta ñawpa kana kan."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -4219,11 +6001,26 @@ msgstr ""
 "sapa sayanapak minutokunata ñawpaman churana."
 
 #. module: bus_tracking
+#: model_terms:ir.actions.act_window,help:bus_tracking.action_bus_fine
+msgid ""
+"The system proposes a fine when a speeding, a deviation, a long stop, a skipped stop, a late start or\n"
+"                an incomplete trip goes beyond the threshold of its type, with the evidence it saw. Try it with\n"
+"                Configuration &gt; Simulate trips &gt; Fines scenarios."
+msgstr "Utka purishka, ñanmanta llukshishka, unay sayashka, yallishka sayana, kipa kallarishka o mana tukushka purishka layapak tuputa yallikpimi sistema multata rikuchin, rikushka rikuchinawan. Kaywan ruray: Configuración &gt; Purishkakunata rurachiy &gt; Multapak rurashkakuna."
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
 msgid "The test could not be delivered to any device."
 msgstr "Pruebaka mana ima dispositivoman chayashkachu."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
+msgid ""
+"The thresholds and amounts of each rule are in Buses &gt; Fines &gt; Fine "
+"types."
+msgstr "Tukuy kamachikpak tupukuna, kullkikunapish Buskuna &gt; Multakuna &gt; Multa layakuna ukupi kan."
 
 #. module: bus_tracking
 #. odoo-python
@@ -4258,6 +6055,24 @@ msgstr "Purishkaka waqaychashka, shinapash mana yupashkachu."
 
 #. module: bus_tracking
 #. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"The trip was planned at %(planned)s and %(bus)s never reached its first "
+"stop, %(first)s."
+msgstr "Purishkaka %(planned)s pachapi yuyashka karka, %(bus)s ñawpa sayanaman, %(first)s, mana chayarkachu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid ""
+"The trip was planned at %(planned)s and %(bus)s reached its first stop at "
+"%(real)s: %(delay)s min late (the rule allows %(threshold)s min)."
+msgstr "Purishkaka %(planned)s pachapi yuyashka karka, %(bus)s ñawpa sayanaman %(real)s pachapi chayarka: %(delay)s min kipa (kamachika %(threshold)s min sakin)."
+
+#. module: bus_tracking
+#. odoo-python
 #: code:addons/bus_tracking/models/res_users.py:0
 #, python-format
 msgid "The user must be in the Driver group to have a QR badge."
@@ -4278,6 +6093,11 @@ msgid "This Fleet vehicle already belongs to another bus."
 msgstr "Kay Fleet wanraka shuk busapakmi."
 
 #. module: bus_tracking
+#: model:ir.model.constraint,message:bus_tracking.constraint_bus_fine_alert_uniq
+msgid "This alert already has a fine."
+msgstr "Kay willayka ña multata charin."
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/push_setup.xml:0
 #, python-format
@@ -4287,6 +6107,14 @@ msgid ""
 msgstr ""
 "Kay navegadorka push willaykunata mana chaskiyta ushanchu. iPhonepika, "
 "ñawpaqta kay rakuta Home Screenman yapay."
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid ""
+"This bus will keep the positions of its phone without a driver shift for the"
+" next 8 hours. Use it to show the system with Traccar Client."
+msgstr "Kay busmi pushakpak llankay pacha illakpi telefonopak maypi kashkata katik 8 horakunapi waqaychanka. Traccar Clientwan sistemata rikuchinkapak kayta llankachiy."
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -4306,6 +6134,38 @@ msgstr "Kay dispositivo ña killkashka kan."
 #, python-format
 msgid "This device receives notifications."
 msgstr "Kay dispositivoka willaykunata chaskin."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "This fine can no longer be appealed."
+msgstr "Kay multataka ña mana kutichiy ushanchu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "This fine has no driver: it cannot be confirmed."
+msgstr "Kay multaka mana pushakta charinchu: mana chiqanchiy ushanchu."
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/fine_evidence.xml:0
+#, python-format
+msgid "This fine has no positions to show."
+msgstr "Kay multaka rikuchinkapak maypi kashkata mana charinchu."
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_route.py:0
+#, python-format
+msgid ""
+"This line has no finished trips with arrivals yet. Use the minutes by "
+"distance."
+msgstr ""
+"Kay ñanka manarak tukurishka purishkakunata charinchu. Karumanta "
+"minutukunata ruray."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__threshold
@@ -4328,6 +6188,11 @@ msgstr "Pacha rikuchik"
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_run__destination_stop_id
 msgid "To"
 msgstr "Kama"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+msgid "To decide"
+msgstr "Akllanapak"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_incident_search
@@ -4372,6 +6237,11 @@ msgid "Traccar Device ID"
 msgstr "Traccarpi dispositivo ID"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
+msgid "Traccar GPS"
+msgstr "Traccar GPS"
+
+#. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_bus_traccar_api
 msgid "Traccar REST API client"
 msgstr "Traccar REST API cliente"
@@ -4407,6 +6277,13 @@ msgstr "Traccar dispositivoka ña shuk busman tinkishka."
 #, python-format
 msgid "Traccar did not answer with JSON: %s"
 msgstr "Traccar mana JSONwan kutichirka: %s"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/traccar_api.py:0
+#, python-format
+msgid "Traccar did not give an API token (error %s)."
+msgstr "Traccar mana API tokenta kurkachu (pantay %s)."
 
 #. module: bus_tracking
 #. odoo-python
@@ -4486,6 +6363,11 @@ msgid "Traffic"
 msgstr "Ñan tantarishka"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Transport indicators"
+msgstr "Antawamanta rikuchikkuna"
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
@@ -4494,6 +6376,7 @@ msgstr "Purichiy rurak"
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__trip_id
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__trip_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__trip_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_trip_stop__trip_id
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
@@ -4553,6 +6436,13 @@ msgstr ""
 "Chunka ishkay rurashka purishkakuna L1 manta L4 kama ñankunapi rurakun."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__type_id
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_search
+msgid "Type"
+msgstr "Laya"
+
+#. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_users__driver_password
 msgid "Type here to set or change the driver's password."
 msgstr "Pushakpa pakashka shimita churankapak o tikrachinkapak kaypi killkay."
@@ -4565,6 +6455,8 @@ msgstr "Mana kushka"
 #. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__unit
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine_type__unit
 #, python-format
 msgid "Unit"
 msgstr "Tupuna"
@@ -4589,6 +6481,14 @@ msgstr "Mana allichishka"
 #, python-format
 msgid "Until"
 msgstr "Kama"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_vehicle__demo_report_until
+#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_demo_report_until
+msgid ""
+"Until then this bus keeps the positions of its phone without a driver shift,"
+" to show the system with Traccar Client. It switches itself off."
+msgstr "Chay pachakama kay busmi pushakpak llankay pacha illakpi telefonopak maypi kashkata waqaychan, Traccar Clientwan sistemata rikuchinkapak. Kikinlla wañun."
 
 #. module: bus_tracking
 #. odoo-python
@@ -4639,6 +6539,11 @@ msgid "User Agent"
 msgstr "Yaykuk agente"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "Value"
+msgstr "Chani"
+
+#. module: bus_tracking
 #: model:ir.model,name:bus_tracking.model_fleet_vehicle
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_alert__vehicle_id
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_incident__vehicle_id
@@ -4656,6 +6561,12 @@ msgid "Vehicle Count"
 msgstr "Bus yupay"
 
 #. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__severity__very_serious
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_type__severity__very_serious
+msgid "Very serious"
+msgstr "Ashtawan llaki"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
 msgid "View on map"
@@ -4670,6 +6581,13 @@ msgstr "Llankak ayllullapak rikuna."
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_route__public
 msgid "Visible to passengers"
 msgstr "Purikkunapak rikuna"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_stats.py:0
+#, python-format
+msgid "Waiting for a decision"
+msgstr "Akllayta shuyakun"
 
 #. module: bus_tracking
 #. odoo-javascript
@@ -4706,9 +6624,31 @@ msgid "What a simulated trip is meant to trigger, to measure the detection."
 msgstr "Rurashka purishka ima ruranata mañan, tarita tupuchinapak."
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "What happened"
+msgstr "Ima tukurka"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_discard_form
+msgid "What made you discard it"
+msgstr "Imamanta anchuchirkanki"
+
+#. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_trip_form
 msgid "What really happened"
 msgstr "Chiqanta ima pasashka"
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/js/fine_evidence.js:0
+#, python-format
+msgid "What the bus did"
+msgstr "Bus rurashka"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "What the driver will read on the tablet"
+msgstr "Pushak tabletapi killkakatinka"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
@@ -4720,6 +6660,16 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_complaint_form
 msgid "What the passenger wrote"
 msgstr "Purik killkashka"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_type_form
+msgid "What the rule means, as the driver will read it"
+msgstr "Kamachik ima nishkata, pushak killkakatinka shina"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__description
+msgid "What the rule means, shown on each fine."
+msgstr "Kamachik ima nishka, tukuy multapi rikuchishka."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_trip__detected_flags
@@ -4740,6 +6690,13 @@ msgstr "Kay purishkapak ñawpa sayanaman busa kaypacha chayarka."
 #: model:ir.model.fields,help:bus_tracking.field_bus_trip__real_end
 msgid "When the bus reached its last stop of this trip."
 msgstr "Kay purishkapak tukuy sayanaman busa kaypacha chayarka."
+
+#. module: bus_tracking
+#. odoo-javascript
+#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Where the fines happened"
+msgstr "Maypi multakuna tukurka"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_map_center
@@ -4767,11 +6724,39 @@ msgid "Whether the driver has a valid QR badge."
 msgstr "Pushak allichu QR credencialta charinchu."
 
 #. module: bus_tracking
+#: model:ir.model.fields,field_description:bus_tracking.field_bus_fine__summary
+msgid "Why"
+msgstr "Imamanta"
+
+#. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
+msgid "Why the system proposes it"
+msgstr "Sistema imamanta rikuchin"
+
+#. module: bus_tracking
+#: model:ir.model.fields,help:bus_tracking.field_bus_fine__summary
+msgid "Why the system proposes this fine, in plain words."
+msgstr "Sistema kay multata imamanta rikuchin, shutilla shimikunawan."
+
+#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #, python-format
 msgid "With alert"
 msgstr "Yuyachikwan"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine.py:0
+#, python-format
+msgid "Write the statement in up to %s characters."
+msgstr "Kutichishkata %s killka kama killkay."
+
+#. module: bus_tracking
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine__discard_reason__config
+#: model:ir.model.fields.selection,name:bus_tracking.selection__bus_fine_discard__reason__config
+msgid "Wrong setup of the rule"
+msgstr "Kamachik mana alli churashka"
 
 #. module: bus_tracking
 #. odoo-python
@@ -4894,6 +6879,11 @@ msgid "bus.trip.stop (status, with the tolerance of Settings)"
 msgstr "bus.trip.stop (imashina kashka, Ajustekunapak ushashkawan)"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "by"
+msgstr "pi"
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
@@ -4901,6 +6891,13 @@ msgid "closed trips that reached every stop ÷ closed trips × 100"
 msgstr ""
 "tukuy sayanakunaman chayashka wichkashka purishkakuna ÷ wichkashka "
 "purishkakuna × 100"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "driver of the scheduled trip"
+msgstr "yuyashka purishkapak pushak"
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_vehicle_form
@@ -4956,6 +6953,11 @@ msgid "median %(median)s ms in %(n)s samples"
 msgstr "chawpi %(median)s ms, %(n)s tupushkakunapi"
 
 #. module: bus_tracking
+#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
+msgid "min"
+msgstr "min"
+
+#. module: bus_tracking
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_kpi.py:0
 #, python-format
@@ -4998,6 +7000,13 @@ msgstr "mana posicionyuk purishkakuna"
 msgid "number of alerts and driver incidents, and per 100 km driven"
 msgstr ""
 "yuyachikuna, pushakkunapak pasashkakunapash yupay, sapa 100 km purishkapak"
+
+#. module: bus_tracking
+#. odoo-python
+#: code:addons/bus_tracking/models/bus_fine_detect.py:0
+#, python-format
+msgid "on shift"
+msgstr "llankay pachapi"
 
 #. module: bus_tracking
 #. odoo-python
@@ -5096,377 +7105,3 @@ msgstr "🔴 Mana tinkishka"
 #: model:ir.model.fields.selection,name:bus_tracking.selection__bus_vehicle__connection__online
 msgid "🟢 Connected"
 msgstr "🟢 Tinkishka"
-
-#. module: bus_tracking
-#: model:ir.actions.report,print_report_name:bus_tracking.action_report_operation
-msgid "'Reporte-buses-%s-%s' % (object.date_from, object.date_to)"
-msgstr "'Reporte-buses-%s-%s' % (object.date_from, object.date_to)"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "(simulated)"
-msgstr "(yanapashka)"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "<span class=\"bt-brand-mark\">BUS</span>"
-msgstr "<span class=\"bt-brand-mark\">BUS</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid ""
-"<span class=\"bt-dot bt-good\"/>within the goal <span class=\"bt-dot bt-warn\"/>watch <span class=\"bt-dot bt-bad\"/>out of range\n"
-"                        <span class=\"bt-dot\"/>no goal or no data"
-msgstr "<span class=\"bt-dot bt-good\"/>paktashka <span class=\"bt-dot bt-warn\"/>rikuna <span class=\"bt-dot bt-bad\"/>mana paktashka\n                        <span class=\"bt-dot\"/>mana paktana, mana willaykunapash"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_form_bus
-msgid "<span class=\"o_stat_text\">Live Map</span>"
-msgstr "<span class=\"o_stat_text\">Live Map</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"paso-num\">1</span>"
-msgstr "<span class=\"paso-num\">1</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"paso-num\">2</span>"
-msgstr "<span class=\"paso-num\">2</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"paso-num\">3</span>"
-msgstr "<span class=\"paso-num\">3</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"paso-num-badge\">01</span>"
-msgstr "<span class=\"paso-num-badge\">01</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"paso-num-badge\">02</span>"
-msgstr "<span class=\"paso-num-badge\">02</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "<span class=\"paso-num-badge\">03</span>"
-msgstr "<span class=\"paso-num-badge\">03</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.portal_footer
-msgid ""
-"<span>Huachi</span>\n"
-"                            <span>Ingahurco</span>\n"
-"                            <span>Querochaca</span>"
-msgstr "<span>Huachi</span>\n                            <span>Ingahurco</span>\n                            <span>Querochaca</span>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "<strong>Data:</strong>"
-msgstr "<strong>Willaykuna:</strong>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "<strong>Lines:</strong>"
-msgstr "<strong>Ñankuna:</strong>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "<strong>Period:</strong>"
-msgstr "<strong>Pacha:</strong>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
-msgid ""
-"A PDF with the indicators, the lines, each day, the delays, the incidents "
-"and the latest trips of the period."
-msgstr "Shuk PDF: rikuchikkuna, ñankuna, sapan puncha, unaykuna, llakikuna, kay pachapi kipa purikunapash."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Arrivals"
-msgstr "Chayamukkuna"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Arrivals by delay"
-msgstr "Unaypi chayamukkuna"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Avg. delay"
-msgstr "Chawpi unay"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Change"
-msgstr "Shukyay"
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_report.py:0
-#, python-format
-msgid "Choose the period of the report again."
-msgstr "Willay pachata kutin akllay."
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_bus_report_wizard__compare
-msgid "Compare with the previous period"
-msgstr "Ñawpa pachawan chimpapuray"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Compliance"
-msgstr "Paktachiy"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Cumulative"
-msgstr "Tantachishka"
-
-#. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_dashboard
-msgid "Dashboard"
-msgstr "Rikuchina pirka"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Day by day"
-msgstr "Puncha puncha"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Delay at the end"
-msgstr "Tukuripi unay"
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
-#, python-format
-msgid "Download PDF"
-msgstr "PDF uraykuchiy"
-
-#. module: bus_tracking
-#: model:ir.actions.act_window,name:bus_tracking.action_bus_report_wizard
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_report_pdf
-msgid "Download report"
-msgstr "Willayta uraykuchiy"
-
-#. module: bus_tracking
-#: model:ir.model,name:bus_tracking.model_bus_report_wizard
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_report_wizard_form
-msgid "Download the operation report"
-msgstr "Llamkaymanta willayta uraykuchiy"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_bus_report_wizard__route_ids
-msgid "Empty: every line."
-msgstr "Chusak: tukuy ñankuna."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.landing
-msgid "Estudiantes universitarios en Ambato"
-msgstr "Ambatopi hatun yachana wasipi yachakukkuna"
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_report.py:0
-#, python-format
-msgid "Every line"
-msgstr "Tukuy ñankuna"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Incidents and alerts by kind"
-msgstr "Llakikuna, willachikunapash, imashina kashkamanta"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Km driven"
-msgstr "Purishka km"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Km planned"
-msgstr "Yuyashka km"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Latest trips"
-msgstr "Kipa purikuna"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "No incidents or alerts in this period."
-msgstr "Kay pachapi mana llakikuna, mana willachikunapash tiyarkachu."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "No late arrivals in this period."
-msgstr "Kay pachapi mana unaypi chayamukkuna tiyarkachu."
-
-#. module: bus_tracking
-#: model:ir.ui.menu,name:bus_tracking.menu_bus_reports
-msgid "Notifications"
-msgstr "Willachikuna"
-
-#. module: bus_tracking
-#: model:ir.actions.report,name:bus_tracking.action_report_operation
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Operation report"
-msgstr "Llamkaymanta willay"
-
-#. module: bus_tracking
-#: model:ir.model,name:bus_tracking.model_report_bus_tracking_report_operation
-msgid "Operation report (PDF)"
-msgstr "Llamkaymanta willay (PDF)"
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
-#, python-format
-msgid "Preparing the PDF…"
-msgstr "PDFta allichikun…"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Previous period"
-msgstr "Ñawpa pacha"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Printed"
-msgstr "Llukchishka"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Stops with the most delay"
-msgstr "Ashtawan unayyuk sayanakuna"
-
-#. module: bus_tracking
-#. odoo-javascript
-#: code:addons/bus_tracking/static/src/js/dashboard.js:0
-#, python-format
-msgid "The PDF could not be prepared. Try again in a moment."
-msgstr "PDFta mana allichiyta usharkachu. Ashata shuyashpa kutin ruray."
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_report.py:0
-#, python-format
-msgid "The report covers at most one year."
-msgstr "Willayka shuk watallatami charin."
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_report.py:0
-#, python-format
-msgid "The start of the period must come before its end."
-msgstr "Pachapa kallarika tukurimanta ñawpa kana kan."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Transport indicators"
-msgstr "Antawamanta rikuchikkuna"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "Value"
-msgstr "Chani"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "by"
-msgstr "pi"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
-msgid "min"
-msgstr "min"
-
-#. module: bus_tracking
-#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__retired
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
-msgid "Decommissioned"
-msgstr "Llamkaymanta llukchishka"
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_on_route
-msgid "Driving a shift"
-msgstr "Turnopi purikun"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_fleet_vehicle__bus_service
-msgid ""
-"On route while its bus drives a shift; decommissioned when archived or in "
-"the Downgraded state of Fleet."
-msgstr "Antawa turnopi purikukpika ñanpimi kan; pakashka kakpi, Flotapi llukchishka kakpipash, llamkaymanta llukchishkami kan."
-
-#. module: bus_tracking
-#: model:ir.model.fields.selection,name:bus_tracking.selection__fleet_vehicle__bus_service__parked
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
-msgid "Parked (not on route)"
-msgstr "Sayashka (mana ñanpi)"
-
-#. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_fleet_vehicle__bus_service
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_fleet_vehicle_search_service
-msgid "Service"
-msgstr "Llamkay"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_bus_route_schedule__driver_user_id
-msgid ""
-"The driver of its trips. Their tablet reminds them 10 minutes before each "
-"trip and at its start."
-msgstr "Purikunapa antawa pushak. Paypa tabletaka sapan purina chunka minuto ñawpaman, llukshina pachapipash willan."
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_bus_trip__driver_user_id
-msgid ""
-"The driver of this trip. Their tablet reminds them 10 minutes before and at "
-"the planned start."
-msgstr "Kay purinapa antawa pushak. Paypa tabletaka chunka minuto ñawpaman, yuyashka llukshina pachapipash willan."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
-msgid "Minutes by distance"
-msgstr "Karumanta minutukuna"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
-msgid "Minutes from real trips"
-msgstr "Purishkamanta minutukuna"
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_route.py:0
-#, python-format
-msgid "The line needs at least two stops to measure the distance."
-msgstr "Karuta tupunkapakka ñanka ishkay sayanakunatami charina."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
-msgid ""
-"The planned minutes will be calculated from the distance and the speed. "
-"Continue?"
-msgstr "Minutukunaka karumanta, utkamantapash yupashkami kanka. ¿Katinkichu?"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_route_form
-msgid ""
-"The planned minutes will be the average time the bus takes to reach each "
-"stop. Continue?"
-msgstr "Minutukunaka bus sapan sayanaman chayankakama chawpi pachami kanka. ¿Katinkichu?"
-
-#. module: bus_tracking
-#. odoo-python
-#: code:addons/bus_tracking/models/bus_route.py:0
-#, python-format
-msgid ""
-"This line has no finished trips with arrivals yet. Use the minutes by "
-"distance."
-msgstr "Kay ñanka manarak tukurishka purishkakunata charinchu. Karumanta minutukunata ruray."

@@ -33,6 +33,7 @@ Los estudiantes esperan el bus sin saber si ya pasó, si viene tarde o si viene.
 5. El personal ve los buses en el mapa en vivo, atiende SOS e incidentes y recibe notificaciones push en el navegador.
 6. Los pasajeros ven en el portal cuántas paradas le faltan al bus para llegar a la suya y pueden escribir a transporte.
 7. Los reportes muestran 12 indicadores de transporte y de calidad del sistema, y se descargan en PDF.
+8. A partir de las alertas, el sistema propone multas con su evidencia (mapa, tramo y gráfico de velocidad) y sus comprobaciones; la oficina las revisa en un kanban y el chofer puede presentar su descargo desde la tableta.
 
 ### ¿Para quién está pensado?
 
@@ -50,6 +51,7 @@ Los estudiantes esperan el bus sin saber si ya pasó, si viene tarde o si viene.
 | <img width="420" src="docs/capturas/panel-mapa-en-vivo.png" alt="Mapa en vivo"><br><sub>Mapa en vivo del panel con la cola de Atención.</sub> | <img width="420" src="docs/capturas/panel-reportes.png" alt="Tablero de reportes"><br><sub>Reportes: indicadores de transporte y de calidad, con descarga en PDF.</sub> |
 | <img width="420" src="docs/capturas/reporte-pdf.png" alt="Reporte en PDF"><br><sub>Reporte de operación en PDF.</sub> | <img width="420" src="docs/capturas/panel-flota.png" alt="Flota"><br><sub>Flota: en ruta, estacionados y dados de baja.</sub> |
 | <img width="420" src="docs/capturas/tableta-seleccion.png" alt="Elegir bus en la tableta"><br><sub>Tableta: elegir bus y línea para iniciar el turno.</sub> | <img width="420" src="docs/capturas/tableta-turno.png" alt="Turno en la tableta"><br><sub>Tableta en turno: próxima parada, alertas y SOS.</sub> |
+| <img width="420" src="docs/capturas/panel-multas.png" alt="Kanban de multas"><br><sub>Multas: kanban Nueva, En revisión, Multada, Apelada y Descartada.</sub> | <img width="420" src="docs/capturas/panel-multa-evidencia.png" alt="Evidencia de una multa"><br><sub>Una multa por exceso de velocidad: porqué, comprobaciones y tramo en el mapa.</sub> |
 
 Generadas con `scripts/dev_seed.py` en local (`qa/capturas_ui.py` y `qa/capturas_tablet.py`); no contienen datos reales.
 
@@ -68,6 +70,7 @@ Generadas con `scripts/dev_seed.py` en local (`qa/capturas_ui.py` y `qa/capturas
 - **Notificaciones push**: los administradores reciben alertas e incidentes en el navegador; probado en Chrome y Edge de Windows.
 - **Portal de pasajeros**: líneas, paradas y buses en vivo sin login; cuenta paradas, nunca promete minutos; nunca publica placa, chofer ni velocidad.
 - **Mensajes de pasajeros**: formulario `/quejas` con protección contra abuso y tablero Nueva, En revisión y Resuelta.
+- **Control de multas**: seis reglas parametrizables (velocidad sobre 70 km/h por 30 s, desvío, parada larga, parada omitida, salida tardía y recorrido incompleto). El sistema propone cada multa con la evidencia congelada y las comprobaciones, y una persona decide en un kanban. El chofer responde una vez desde la tableta. Incluye estadísticas en el tablero y el PDF.
 - **Tres idiomas**: español, inglés y kichwa (borrador) en el portal, el panel y la tableta.
 
 ---
@@ -116,7 +119,7 @@ sistema-rastreo-buses/
 │       ├── views/             # Vistas y menús del panel
 │       ├── report/            # Reporte de operación en PDF
 │       ├── static/            # OWL (mapa, tablero, push), CSS, Leaflet, service worker
-│       ├── migrations/        # Migraciones por versión (16.0.1.1.0 a 16.0.1.9.0)
+│       ├── migrations/        # Migraciones por versión (16.0.1.1.0 a 16.0.1.11.0)
 │       ├── i18n/              # es.po, qu.po y plantilla .pot
 │       └── tests/             # Pruebas de Odoo
 ├── apps/
@@ -267,6 +270,8 @@ Todas por `POST`, con `Authorization: Bearer <token>` salvo el login.
 | `/bus_tracking/driver/route` | Trazado de la línea |
 | `/bus_tracking/driver/incident` | Aviso o SOS |
 | `/bus_tracking/driver/client_error` | Fallas de la app para la oficina |
+| `/bus_tracking/driver/fines` | Multas confirmadas del chofer (`{"fines": [...]}`), con el porqué y las comprobaciones en el idioma de la app |
+| `/bus_tracking/driver/fines/appeal` | Descargo del chofer sobre una multa: una sola vez y dentro del plazo |
 
 ### Endpoints públicos
 
@@ -293,6 +298,7 @@ Todas por `POST`, con `Authorization: Bearer <token>` salvo el login.
 | `bus.driver.token` | Sesiones de tableta y credenciales QR (solo se guarda la huella) |
 | `bus.push.subscription` | Navegadores suscritos a las notificaciones push |
 | `bus.report.wizard` | Reporte de operación en PDF |
+| `bus.fine.type` / `bus.fine` | Reglas de multa y multas propuestas, con evidencia, comprobaciones, decisión y descargo |
 
 ### Reglas de negocio
 
@@ -302,16 +308,20 @@ Todas por `POST`, con `Authorization: Bearer <token>` salvo el login.
 | Cierre automático del turno | 14 horas |
 | Desvío de ruta | Más de 150 m durante 3 minutos |
 | Recordatorio al chofer | 10 minutos antes del recorrido y a la hora de salida |
+| Multa por velocidad | Más de 70 km/h durante 30 s seguidos (el límite es 50 km/h; entre 50 y 70 solo hay alerta) |
+| Otras multas | Desvío de más de 300 m por 3 minutos, parada de más de 20 minutos lejos de las paradas, parada omitida, salida con más de 10 minutos de retraso, recorrido incompleto |
+| Comprobaciones de una multa | Chofer identificado, sin incidentes reportados, señal GPS suficiente; si una falla, nace descartada por el sistema |
+| Descargo del chofer | Uno por multa, dentro de 3 días desde que se confirma |
 | Portal | Cuenta paradas, no minutos; no publica placa, chofer ni velocidad |
 | Grupos | User (lectura y mapa), Manager (todo), Driver (solo la API de la tableta, usuarios de portal) |
 
 ### Migraciones
 
-Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versión actual del módulo es `16.0.1.9.0`, que retira Grafana (vistas `kpi_*`, tabla de conteos diarios y parámetros) y marca qué vehículos de la flota están en ruta. Se aplican con `-u bus_tracking`.
+Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versión actual del módulo es `16.0.1.11.0`, que retira el modo demostración de las multas (borra el parámetro `bus_tracking.fines_real`). La `16.0.1.10.0` agrega las multas y marca como revisadas por el detector las alertas que ya existían. La `16.0.1.9.0` retira Grafana (vistas `kpi_*`, tabla de conteos diarios y parámetros) y marca qué vehículos de la flota están en ruta. Se aplican con `-u bus_tracking`.
 
 ### Calidad
 
-Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida: 555 pruebas de Odoo y 186 de Jest en verde. El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
+Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida (20-nov): 624 pruebas de Odoo, 622 en verde; las 2 que fallan son de la migración de Grafana y dependen de la base de desarrollo local (DEF-084). 197 de Jest en verde. El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
 
 ### Lo que queda por confirmar
 
@@ -332,6 +342,9 @@ La segunda auditoría (17-nov-2026) concluyó que el sistema aún **no está lis
 - [x] Flota en tablero En ruta / Estacionados / Dados de baja
 - [x] Notificaciones push del administrador en Windows
 - [x] Recordatorios de recorridos en la tableta
+- [x] Control de multas con evidencia, kanban y descargo del chofer
+- [x] Multas tratadas como reales en la demostración (sin aviso ni interruptor de demostración)
+- [ ] Multas según el reglamento interno de una empresa real (fuera del alcance: el sistema es una demostración)
 - [ ] Fase 46: jornada real con tabletas, Supabase y VM Linux
 - [ ] Revisión del kichwa por una persona hablante
 - [ ] Pruebas de usabilidad con personas
@@ -345,9 +358,9 @@ El estado detallado está en `docs/arquitectura/ROADMAP.md`.
 
 | Nombre | Commits |
 |---|---|
-| JoseM151 | 388 |
+| JoseM151 | 441 |
 | kiramman-mp3 | 242 |
-| Johan Rodríguez | 162 |
+| Johan Rodríguez | 245 |
 
 ---
 
