@@ -32,7 +32,9 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM"
       ],
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#F1F3F2",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -88,8 +90,9 @@
         }
       },
       "eas": {
-        "projectId": "857a4d7c-f939-4208-83aa-1bd201323bb3"
+        "projectId": "5162a4a4-5128-4680-8a73-b8c0f3a4bad4"
       }
-    }
+    },
+    "owner": "johan9077"
   }
 }
