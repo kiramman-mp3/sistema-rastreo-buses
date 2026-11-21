@@ -94,8 +94,11 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-084 | 20-nov-2026 | Suite completa de las fases de multas | test_migration_grafana falla si otra base del mismo servidor aún da permisos al rol grafana_reader | tests/test_migration_grafana.py | Cerrado |
 | DEF-085 | 20-nov-2026 | Reinstalación del entorno y verificación con flake8 | flake8 marcaba 6 avisos de estilo (sangría y largo de línea) en el código de multas | models/bus_fine.py, models/bus_fine_detect.py, models/trip_simulator.py, tests/test_fine_panel.py | Cerrado |
 | DEF-086 | 20-nov-2026 | Demostración en la base reinstalada (línea L1) | Escenarios de multas en una línea de tramos cortos no generaba las multas de velocidad ni de desvío, y no avisaba | models/trip_simulator.py | Cerrado |
+| DEF-087 | 21-nov-2026 | Revisión de versiones antes de pasar a main | La versión de la app de tableta no coincidía: package.json decía 1.0.0 y app.json 1.4.0 | apps/conductor-tablet/package.json, package-lock.json | Cerrado |
+| DEF-088 | 21-nov-2026 | Revisión de los documentos antes de pasar a main | El documento de arquitectura decía versión 16.0.1.6.0 y el ROADMAP daba como última etiqueta v1.0.0-rc1 con la app en 1.2.0 | docs/arquitectura/ARQUITECTURA-Y-DATOS.md, docs/arquitectura/ROADMAP.md | Cerrado |
+| DEF-089 | 21-nov-2026 | Retiro del modo demostración de las multas | Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa | models/bus_fine_stats.py, models/bus_fine.py, i18n/*.po | Cerrado |
 
-Resumen: 86 registrados, 85 cerrados (99 %), 1 abiertos. Densidad: 17,1 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 89 registrados, 88 cerrados (99 %), 1 abiertos. Densidad: 17,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -614,6 +617,24 @@ Resumen: 86 registrados, 85 cerrados (99 %), 1 abiertos. Densidad: 17,1 defectos
 - **Causa raíz:** Los tramos de L1 son de 2 a 4 minutos: no cabe un desvío de 3 minutos ni un exceso sostenido de 30 s; además el exceso iba siempre en el primer tramo y no en el más largo. Las pruebas usaban una ruta de tramos de 5,5 km.
 - **Categoría:** Lógica
 - **Prueba que lo protege:** TestFineDetection.test_the_fines_set_refuses_a_route_of_short_stretches; el exceso va en el tramo más largo; en L1 el asistente nombra las líneas que sirven y en L4 salen las 6 reglas
+
+### DEF-087: La versión de la app de tableta no coincidía: package.json decía 1.0.0 y app.json 1.4.0
+
+- **Causa raíz:** La versión se subía solo en app.json al publicar cada compilación y nadie actualizaba package.json.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** Misma versión en app.json, package.json y package-lock.json (1.4.1); lint, typecheck y Jest en verde
+
+### DEF-088: El documento de arquitectura decía versión 16.0.1.6.0 y el ROADMAP daba como última etiqueta v1.0.0-rc1 con la app en 1.2.0
+
+- **Causa raíz:** Las versiones se escribieron a mano en cada documento y no se revisaron al cerrar las etapas posteriores.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** Versiones tomadas de __manifest__.py, app.json y git tag (16.0.1.11.0, 1.4.1, v1.0.6-rc3)
+
+### DEF-089: Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa
+
+- **Causa raíz:** El aviso se había escrito en varios sitios sin una sola fuente: el interruptor fines_real, la ficha, la API y dos textos sueltos.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** TestFineApi y TestFinePanel (sin demo en la API ni aviso en la ficha); TestFinesRealCleanup (migración 16.0.1.11.0); qa/traducciones.py
 
 ## 3. Qué falta para cerrar los abiertos
 

@@ -48,7 +48,7 @@ La tableta toma los recorridos de las próximas 24 horas cada vez que entras o l
 
 ### Mis multas
 
-En la pantalla de elegir bus, antes de iniciar el turno, el botón **Mis multas** muestra las multas que la oficina **ya confirmó** (las que todavía revisa no aparecen). Durante el turno no se puede abrir: no distrae mientras manejas. Mientras la empresa no use multas reales, un aviso arriba dice que son de demostración y que los montos son ficticios.
+En la pantalla de elegir bus, antes de iniciar el turno, el botón **Mis multas** muestra las multas que la oficina **ya confirmó** (las que todavía revisa no aparecen). Durante el turno no se puede abrir: no distrae mientras manejas. Los montos son valores de ejemplo en dólares.
 
 - Cada multa dice el tipo (exceso de velocidad, desvío de ruta, parada larga, parada omitida, salida tardía o recorrido incompleto), el monto, la fecha, el bus y su estado: **Multada**, **Descargo enviado: en revisión**, **Descargo rechazado** o **Descargo aceptado: multa anulada**.
 - Al abrirla ves **Por qué** (lo que midió el sistema, por ejemplo «circuló por encima de 70 km/h durante 47 s seguidos») y **Lo que el sistema comprobó**: que eras el chofer del turno o del recorrido, que no habías reportado un incidente que lo explique y que el GPS tenía señal suficiente.

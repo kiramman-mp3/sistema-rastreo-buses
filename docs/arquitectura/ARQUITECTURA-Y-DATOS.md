@@ -1,7 +1,7 @@
 # Arquitectura y modelo de datos
 
 Entregable 2 del proyecto final. Describe cómo está armado el sistema, cómo viaja una posición desde el celular hasta un indicador, qué datos se guardan y por qué.
-Versión del módulo: **16.0.1.6.0**. Requisitos: `docs/arquitectura/REQUISITOS.md`. Despliegue: `docs/guias/PRODUCCION.md`.
+Versión del módulo: **16.0.1.11.0**. Requisitos: `docs/arquitectura/REQUISITOS.md`. Despliegue: `docs/guias/PRODUCCION.md`.
 
 ## 1. Vista general
 

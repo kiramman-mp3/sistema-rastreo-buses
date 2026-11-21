@@ -26,7 +26,6 @@ El sistema está pensado para los buses de la Universidad Técnica de Ambato (UT
 - **Erase complaint contact data after (days)**: 90 por defecto.
 - **GPS address for the phones**: la dirección HTTPS a la que envían los celulares de los choferes.
 - **Monthly cap of fines per driver ($)**: el tope mensual de multas por chofer; 0 es sin tope. En Ecuador las multas no pueden pasar del 10 % de la remuneración.
-- **The fines are real**: apagado, cada multa (en el panel y en la tableta) dice que es de demostración con montos ficticios.
 
 Las reglas de multa se ajustan en **Buses > Multas > Tipos de multa**: el umbral (por defecto: 70 km/h, 300 m, 20 min, 10 min y 1 parada), la duración mínima, la gravedad, el monto en dólares, la reincidencia y los días para el descargo. Los valores iniciales son de demostración: los reales los fija el reglamento interno de la empresa.
 

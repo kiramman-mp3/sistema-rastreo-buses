@@ -2,6 +2,8 @@
 
 Fecha: 2026-11-20. Base: `develop` en `aa20274` (módulo `16.0.1.9.0`, app de tableta `1.3.1`).
 
+> **Actualización del 21-nov:** el modo demostración de las multas se retiró (módulo `16.0.1.11.0`, tableta `1.4.1`): las multas se tratan como reales dentro del montaje y los montos siguen siendo valores de ejemplo en dólares. Ver [`PLAN-MULTAS-REALES.md`](PLAN-MULTAS-REALES.md).
+
 ## 0. Propósito y alcance
 
 Demostrar cómo el sistema apoyaría a la empresa en el control de multas a choferes. Las multas son **ficticias** (montos de demostración en dólares), pero cada una es **verificable**: el administrador ve con los datos reales del GPS por qué el sistema la recomienda.

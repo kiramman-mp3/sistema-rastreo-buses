@@ -22,22 +22,22 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 26 | 30,2 % | 30,2 % |
-| Seguridad | 14 | 16,3 % | 46,5 % |
-| Configuración | 12 | 14,0 % | 60,5 % |
-| Accesibilidad y diseño | 7 | 8,1 % | 68,6 % |
-| Interfaz | 5 | 5,8 % | 74,4 % |
-| Validación de entrada | 5 | 5,8 % | 80,2 % |
-| Entorno | 4 | 4,7 % | 84,9 % |
-| Internacionalización | 3 | 3,5 % | 88,4 % |
-| Infraestructura y despliegue | 2 | 2,3 % | 90,7 % |
-| Migración | 2 | 2,3 % | 93,0 % |
-| Accesibilidad | 1 | 1,2 % | 94,2 % |
-| Contenido | 1 | 1,2 % | 95,3 % |
-| Interfaz y vistas | 1 | 1,2 % | 96,5 % |
-| Permisos | 1 | 1,2 % | 97,7 % |
-| Proceso | 1 | 1,2 % | 98,8 % |
-| Rendimiento | 1 | 1,2 % | 100,0 % |
+| Lógica | 27 | 30,3 % | 30,3 % |
+| Seguridad | 14 | 15,7 % | 46,1 % |
+| Configuración | 12 | 13,5 % | 59,6 % |
+| Accesibilidad y diseño | 7 | 7,9 % | 67,4 % |
+| Interfaz | 5 | 5,6 % | 73,0 % |
+| Validación de entrada | 5 | 5,6 % | 78,7 % |
+| Entorno | 4 | 4,5 % | 83,1 % |
+| Internacionalización | 3 | 3,4 % | 86,5 % |
+| Proceso | 3 | 3,4 % | 89,9 % |
+| Infraestructura y despliegue | 2 | 2,2 % | 92,1 % |
+| Migración | 2 | 2,2 % | 94,4 % |
+| Accesibilidad | 1 | 1,1 % | 95,5 % |
+| Contenido | 1 | 1,1 % | 96,6 % |
+| Interfaz y vistas | 1 | 1,1 % | 97,8 % |
+| Permisos | 1 | 1,1 % | 98,9 % |
+| Rendimiento | 1 | 1,1 % | 100,0 % |
 
 **Lectura:** con la auditoría del 2-nov la lógica y la seguridad pasan a encabezar: los defectos ya no están en la entrada de datos sino en reglas que se cumplían sólo en un lado (la vista y no el método, la tableta y no el servidor). Quedan abiertos: DEF-079, de la segunda auditoría (17-nov); de nuevo la lógica y la seguridad dominan, ahora en el despliegue y en la cola de la tableta.
 
