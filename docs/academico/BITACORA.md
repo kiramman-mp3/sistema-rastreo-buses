@@ -1499,3 +1499,24 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 - Build de la app 1.4.1 con EAS y despliegue: no se hicieron.
 - El `merge` a `main`, la etiqueta y el `push` esperan confirmación del usuario.
 - El `CLAUDE.md` de la copia de trabajo difiere del commiteado (le faltan la sección de documentación y la última línea); no se tocó.
+
+## 2026-11-21: compilación de la app, CI y release v1.0.0
+
+### Qué se hizo
+
+- Compilación con EAS de la app 1.4.1: APK (perfil `production`) e IPA sin firmar (perfil `ios-altstore`). La cuenta de Expo `kiramman` ya había agotado los builds de Android gratis del mes (se renuevan el 1-dic); se canceló el build de iOS que se había lanzado allí y se usó la cuenta `johan9077`, con un proyecto nuevo (`@johan9077/conductor-tablet`, `projectId` y `owner` en `app.json`). El keystore del APK es nuevo.
+- `develop` y `main` subidos a GitHub; el CI quedó en verde en las dos ramas (Odoo, lint y traducciones, gitleaks y tableta).
+- Release `v1.0.0` con `BusesUTA-1.4.1.apk`, `BusesUTA-1.4.1.ipa` y `SHA256SUMS`. Se creó primero como `v1.0.8-rc3` y por decisión del usuario se renombró a `v1.0.0`; la etiqueta `v1.0.8-rc3` se borró. La etiqueta `v1.0.7-rc3` queda en GitHub sin release.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| CI de GitHub en `develop` y en `main` tras integrar el cambio de `app.json` | 4 de 4 jobs en verde en cada rama |
+| Builds de EAS | Los dos terminaron en `FINISHED` (versión 1.4.1) |
+| APK e IPA descargados | Archivos zip válidos; no se instalaron en un dispositivo |
+
+### Pendiente o sin confirmar
+
+- Como el keystore es nuevo, el APK no actualiza sobre una app instalada con otra firma: hay que desinstalar la anterior en cada tableta.
+- Fase 46, revisión del kichwa y pruebas de usabilidad siguen abiertas; `v1.0.0` no las da por cumplidas.
