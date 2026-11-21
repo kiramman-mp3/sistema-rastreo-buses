@@ -1477,6 +1477,8 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 |---|---|
 | Suite de Odoo (comando del CI) en `develop` antes de cambiar | 625/625 |
 | Suite de Odoo en `feature/multas-como-reales` | 626/626 (se retira 1 prueba del interruptor y se agregan 2 de la migración) |
+| Suite de Odoo en `develop` con todo integrado (etapa 6) | 626/626, 0 fallos |
+| Escaneo de secretos (gitleaks v8.30.1 del CI) y `qa/xss_tooltips.js` | Sin hallazgos |
 | Actualización 16.0.1.10.0 a 16.0.1.11.0 de una base con `fines_real = True` | Corre la migración y el parámetro queda en 0 filas |
 | `python -m flake8 addons/bus_tracking scripts/dev_seed.py` | Sin avisos |
 | Tableta: lint, typecheck, Jest y `expo export` | Sin errores; 197 de 197 |

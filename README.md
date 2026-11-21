@@ -358,9 +358,9 @@ El estado detallado está en `docs/arquitectura/ROADMAP.md`.
 
 | Nombre | Commits |
 |---|---|
-| JoseM151 | 430 |
+| JoseM151 | 441 |
 | kiramman-mp3 | 242 |
-| Johan Rodríguez | 218 |
+| Johan Rodríguez | 245 |
 
 ---
 
