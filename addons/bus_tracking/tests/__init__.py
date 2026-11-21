@@ -35,3 +35,4 @@ from . import test_fine_detect
 from . import test_fine_panel
 from . import test_fine_api
 from . import test_fine_stats
+from . import test_migration_fines
