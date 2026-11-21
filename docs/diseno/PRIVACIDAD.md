@@ -58,5 +58,5 @@ Para **choferes**:
 - Revisión legal del texto y decisión de la política oficial (y su enlace en *Ajustes*).
 - Decidir plazos para turnos e incidentes (hoy no se borran solos) y poner `retention_days` en un valor distinto de 0 si no se quiere guardar para siempre.
 - Informar a los choferes por escrito (contrato o reglamento interno) del rastreo durante el turno; el aviso en la app no sustituye eso.
-- Antes de usar multas reales: que consten en el reglamento interno aprobado por el Ministerio del Trabajo, con sus montos (el Código del Trabajo, art. 44 literal b, impide descontar más del 10 % de la remuneración por multas; *Ajustes > Tope mensual de multas*), y decidir cuánto tiempo se conservan las multas y su evidencia.
+- Solo si el sistema saliera de esta demostración y se usara con choferes reales: que las multas consten en el reglamento interno aprobado por el Ministerio del Trabajo, con sus montos (el Código del Trabajo, art. 44 literal b, impide descontar más del 10 % de la remuneración por multas; *Ajustes > Tope mensual de multas*), y decidir cuánto tiempo se conservan las multas y su evidencia.
 - Registro de actividades de tratamiento y, si corresponde, delegado de protección de datos.
