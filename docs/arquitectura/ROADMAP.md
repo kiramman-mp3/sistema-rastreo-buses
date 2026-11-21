@@ -2,7 +2,7 @@
 
 Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-21.
 
-Estado: versión del módulo `16.0.1.11.0` en `develop` (multas como reales), app de tableta `1.4.1`, última etiqueta `v1.0.6-rc3`. Fases 38 a 45 de la segunda auditoría integradas en `develop`. **No apto todavía para producción general**: falta la fase 46, las pruebas reales.
+Estado: versión del módulo `16.0.1.11.0` en `main` y `develop` (multas como reales), app de tableta `1.4.1`, última etiqueta y release `v1.0.0` (21-nov-2026). Fases 38 a 45 de la segunda auditoría integradas. **No apto todavía para producción general**: falta la fase 46, las pruebas reales. El nombre `v1.0.0` se dio a la release de la demostración por decisión del usuario; no significa que la fase 46 esté superada.
 
 ## 1. Lo hecho
 
@@ -58,7 +58,7 @@ Hitos:
 
 - **Piloto vigilado** (`v0.9.6-beta`): fases 38, 39 y 40 integradas. Pocos buses, con alguien mirando el panel.
 - **Candidata** (`v1.0.0-rc1`): fases 41 a 45 integradas y suite completa en verde. **Alcanzado el 18-nov-2026**: etiqueta en `main`, release en GitHub con el APK y el IPA 1.2.0, y la VM de Azure actualizada.
-- **Producción** (`v1.0.0`): fase 46 superada, es decir una jornada real sin defectos críticos y respaldos fuera del servidor.
+- **Producción**: fase 46 superada, es decir una jornada real sin defectos críticos y respaldos fuera del servidor. La etiqueta `v1.0.0` ya se usó el 21-nov-2026 para la release de la demostración (módulo 16.0.1.11.0, tableta 1.4.1), así que la salida a producción real necesitará otro número de versión.
 
 Decisiones ya tomadas: base de producción en **Supabase** (17-nov), que amplía la fase 39 con soporte de base externa en los scripts.
 
@@ -81,7 +81,7 @@ Detalle en [`PLAN-MULTAS.md`](PLAN-MULTAS.md) y, para el retiro del modo demostr
 | MR3 | — | Rendimiento del detector: 0,84 ms por disparo (p95 1,2 ms), sin cambios de código | Hecha (medido) |
 | MR4 | — | Migración 16.0.1.10.0: 500.000 filas en 1,16 s y repetible, sin cambios de código | Hecha (medida) |
 | MR5 | `docs/multas-reales` | Documentación, versiones (DEF-088) y defectos | Hecha |
-| MR6 | — | Verificaciones finales y paso a `main` | Verificaciones hechas; el `merge` a `main` espera confirmación |
+| MR6 | — | Verificaciones finales, paso a `main`, CI en verde y release `v1.0.0` con el APK y el IPA 1.4.1 | Hecha |
 
 Hito **Multas demostrables**: alcanzado el 20-nov-2026 en `develop` (sin etiqueta ni despliegue todavía). Hito **Multas como reales**: alcanzado el 21-nov-2026 en `develop`.
 
