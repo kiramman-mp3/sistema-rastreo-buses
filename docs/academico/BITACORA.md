@@ -1459,3 +1459,41 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 
 - La revisión visual en el navegador de esta reinstalación no se repitió: la del día se hizo en la base `fines_demo`.
 - Los mismos pendientes de la entrada anterior: multas reales, revisión del kichwa, sin `push`, sin integrar a `main` y sin build de la app 1.4.0.
+
+## 2026-11-21: multas como reales y cierre previo a `main`
+
+### Qué se hizo
+
+- Pedido del usuario: el sistema es solo una demostración de capacidades y no irá a producción, así que las multas se tratan como reales. Se quitó el campo `demo` de la API (no se dejó en `false`). Plan en [`PLAN-MULTAS-REALES.md`](../arquitectura/PLAN-MULTAS-REALES.md).
+- `fix/version-tableta`: `package.json` y `package-lock.json` en 1.4.0, igual que `app.json` (DEF-087).
+- `feature/multas-como-reales`: sin `demo` en `/bus_tracking/driver/fines`; sin aviso en *Mis multas* ni en la ficha de la multa; sin la casilla *The fines are real* ni el campo `demo_notice`; migración 16.0.1.11.0 que borra `bus_tracking.fines_real`; dos textos que aún decían demostración, reescritos y retraducidos (DEF-089); tableta 1.4.1. La etiqueta `simulated` y los montos no cambian.
+- Etapa 3 (medida, sin cambios de código): un disparo de `bus.fine._trigger_detection` cuesta 0,84 ms de mediana y 1,2 ms en p95 (300 disparos en una base de pruebas). Cada disparo deja una fila en `ir.cron.trigger`. Se llama al abrirse ya cerrada una alerta, al cerrarse y al cerrar un recorrido, no con cada posición.
+- Etapa 4 (medida, sin cambios de código): el `UPDATE` de la migración 16.0.1.10.0 sobre una tabla temporal de 500.000 filas tardó 1,16 s y una segunda pasada actualizó 0 filas, es decir se puede repetir sin daño. No se midió con filas reales de `bus_alert`.
+- `docs/multas-reales`: guías, privacidad, arquitectura, README, roadmap y defectos DEF-087 a DEF-089 (DEF-088: versiones viejas en el documento de arquitectura y en el roadmap).
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| Suite de Odoo (comando del CI) en `develop` antes de cambiar | 625/625 |
+| Suite de Odoo en `feature/multas-como-reales` | 626/626 (se retira 1 prueba del interruptor y se agregan 2 de la migración) |
+| Actualización 16.0.1.10.0 a 16.0.1.11.0 de una base con `fines_real = True` | Corre la migración y el parámetro queda en 0 filas |
+| `python -m flake8 addons/bus_tracking scripts/dev_seed.py` | Sin avisos |
+| Tableta: lint, typecheck, Jest y `expo export` | Sin errores; 197 de 197 |
+| `qa/traducciones.py` | `es.po`: 0 sin traducir, 0 modelos inexistentes |
+| Base `buses` nueva (README, `dev_seed.py`) y *Escenarios de multas* con `chofer1` en L4 | 6 multas: velocidad, desvío, parada larga, parada omitida, recorrido incompleto y salida tardía descartada por el sistema |
+| `POST /bus_tracking/driver/fines` como `chofer1` tras confirmar 2 multas | Responde solo `fines` (sin `demo`), con MUL-0001 ($25) y MUL-0002 ($20) |
+
+### Problemas encontrados
+
+- Un script que reescribía los `.po` unía los bloques con un solo salto de línea y borraba las líneas en blanco (3.200 líneas de diff); se vio en `git diff --stat`, se revirtió y se rehízo antes de hacer commit.
+- La base de pruebas no tenía el idioma `es_EC` y `dev_seed.py` falló: se creó la base `buses` con los pasos del README.
+- Con varias bases en Postgres, Odoo respondía 404 en `/bus_tracking/driver/login`: se borraron las bases de prueba.
+- Docker Desktop estaba apagado al empezar; se inició y se reconstruyó la imagen.
+
+### Pendiente o sin confirmar
+
+- Fase 46 (jornada real con tabletas, Supabase y VM Linux), revisión del kichwa y pruebas de usabilidad, igual que antes.
+- Build de la app 1.4.1 con EAS y despliegue: no se hicieron.
+- El `merge` a `main`, la etiqueta y el `push` esperan confirmación del usuario.
+- El `CLAUDE.md` de la copia de trabajo difiere del commiteado (le faltan la sección de documentación y la última línea); no se tocó.
