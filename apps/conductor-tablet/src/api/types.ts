@@ -144,7 +144,5 @@ export type Fine = {
 };
 
 export type FinesResponse = {
-  /** True while the fines are a demonstration with fictitious amounts. */
-  demo: boolean;
   fines: Fine[];
 };

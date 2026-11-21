@@ -90,9 +90,9 @@ describe('driver API client', () => {
   });
 
   test('asks for the fines in the language of the app', async () => {
-    const fetchMock = jest.fn().mockResolvedValue(json(200, { demo: true, fines: [] }));
+    const fetchMock = jest.fn().mockResolvedValue(json(200, { fines: [] }));
     const client = createClient({ baseUrl: 'http://odoo:8069', store: store(), fetch: fetchMock });
-    await expect(client.fines('qu')).resolves.toEqual({ demo: true, fines: [] });
+    await expect(client.fines('qu')).resolves.toEqual({ fines: [] });
     expect(fetchMock.mock.calls[0][0]).toBe('http://odoo:8069/bus_tracking/driver/fines');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ lang: 'qu' });
   });
