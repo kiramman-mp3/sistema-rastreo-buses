@@ -160,7 +160,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_fine_stats.py:0
 #, python-format
-msgid "%(n)s confirmed fines (fictitious amounts while in demonstration)"
+msgid "%(n)s confirmed fines"
 msgstr ""
 
 #. module: bus_tracking
@@ -424,13 +424,6 @@ msgstr ""
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "<strong>Data:</strong>"
-msgstr ""
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
-msgid ""
-"<strong>Demonstration fine.</strong>\n"
-"                    The amounts are fictitious: they show how the system would support the fines of the company."
 msgstr ""
 
 #. module: bus_tracking
@@ -701,7 +694,7 @@ msgstr ""
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__amount
-msgid "Amount of a first fine of this type. Demonstration amounts."
+msgid "Amount of a first fine of this type."
 msgstr ""
 
 #. module: bus_tracking
@@ -3161,12 +3154,6 @@ msgstr ""
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__password
 msgid "Leave it empty to keep the current password."
-msgstr ""
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid ""
-"Leave it off while the fines are a demonstration with fictitious amounts."
 msgstr ""
 
 #. module: bus_tracking
@@ -5647,11 +5634,6 @@ msgid "The fine stays confirmed. The driver cannot appeal it again."
 msgstr ""
 
 #. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_fines_real
-msgid "The fines are real"
-msgstr ""
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
@@ -6610,12 +6592,6 @@ msgstr ""
 #: code:addons/bus_tracking/static/src/xml/live_map.xml:0
 #, python-format
 msgid "With alert"
-msgstr ""
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_fines_real
-msgid ""
-"Without it every fine says it is a demonstration with fictitious amounts."
 msgstr ""
 
 #. module: bus_tracking

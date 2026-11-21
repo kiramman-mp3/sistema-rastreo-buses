@@ -41,12 +41,11 @@ class TestFinePanel(FineCase):
         action = fine_type.action_open_fines()
         self.assertEqual(self.env['bus.fine'].search(action['domain']), fine)
 
-    def test_the_demonstration_notice_follows_the_setting(self):
+    def test_the_fine_form_has_no_demonstration_notice(self):
         fine = self.fines_of(simulate(self.env, self.route, 'speeding', self.driver))
-        self.assertTrue(fine.demo_notice)
-        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.fines_real', 'True')
-        fine.invalidate_recordset(['demo_notice'])
-        self.assertFalse(fine.demo_notice)
+        self.assertNotIn('demo_notice', fine._fields)
+        view = self.env['bus.fine'].get_view(self.env.ref('bus_tracking.view_bus_fine_form').id, 'form')
+        self.assertNotIn('Demonstration fine', view['arch'])
 
     def test_the_discard_button_opens_its_wizard(self):
         fine = self.fines_of(simulate(self.env, self.route, 'speeding', self.driver))

@@ -35,7 +35,6 @@ export default function FinesScreen() {
   const layout = useLayout();
   const actions = useSessionActions();
   const [fines, setFines] = useState<Fine[]>([]);
-  const [demo, setDemo] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
   const [openId, setOpenId] = useState<number | null>(null);
@@ -48,7 +47,6 @@ export default function FinesScreen() {
         .then((data) => {
           setError('');
           setFines(sortFines(data.fines));
-          setDemo(data.demo);
         })
         .catch((err: unknown) => setError(err instanceof NetworkError ? t('network') : t('finesError')))
         .finally(() => setLoaded(true)),
@@ -77,7 +75,6 @@ export default function FinesScreen() {
         />
       </View>
 
-      {demo ? <Notice item={{ key: 'demo', tone: 'warn', title: t('finesDemo'), live: 'polite' }} /> : null}
       {error ? <Notice item={{ key: 'error', tone: 'danger', title: error, live: 'polite' }} /> : null}
       {loaded && !error && fines.length === 0 ? (
         <Notice item={{ key: 'empty', tone: 'ok', title: t('finesEmpty'), live: 'polite' }} />

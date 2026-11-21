@@ -162,8 +162,8 @@ msgstr "%(n)s aceptadas"
 #. odoo-python
 #: code:addons/bus_tracking/models/bus_fine_stats.py:0
 #, python-format
-msgid "%(n)s confirmed fines (fictitious amounts while in demonstration)"
-msgstr "%(n)s multas confirmadas (montos ficticios mientras sea demostración)"
+msgid "%(n)s confirmed fines"
+msgstr "%(n)s multas confirmadas"
 
 #. module: bus_tracking
 #. odoo-python
@@ -433,13 +433,6 @@ msgstr "<span>Huachi</span>\n                            <span>Ingahurco</span>\
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
 msgid "<strong>Data:</strong>"
 msgstr "<strong>Datos:</strong>"
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.view_bus_fine_form
-msgid ""
-"<strong>Demonstration fine.</strong>\n"
-"                    The amounts are fictitious: they show how the system would support the fines of the company."
-msgstr "<strong>Multa de demostración.</strong>\n                    Los montos son ficticios: muestran cómo el sistema apoyaría las multas de la empresa."
 
 #. module: bus_tracking
 #: model_terms:ir.ui.view,arch_db:bus_tracking.report_operation
@@ -731,8 +724,8 @@ msgstr "Monto multado"
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_fine_type__amount
-msgid "Amount of a first fine of this type. Demonstration amounts."
-msgstr "Monto de una primera multa de este tipo. Montos de demostración."
+msgid "Amount of a first fine of this type."
+msgstr "Monto de una primera multa de este tipo."
 
 #. module: bus_tracking
 #: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__active
@@ -3238,12 +3231,6 @@ msgstr "La latitud debe estar entre -90 y 90, y la longitud entre -180 y 180."
 #: model:ir.model.fields,help:bus_tracking.field_bus_driver_edit__password
 msgid "Leave it empty to keep the current password."
 msgstr "Déjala vacía para mantener la contraseña actual."
-
-#. module: bus_tracking
-#: model_terms:ir.ui.view,arch_db:bus_tracking.res_config_settings_view_form_bus
-msgid ""
-"Leave it off while the fines are a demonstration with fictitious amounts."
-msgstr "Déjalo desactivado mientras las multas sean una demostración con montos ficticios."
 
 #. module: bus_tracking
 #: model:ir.model.fields,field_description:bus_tracking.field_bus_complaint__has_contact
@@ -5791,11 +5778,6 @@ msgid "The fine stays confirmed. The driver cannot appeal it again."
 msgstr "La multa sigue confirmada. El chofer no puede volver a apelarla."
 
 #. module: bus_tracking
-#: model:ir.model.fields,field_description:bus_tracking.field_res_config_settings__bus_fines_real
-msgid "The fines are real"
-msgstr "Las multas son reales"
-
-#. module: bus_tracking
 #. odoo-javascript
 #: code:addons/bus_tracking/static/src/xml/dashboard.xml:0
 #, python-format
@@ -6802,12 +6784,6 @@ msgstr "Por qué el sistema propone esta multa, en palabras sencillas."
 #, python-format
 msgid "With alert"
 msgstr "Con alerta"
-
-#. module: bus_tracking
-#: model:ir.model.fields,help:bus_tracking.field_res_config_settings__bus_fines_real
-msgid ""
-"Without it every fine says it is a demonstration with fictitious amounts."
-msgstr "Sin esto, cada multa indica que es una demostración con montos ficticios."
 
 #. module: bus_tracking
 #. odoo-python

@@ -66,7 +66,7 @@ class TestFineDriverApi(HttpCase):
         resp = self.post(FINES, {'lang': 'es'}, token=self.token)
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
-        self.assertTrue(data['demo'])
+        self.assertNotIn('demo', data)
         self.assertEqual([f['id'] for f in data['fines']], confirmed.ids)
         item = data['fines'][0]
         self.assertEqual((item['state'], item['amount'], item['currency']), ('fined', 25.0, '$'))
@@ -118,7 +118,3 @@ class TestFineDriverApi(HttpCase):
         item = self.post(FINES, token=self.token).json()['fines'][0]
         self.assertEqual((item['state'], item['appeal_result'], item['amount']), ('discarded', 'accepted', 0.0))
         self.assertEqual(item['appeal_answer'], 'Se revisó el GPS del bus: falló ese día.')
-
-    def test_real_fines_drop_the_demonstration_notice(self):
-        self.env['ir.config_parameter'].sudo().set_param('bus_tracking.fines_real', 'True')
-        self.assertFalse(self.post(FINES, token=self.token).json()['demo'])

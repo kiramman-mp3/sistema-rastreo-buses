@@ -457,8 +457,7 @@ class BusDriverApi(http.Controller):
             return err
         lang = self._lang_for(user, read_body())
         fines = self._driver_fines(user).with_context(lang=lang)
-        real = request.env['ir.config_parameter'].sudo().get_param('bus_tracking.fines_real') in ('1', 'True', 'true')
-        return json_response({'demo': not real, 'fines': [self._fine_payload(fine) for fine in fines]})
+        return json_response({'fines': [self._fine_payload(fine) for fine in fines]})
 
     @http.route('/bus_tracking/driver/fines/appeal', type='http', auth='public', methods=['POST'], csrf=False)
     def fine_appeal(self, **kwargs):

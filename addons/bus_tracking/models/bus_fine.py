@@ -66,7 +66,7 @@ class BusFineType(models.Model):
     severity = fields.Selection(SEVERITIES, required=True, default='minor')
     currency_id = fields.Many2one('res.currency', required=True, default=lambda self: self._default_currency())
     amount = fields.Monetary(string="Amount", required=True, default=10.0,
-                             help="Amount of a first fine of this type. Demonstration amounts.")
+                             help="Amount of a first fine of this type.")
     threshold = fields.Float(
         string="Fine above",
         help="The measured value must go beyond this to be fined: km/h for speeding, metres for a deviation or a "
@@ -185,7 +185,6 @@ class BusFine(models.Model):
     color = fields.Integer(compute='_compute_color')
     headline = fields.Char(string="In short", compute='_compute_headline')
     map_tile_url = fields.Char(compute='_compute_map_tile_url')
-    demo_notice = fields.Boolean(compute='_compute_demo_notice')
 
     _sql_constraints = [
         ('alert_uniq', 'unique(alert_id)', "This alert already has a fine."),
@@ -211,11 +210,6 @@ class BusFine(models.Model):
         url = tile_url(self.env)
         for fine in self:
             fine.map_tile_url = url
-
-    def _compute_demo_notice(self):
-        real = self.env['ir.config_parameter'].sudo().get_param('bus_tracking.fines_real') in ('1', 'True', 'true')
-        for fine in self:
-            fine.demo_notice = not real
 
     @api.depends('state', 'appeal_deadline', 'appeal_text')
     def _compute_can_appeal(self):
