@@ -33,7 +33,7 @@ Los estudiantes esperan el bus sin saber si ya pasó, si viene tarde o si viene.
 5. El personal ve los buses en el mapa en vivo, atiende SOS e incidentes y recibe notificaciones push en el navegador.
 6. Los pasajeros ven en el portal cuántas paradas le faltan al bus para llegar a la suya y pueden escribir a transporte.
 7. Los reportes muestran 12 indicadores de transporte y de calidad del sistema, y se descargan en PDF.
-8. A partir de las alertas, el sistema propone multas de demostración con su evidencia (mapa, tramo y gráfico de velocidad) y sus comprobaciones; la oficina las revisa en un kanban y el chofer puede presentar su descargo desde la tableta.
+8. A partir de las alertas, el sistema propone multas con su evidencia (mapa, tramo y gráfico de velocidad) y sus comprobaciones; la oficina las revisa en un kanban y el chofer puede presentar su descargo desde la tableta.
 
 ### ¿Para quién está pensado?
 
@@ -70,7 +70,7 @@ Generadas con `scripts/dev_seed.py` en local (`qa/capturas_ui.py` y `qa/capturas
 - **Notificaciones push**: los administradores reciben alertas e incidentes en el navegador; probado en Chrome y Edge de Windows.
 - **Portal de pasajeros**: líneas, paradas y buses en vivo sin login; cuenta paradas, nunca promete minutos; nunca publica placa, chofer ni velocidad.
 - **Mensajes de pasajeros**: formulario `/quejas` con protección contra abuso y tablero Nueva, En revisión y Resuelta.
-- **Control de multas (demostración)**: seis reglas parametrizables (velocidad sobre 70 km/h por 30 s, desvío, parada larga, parada omitida, salida tardía y recorrido incompleto). El sistema propone cada multa con la evidencia congelada y las comprobaciones, y una persona decide en un kanban. El chofer responde una vez desde la tableta. Incluye estadísticas en el tablero y el PDF.
+- **Control de multas**: seis reglas parametrizables (velocidad sobre 70 km/h por 30 s, desvío, parada larga, parada omitida, salida tardía y recorrido incompleto). El sistema propone cada multa con la evidencia congelada y las comprobaciones, y una persona decide en un kanban. El chofer responde una vez desde la tableta. Incluye estadísticas en el tablero y el PDF.
 - **Tres idiomas**: español, inglés y kichwa (borrador) en el portal, el panel y la tableta.
 
 ---
@@ -119,7 +119,7 @@ sistema-rastreo-buses/
 │       ├── views/             # Vistas y menús del panel
 │       ├── report/            # Reporte de operación en PDF
 │       ├── static/            # OWL (mapa, tablero, push), CSS, Leaflet, service worker
-│       ├── migrations/        # Migraciones por versión (16.0.1.1.0 a 16.0.1.10.0)
+│       ├── migrations/        # Migraciones por versión (16.0.1.1.0 a 16.0.1.11.0)
 │       ├── i18n/              # es.po, qu.po y plantilla .pot
 │       └── tests/             # Pruebas de Odoo
 ├── apps/
@@ -270,7 +270,7 @@ Todas por `POST`, con `Authorization: Bearer <token>` salvo el login.
 | `/bus_tracking/driver/route` | Trazado de la línea |
 | `/bus_tracking/driver/incident` | Aviso o SOS |
 | `/bus_tracking/driver/client_error` | Fallas de la app para la oficina |
-| `/bus_tracking/driver/fines` | Multas confirmadas del chofer, con el porqué y las comprobaciones en el idioma de la app |
+| `/bus_tracking/driver/fines` | Multas confirmadas del chofer (`{"fines": [...]}`), con el porqué y las comprobaciones en el idioma de la app |
 | `/bus_tracking/driver/fines/appeal` | Descargo del chofer sobre una multa: una sola vez y dentro del plazo |
 
 ### Endpoints públicos
@@ -317,7 +317,7 @@ Todas por `POST`, con `Authorization: Bearer <token>` salvo el login.
 
 ### Migraciones
 
-Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versión actual del módulo es `16.0.1.10.0`, que agrega las multas y marca como revisadas por el detector las alertas que ya existían. La `16.0.1.9.0` retira Grafana (vistas `kpi_*`, tabla de conteos diarios y parámetros) y marca qué vehículos de la flota están en ruta. Se aplican con `-u bus_tracking`.
+Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versión actual del módulo es `16.0.1.11.0`, que retira el modo demostración de las multas (borra el parámetro `bus_tracking.fines_real`). La `16.0.1.10.0` agrega las multas y marca como revisadas por el detector las alertas que ya existían. La `16.0.1.9.0` retira Grafana (vistas `kpi_*`, tabla de conteos diarios y parámetros) y marca qué vehículos de la flota están en ruta. Se aplican con `-u bus_tracking`.
 
 ### Calidad
 
@@ -342,8 +342,9 @@ La segunda auditoría (17-nov-2026) concluyó que el sistema aún **no está lis
 - [x] Flota en tablero En ruta / Estacionados / Dados de baja
 - [x] Notificaciones push del administrador en Windows
 - [x] Recordatorios de recorridos en la tableta
-- [x] Control de multas de demostración con evidencia, kanban y descargo del chofer
-- [ ] Multas reales según el reglamento interno de la empresa
+- [x] Control de multas con evidencia, kanban y descargo del chofer
+- [x] Multas tratadas como reales en la demostración (sin aviso ni interruptor de demostración)
+- [ ] Multas según el reglamento interno de una empresa real (fuera del alcance: el sistema es una demostración)
 - [ ] Fase 46: jornada real con tabletas, Supabase y VM Linux
 - [ ] Revisión del kichwa por una persona hablante
 - [ ] Pruebas de usabilidad con personas
