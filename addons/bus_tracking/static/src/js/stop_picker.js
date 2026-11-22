@@ -38,7 +38,14 @@ export class BusStopPicker extends Component {
             this.state.route = data.route;
             this.initMap(data);
         });
-        onWillUnmount(() => this.map && this.map.remove());
+        onWillUnmount(() => {
+            if (this.map) {
+                // map.remove() does not cancel the debounced wheel zoom, which then fails on the removed panes.
+                clearTimeout(this.map.scrollWheelZoom && this.map.scrollWheelZoom._timer);
+                this.map._animatingZoom = false;
+                this.map.remove();
+            }
+        });
     }
 
     initMap(data) {
