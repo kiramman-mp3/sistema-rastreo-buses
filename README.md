@@ -16,6 +16,8 @@ Se hizo como proyecto de la universidad: un sistema de transporte con indicadore
 
 > [!TIP]
 > Demo pública (versión `v1.0.0`): <https://buses.madebyjohan.xyz>. Para correrlo en local: `cp .env.example .env && docker compose up -d` y abrir <http://localhost:8069>.
+>
+> Documentación completa y ordenada en Notion: <https://youthful-postage-ee8.notion.site/Sistema-de-rastreo-de-buses-UTA-documentaci-n-420c4ab8616d81bbb7e7d230d5a783db>.
 
 ---
 
@@ -145,7 +147,7 @@ sistema-rastreo-buses/
 └── .env.prod.example          # Variables de producción
 ```
 
-El índice de la documentación está en `docs/README.md`.
+El índice de la documentación está en `docs/README.md`. Está también publicada, organizada por secciones, en [Notion](https://youthful-postage-ee8.notion.site/Sistema-de-rastreo-de-buses-UTA-documentaci-n-420c4ab8616d81bbb7e7d230d5a783db).
 
 ---
 
