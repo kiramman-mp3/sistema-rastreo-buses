@@ -12,7 +12,7 @@ Regla del proyecto: **cada vez que se pruebe, se mida o se corrija algo relacion
 | [02-estandares-y-reglas.md](02-estandares-y-reglas.md) | Reglas de negocio R1 a R16, semántica de las respuestas HTTP, convenciones y análisis estático |
 | [03-plan-y-casos-de-prueba.md](03-plan-y-casos-de-prueba.md) | Estrategia, criterios de aceptación y todos los casos de prueba *(generado)* |
 | [04-resultados-y-metricas.md](04-resultados-y-metricas.md) | Cuadro de mando, tiempos, cobertura y estado de los datos *(generado)* |
-| [05-registro-de-defectos.md](05-registro-de-defectos.md) | Defectos DEF-001 a DEF-062 con causa raíz y estado *(generado)* |
+| [05-registro-de-defectos.md](05-registro-de-defectos.md) | Defectos DEF-001 a DEF-090 con causa raíz y estado *(generado)* |
 | [06-lluvia-de-ideas.md](06-lluvia-de-ideas.md) | 94 ideas del proyecto, categorizadas, con su estado |
 | [07-pareto.md](07-pareto.md) | Tres diagramas de Pareto: fallos de la evaluación, defectos y problemas de la construcción *(generado)* |
 | [08-ishikawa.md](08-ishikawa.md) | Dos diagramas de Ishikawa con los cinco porqués |
