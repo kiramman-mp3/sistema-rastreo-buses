@@ -2,7 +2,7 @@
 
 Vista única de todo lo que se hizo y de lo que falta, en orden. El detalle de cada etapa está en su plan; la historia día a día en [`../academico/BITACORA.md`](../academico/BITACORA.md). Actualizado el 2026-11-21.
 
-Estado: versión del módulo `16.0.1.11.0` en `main` y `develop` (multas como reales), app de tableta `1.4.1`, última etiqueta y release `v1.0.0` (21-nov-2026). Fases 38 a 45 de la segunda auditoría integradas. **No apto todavía para producción general**: falta la fase 46, las pruebas reales. El nombre `v1.0.0` se dio a la release de la demostración por decisión del usuario; no significa que la fase 46 esté superada.
+Estado: versión del módulo `16.0.1.11.0` en `main` y `develop` (multas como reales), app de tableta `1.4.1`, última etiqueta y release `v1.0.0` (21-nov-2026). La demostración está desplegada en un homelab con despliegue continuo desde `main` ([`../guias/DESPLIEGUE-HOMELAB.md`](../guias/DESPLIEGUE-HOMELAB.md)). Fases 38 a 45 de la segunda auditoría integradas. **No apto todavía para producción general**: falta la fase 46, las pruebas reales. El nombre `v1.0.0` se dio a la release de la demostración por decisión del usuario; no significa que la fase 46 esté superada.
 
 ## 1. Lo hecho
 
@@ -25,6 +25,7 @@ Estado: versión del módulo `16.0.1.11.0` en `main` y `develop` (multas como re
 | Pedidos del usuario tras la auditoría | 17 y 18-nov | — | Estado Resuelta en mensajes, gráficos sin repetir animación, Grafana retirado, reportes propios con PDF, menús Reportes y Notificaciones, flota en tablero, Conversaciones oculto, push del administrador en Windows, recordatorios de recorridos en la tableta; DEF-064 a DEF-075 | [`../academico/BITACORA.md`](../academico/BITACORA.md) |
 | Control de multas | 20-nov | M1 a M6 | Tipos de multa parametrizables, detector que propone multas desde las alertas con evidencia congelada y comprobaciones, kanban de revisión con descarte y descargo, ficha con mapa y gráfico de velocidad, pantalla *Mis multas* con descargo en la tableta, pestaña del tablero y sección del PDF, escenarios del simulador; DEF-081 a DEF-084 | [`PLAN-MULTAS.md`](PLAN-MULTAS.md) |
 | Multas como reales y cierre previo a `main` | 21-nov | MR1 a MR6 | Se retira el modo demostración de las multas (sin `demo` en la API, sin aviso en la ficha ni en la tableta, sin la casilla `fines_real`), migración 16.0.1.11.0, tableta 1.4.1, versiones alineadas, costo del detector y de la migración medidos; DEF-087 a DEF-089 | [`PLAN-MULTAS-REALES.md`](PLAN-MULTAS-REALES.md) |
+| Release, despliegue en el homelab y datos de demostración | 21-nov | — | Compilación del APK y el IPA 1.4.1 con EAS, release `v1.0.0`, CI en verde; la demostración pasa de la VM de Azure a un homelab (túnel de Cloudflare, Postgres 17, despliegue continuo desde `main` con vuelta atrás); `scripts/demo_reportes.py` agrega 21 días de viajes simulados, multas y quejas para mostrar los reportes (local y homelab); corrección del error de zoom al salir del mapa en vivo (DEF-090) | [`../guias/DESPLIEGUE-HOMELAB.md`](../guias/DESPLIEGUE-HOMELAB.md) |
 | Correcciones de la segunda auditoría | 17-nov | 38 a 45 | Portal sin XSS, colas de la tableta seguras, despliegue sobre Supabase, acceso al panel, turnos y alertas, servidor y GPS de la tableta, permisos de choferes, carga y purga, build; DEF-051 a DEF-062 cerrados | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
 
 Cifras al cierre de la etapa de la rúbrica (5-nov): 544 pruebas de Odoo, 167 de Jest, 96 % de cobertura de Python según `odoo_test.log`, SonarQube con el Quality Gate aprobado, 50 defectos registrados y cerrados.
@@ -33,7 +34,7 @@ Cifras tras la fase 45 (17-nov): 579 pruebas de Odoo, 179 de Jest, 97 % de cober
 
 Cifras al 18-nov: 555 pruebas de Odoo (bajan al retirar las de Grafana), 186 de Jest, 75 defectos registrados y cerrados.
 
-Cifras al 21-nov (`develop`): 626 pruebas de Odoo (comando del CI, 0 fallos), 197 de Jest, flake8, lint y typecheck sin avisos; DEF-087 a DEF-089 cerrados.
+Cifras al 21-nov (`develop`): 626 pruebas de Odoo (comando del CI, 0 fallos), 197 de Jest, flake8, lint y typecheck sin avisos; DEF-087 a DEF-089 cerrados. Con DEF-090 (zoom del mapa), 90 defectos registrados y 89 cerrados; el abierto es DEF-079.
 
 Cifras al 20-nov (control de multas, tras reinstalar el entorno de desarrollo desde cero): 625 pruebas de Odoo, todas pasan (DEF-084 cerrado). 197 pruebas de Jest. 86 defectos registrados, 85 cerrados (abierto: DEF-079).
 
@@ -92,4 +93,6 @@ Hito **Multas demostrables**: alcanzado el 20-nov-2026 en `develop` (sin etiquet
 - Multas en una empresa real (fuera del alcance de esta demostración): que se incluyan en el reglamento interno aprobado por el Ministerio del Trabajo, con montos y plazo de conservación fijados por la empresa.
 - Pruebas de usabilidad con personas (fase 31).
 - Confirmar con el docente que los reportes de Odoo sirven en lugar de Power BI (Grafana se retiró el 17-nov).
-- Dominio institucional, correo real y suscripción de Azure definitiva.
+- Dominio institucional y correo real (el dominio actual, `madebyjohan.xyz`, es personal).
+- Respaldo automático y copia fuera del equipo en el homelab: hoy solo hay volcados manuales en `~/backups/` (ver [`../guias/DESPLIEGUE-HOMELAB.md`](../guias/DESPLIEGUE-HOMELAB.md)).
+- Cambiar la contraseña de los choferes de demostración (`chofer1` a `chofer4`) o desactivarlos si el sitio sigue público.
