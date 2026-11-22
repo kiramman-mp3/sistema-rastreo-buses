@@ -73,7 +73,7 @@ Los 30 procesos de la norma (2017), agrupados como en ella.
 | | Implementación | Cumple | Módulo `bus_tracking` |
 | | Integración | Cumple | Celular simulado, Traccar, webhook y Odoo probados de punta a punta |
 | | Verificación | Cumple | 150 pruebas, 42 casos en vivo, auditoría y cobertura |
-| | Transición | Parcial | Producción probada en local; Azure pendiente |
+| | Transición | Parcial | Demostración desplegada en un homelab con despliegue continuo desde `main` (21-nov-2026); la jornada real con tabletas (fase 46) está pendiente |
 | | Validación | Parcial | Sin celular real ni usuarios reales |
 | | Operación | Parcial | `docs/guias/PRODUCCION.md` y `docs/guias/GUIA-CHOFER.md`; sin operación real |
 | | Mantenimiento | Parcial | Actualización documentada; sin versionado semántico |

@@ -362,6 +362,9 @@ DEFECTOS = [
     ('DEF-089', '21-nov-2026', 'Retiro del modo demostración de las multas', 'Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa',
      'models/bus_fine_stats.py, models/bus_fine.py, i18n/*.po', 'El aviso se había escrito en varios sitios sin una sola fuente: el interruptor fines_real, la ficha, la API y dos textos sueltos.',
      'Lógica', 'Cerrado', 'TestFineApi y TestFinePanel (sin demo en la API ni aviso en la ficha); TestFinesRealCleanup (migración 16.0.1.11.0); qa/traducciones.py'),
+    ('DEF-090', '21-nov-2026', 'Error de JavaScript informado en el sitio publicado', 'Al salir del mapa en vivo girando la rueda del ratón, el panel mostraba el error «Cannot read properties of undefined (reading «_leaflet_pos»)',
+     'static/src/js/live_map.js, static/src/js/stop_picker.js', 'Leaflet 1.9.4 retrasa el zoom de la rueda con un temporizador que map.remove() no cancela: al desmontarse la pantalla, el zoom se ejecutaba sobre un mapa sin paneles.',
+     'Lógica', 'Cerrado', 'Se cancela scrollWheelZoom._timer antes de map.remove() en el mapa en vivo y en el selector de paradas; desplegado en el homelab el 21-nov (sin prueba automática: no hay pruebas de navegador para este caso)'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).

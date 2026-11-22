@@ -8,7 +8,7 @@ que no está en el repositorio (el celular real, la confirmación del docente) s
 | # | Actividad del PDF | Qué se hizo | Evidencia | Estado |
 |---|---|---|---|---|
 | 1 | Análisis del problema y requisitos | Problema, interesados, 17 requisitos funcionales y 10 no funcionales con criterio de aceptación | `docs/arquitectura/REQUISITOS.md`, `docs/calidad/01-politica-y-alcance.md` | Hecho |
-| 2 | Infraestructura (Odoo 16, **Fleet**, Traccar, conectividad externa, **Traccar Client**) | Odoo y Traccar en Docker; Azure con Caddy y HTTPS (alternativa equivalente a Cloudflare Tunnel); Fleet instalado y enlazado a cada bus; guía y reporte de demostración para Traccar Client | `docker-compose*.yml`, `proxy/Caddyfile`, `docs/guias/PRODUCCION.md`, `docs/arquitectura/FLEET.md`, `docs/guias/DEMO-TRACCAR-CLIENT.md` | Hecho; **capturas con el celular pendientes** (lista de evidencias §5 de la guía) |
+| 2 | Infraestructura (Odoo 16, **Fleet**, Traccar, conectividad externa, **Traccar Client**) | Odoo y Traccar en Docker; homelab con túnel de Cloudflare y despliegue continuo desde `main` (antes, Azure con Caddy y HTTPS); Fleet instalado y enlazado a cada bus; guía y reporte de demostración para Traccar Client | `docker-compose*.yml`, `proxy/Caddyfile`, `docs/guias/DESPLIEGUE-HOMELAB.md`, `docs/guias/PRODUCCION.md`, `docs/arquitectura/FLEET.md`, `docs/guias/DEMO-TRACCAR-CLIENT.md` | Hecho; **capturas con el celular pendientes** (lista de evidencias §5 de la guía) |
 | 3 | Integración Odoo–Traccar | Webhook y consulta periódica, sin duplicados, validación, auditoría de sincronización | `models/bus_vehicle.py`, `tests/test_ingest.py`, `test_http.py`, `test_traccar_consistency.py` | Hecho |
 | 4 | Vehículos, rutas y paradas; horarios y asignación | 6 buses, 4 rutas con 4 a 6 paradas, minutos planificados, horarios y asignación por fecha y hora | `models/bus_route.py`, `bus_trip.py`, `tests/test_trips.py`, `test_boundaries.py` | Hecho (horarios simulados hasta confirmar los oficiales) |
 | 5 | Monitoreo y registro de recorridos (10 recorridos de prueba) | Recorrido con hora programada y real, distancias estimada y recorrida, paradas con retraso; **12 recorridos simulados** identificados | `docs/calidad/13-recorridos-de-prueba.md`, `tests/test_trip_run.py`, `test_trip_simulator.py`, `scripts/seed_recorridos.py` | Hecho |
@@ -25,7 +25,7 @@ que no está en el repositorio (el celular real, la confirmación del docente) s
 | 1 | Documento de análisis y requisitos | `docs/arquitectura/REQUISITOS.md` | Hecho |
 | 2 | Arquitectura y modelo de datos | `docs/arquitectura/ARQUITECTURA-Y-DATOS.md`, `PLAN.md` | Hecho |
 | 3 | Sistema Odoo 16 integrado con Traccar | `addons/bus_tracking/`, `docker-compose*.yml` | Hecho |
-| 4 | Conectividad externa funcional | Servidor en Azure con HTTPS (`docs/guias/PRODUCCION.md`) y `gps.<dominio>`; prueba con datos móviles | Hecho en el servidor; **prueba con celular pendiente** |
+| 4 | Conectividad externa funcional | Servidor público con HTTPS (`docs/guias/DESPLIEGUE-HOMELAB.md`; antes `docs/guias/PRODUCCION.md` en Azure) y `gps-buses.madebyjohan.xyz`; prueba con datos móviles | Hecho en el servidor; **prueba con celular pendiente** |
 | 5 | Módulo desarrollado o adaptado para administrar rutas | `bus_tracking`: rutas, paradas, horarios, asignación, recorridos y Fleet | Hecho |
 | 6 | Historial de recorridos y datos GPS | `bus.trip`, `bus.trip.stop`, `bus.position`; menús Scheduled trips y Reports | Hecho |
 | 7 | Indicadores calculados y dashboard dentro de Odoo | Buses › Indicators › Odoo dashboard; `14-metricas-de-transporte.md` | Hecho |
@@ -70,5 +70,5 @@ Cada pregunta del PDF (§6) con su pantalla está en `docs/academico/GUION_DEFEN
 | Confirmar con el docente que Grafana reemplaza a Power BI | Equipo | Decisión del docente; el tablero de Odoo cubre el criterio por sí solo |
 | Revisión del kichwa por una persona hablante | Comunidad | La traducción la hizo una IA |
 | Pruebas unitarias del JavaScript del módulo; `npm audit`; prueba de concurrencia | Equipo | Siguiente ciclo (`18-mejora-continua-pdca.md` §5) |
-| **Desplegar la versión 16.0.1.6.0 en Azure** (respaldo, migración de Fleet y de las vistas, Grafana con su subdominio) | Equipo | El servidor sigue en la versión anterior; el despliegue modifica la base de producción y se hace con respaldo (`docs/guias/GRAFANA.md` §3, `docs/arquitectura/FLEET.md` §4) |
-| Subir los cambios a GitHub (`develop` y `main`) | Equipo | Se hace cuando lo decida el equipo |
+| ~~Desplegar la versión 16.0.1.6.0 en Azure~~ | Equipo | Hecho de otra forma: el 21-nov-2026 se desplegó la 16.0.1.11.0 en el homelab, con respaldo previo y migraciones automáticas (`docs/guias/DESPLIEGUE-HOMELAB.md`) |
+| ~~Subir los cambios a GitHub (`develop` y `main`)~~ | Equipo | Hecho: `develop` y `main` están en GitHub y el CI corre en las dos |

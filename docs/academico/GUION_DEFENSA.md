@@ -148,7 +148,7 @@ Puntos a destacar:
 | **Celular del chofer como GPS** | Decisión del cliente: cero costo de hardware. A cambio hay que cuidar batería, plan de datos y consentimiento del chofer. |
 | **Portal sin login** | Decisión del cliente: el pasajero solo mira y se queja; menos fricción y menos datos personales. |
 | **Docker Compose** | Instalación repetible (`docker compose up`); probada desde cero. |
-| **Azure con máquina virtual Linux** | Decisión del cliente. Traccar recibe conexiones de dispositivos que no encajan en servicios de aplicación web. **Aún no desplegado.** |
+| **Azure con máquina virtual Linux** | Decisión original del cliente: Traccar recibe conexiones de dispositivos que no encajan en servicios de aplicación web. **No se usó:** el 21-nov-2026 la demostración se desplegó en un homelab con Docker Compose detrás de un túnel de Cloudflare, con despliegue continuo desde `main` (`docs/guias/DESPLIEGUE-HOMELAB.md`). |
 | **Español, inglés y kichwa** | Decisión del cliente. Odoo 16 no trae kichwa; se hizo en el portal con un diccionario propio, marcado como borrador hasta que lo revise una persona hablante. |
 
 *"Todas estas decisiones se tomaron con el cliente en la fase 0 y están en `docs/arquitectura/PLAN.md`."*
@@ -237,7 +237,7 @@ Cifras de la corrida del 2-nov-2026 (`qa/ejecutar_todo.sh`). La evaluación del 
 - El GPS se **simuló con peticiones HTTP**; no se ha hecho un turno completo con un celular real.
 - El push se probó en cifrado, firma y endpoints, pero no entregado a un navegador real.
 - El CI corre flake8 con todas las reglas, el lint de la tableta y la suite de Odoo; no hay SonarQube ni pylint-odoo.
-- No se desplegó en Azure ni se probó con dominio público.
+- La demostración está desplegada con dominio público (`buses.madebyjohan.xyz`) en un homelab, no en un servidor de producción: no hay respaldo automático ni copia fuera del equipo, y la jornada real con tabletas (fase 46) sigue pendiente.
 - El kichwa es un borrador sin revisión de una persona hablante.
 - No hay QA independiente: quien desarrolla también probó.
 

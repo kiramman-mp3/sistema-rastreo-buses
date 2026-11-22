@@ -1,6 +1,9 @@
 # Puesta en producción
 
-Guía para instalar y operar el sistema en un servidor. Todo lo de esta página está en `docker-compose.prod.yml`, `proxy/Caddyfile` y `scripts/`.
+Guía para instalar y operar el sistema en un servidor con IP pública. Todo lo de esta página está en `docker-compose.prod.yml`, `proxy/Caddyfile` y `scripts/`.
+
+> [!NOTE]
+> La demostración pública corre hoy en un homelab, detrás de un túnel de Cloudflare y con despliegue continuo desde `main`: ver [`DESPLIEGUE-HOMELAB.md`](DESPLIEGUE-HOMELAB.md). Esta guía describe el despliegue genérico (el que se usó en la VM de Azure) y los scripts de `scripts/`.
 
 ## Requisitos
 
@@ -89,7 +92,7 @@ Programación diaria con cron (ajusta la ruta):
 
 **Los respaldos viven en el mismo servidor.** Si el servidor se pierde, se pierden con él. Copia `backups/` a otro lugar (otro servidor, almacenamiento en la nube) con la herramienta que ya uses; el proyecto no incluye ese paso.
 
-En la VM de demostración de Azure la copia va a la cuenta de almacenamiento privada `stbusesuta11900` (contenedor `backups`). Desde un equipo con la CLI de Azure:
+En la VM de Azure que se usó antes de pasar al homelab, la copia iba a la cuenta de almacenamiento privada `stbusesuta11900` (contenedor `backups`). Desde un equipo con la CLI de Azure:
 
 ```bash
 az storage blob download-batch --account-name stbusesuta11900 -s backups -d ./backups-azure --auth-mode key

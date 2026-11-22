@@ -64,7 +64,7 @@ El detalle de cada escenario (con el máximo y el tamaño de cada respuesta) est
 
 ## 4. Límites de esta medición
 
-- Se midió **en la máquina de desarrollo**, no en la VM pequeña de Azure; allí los tiempos serán mayores. La proporción entre escenarios sí se mantiene: con la meta a 2 000 ms y el peor caso a 704 ms hay margen
+- Se midió **en la máquina de desarrollo**, ni en el homelab ni en una VM pequeña; allí los tiempos serán mayores. La proporción entre escenarios sí se mantiene: con la meta a 2 000 ms y el peor caso a 704 ms hay margen
   de casi 3 veces. El indicador S3 mide los tiempos reales del servidor (`bus.perf.sample`, botón «Medir ahora» del tablero) y es el que debe vigilarse en producción.
 - Es **un solo usuario a la vez**. No se midió la concurrencia (varios gestores con el mapa abierto y 20 tabletas enviando a la vez); para el tamaño del proyecto (6 buses) no se espera que importe, y Odoo en producción
   corre con varios procesos.
