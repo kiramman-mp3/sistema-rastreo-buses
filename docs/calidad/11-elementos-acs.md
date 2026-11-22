@@ -51,5 +51,5 @@ Por orden de prioridad:
 4. Configurar el análisis estático y la integración continua.
 5. Mover los límites de uso a un almacén común o al proxy; agregar límite de login y 2FA.
 6. Pruebas de interfaz extremo a extremo y pruebas de usabilidad.
-7. Monitoreo con alertas en producción (Azure Monitor sobre `/bus_tracking/health`) y copia de los respaldos fuera del servidor.
+7. Monitoreo con alertas en producción (un monitor externo sobre `/bus_tracking/health`; no hay ninguno configurado en el homelab) y copia de los respaldos fuera del servidor.
 8. Revisión del kichwa por una persona hablante y revisión legal del aviso de privacidad.

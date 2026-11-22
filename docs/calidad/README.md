@@ -35,17 +35,17 @@ Otros contenidos de la carpeta:
 
 Los documentos marcados *(generado)* los escribe `qa/generar_docs.py` desde las evidencias: **no se editan a mano**, se vuelve a ejecutar el script.
 
-## Estado resumido (evidencias del 5-nov-2026 y segunda auditoría del 17-nov-2026)
+## Estado resumido (a 21-nov-2026; cobertura y suite en vivo, de la última medición)
 
 | Medida | Resultado |
 |---|---|
-| Pruebas de Odoo | 544, 0 fallos (5-nov) |
-| Pruebas de la app (Jest) | 167, 0 fallos (17-nov); lint y typecheck en verde |
+| Pruebas de Odoo | 626, 0 fallos (21-nov, comando del CI) |
+| Pruebas de la app (Jest) | 197, 0 fallos (21-nov); lint y typecheck en verde |
 | Suite en vivo | 47 de 47 |
 | Auditoría aleatoria | 1000 peticiones, sin respuestas 5xx inesperadas |
 | Cobertura de código | 95,9 % de Python; 78,4 % de todo el código según SonarQube |
-| Defectos | 62 registrados, 50 cerrados, 12 abiertos (DEF-051 a DEF-062) |
-| Decisión | No apto para producción general. Apto para un piloto vigilado tras las fases 38 a 40 de [`PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md) |
+| Defectos | 90 registrados, 89 cerrados, 1 abierto (DEF-079, error de Android 17 en `expo-task-manager`) |
+| Decisión | No apto para producción general: falta la fase 46 de [`PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md) (jornada real con tabletas). La demostración está desplegada en el homelab |
 
 El estado del 28-oct (150 pruebas, 3 defectos abiertos) se conserva en `Informe_calidad_rastreo_buses.pdf`.
 

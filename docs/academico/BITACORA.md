@@ -1520,3 +1520,35 @@ Resolución de incidencias reportadas en campo donde los teléfonos conectados n
 
 - Como el keystore es nuevo, el APK no actualiza sobre una app instalada con otra firma: hay que desinstalar la anterior en cada tableta.
 - Fase 46, revisión del kichwa y pruebas de usabilidad siguen abiertas; `v1.0.0` no las da por cumplidas.
+
+## 2026-11-21: datos de demostración, despliegue en el homelab y actualización de la documentación
+
+### Qué se hizo
+
+- Pedido del usuario: tener datos para mostrar reportes en la base local y en la del homelab. Se escribió `scripts/demo_reportes.py` (rama `chore/demo-reportes`): crea las líneas L1 a L4, los choferes `chofer1` a `chofer4`, 21 días de viajes simulados por línea con escenarios ponderados (la mayoría puntuales; el resto con retrasos, paradas omitidas, desvíos, exceso de velocidad y viajes sin arrancar) y 24 quejas repartidas en las últimas semanas. Usa el simulador del módulo, así que las multas salen del detector real.
+- Resultado: local con 91 viajes, 22 multas y 28 quejas; homelab con 108 viajes (24 reales y 84 simulados), 19 multas y 24 quejas. Antes de insertar en el homelab se hizo un volcado (`~/backups/buses-pre-demo-20261121.sql.gz`).
+- Error informado en el sitio publicado: `Cannot read properties of undefined (reading '_leaflet_pos')` al salir del mapa en vivo girando la rueda. Leaflet 1.9.4 retrasa el zoom de la rueda con un temporizador que `map.remove()` no cancela. Rama `fix/leaflet-wheel-zoom-unmount`: se cancela `scrollWheelZoom._timer` antes de quitar el mapa en `live_map.js` y en `stop_picker.js` (DEF-090).
+- Integración en `main` y despliegue: `develop` entró a `main` con `--no-ff` y se subió a GitHub; el cron del homelab (`deploy.sh`, cada 5 minutos, rama `main`) se lanzó a mano. Pasó de `c26c067` a `5536664`, actualizó el módulo `bus_tracking` y la URL respondió 200 a los 33 segundos.
+- Documentación (rama `docs/actualizar-documentacion`): nueva guía [`DESPLIEGUE-HOMELAB.md`](../guias/DESPLIEGUE-HOMELAB.md) con lo que corre en el servidor, el despliegue continuo, los respaldos y los datos de demostración; se marcó Azure como el despliegue anterior en las guías, la arquitectura, la matriz de trazabilidad y el guion de defensa; la guía del chofer ya no cita la URL de Azure (el APK 1.4.1 apunta a `https://buses.madebyjohan.xyz`); se actualizaron las cifras del índice de calidad y del README; DEF-090 registrado y `docs/calidad/` regenerado.
+
+### Qué se verificó
+
+| Prueba | Resultado |
+|---|---|
+| `scripts/demo_reportes.py` en la base local y en la del homelab | `demo ok`: 84 viajes simulados nuevos en cada una |
+| Los 24 viajes reales del homelab tras el script | Siguen igual (`simulated = false`: 24) |
+| `deploy.sh buses` en el homelab | `listo en 5536664`; `buses-odoo` healthy; `/web/login` responde 200 |
+| El `live_map.js` desplegado | Contiene la cancelación del temporizador |
+| `python -X utf8 qa/generar_docs.py` tras DEF-090 | Cambian solo `05-registro-de-defectos.md`, `07-pareto.md` y la figura del Pareto |
+
+### Problemas encontrados
+
+- La corrección del zoom no se probó en un navegador ni tiene prueba automática: el proyecto no tiene pruebas de navegador para este caso. Queda por confirmar con el usuario en el sitio publicado.
+- Docker Desktop estaba apagado al empezar; se inició para correr el script en local.
+- El primer intento de registrar DEF-090 dejó una cadena con comillas sin escapar y `qa/datos_calidad.py` no compilaba; se vio al regenerar y se corrigió antes del commit.
+
+### Pendiente o sin confirmar
+
+- Respaldo automático y copia fuera del equipo en el homelab: no existen.
+- Los choferes de demostración tienen la contraseña igual a su usuario; cambiarla o desactivarlos si el sitio sigue público.
+- Fase 46, revisión del kichwa y pruebas de usabilidad siguen abiertas.

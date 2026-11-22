@@ -12,7 +12,7 @@ Esta guía es para quien maneja. En el bus hay una tableta con la app **Buses UT
 ## Instalar (el administrador lo hace una vez)
 
 1. Instala el APK de `eas build --profile production --platform android` (o build nativo de iOS para pruebas en iPhone).
-2. El APK de producción ya trae configurado `https://busesuta2340.eastus2.cloudapp.azure.com`. Para iniciar sesión, el chofer simplemente pulsa **Escanear credencial QR** y apunta a su carnet de conductor.
+2. El APK de producción ya trae configurado `https://buses.madebyjohan.xyz` (`EXPO_PUBLIC_ODOO_URL` en `apps/conductor-tablet/eas.json`). Para iniciar sesión, el chofer simplemente pulsa **Escanear credencial QR** y apunta a su carnet de conductor.
 3. En Ajustes del sistema:
    - **Android**: ubicación precisa (*Todo el tiempo*); batería de **Buses UTA** sin restricciones; pantalla encendida mientras carga. Guía por marca: [dontkillmyapp.com](https://dontkillmyapp.com).
    - **iOS (iPhone)**: Ajustes → Buses UTA → Ubicación: seleccionar **Siempre** y marcar **Ubicación exacta**. Habilitar **Actualización en segundo plano**. Durante el turno activo se muestra el indicador azul de ubicación en la barra de estado.
