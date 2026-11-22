@@ -2,6 +2,8 @@
 
 Portal central de documentación técnica, operativa, de diseño y de aseguramiento de calidad del **Sistema de Rastreo de Buses en Tiempo Real** (Odoo 16 + Traccar + App Móvil Expo).
 
+Esta documentación también está publicada, organizada por secciones, en [Notion](https://youthful-postage-ee8.notion.site/Sistema-de-rastreo-de-buses-UTA-documentaci-n-420c4ab8616d81bbb7e7d230d5a783db). Esa copia se generó el 21-nov-2026 desde esta carpeta; la fuente de verdad es este repositorio.
+
 ---
 
 ## Estructura de la Documentación
