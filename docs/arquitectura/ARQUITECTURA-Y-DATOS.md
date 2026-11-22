@@ -9,7 +9,7 @@ Versión del módulo: **16.0.1.11.0**. Requisitos: `docs/arquitectura/REQUISITOS
  Celular / tableta (Traccar Client o app Buses UTA)
         │  OsmAnd sobre HTTPS (gps.<dominio>)
         ▼
- ┌─────────────── Servidor Azure (Docker) ────────────────────────────────────────────┐
+ ┌─────────────── Servidor (Docker) ──────────────────────────────────────────────────┐
  │  Caddy (HTTPS, cabeceras)                                                            │
  │    ├─ <dominio>          ──► Odoo 16 (módulo bus_tracking + Fleet)                  │
  │    ├─ gps.<dominio>      ──► Traccar :5055 (protocolo OsmAnd) ──webhook──► Odoo     │
@@ -28,7 +28,8 @@ Versión del módulo: **16.0.1.11.0**. Requisitos: `docs/arquitectura/REQUISITOS
 | **Odoo Fleet** | Registro de los vehículos de la empresa, enlazado con cada bus | `models/bus_fleet.py` |
 | **Caddy** | HTTPS automático, cabeceras de seguridad, bloqueo del webhook y del administrador de bases desde fuera | `proxy/Caddyfile` |
 | **App Buses UTA (Expo)** | Cliente de operación del chofer: turno, GPS, incidentes, horario y retraso | `apps/conductor-tablet/` |
-| **Azure con Caddy** | Alternativa equivalente a Cloudflare Tunnel (`docs/guias/DEMO-TRACCAR-CLIENT.md` §6) | `docs/guias/PRODUCCION.md` |
+| **Homelab con túnel de Cloudflare** | Despliegue vigente de la demostración (desde el 21-nov-2026): Cloudflare pone el HTTPS, Caddy sirve HTTP y un cron despliega `main` cada 5 minutos | `docs/guias/DESPLIEGUE-HOMELAB.md` |
+| **Azure con Caddy** | Despliegue anterior y alternativa para un servidor con IP pública (`docs/guias/DEMO-TRACCAR-CLIENT.md` §6) | `docs/guias/PRODUCCION.md` |
 
 ## 2. Cómo viaja un dato
 
