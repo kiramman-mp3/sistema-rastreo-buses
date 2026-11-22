@@ -10,7 +10,7 @@ Colección de herramientas automatizadas para la administración del stack, desp
 |---|---|---|---|
 | [`backup.sh`](backup.sh) | Producción / Dev | Genera un volcado SQL comprimido de las bases de Odoo y Traccar. | `./scripts/backup.sh` |
 | [`restore.sh`](restore.sh) | Producción / Dev | Restaura un respaldo específico en la base de datos de PostgreSQL. | `./scripts/restore.sh backups/<archivo>.sql.gz` |
-| [`init-prod.sh`](init-prod.sh) | Producción | Aprovisionamiento inicial del stack en servidor Linux (Azure VM). | `sudo ./scripts/init-prod.sh` |
+| [`init-prod.sh`](init-prod.sh) | Producción | Aprovisionamiento inicial del stack en servidor Linux con IP pública (la VM de Azure; el homelab se despliega solo, ver `docs/guias/DESPLIEGUE-HOMELAB.md`). | `sudo ./scripts/init-prod.sh` |
 | [`reset-prod.sh`](reset-prod.sh) | Producción | Reinicio seguro de producción (requiere confirmación y crea backup). | `sudo ./scripts/reset-prod.sh` |
 | [`bootstrap-traccar.sh`](bootstrap-traccar.sh) | Producción / Dev | Configura usuario admin y parámetros API de Traccar de forma automatizada. | `./scripts/bootstrap-traccar.sh` |
 | [`dev_seed.py`](dev_seed.py) | Desarrollo local | Puebla la base de datos con rutas de Ambato, paradas, buses y choferes. | `docker compose exec -T odoo odoo shell < dev_seed.py` |
@@ -25,7 +25,7 @@ Colección de herramientas automatizadas para la administración del stack, desp
 * Los respaldos se guardan en el directorio `backups/` con fecha y hora (`buses_YYYY-MM-DD_HHMM.sql.gz`).
 * Se recomienda programar `backup.sh` en el crontab del servidor de producción:
   ```bash
-  0 2 * * * cd /home/azureuser/buses && ./scripts/backup.sh > /dev/null 2>&1
+  0 2 * * * cd /opt/rastreo-buses && ./scripts/backup.sh > /dev/null 2>&1
   ```
 
 ### 2. Semillas de datos locales (`dev_seed.py`)

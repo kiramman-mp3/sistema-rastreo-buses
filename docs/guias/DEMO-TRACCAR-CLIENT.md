@@ -59,6 +59,9 @@ Los 12 recorridos simulados (`docs/calidad/13-recorridos-de-prueba.md`) cubren l
 
 ## 6. Por qué Azure con Caddy y no Cloudflare Tunnel
 
+> [!NOTE]
+> Esta comparación es de la decisión original (la VM de Azure). El 21-nov-2026 la demostración pasó a un homelab detrás de un túnel de Cloudflare, la opción que aquí se dejaba para un servidor sin IP pública: ver [`DESPLIEGUE-HOMELAB.md`](DESPLIEGUE-HOMELAB.md). Traccar Client y Odoo no cambiaron, solo el dominio (`gps-buses.madebyjohan.xyz`).
+
 El proyecto pide que el servidor sea alcanzable desde Internet por los celulares sin exponer la red de la institución. Cloudflare Tunnel y la VM de Azure con Caddy resuelven lo mismo; se eligió la segunda:
 
 | | Cloudflare Tunnel | Azure VM + Caddy (el proyecto) |

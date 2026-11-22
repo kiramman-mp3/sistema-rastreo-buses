@@ -28,9 +28,10 @@ docs/
 ├── guias/                         # Manuales operativos y guías de puesta en marcha
 │   ├── GUIA-CHOFER.md             # Manual de usuario para choferes en tableta o teléfono (Android/iOS)
 │   ├── OPERACION.md               # Guía diaria de operación y despacho en consola de Odoo
-│   ├── PRODUCCION.md              # Guía de despliegue en servidor Azure VM, Caddy HTTPS y backups
+│   ├── PRODUCCION.md              # Guía de despliegue en un servidor con IP pública (Azure VM), Caddy HTTPS y backups
+│   ├── DESPLIEGUE-HOMELAB.md      # Despliegue vigente: homelab, túnel de Cloudflare y despliegue continuo desde main
 │   ├── GLOSARIO-KICHWA.md         # Términos en kichwa usados en la interfaz (borrador sin revisión)
-│   ├── DEMO-TRACCAR-CLIENT.md     # Demostración con un celular y Traccar Client, evidencias y Azure frente a Cloudflare
+│   ├── DEMO-TRACCAR-CLIENT.md     # Demostración con un celular y Traccar Client, evidencias y la comparación entre Azure y Cloudflare (decisión original)
 │   └── PERSONALIZACION.md         # Parámetros institucionales UTA, mapa en Ambato y límites
 │
 ├── diseno/                        # Identidad visual, tokens y marco normativo
@@ -43,7 +44,7 @@ docs/
 │   ├── 02-estandares-y-reglas.md  # Estándares de codificación, convenciones y buenas prácticas
 │   ├── 03-plan-y-casos-de-prueba.md # Plan maestro de pruebas y matriz de casos de verificación
 │   ├── 04-resultados-y-metricas.md # Resultados de ejecución, cobertura y métricas de complejidad
-│   ├── 05-registro-de-defectos.md # Defectos DEF-001 a DEF-062 con causa raíz y estado (12 abiertos)
+│   ├── 05-registro-de-defectos.md # Defectos DEF-001 a DEF-089 con causa raíz y estado (1 abierto)
 │   ├── 06-lluvia-de-ideas.md      # Lluvia de ideas estructurada y matriz de priorización
 │   ├── 07-pareto.md               # Diagramas y análisis de Pareto (80/20) para defectos y fallos
 │   ├── 08-ishikawa.md             # Diagramas de causa y efecto (espina de pescado)
@@ -93,9 +94,10 @@ Para saber en qué punto está el proyecto, empieza por [`arquitectura/ROADMAP.m
 3. [`diseno/PRIVACIDAD.md`](diseno/PRIVACIDAD.md): Alcance del rastreo y derechos sobre la privacidad de la ubicación.
 
 ### 4. Administrador de Sistemas / DevOps
-1. [`guias/PRODUCCION.md`](guias/PRODUCCION.md): Puesta en marcha en Azure, certificados SSL Let's Encrypt y crons de respaldo.
-2. [`guias/PERSONALIZACION.md`](guias/PERSONALIZACION.md): Configuración de dominios, teselas de mapa y parámetros institucionales.
-3. [`../scripts/README.md`](../scripts/README.md): Catálogo de scripts de mantenimiento, restauración y semillas.
+1. [`guias/PRODUCCION.md`](guias/PRODUCCION.md): Puesta en marcha en un servidor con IP pública, certificados Let's Encrypt y crons de respaldo.
+2. [`guias/DESPLIEGUE-HOMELAB.md`](guias/DESPLIEGUE-HOMELAB.md): Cómo corre hoy la demostración: túnel de Cloudflare, despliegue continuo desde `main`, respaldos y datos de demostración.
+3. [`guias/PERSONALIZACION.md`](guias/PERSONALIZACION.md): Configuración de dominios, teselas de mapa y parámetros institucionales.
+4. [`../scripts/README.md`](../scripts/README.md): Catálogo de scripts de mantenimiento, restauración y semillas.
 
 ### 5. Auditor de Calidad / Evaluador Académico
 1. [`academico/GUION_DEFENSA.md`](academico/GUION_DEFENSA.md): Guion resumen de la solución, justificación y valor técnico.
@@ -122,6 +124,7 @@ Para saber en qué punto está el proyecto, empieza por [`arquitectura/ROADMAP.m
 | **Guías** | [`GUIA-CHOFER.md`](guias/GUIA-CHOFER.md) | Manual operativo de cabina | Choferes de autobús |
 | **Guías** | [`OPERACION.md`](guias/OPERACION.md) | Gestión de tráfico y alertas | Supervisores de flota |
 | **Guías** | [`PRODUCCION.md`](guias/PRODUCCION.md) | Manual de administración de servidores | Administradores de sistemas |
+| **Guías** | [`DESPLIEGUE-HOMELAB.md`](guias/DESPLIEGUE-HOMELAB.md) | Despliegue vigente y despliegue continuo | Administradores de sistemas |
 | **Guías** | [`PERSONALIZACION.md`](guias/PERSONALIZACION.md) | Parámetros específicos de la UTA | Administradores de Odoo |
 | **Guías** | [`DEMO-TRACCAR-CLIENT.md`](guias/DEMO-TRACCAR-CLIENT.md) | Demostración con celular y Traccar Client | Equipo del proyecto, defensa |
 | **Diseño** | [`DISENO.md`](diseno/DISENO.md) | Tokens, colores y componentes UI | Diseñadores, Frontend |
