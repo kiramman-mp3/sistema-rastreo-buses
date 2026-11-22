@@ -2,19 +2,20 @@
 
 [![Odoo](https://img.shields.io/badge/Odoo-16.0-714B67?style=flat-square&logo=odoo&logoColor=white)](https://www.odoo.com/)
 [![Python](https://img.shields.io/badge/Python-3.9-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%20%7C%2017-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Traccar](https://img.shields.io/badge/Traccar-6.16.0-1A73E8?style=flat-square)](https://www.traccar.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Expo](https://img.shields.io/badge/Expo-SDK%2058-000020?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/)
-[![Azure](https://img.shields.io/badge/Azure-VM-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Tunnel-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://www.cloudflare.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Licencia](https://img.shields.io/badge/Licencia-LGPL--3.0-blue?style=flat-square)](LICENSE)
 
 **Sistema de rastreo de buses UTA** es un módulo de Odoo 16 (`bus_tracking`), unido a un servidor Traccar y a una app de tableta para el chofer, que muestra en vivo dónde van los buses de la Universidad Técnica de Ambato. Lo usan tres públicos: el personal de transporte (panel de Odoo), los choferes (tableta) y los pasajeros (portal público sin login).
 
-Se hizo como proyecto de la universidad: un sistema de transporte con indicadores de servicio, gestión de calidad documentada (ISO 25010, Pareto, Ishikawa, PDCA) y despliegue real en Azure.
+Se hizo como proyecto de la universidad: un sistema de transporte con indicadores de servicio, gestión de calidad documentada (ISO 25010, Pareto, Ishikawa, PDCA) y despliegue real en un homelab, con despliegue continuo desde `main` (antes se usó una VM de Azure).
 
 > [!TIP]
-> Demo pública: <https://buses.madebyjohan.xyz>. Para correrlo en local: `cp .env.example .env && docker compose up -d` y abrir <http://localhost:8069>.
+> Demo pública (versión `v1.0.0`): <https://buses.madebyjohan.xyz>. Para correrlo en local: `cp .env.example .env && docker compose up -d` y abrir <http://localhost:8069>.
 
 ---
 
@@ -81,9 +82,9 @@ Generadas con `scripts/dev_seed.py` en local (`qa/capturas_ui.py` y `qa/capturas
 - **App de tableta**: Expo SDK 58, React Native 0.88, React 19, TypeScript, Expo Router, `expo-location`, `expo-task-manager`, `expo-notifications`.
 - **Backend**: Odoo 16 (Python 3.9), módulo `bus_tracking` (depende de `mail`, `fleet` y `auth_totp`), `pywebpush` para Web Push, wkhtmltopdf para los PDF.
 - **Rastreo**: Traccar 6.16.0 (protocolo OsmAnd, puerto 5055).
-- **Base de datos**: PostgreSQL 15 en desarrollo; PostgreSQL 17 o Supabase en producción.
+- **Base de datos**: PostgreSQL 15 en desarrollo; PostgreSQL 17 en el homelab (contenedor local) o Supabase en un servidor de producción.
 - **Pruebas y calidad**: pruebas de Odoo (`--test-enable`), Jest, ESLint, flake8, Playwright, axe, SonarQube, gitleaks.
-- **Despliegue**: Docker Compose, Caddy 2 (HTTPS con Let's Encrypt), VM de Azure, EAS Build para el APK.
+- **Despliegue**: Docker Compose, Caddy 2, túnel de Cloudflare (HTTPS) en un homelab con un cron que despliega `main` cada 5 minutos, GitHub Actions para el CI y EAS Build para el APK. La VM de Azure con Let's Encrypt fue el despliegue anterior.
 
 ---
 
@@ -100,11 +101,13 @@ graph TD
     O -->|Web Push| N[Navegadores del personal]
     P[Portal de pasajeros] -->|/rutas, /quejas| O
     A[Panel de Odoo] --> O
-    C[Caddy HTTPS] --> O
+    CF[Túnel de Cloudflare<br/>HTTPS] --> C[Caddy HTTP]
+    C --> O
     C --> TR
+    GH[GitHub main] -.->|cron cada 5 min<br/>deploy.sh| O
 ```
 
-Odoo es la fuente de verdad: Traccar solo recibe el GPS y lo reenvía. Las posiciones duplicadas se descartan (único por bus y hora GPS), aunque el webhook y el cron traigan la misma a la vez.
+Odoo es la fuente de verdad: Traccar solo recibe el GPS y lo reenvía. En el homelab, el túnel de Cloudflare pone el HTTPS y un cron del servidor despliega lo que llegue a `main` (la flecha punteada). Las posiciones duplicadas se descartan (único por bus y hora GPS), aunque el webhook y el cron traigan la misma a la vez.
 
 ---
 
@@ -128,14 +131,14 @@ sistema-rastreo-buses/
 ├── docker/odoo/               # Imagen de Odoo con pywebpush
 ├── docs/
 │   ├── arquitectura/          # Roadmap, planes, requisitos, arquitectura y datos
-│   ├── guias/                 # Chofer, operación, producción, personalización
+│   ├── guias/                 # Chofer, operación, producción, homelab, personalización
 │   ├── diseno/                # Diseño visual y privacidad
 │   ├── calidad/               # Gestión de calidad, defectos, métricas, evidencias
 │   ├── academico/             # Bitácora y guion de defensa
 │   └── capturas/              # Imágenes de este README
 ├── proxy/                     # Caddyfile (HTTPS)
 ├── qa/                        # Suites de calidad, capturas y generadores de documentos
-├── scripts/                   # Despliegue, respaldos, semillas de desarrollo
+├── scripts/                   # Despliegue, respaldos, semillas y datos de demostración
 ├── docker-compose.yml         # Entorno de desarrollo
 ├── docker-compose.prod.yml    # Producción
 ├── .env.example               # Variables de desarrollo
@@ -151,7 +154,7 @@ El índice de la documentación está en `docs/README.md`.
 - Docker y Docker Compose.
 - Node.js 20 para la app de tableta.
 - Python 3 en el equipo para los scripts de `qa/` (Playwright para las capturas).
-- Solo en producción: un servidor Linux con dos dominios (`DOMAIN` y `GPS_DOMAIN`), puertos 80 y 443 abiertos, y una base PostgreSQL (local o Supabase).
+- Solo en producción: un servidor Linux con Docker y dos dominios (`DOMAIN` y `GPS_DOMAIN`). Con IP pública, los puertos 80 y 443 abiertos y una base PostgreSQL (local o Supabase); sin IP pública (el homelab), un túnel de Cloudflare hacia el proxy.
 - Para la tableta: Android con GPS; el APK se compila con EAS Build.
 
 ---
@@ -223,6 +226,7 @@ curl "http://localhost:5055/?id=<identificador>&lat=-1.24&lon=-78.62&speed=10"
 | `sh qa/ejecutar_todo.sh` | Pruebas en vivo y auditoría de calidad |
 | `python -X utf8 qa/generar_docs.py` | Regenera los documentos de `docs/calidad/` |
 | `./scripts/backup.sh` / `./scripts/restore.sh <archivo>` | Respaldo y restauración de las bases |
+| `docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo < scripts/demo_reportes.py` | Agrega 21 días de viajes simulados, multas y quejas para mostrar reportes (no toca datos reales) |
 
 Después de las pruebas de Odoo, borra la base de prueba (`docker compose exec -T db dropdb -U odoo buses_test`): con dos bases, las páginas públicas fallan.
 
@@ -230,7 +234,9 @@ Después de las pruebas de Odoo, borra la base de prueba (`docker compose exec -
 
 ## ☁️ Despliegue
 
-La demo corre en una VM de Azure con `docker-compose.prod.yml`, Caddy como proxy HTTPS y respaldos a una cuenta de almacenamiento privada. La guía completa está en `docs/guias/PRODUCCION.md`.
+La demo corre desde el 21-nov-2026 en un homelab: Docker Compose (basado en `docker-compose.prod.yml`, con Postgres 17 local), Caddy sirviendo HTTP y un túnel de Cloudflare que pone el HTTPS. Un cron del servidor revisa `main` cada 5 minutos, reconstruye los contenedores, actualiza el módulo si cambió `addons/`, comprueba que `/web/login` responda y vuelve al commit anterior si no. **Integrar en `main` equivale a publicar.** Los detalles, los respaldos y la operación están en `docs/guias/DESPLIEGUE-HOMELAB.md`.
+
+Para un servidor con IP pública (el despliegue que se usó antes en una VM de Azure) se usa `docker-compose.prod.yml`; la guía completa está en `docs/guias/PRODUCCION.md`.
 
 ```bash
 cp .env.prod.example .env.prod      # editar DOMAIN, GPS_DOMAIN, ACME_EMAIL y los secretos
@@ -248,7 +254,7 @@ sudo ./scripts/init-prod.sh
 | `POSTGRES_IMAGE`, `ODOO_IMAGE`, `TRACCAR_IMAGE` | Versiones de las imágenes |
 | `BACKUP_KEEP_DAYS` | Días que se guardan los respaldos |
 
-La tableta toma la dirección de Odoo de `EXPO_PUBLIC_ODOO_URL`, definida como variable de entorno en EAS.
+La tableta toma la dirección de Odoo de `EXPO_PUBLIC_ODOO_URL`, definida en los perfiles de `apps/conductor-tablet/eas.json` (hoy `https://buses.madebyjohan.xyz`). En el homelab los secretos (`DB_PASSWORD`, `WEBHOOK_SECRET`, `TRACCAR_DB_PASSWORD`, el token del túnel) viven en archivos `.env` del servidor, fuera del repositorio.
 
 ---
 
@@ -321,7 +327,7 @@ Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versi
 
 ### Calidad
 
-Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida (20-nov): 624 pruebas de Odoo, 622 en verde; las 2 que fallan son de la migración de Grafana y dependen de la base de desarrollo local (DEF-084). 197 de Jest en verde. El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
+Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida (21-nov): 626 pruebas de Odoo en verde con el comando del CI y 197 de Jest en verde; 90 defectos registrados y 89 cerrados (el abierto es DEF-079, un aviso de Android 17). El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
 
 ### Lo que queda por confirmar
 
@@ -344,11 +350,16 @@ La segunda auditoría (17-nov-2026) concluyó que el sistema aún **no está lis
 - [x] Recordatorios de recorridos en la tableta
 - [x] Control de multas con evidencia, kanban y descargo del chofer
 - [x] Multas tratadas como reales en la demostración (sin aviso ni interruptor de demostración)
+- [x] Release `v1.0.0` con el APK y el IPA 1.4.1, y CI en verde
+- [x] Despliegue en un homelab con túnel de Cloudflare y despliegue continuo desde `main`
+- [x] Datos de demostración para los reportes (`scripts/demo_reportes.py`)
+- [x] Corrección del error de zoom al salir del mapa en vivo (DEF-090)
 - [ ] Multas según el reglamento interno de una empresa real (fuera del alcance: el sistema es una demostración)
 - [ ] Fase 46: jornada real con tabletas, Supabase y VM Linux
 - [ ] Revisión del kichwa por una persona hablante
 - [ ] Pruebas de usabilidad con personas
-- [ ] Dominio institucional, correo real y suscripción de Azure definitiva
+- [ ] Respaldo automático y copia fuera del equipo en el homelab
+- [ ] Dominio institucional y correo real
 
 El estado detallado está en `docs/arquitectura/ROADMAP.md`.
 
@@ -359,8 +370,8 @@ El estado detallado está en `docs/arquitectura/ROADMAP.md`.
 | Nombre | Commits |
 |---|---|
 | JoseM151 | 441 |
+| Johan Rodríguez | 267 |
 | kiramman-mp3 | 242 |
-| Johan Rodríguez | 245 |
 
 ---
 
