@@ -97,8 +97,9 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-087 | 21-nov-2026 | Revisión de versiones antes de pasar a main | La versión de la app de tableta no coincidía: package.json decía 1.0.0 y app.json 1.4.0 | apps/conductor-tablet/package.json, package-lock.json | Cerrado |
 | DEF-088 | 21-nov-2026 | Revisión de los documentos antes de pasar a main | El documento de arquitectura decía versión 16.0.1.6.0 y el ROADMAP daba como última etiqueta v1.0.0-rc1 con la app en 1.2.0 | docs/arquitectura/ARQUITECTURA-Y-DATOS.md, docs/arquitectura/ROADMAP.md | Cerrado |
 | DEF-089 | 21-nov-2026 | Retiro del modo demostración de las multas | Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa | models/bus_fine_stats.py, models/bus_fine.py, i18n/*.po | Cerrado |
+| DEF-090 | 21-nov-2026 | Error de JavaScript informado en el sitio publicado | Al salir del mapa en vivo girando la rueda del ratón, el panel mostraba el error «Cannot read properties of undefined (reading «_leaflet_pos») | static/src/js/live_map.js, static/src/js/stop_picker.js | Cerrado |
 
-Resumen: 89 registrados, 88 cerrados (99 %), 1 abiertos. Densidad: 17,7 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 90 registrados, 89 cerrados (99 %), 1 abiertos. Densidad: 17,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -635,6 +636,12 @@ Resumen: 89 registrados, 88 cerrados (99 %), 1 abiertos. Densidad: 17,7 defectos
 - **Causa raíz:** El aviso se había escrito en varios sitios sin una sola fuente: el interruptor fines_real, la ficha, la API y dos textos sueltos.
 - **Categoría:** Lógica
 - **Prueba que lo protege:** TestFineApi y TestFinePanel (sin demo en la API ni aviso en la ficha); TestFinesRealCleanup (migración 16.0.1.11.0); qa/traducciones.py
+
+### DEF-090: Al salir del mapa en vivo girando la rueda del ratón, el panel mostraba el error «Cannot read properties of undefined (reading «_leaflet_pos»)
+
+- **Causa raíz:** Leaflet 1.9.4 retrasa el zoom de la rueda con un temporizador que map.remove() no cancela: al desmontarse la pantalla, el zoom se ejecutaba sobre un mapa sin paneles.
+- **Categoría:** Lógica
+- **Prueba que lo protege:** Se cancela scrollWheelZoom._timer antes de map.remove() en el mapa en vivo y en el selector de paradas; desplegado en el homelab el 21-nov (sin prueba automática: no hay pruebas de navegador para este caso)
 
 ## 3. Qué falta para cerrar los abiertos
 
