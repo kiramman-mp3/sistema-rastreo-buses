@@ -14,6 +14,7 @@ Colección de herramientas automatizadas para la administración del stack, desp
 | [`reset-prod.sh`](reset-prod.sh) | Producción | Reinicio seguro de producción (requiere confirmación y crea backup). | `sudo ./scripts/reset-prod.sh` |
 | [`bootstrap-traccar.sh`](bootstrap-traccar.sh) | Producción / Dev | Configura usuario admin y parámetros API de Traccar de forma automatizada. | `./scripts/bootstrap-traccar.sh` |
 | [`dev_seed.py`](dev_seed.py) | Desarrollo local | Puebla la base de datos con rutas de Ambato, paradas, buses y choferes. | `docker compose exec -T odoo odoo shell < dev_seed.py` |
+| [`demo_reportes.py`](demo_reportes.py) | Desarrollo / Servidor | Agrega ~3 semanas de viajes simulados, multas, choferes y quejas para tener reportes que mostrar. No toca datos reales. | `docker compose exec -T odoo odoo shell -d buses --no-http --db_host db --db_user odoo --db_password odoo < scripts/demo_reportes.py` |
 | [`download-apk.ps1`](download-apk.ps1) | Host local (Win) | Sondea el estado del build de Android en EAS y descarga el APK a `dist-mobile/`. | `powershell -File scripts/download-apk.ps1` |
 
 ---
