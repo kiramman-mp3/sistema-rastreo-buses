@@ -7,6 +7,8 @@ resumen de la brecha está en la sección 1; las fases (R1 a R12) en la sección
 Estados: **[HECHO]** verificado en el código o en la documentación, **[PARCIAL]** existe pero no cubre todo lo que pide el PDF,
 **[FALTA]** no existe.
 
+> **Documento histórico de planificación.** La fase R7 (Grafana incrustado) se retiró el 17-nov-2026 (versión 16.0.1.9.0): los archivos que cita (`15-tablero-grafana.md`, `GRAFANA.md`, `qa/grafana_smoke.py`, `test_grafana_*.py`) ya no existen. El estado vigente de cada actividad y su evidencia está en [`../calidad/19-matriz-de-trazabilidad.md`](../calidad/19-matriz-de-trazabilidad.md).
+
 ## Estado final (2026-11-05)
 
 Las fases R1 a R12 se implementaron en ramas propias, con pruebas, y se integraron a `develop` (versión del módulo 16.0.1.6.0; 544 pruebas de Odoo, 167 de Jest y 19 comprobaciones de Grafana en verde; SonarQube con el Quality Gate aprobado).

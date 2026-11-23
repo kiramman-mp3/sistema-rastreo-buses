@@ -2,6 +2,8 @@
 
 Estado: **[HECHO]** construido y probado, **[HECHO*]** construido pero sin probar en entorno real, **[PENDIENTE]** no iniciado o no presente en el código actual.
 
+> **Documento histórico de planificación.** La fase R7 (Grafana incrustado) se retiró el 17-nov-2026 (versión 16.0.1.9.0): los archivos que cita (`15-tablero-grafana.md`, `GRAFANA.md`, `qa/grafana_smoke.py`, `test_grafana_*.py`) ya no existen. El estado vigente de cada actividad y su evidencia está en [`../calidad/19-matriz-de-trazabilidad.md`](../calidad/19-matriz-de-trazabilidad.md).
+
 > **Proyecto final integrador (rúbrica de Gestión de Calidad del Software):** el plan para cubrir todos sus criterios,
 > con fases, tareas, pruebas y evidencias, está en [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md). Lo que esta página marca como
 > **[PENDIENTE]** y se retoma allí lleva la referencia de la fase (R1 a R12).
@@ -234,8 +236,8 @@ Las doce fases de [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md) están hechas y probadas 
 | R1 a R3 | Horarios, asignación por fecha y hora, recorridos programados, registro de paradas y reglas de incumplimiento | `docs/calidad/02-estandares-y-reglas.md` §1.1 |
 | R4 | Simulador y 12 recorridos de prueba identificados como simulados | `docs/calidad/13-recorridos-de-prueba.md` |
 | R5 | 12 indicadores calculados con SQL | `docs/calidad/14-metricas-de-transporte.md` |
-| R6 | Tablero dentro de Odoo | `docs/calidad/15-tablero-grafana.md` |
-| R7 | Grafana incrustado y vistas SQL de solo lectura | `docs/guias/GRAFANA.md` |
+| R6 | Tablero dentro de Odoo | `docs/calidad/19-matriz-de-trazabilidad.md` (actividad 8; `15-tablero-grafana.md` se borró al retirar Grafana) |
+| R7 | Grafana incrustado y vistas SQL de solo lectura | Retirado el 17-nov-2026 (16.0.1.9.0) |
 | R8 | Integración con Odoo Fleet | `docs/arquitectura/FLEET.md` |
 | R9 | Reporte de demostración por bus y guía de Traccar Client | `docs/guias/DEMO-TRACCAR-CLIENT.md` |
 | R10 | SonarQube | `docs/calidad/16-sonarqube.md` |
