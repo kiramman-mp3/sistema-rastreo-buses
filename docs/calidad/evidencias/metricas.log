@@ -1,11 +1,11 @@
 {
  "cobertura": {
-  "sentencias": 3086,
-  "perdidas": 87,
-  "ramas": 860,
-  "ramas_parciales": 66,
-  "porcentaje": 95.91991890522047,
-  "solo_lineas": 97.18081659105638,
+  "sentencias": 4285,
+  "perdidas": 171,
+  "ramas": 1232,
+  "ramas_parciales": 115,
+  "porcentaje": 94.34475258292551,
+  "solo_lineas": 96.00933488914819,
   "archivos": [
    {
     "archivo": "__init__.py",
@@ -41,27 +41,27 @@
    },
    {
     "archivo": "controllers/driver_api.py",
-    "sentencias": 231,
+    "sentencias": 281,
     "perdidas": 17,
-    "ramas": 84,
+    "ramas": 104,
     "ramas_parciales": 18,
-    "cobertura": 88.88888888888889
+    "cobertura": 90.9090909090909
    },
    {
     "archivo": "controllers/landing.py",
-    "sentencias": 24,
+    "sentencias": 26,
     "perdidas": 3,
     "ramas": 6,
     "ramas_parciales": 0,
-    "cobertura": 83.33333333333333
+    "cobertura": 84.375
    },
    {
     "archivo": "controllers/main.py",
-    "sentencias": 114,
+    "sentencias": 118,
     "perdidas": 0,
-    "ramas": 26,
+    "ramas": 30,
     "ramas_parciales": 2,
-    "cobertura": 98.57142857142857
+    "cobertura": 98.64864864864865
    },
    {
     "archivo": "controllers/portal.py",
@@ -88,6 +88,14 @@
     "cobertura": 81.81818181818181
    },
    {
+    "archivo": "migrations/16.0.1.11.0/post-migrate.py",
+    "sentencias": 2,
+    "perdidas": 0,
+    "ramas": 0,
+    "ramas_parciales": 0,
+    "cobertura": 100.0
+   },
+   {
     "archivo": "migrations/16.0.1.6.0/post-migrate.py",
     "sentencias": 4,
     "perdidas": 0,
@@ -96,8 +104,32 @@
     "cobertura": 100.0
    },
    {
+    "archivo": "migrations/16.0.1.7.0/post-migrate.py",
+    "sentencias": 11,
+    "perdidas": 1,
+    "ramas": 2,
+    "ramas_parciales": 2,
+    "cobertura": 76.92307692307692
+   },
+   {
+    "archivo": "migrations/16.0.1.8.0/post-migrate.py",
+    "sentencias": 9,
+    "perdidas": 0,
+    "ramas": 2,
+    "ramas_parciales": 1,
+    "cobertura": 90.9090909090909
+   },
+   {
+    "archivo": "migrations/16.0.1.9.0/pre-migrate.py",
+    "sentencias": 20,
+    "perdidas": 3,
+    "ramas": 4,
+    "ramas_parciales": 0,
+    "cobertura": 87.5
+   },
+   {
     "archivo": "models/__init__.py",
-    "sentencias": 22,
+    "sentencias": 25,
     "perdidas": 0,
     "ramas": 0,
     "ramas_parciales": 0,
@@ -105,19 +137,27 @@
    },
    {
     "archivo": "models/bus_alert.py",
-    "sentencias": 144,
-    "perdidas": 2,
-    "ramas": 70,
-    "ramas_parciales": 3,
-    "cobertura": 97.66355140186916
+    "sentencias": 207,
+    "perdidas": 6,
+    "ramas": 100,
+    "ramas_parciales": 8,
+    "cobertura": 95.43973941368078
    },
    {
     "archivo": "models/bus_complaint.py",
-    "sentencias": 53,
+    "sentencias": 56,
     "perdidas": 0,
     "ramas": 14,
     "ramas_parciales": 1,
-    "cobertura": 98.50746268656717
+    "cobertura": 98.57142857142857
+   },
+   {
+    "archivo": "models/bus_driver_edit.py",
+    "sentencias": 51,
+    "perdidas": 1,
+    "ramas": 12,
+    "ramas_parciales": 2,
+    "cobertura": 95.23809523809524
    },
    {
     "archivo": "models/bus_driver_token.py",
@@ -125,47 +165,4 @@
     "perdidas": 1,
     "ramas": 8,
     "ramas_parciales": 1,
-    "cobertura": 97.10144927536231
-   },
-   {
-    "archivo": "models/bus_fleet.py",
-    "sentencias": 69,
-    "perdidas": 1,
-    "ramas": 20,
-    "ramas_parciales": 2,
-    "cobertura": 96.62921348314607
-   },
-   {
-    "archivo": "models/bus_grafana.py",
-    "sentencias": 46,
-    "perdidas": 0,
-    "ramas": 4,
-    "ramas_parciales": 0,
-    "cobertura": 100.0
-   },
-   {
-    "archivo": "models/bus_incident.py",
-    "sentencias": 57,
-    "perdidas": 0,
-    "ramas": 14,
-    "ramas_parciales": 1,
-    "cobertura": 98.59154929577464
-   },
-   {
-    "archivo": "models/bus_kpi.py",
-    "sentencias": 182,
-    "perdidas": 0,
-    "ramas": 40,
-    "ramas_parciales": 0,
-    "cobertura": 100.0
-   },
-   {
-    "archivo": "models/bus_kpi_views.py",
-    "sentencias": 20,
-    "perdidas": 0,
-    "ramas": 6,
-    "ramas_parciales": 1,
-    "cobertura": 96.15384615384616
-   },
-   {
-    "archivo": "models
+    "cobert
