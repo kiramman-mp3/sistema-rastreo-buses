@@ -58,7 +58,7 @@ docs/
 │   ├── 14-metricas-de-transporte.md # Los 12 indicadores con fórmula, fuente, umbrales, SQL y resultado (generado del código)
 │   ├── 16-sonarqube.md            # Análisis estático con SonarQube: antes y después, interpretación y evidencia
 │   ├── 17-rendimiento-por-volumen.md # Tiempos de cada pantalla hasta 1 000 000 de posiciones
-│   ├── 18-mejora-continua-pdca.md # Ishikawa, Pareto y cuatro ciclos PDCA de la etapa de la rúbrica
+│   ├── 18-mejora-continua-pdca.md # Ishikawa, Pareto y cinco ciclos PDCA (la etapa de la rúbrica y la revisión de seguridad del 23-nov)
 │   ├── 19-matriz-de-trazabilidad.md # Cada actividad, entregable y criterio con su evidencia
 │   ├── Informe_final_proyecto_rastreo_buses.pdf # Informe final del proyecto con las evidencias actuales
 │   ├── Informe_calidad_rastreo_buses.pdf # Informe de la evaluación del 28-oct-2026 (histórico)
