@@ -8,14 +8,14 @@ Ocho características y sus subcaracterísticas.
 
 | Característica | Subcaracterística | Nivel | Evidencia |
 |---|---|---|---|
-| Adecuación funcional | Completitud funcional | Cumple | Mapa, portal, quejas, push, turnos y app del chofer, **horarios y asignación, recorridos programados, reglas de incumplimiento, 12 indicadores, tablero en Odoo y Grafana y Fleet** (`docs/calidad/19-matriz-de-trazabilidad.md`); el kichwa está sin revisión de una persona hablante |
+| Adecuación funcional | Completitud funcional | Cumple | Mapa, portal, quejas, push, turnos y app del chofer, **horarios y asignación, recorridos programados, reglas de incumplimiento, 12 indicadores, tablero en Odoo con reporte en PDF, multas y Fleet** (`docs/calidad/19-matriz-de-trazabilidad.md`); el kichwa está sin revisión de una persona hablante |
 | | Corrección funcional | Parcial | 544 pruebas de Odoo, 167 de la app y 47 casos en vivo pasan; los 12 recorridos simulados dan lo esperado (12 de 12). La segunda auditoría (17-nov) abrió 12 defectos (DEF-051 a DEF-062), entre ellos pérdida de un SOS en cola, de posiciones al cerrar el turno y una falsa alerta tras cada turno; su corrección está en `docs/arquitectura/PLAN-AUDITORIA-2.md` |
 | | Pertinencia funcional | Parcial | Recorridos automáticos y pasajero sin login, como pidió el cliente; sin validar con personas usuarias |
 | Eficiencia de desempeño | Comportamiento temporal | Cumple | Media de 0,036 s en la auditoría; p95 de cada pantalla menor que 160 ms hasta 100 000 posiciones y 5 000 recorridos y de 704 ms con 1 000 000 y 50 000 (`17-rendimiento-por-volumen.md`); P7 (un bus, 20 hilos) está en el límite de 2 s |
 | | Uso de recursos | No evaluado | No se midió CPU ni memoria |
 | | Capacidad | Cumple | 35 a 40 req/s con 20 hilos en un proceso (se necesitan 10) y el volumen de 30 días (1 000 000 de posiciones) medido; falta probar varios procesos y la concurrencia de varios gestores |
 | Compatibilidad | Coexistencia | Parcial | Convive con otros contenedores (`ODOO_PORT` resolvió el conflicto del puerto 8069) |
-| | Interoperabilidad | Parcial | Traccar 6 por webhook y REST verificado con GPS simulado y con prueba de integración que compara las dos bases (`test_traccar_consistency.py`); Odoo Fleet integrado; Grafana por vistas SQL. Falta la prueba con un celular real y Traccar Client (guía lista) |
+| | Interoperabilidad | Parcial | Traccar 6 por webhook y REST verificado con GPS simulado y con prueba de integración que compara las dos bases (`test_traccar_consistency.py`); Odoo Fleet integrado. Falta la prueba con un celular real y Traccar Client (guía lista) |
 | Usabilidad | Reconocimiento de la adecuación | Parcial | Landing y portal con textos claros; sin prueba con personas |
 | | Capacidad de aprendizaje | Parcial | `docs/guias/GUIA-CHOFER.md`; sin medir |
 | | Operabilidad | Parcial | Panel de Odoo y mapa; portal revisado a 390 px |
@@ -34,8 +34,8 @@ Ocho características y sus subcaracterísticas.
 | Mantenibilidad | Modularidad | Cumple | Un modelo y un controlador por responsabilidad |
 | | Reusabilidad | Parcial | `RateLimiter`, `TtlCache` y `geo` compartidos entre portal y quejas |
 | | Analizabilidad | Parcial | Bitácora y pruebas con nombres descriptivos; flake8 con todas las reglas en el CI y chequeo de traducciones; SonarQube con Quality Gate aprobado y 0 bugs (`16-sonarqube.md`); sin pylint-odoo |
-| | Modificabilidad | Cumple | Umbrales, marca, mapa y retención se cambian en Ajustes; cobertura de 95,9 % en Python (78,4 % en todo el código según SonarQube) protege los cambios |
-| | Capacidad de ser probado | Cumple | 544 + 167 pruebas, 47 casos en vivo, la auditoría y la prueba de humo de Grafana; los límites en memoria exigen reiniciar para medir |
+| | Modificabilidad | Cumple | Umbrales, marca, mapa y retención se cambian en Ajustes; cobertura de 94,3 % en Python al 23-nov (78,4 % en todo el código según SonarQube) protege los cambios |
+| | Capacidad de ser probado | Cumple | 544 + 167 pruebas, 47 casos en vivo y la auditoría; los límites en memoria exigen reiniciar para medir |
 | Portabilidad | Adaptabilidad | Parcial | Configurable por Ajustes e idiomas por diccionario |
 | | Instalabilidad | Parcial | `docker compose up` y `scripts/init-prod.sh`, repetidos desde cero; pero en producción la base local no vuelve a arrancar tras un `down` y `up -d` (DEF-054) y nunca se instaló en un servidor Linux con Let's Encrypt |
 | | Capacidad de reemplazo | No evaluado | |

@@ -70,6 +70,8 @@ lo que se prioriza es probar contra la plataforma de verdad temprano.
 
 ### Ciclo 2: acceso a Grafana (DEF-046)
 
+> Registro histórico: Grafana se retiró el 17-nov-2026 (versión 16.0.1.9.0, DEF-071) y con él `qa/grafana_smoke.py`. El tablero de Odoo y el reporte en PDF cubren la alternativa A del PDF.
+
 | Fase | Qué se hizo |
 |---|---|
 | **Planificar** | Problema: el plan decía token de 5 minutos. Hipótesis: Grafana abre una sesión al primer acceso |
@@ -104,14 +106,29 @@ lo que se prioriza es probar contra la plataforma de verdad temprano.
 | **Verificar** | Peor caso: tablero 704 ms con 50 000 recorridos |
 | **Actuar** | No se agregaron índices (ya cubren las consultas); se vigila S3 en producción |
 
+### Ciclo 5: lo que una sesión de chofer puede llamar por RPC (DEF-091 y DEF-092, 23-nov-2026)
+
+| Fase | Qué se hizo |
+|---|---|
+| **Planificar** | Problema: la revisión de producción encontró que Odoo ejecuta por `/web/dataset/call_kw` cualquier método público sin comprobar permisos. Hipótesis: un chofer (usuario de portal, con contraseña) puede llamar al cliente de Traccar, a los indicadores y a dos asistentes que trabajan como el sistema. Agravante: en el sitio público los choferes de demostración tenían su usuario como contraseña |
+| **Hacer** | Se escribieron primero 13 pruebas que reproducen el ataque por HTTP con la sesión de un chofer (`tests/test_rpc_access.py`). Después, una comprobación de quién llama en el único punto por donde pasa todo pedido a Traccar (`_call`), en los indicadores y en los dos asistentes; y el script de demostración pasó a dar contraseñas aleatorias |
+| **Verificar** | Con el código anterior fallan 8 de las 13 pruebas: el chofer leía los dispositivos con su identificador OsmAnd (la credencial del GPS de cada bus), creaba dispositivos, leía los indicadores, creaba recorridos simulados y borraba una credencial QR. Con la corrección pasan las 13 y la suite completa (639) sigue en verde. El script renovó la contraseña de un chofer que tenía la débil y la vieja dejó de servir |
+| **Actuar** | Regla nueva de revisión: todo método público de un modelo abstracto o que trabaje con `sudo()` sin leer el registro comprueba quién lo llama, con una prueba por RPC. Queda como tarea de operación cambiar las contraseñas de los choferes del homelab (`DESPLIEGUE-HOMELAB.md`) |
+
+| Medida | Antes | Después |
+|---|---|---|
+| Ataques por RPC que funcionan con la sesión de un chofer | 6 de 6 | **0 de 6** |
+| Pruebas de acceso por RPC que fallan | 8 de 13 | **0 de 13** |
+| Choferes de demostración con su usuario como contraseña | 4 de 4 | **0** al volver a correr el script |
+
 ## 5. Lo que cambió en el proceso
 
 | Antes de la etapa | Después |
 |---|---|
 | 38 defectos, 289 pruebas de Odoo, 165 de Jest | **48 defectos (todos cerrados)**, **544 pruebas de Odoo**, **167 de Jest** |
 | Sin análisis estático | SonarQube con informe e interpretación |
-| Pruebas solo en el servidor | Pruebas también en el navegador y contra contenedores reales (Playwright, `qa/grafana_smoke.py`) |
-| Indicadores no definidos formalmente | 12 indicadores con fórmula, consulta y prueba de que los dos tableros coinciden |
+| Pruebas solo en el servidor | Pruebas también en el navegador y contra contenedores reales (Playwright; la prueba de humo de Grafana se retiró con Grafana) |
+| Indicadores no definidos formalmente | 12 indicadores con fórmula, consulta y prueba de que el tablero coincide con las fórmulas |
 | Rendimiento no medido por volumen | Medido hasta 1 000 000 de posiciones |
 
 **Acciones que quedan** (siguiente ciclo): pruebas unitarias del JavaScript del módulo (hoy 0 % de cobertura medida), análisis de dependencias (`npm audit`), una prueba de concurrencia, y la evidencia física con Traccar Client el día de la defensa.

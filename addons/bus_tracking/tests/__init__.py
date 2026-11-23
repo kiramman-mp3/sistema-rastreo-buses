@@ -36,3 +36,4 @@ from . import test_fine_panel
 from . import test_fine_api
 from . import test_fine_stats
 from . import test_migration_fines
+from . import test_rpc_access

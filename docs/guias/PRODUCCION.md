@@ -26,7 +26,7 @@ Los scripts hablan con Supabase desde un contenedor cliente de Postgres (`script
 - `reset-prod.sh` sólo trabaja con la base local; en Supabase las bases se borran desde su consola.
 
 
-- **Local (desarrollo y laboratorio)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db,bi` (o `local-db` sin Grafana) en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
+- **Local (desarrollo y laboratorio)**: deja `DB_HOST` vacío o en `db` en `.env.prod`. Postgres corre en el contenedor `db`, `init-prod.sh` crea las bases y `backup.sh`, `restore.sh` y `reset-prod.sh` funcionan tal cual. El servicio `db` está en el perfil `local-db`: pon `COMPOSE_PROFILES=local-db` en `.env.prod`. Si no, tras un `docker compose down` y `up -d` Postgres no arranca y Odoo y Traccar se quedan sin base (DEF-054).
 - `.env.prod.example` trae los valores de Supabase. Si usas la base local, pon `DB_HOST=db` y quita `TRACCAR_DATABASE_URL`.
 - **Supabase (producción)**: pon `DB_HOST`, `DB_USER` y `DB_PASSWORD` de *Supabase > Connect* (session pooler), y en `TRACCAR_DATABASE_URL`, `TRACCAR_DB_USER` y `TRACCAR_DB_PASSWORD` el mismo host, usuario y contraseña (el ejemplo trae marcadores `TU_PROYECTO`).
 

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import requests
 
 from odoo import _, api, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -35,7 +35,19 @@ class BusTraccarApi(models.AbstractModel):
         return bool(conf['url'] and (conf['token'] or conf['user']))
 
     @api.model
+    def _check_access(self):
+        """Every public method of this model can be called over RPC by anyone with a session, drivers (portal users)
+        included, and an abstract model has no access rights of its own. Traccar holds every position and the
+        OsmAnd identifier of every bus (the only credential a phone needs to report as that bus), so only the system
+        (crons, webhook), managers and the administrators of Settings may reach it."""
+        user = self.env.user
+        if not (self.env.su or user.has_group('bus_tracking.group_bus_manager')
+                or user.has_group('base.group_system')):
+            raise AccessError(_("Only managers can talk to Traccar."))
+
+    @api.model
     def _call(self, verb, path, params=None, json=None, conf=None, anonymous=False):
+        self._check_access()
         conf = conf or self._get_conf()
         if not conf['url']:
             raise UserError(_("Traccar URL is not configured."))
@@ -117,6 +129,7 @@ class BusTraccarApi(models.AbstractModel):
     @api.model
     def _request_token(self, conf):
         """A long-lived API token of the stored user. Traccar answers it as plain text, not JSON."""
+        self._check_access()
         expiration = (datetime.utcnow() + timedelta(days=TOKEN_DAYS)).strftime('%Y-%m-%dT%H:%M:%SZ')
         try:
             resp = requests.post('%s/api/session/token' % conf['url'], data={'expiration': expiration},

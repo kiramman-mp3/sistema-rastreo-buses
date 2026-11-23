@@ -329,7 +329,7 @@ Las migraciones están en `addons/bus_tracking/migrations/<versión>/`. La versi
 
 ### Calidad
 
-Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida (21-nov): 626 pruebas de Odoo en verde con el comando del CI y 197 de Jest en verde; 90 defectos registrados y 89 cerrados (el abierto es DEF-079, un aviso de Android 17). El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
+Política, casos de prueba, resultados, registro de defectos, Pareto, Ishikawa y cumplimiento ISO están en `docs/calidad/` (índice en `docs/calidad/README.md`). Última corrida (23-nov, `qa/ejecutar_todo.py`): 639 pruebas de Odoo y 197 de Jest en verde; 93 defectos registrados y 92 cerrados (el abierto es DEF-079, un aviso de Android 17). Las cifras de cada documento salen de `docs/calidad/evidencias/`. El CI (`.github/workflows/ci.yml`) corre la tableta, gitleaks, el linter y traducciones del módulo y la suite de Odoo contra Postgres.
 
 ### Lo que queda por confirmar
 
@@ -356,6 +356,7 @@ La segunda auditoría (17-nov-2026) concluyó que el sistema aún **no está lis
 - [x] Despliegue en un homelab con túnel de Cloudflare y despliegue continuo desde `main`
 - [x] Datos de demostración para los reportes (`scripts/demo_reportes.py`)
 - [x] Corrección del error de zoom al salir del mapa en vivo (DEF-090)
+- [x] Revisión de seguridad: lo que una sesión de chofer puede llamar por RPC y contraseñas aleatorias para los choferes de demostración (DEF-091 y DEF-092)
 - [ ] Multas según el reglamento interno de una empresa real (fuera del alcance: el sistema es una demostración)
 - [ ] Fase 46: jornada real con tabletas, Supabase y VM Linux
 - [ ] Revisión del kichwa por una persona hablante

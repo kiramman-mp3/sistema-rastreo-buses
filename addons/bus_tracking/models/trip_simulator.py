@@ -10,7 +10,7 @@ never show, and every trip is marked `simulated` with its scenario: they are nev
 from datetime import timedelta
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 
 from .bus_trip import local_to_utc, utc_to_local_date
 from .utils import haversine_m
@@ -325,6 +325,10 @@ class BusTripSimulate(models.TransientModel):
         }
 
     def action_demo_set(self):
+        # Unlike the other buttons it reads nothing from the wizard, which is what would check its access rights:
+        # without this, any session could call it over RPC and fill the database with simulated trips and fines.
+        if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_manager')):
+            raise AccessError(_("Only managers can simulate trips."))
         trips = self.env['bus.trip.simulator'].sudo()._simulate_demo_set()
         if not trips:
             raise UserError(_("No route with the codes L1 to L4 exists: use the simulator on one of your routes."))

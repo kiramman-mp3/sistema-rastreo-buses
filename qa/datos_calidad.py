@@ -6,7 +6,7 @@ so the tables and the figures always agree.
 
 # Categories of the problems found while building (used by the Pareto and the Ishikawa diagram).
 # Date of the run whose evidence is in docs/calidad/evidencias (qa/ejecutar_todo.sh).
-FECHA_EVIDENCIAS = '5-nov-2026'
+FECHA_EVIDENCIAS = '23-nov-2026'
 
 # Failures of the quality evaluation of 2026-10-28, by cause (auditoria.json of that run, plus the
 # suite case of each). They were fixed afterwards; kept here so the first Pareto keeps its data.
@@ -365,6 +365,15 @@ DEFECTOS = [
     ('DEF-090', '21-nov-2026', 'Error de JavaScript informado en el sitio publicado', 'Al salir del mapa en vivo girando la rueda del ratón, el panel mostraba el error «Cannot read properties of undefined (reading «_leaflet_pos»)',
      'static/src/js/live_map.js, static/src/js/stop_picker.js', 'Leaflet 1.9.4 retrasa el zoom de la rueda con un temporizador que map.remove() no cancela: al desmontarse la pantalla, el zoom se ejecutaba sobre un mapa sin paneles.',
      'Lógica', 'Cerrado', 'Se cancela scrollWheelZoom._timer antes de map.remove() en el mapa en vivo y en el selector de paradas; desplegado en el homelab el 21-nov (sin prueba automática: no hay pruebas de navegador para este caso)'),
+    ('DEF-091', '23-nov-2026', 'Revisión de seguridad de lo que se puede llamar por RPC', 'Un chofer (usuario de portal) con sesión web podía llamar por /web/dataset/call_kw al cliente de Traccar (leer todos los dispositivos con su identificador OsmAnd y todas las posiciones, crear dispositivos), leer los indicadores, crear el conjunto de recorridos simulados y borrar la credencial QR que se muestra a un gestor',
+     'models/traccar_api.py, models/bus_kpi.py, models/trip_simulator.py, models/bus_driver_edit.py', 'Odoo ejecuta por RPC cualquier método público sin comprobar permisos: un modelo abstracto no tiene permisos propios y un método que no lee el registro nunca los consulta. Se protegieron los botones de la vista (DEF-011) pero no estos métodos, que trabajan como el sistema o con SQL directo.',
+     'Seguridad', 'Cerrado', 'tests/test_rpc_access.py (13 pruebas; 8 fallaban con el código anterior); el acceso queda para el sistema, los gestores y los administradores de Ajustes'),
+    ('DEF-092', '23-nov-2026', 'Revisión de seguridad del despliegue público', 'Los cuatro choferes de demostración del homelab tenían como contraseña su propio usuario (chofer1 a chofer4) en un sitio público; con DEF-091 bastaba para leer los identificadores de los GPS',
+     'scripts/demo_reportes.py', 'El script de datos de demostración, pensado primero para desarrollo, se reutilizó en el servidor público; la guía pedía cambiar las contraseñas a mano y no se hizo.',
+     'Seguridad', 'Cerrado', 'El script da contraseñas aleatorias, las muestra una vez y cambia la de un chofer que aún tenga su usuario como contraseña; comprobado en una base desechable (la contraseña vieja deja de servir)'),
+    ('DEF-093', '23-nov-2026', 'Revisión de la documentación frente al PDF del proyecto', 'La matriz de trazabilidad, los requisitos y el guion de defensa citaban como evidencia a Grafana (retirado el 17-nov) y archivos que ya no existen (15-tablero-grafana.md, test_grafana_*.py, qa/grafana_smoke.py), y daban cifras viejas (544 pruebas de Odoo y 167 de Jest)',
+     'docs/calidad/*.md, docs/arquitectura/REQUISITOS.md, docs/academico/GUION_DEFENSA.md, README.md', 'Al retirar Grafana se actualizaron el código, el README y las guías de operación, pero no los entregables que lo citaban como evidencia; las cifras se escribían a mano en cada documento.',
+     'Proceso', 'Cerrado', 'Evidencias regeneradas con qa/ejecutar_todo.py el 23-nov; documentos 03, 04, 05 y 07 regenerados; los demás corregidos y sin referencias rotas a archivos retirados'),
 ]
 
 # Ishikawa 1: why bad input reaches the system (DEF-008 to DEF-010).

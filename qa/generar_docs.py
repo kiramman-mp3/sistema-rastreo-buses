@@ -93,9 +93,15 @@ unit_names = {'test_alerts': 'Alertas de velocidad, sin señal y parada larga', 
               'test_quality': 'Auditoría de sincronización, rechazos de posiciones y muestras de rendimiento (R5)',
               'test_dashboard': 'Datos del tablero de Odoo, ruta JSON y permisos (R6)',
               'test_report': 'Reporte de operación en PDF: asistente, cifras, cambio frente al periodo anterior y menús (R6)',
-              'test_grafana_views': 'Grafana: vistas SQL kpi_* (retirado el 17-nov-2026)',
-              'test_grafana_access': 'Grafana: token de acceso (retirado el 17-nov-2026)',
-              'test_grafana_dashboards': 'Grafana: tableros (retirado el 17-nov-2026)',
+              'test_migration_grafana': 'Migración 16.0.1.9.0: retiro de Grafana (vistas, conteos diarios y rol)',
+              'test_migration_fines': 'Migración 16.0.1.11.0: retiro del modo demostración de las multas',
+              'test_fine_states': 'Multas: propuesta, revisión, confirmación, descarte y apelación',
+              'test_fine_detect': 'Multas: detección desde las alertas de los recorridos',
+              'test_fine_panel': 'Multas: tarjeta, ficha, menús y ajustes del panel',
+              'test_fine_stats': 'Multas en el tablero y en el PDF: por estado, chofer, tipo y semana',
+              'test_fine_api': 'Multas en la API de la tableta: listado y apelación del chofer',
+              'test_discuss': 'La app Conversaciones queda oculta',
+              'test_rpc_access': 'Lo que una sesión de chofer puede llamar por RPC: Traccar, indicadores, simulador y credencial (DEF-091)',
               'test_fleet': 'Enlace con Odoo Fleet en los dos sentidos y migración (R8)',
               'test_demo_report': 'Reporte de demostración por bus: acepta, caduca y se detiene (R9)',
               'test_boundaries': 'Caja negra: valores válidos, inválidos y en el límite de reglas, posiciones y periodos (R11)',
@@ -264,7 +270,7 @@ causa_txt = '\n\n'.join('### %s: %s\n\n- **Causa raíz:** %s\n- **Categoría:** 
 write('05-registro-de-defectos.md', '''
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov); DEF-049 y DEF-050 de la actualización en Azure con Fleet (5-nov) y DEF-051 a DEF-062 de la segunda auditoría integral del 17-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA-2.md`, un defecto por hallazgo crítico o medio que es un fallo; su corrección está planificada en las fases 38 a 43). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana (retirado después), Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov); DEF-049 y DEF-050 de la actualización en Azure con Fleet (5-nov) y DEF-051 a DEF-062 de la segunda auditoría integral del 17-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA-2.md`, un defecto por hallazgo crítico o medio que es un fallo; su corrección se hizo en las fases 38 a 43). DEF-063 a DEF-080 salieron de los pedidos del usuario, del retiro de Grafana, del reporte en PDF y del despliegue de v1.0.0-rc1 (17 y 18-nov); DEF-081 a DEF-086 de las multas (20-nov); DEF-087 a DEF-090 de la revisión antes de pasar a `main` y del sitio publicado (21-nov), y DEF-091 a DEF-093 de la revisión de seguridad y de la documentación frente al PDF del proyecto (23-nov). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 

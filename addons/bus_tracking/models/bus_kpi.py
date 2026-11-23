@@ -7,6 +7,7 @@ is static: add a trip, an alert or a position and the figures move.
 from datetime import date, datetime, timedelta
 
 from odoo import _, api, fields, models
+from odoo.exceptions import AccessError
 
 from .bus_trip import utc_to_local_date
 
@@ -240,7 +241,11 @@ class BusKpi(models.AbstractModel):
     def compute(self, date_from=None, date_to=None, route_ids=None, scope='all'):
         """All the indicators for a period (default: the last 30 days), optionally for some routes and for real or
         simulated data only. Returns {'period': ..., 'metrics': [...]} with one dict per indicator."""
-        self.env.flush_all()                     # the queries below read the tables, not the cache
+        # The queries below are raw SQL, which skips the access rights, and this method can be called over RPC by
+        # anyone with a session (drivers too): only the transport team reads the indicators.
+        if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_user')):
+            raise AccessError(_("Only the transport team can read the indicators."))
+        self.env.flush_all()                    # the queries below read the tables, not the cache
         params = self._params(date_from, date_to, route_ids, scope)
         definitions = self._definitions()
         results = {}
