@@ -10,9 +10,11 @@ Es idempotente por día: el simulador salta los días que ya tienen viaje, así 
 días anteriores (DAYS), no duplica los de hoy. Las quejas solo se crean la primera vez.
 """
 import random
+import secrets
 from datetime import timedelta
 
 from odoo import fields
+from odoo.exceptions import AccessDenied
 
 DAYS = 21
 rnd = random.Random(2026)
@@ -68,12 +70,33 @@ for code, name, color, long_stretch, stops in LINES:
     routes[code] = (route, long_stretch)
     Simulator._ensure_plan(route)
 
-drivers = []
+
+def weak_password(user):
+    """Older versions of this script gave each driver its login as password: anyone could sign in with it."""
+    try:
+        user.with_user(user)._check_credentials(user.login, {'interactive': False})
+    except AccessDenied:
+        return False
+    return True
+
+
+# The site is public: each demo driver gets a random password, shown once here and never stored in the repository.
+# A driver an older run left with the login as password gets a new one too.
+drivers, passwords = [], []
 for name, login in DRIVERS:
-    user = Users.search([('login', '=', login)], limit=1) or Users.create({
-        'name': name, 'login': login, 'password': login, 'tz': 'America/Guayaquil', 'lang': 'es_EC',
-        'groups_id': [(6, 0, group_ids)]})
+    user = Users.search([('login', '=', login)], limit=1)
+    if not user:
+        password = secrets.token_urlsafe(12)
+        user = Users.create({
+            'name': name, 'login': login, 'password': password, 'tz': 'America/Guayaquil', 'lang': 'es_EC',
+            'groups_id': [(6, 0, group_ids)]})
+        passwords.append((login, password))
+    elif weak_password(user):
+        password = secrets.token_urlsafe(12)
+        user.password = password
+        passwords.append((login, password))
     drivers.append(user)
+env.cr.commit()
 
 scenarios, weights = zip(*WEIGHTS.items())
 made = 0
@@ -98,3 +121,6 @@ if first_run:
 
 print('demo ok: %d viajes simulados nuevos, %d viajes en total, %d multas, %d quejas' % (
     made, env['bus.trip'].search_count([]), env['bus.fine'].search_count([]), env['bus.complaint'].search_count([])))
+for login, password in passwords:
+    print('chofer %s: contraseña nueva %s (se muestra una sola vez; guárdala en un gestor de contraseñas)' % (
+        login, password))
