@@ -1,11 +1,11 @@
 {
   "resumen": {
-    "fecha": "2026-11-04 21:45:01",
+    "fecha": "2026-11-23 08:07:21",
     "base": "http://localhost:8071",
     "total": 47,
     "pass": 47,
     "fail": 0,
-    "segundos": 125.9159643650055
+    "segundos": 116.42131996154785
   },
   "casos": [
     {
@@ -18,7 +18,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; 1 posición; bus en (-1.2650, -78.6250)",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.0328569000000698
+      "tiempo": 0.022239900000386115
     },
     {
       "id": "F2",
@@ -30,7 +30,7 @@
       "error": "Ninguno",
       "obtenido": "18.52 km/h",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.025057400000150665
+      "tiempo": 0.05412449999994351
     },
     {
       "id": "F3",
@@ -42,7 +42,7 @@
       "error": "Ninguno",
       "obtenido": "1 posición tras 2 envíos",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.05986619999998766
+      "tiempo": 0.05411050000066098
     },
     {
       "id": "F4",
@@ -54,7 +54,7 @@
       "error": "Ninguno",
       "obtenido": "Estado intacto; 2 posiciones guardadas",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.06075369999985014
+      "tiempo": 0.04397049999943192
     },
     {
       "id": "F5",
@@ -66,7 +66,7 @@
       "error": "Ninguno",
       "obtenido": "1 llegada en \"QA Terminal\"",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.07152780000001258
+      "tiempo": 0.09925870000051873
     },
     {
       "id": "F6",
@@ -78,7 +78,7 @@
       "error": "Ninguno",
       "obtenido": "Recorrido \"done\": QA Terminal → QA Campus",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.12984129999995275
+      "tiempo": 0.06902569999965635
     },
     {
       "id": "F7",
@@ -90,7 +90,7 @@
       "error": "Ninguno",
       "obtenido": "Abierta (máx. 74.1 km/h) y cerrada",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.051896299999953044
+      "tiempo": 0.045442400000411
     },
     {
       "id": "F8",
@@ -102,7 +102,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; solo la ruta pública",
       "mensaje": "Página HTML",
-      "tiempo": 0.11789450000014767
+      "tiempo": 0.06681219999973109
     },
     {
       "id": "F9",
@@ -114,7 +114,7 @@
       "error": "Ninguno",
       "obtenido": "7 buses; 8 claves; sin placa",
       "mensaje": "JSON",
-      "tiempo": 0.020485499999949752
+      "tiempo": 0.03727660000004107
     },
     {
       "id": "F10",
@@ -124,9 +124,9 @@
       "esperado": "HTTP 303 a /quejas/gracias?f=Q-…; queja en estado \"new\"",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "303; folio Q-00016; estado new",
+      "obtenido": "303; folio Q-00001; estado new",
       "mensaje": "Redirección a la página de gracias",
-      "tiempo": 0.09716800000001058
+      "tiempo": 0.06841890000032436
     },
     {
       "id": "F11",
@@ -136,9 +136,9 @@
       "esperado": "HTTP 303 con c=0 (no podemos responder)",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "303 → http://localhost:8071/quejas/gracias?f=Q-00017&c=0",
+      "obtenido": "303 → http://localhost:8071/quejas/gracias?f=Q-00002&c=0",
       "mensaje": "Redirección a la página de gracias",
-      "tiempo": 0.08722219999981462
+      "tiempo": 0.05471159999979136
     },
     {
       "id": "F12",
@@ -150,7 +150,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; 1 posición",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.033434900000202106
+      "tiempo": 0.01918500000010681
     },
     {
       "id": "F13",
@@ -162,7 +162,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; token; /me sin id de GPS",
       "mensaje": "JSON",
-      "tiempo": 0.4905569000000014
+      "tiempo": 0.33142670000006547
     },
     {
       "id": "F14",
@@ -174,7 +174,7 @@
       "error": "Ninguno",
       "obtenido": "start/state/incident/end 200; 1 incidente",
       "mensaje": "JSON",
-      "tiempo": 0.7227178999999069
+      "tiempo": 0.5125339999999596
     },
     {
       "id": "E1",
@@ -186,7 +186,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 403",
       "mensaje": "Respuesta vacía",
-      "tiempo": 0.03480370000011135
+      "tiempo": 0.03165820000003805
     },
     {
       "id": "E2",
@@ -198,7 +198,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 403",
       "mensaje": "Respuesta vacía",
-      "tiempo": 0.01679809999995996
+      "tiempo": 0.013509999999769207
     },
     {
       "id": "E3",
@@ -210,7 +210,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400",
       "mensaje": "Respuesta vacía",
-      "tiempo": 0.02718929999991815
+      "tiempo": 0.013954000000012456
     },
     {
       "id": "E4",
@@ -222,7 +222,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 405",
       "mensaje": "Respuesta de método no permitido",
-      "tiempo": 0.02925310000000536
+      "tiempo": 0.026359899999988556
     },
     {
       "id": "E5",
@@ -234,7 +234,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; nada guardado",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.03150690000006762
+      "tiempo": 0.013311300000168558
     },
     {
       "id": "E6",
@@ -246,7 +246,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; nada guardado",
       "mensaje": "Sin cuerpo (200)",
-      "tiempo": 0.016946199999892997
+      "tiempo": 0.015226200000142853
     },
     {
       "id": "E7",
@@ -258,7 +258,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400; 0 guardadas",
       "mensaje": "",
-      "tiempo": 0.030114600000160863
+      "tiempo": 0.030448499999693013
     },
     {
       "id": "E8",
@@ -270,7 +270,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400; 0 guardadas",
       "mensaje": "",
-      "tiempo": 0.03239830000006805
+      "tiempo": 0.01742259999991802
     },
     {
       "id": "E9",
@@ -282,7 +282,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400",
       "mensaje": "",
-      "tiempo": 0.019271699999990233
+      "tiempo": 0.03540670000029422
     },
     {
       "id": "E10",
@@ -294,7 +294,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 404 / 404",
       "mensaje": "Página de no encontrado",
-      "tiempo": 0.053306000000020504
+      "tiempo": 0.04350560000011683
     },
     {
       "id": "E11",
@@ -306,7 +306,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 404 / 404",
       "mensaje": "Página de no encontrado",
-      "tiempo": 0.0626959999999599
+      "tiempo": 0.04702399999996487
     },
     {
       "id": "E12",
@@ -318,7 +318,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400",
       "mensaje": "Escribe entre 10 y 2000 caracteres.",
-      "tiempo": 0.12354430000004868
+      "tiempo": 0.04969770000025164
     },
     {
       "id": "E13",
@@ -330,7 +330,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400",
       "mensaje": "Ese correo no parece válido.",
-      "tiempo": 0.07668020000005527
+      "tiempo": 0.05131120000032752
     },
     {
       "id": "E14",
@@ -342,7 +342,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400",
       "mensaje": "Sesión expirada (CSRF inválido)",
-      "tiempo": 0.038003299999900264
+      "tiempo": 0.017051599999831524
     },
     {
       "id": "E15",
@@ -354,7 +354,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 303; nada guardado",
       "mensaje": "Redirección a gracias sin folio",
-      "tiempo": 0.022876500000165834
+      "tiempo": 0.029628000000229804
     },
     {
       "id": "E16",
@@ -366,7 +366,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400; nada guardado",
       "mensaje": "Revisa tu reporte y pulsa Enviar otra vez",
-      "tiempo": 0.14681629999995494
+      "tiempo": 0.05468939999991562
     },
     {
       "id": "E17",
@@ -378,7 +378,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 400; &lt;script&gt; escapado",
       "mensaje": "Ese correo no parece válido.",
-      "tiempo": 0.12149299999987306
+      "tiempo": 0.05164310000009209
     },
     {
       "id": "E18",
@@ -390,7 +390,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 413",
       "mensaje": "Respuesta vacía",
-      "tiempo": 0.01795880000008765
+      "tiempo": 0.011855099999593222
     },
     {
       "id": "E19",
@@ -402,7 +402,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 200; odoo.http.SessionExpiredException",
       "mensaje": "Session expired",
-      "tiempo": 0.014967100000149003
+      "tiempo": 0.010721700000431156
     },
     {
       "id": "E20",
@@ -414,7 +414,7 @@
       "error": "Ninguno",
       "obtenido": "AccessError",
       "mensaje": "Only managers can receive notifications.",
-      "tiempo": 0.03348679999999149
+      "tiempo": 0.011356799999703071
     },
     {
       "id": "E22",
@@ -426,7 +426,7 @@
       "error": "Ninguno",
       "obtenido": "5 aceptadas y la 6.ª con HTTP 429",
       "mensaje": "Enviaste varios reportes seguidos. Intenta de nuevo más tarde.",
-      "tiempo": 0.43850289999977576
+      "tiempo": 0.19671950000019933
     },
     {
       "id": "P1",
@@ -436,23 +436,23 @@
       "esperado": "Media < 0,5 s y 0 % de error",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "Media 0.0335 s; desv. 0.0100; máx. 0.0545; p95 0.0482",
+      "obtenido": "Media 0.0261 s; desv. 0.0091; máx. 0.0532; p95 0.0407",
       "mensaje": "100 × HTTP 200",
       "stats": {
         "n": 100,
-        "mean": 0.03345720900001425,
-        "min": 0.022040800000013405,
-        "max": 0.05451220000009016,
-        "stdev": 0.009955049248697957,
-        "variance": 9.910300554400176e-05,
-        "cv": 29.754571723821066,
-        "p50": 0.032699200000024575,
-        "p95": 0.048232000000098196,
-        "p99": 0.052049099999976534
+        "mean": 0.0261312659999885,
+        "min": 0.015587399999731133,
+        "max": 0.05324860000018816,
+        "stdev": 0.009051487722819163,
+        "variance": 8.192942999634603e-05,
+        "cv": 34.63853501327929,
+        "p50": 0.022131700000045385,
+        "p95": 0.040708400000312395,
+        "p99": 0.04749949999995806
       },
       "errores": 0,
-      "rps": 29.8877205015136,
-      "tiempo": 3.3457209000014245
+      "rps": 38.26676943589748,
+      "tiempo": 2.61312659999885
     },
     {
       "id": "P2",
@@ -462,23 +462,23 @@
       "esperado": "Media < 1 s y error < 10 %",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "Media 0.4200 s; desv. 0.6180; p95 1.8955; máx. 2.1953; 0 errores; 37.1 req/s",
+      "obtenido": "Media 0.3384 s; desv. 0.5653; p95 1.6729; máx. 2.0757; 0 errores; 47.8 req/s",
       "mensaje": "200 envíos",
       "stats": {
         "n": 200,
-        "mean": 0.41997616149999883,
-        "min": 0.02230949999989207,
-        "max": 2.195261099999925,
-        "stdev": 0.6180105960014245,
-        "variance": 0.3819370967700359,
-        "cv": 147.15373220092306,
-        "p50": 0.059716499999922235,
-        "p95": 1.8955241000001024,
-        "p99": 2.0378659000000425
+        "mean": 0.33836606449999634,
+        "min": 0.015251400000124704,
+        "max": 2.075691100000313,
+        "stdev": 0.5652526343360151,
+        "variance": 0.31951054062380485,
+        "cv": 167.05358298010444,
+        "p50": 0.03392339999982141,
+        "p95": 1.6728879000002053,
+        "p99": 1.9270881000002191
       },
       "errores": 0,
-      "rps": 37.083157497361576,
-      "tiempo": 83.99523229999977
+      "rps": 47.82378580070994,
+      "tiempo": 67.67321289999927
     },
     {
       "id": "P3",
@@ -488,22 +488,22 @@
       "esperado": "Media < 0,5 s y 0 % de error",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "Media 0.0707 s; desv. 0.0241; máx. 0.1837",
+      "obtenido": "Media 0.0372 s; desv. 0.0095; máx. 0.0603",
       "mensaje": "100 × HTTP 200",
       "stats": {
         "n": 100,
-        "mean": 0.07068212899999253,
-        "min": 0.041685099999995145,
-        "max": 0.18367809999995188,
-        "stdev": 0.024083796945474724,
-        "variance": 0.0005800292753108577,
-        "cv": 34.07338925158475,
-        "p50": 0.06413909999992029,
-        "p95": 0.11162880000006226,
-        "p99": 0.14782519999994292
+        "mean": 0.037193934000019906,
+        "min": 0.024179300000014337,
+        "max": 0.060313700000278914,
+        "stdev": 0.009464501382569336,
+        "variance": 8.957678642065686e-05,
+        "cv": 25.44635741560511,
+        "p50": 0.03557100000034552,
+        "p95": 0.053128300000025774,
+        "p99": 0.055742300000019895
       },
       "errores": 0,
-      "tiempo": 7.068212899999253
+      "tiempo": 3.719393400001991
     },
     {
       "id": "P4",
@@ -513,22 +513,22 @@
       "esperado": "Media < 0,5 s y 0 % de error",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "Media 0.0208 s; desv. 0.0074; máx. 0.0359",
+      "obtenido": "Media 0.0175 s; desv. 0.0087; máx. 0.0357",
       "mensaje": "45 × HTTP 200",
       "stats": {
         "n": 45,
-        "mean": 0.020814080000006167,
-        "min": 0.014358100000208651,
-        "max": 0.035943900000120266,
-        "stdev": 0.007423494958559526,
-        "variance": 5.51082773997587e-05,
-        "cv": 35.66573664825602,
-        "p50": 0.016374199999972916,
-        "p95": 0.03241830000001755,
-        "p99": 0.035943900000120266
+        "mean": 0.017510791111170772,
+        "min": 0.010406899999907182,
+        "max": 0.035717400000066846,
+        "stdev": 0.008702866956316214,
+        "variance": 7.573989325934064e-05,
+        "cv": 49.70002155279174,
+        "p50": 0.012612400000307389,
+        "p95": 0.034213399999771354,
+        "p99": 0.035717400000066846
       },
       "errores": 0,
-      "tiempo": 0.9366336000002775
+      "tiempo": 0.7879856000026848
     },
     {
       "id": "P5",
@@ -538,22 +538,22 @@
       "esperado": "Media < 0,5 s y 0 % de error",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "Media 0.0227 s; desv. 0.0078; máx. 0.0414",
+      "obtenido": "Media 0.0193 s; desv. 0.0094; máx. 0.0382",
       "mensaje": "HTTP [200]",
       "stats": {
         "n": 100,
-        "mean": 0.02273746500000243,
-        "min": 0.01662199999987024,
-        "max": 0.041355100000146194,
-        "stdev": 0.007768607822215233,
-        "variance": 6.0351267495383705e-05,
-        "cv": 34.166552085794976,
-        "p50": 0.018345599999975093,
-        "p95": 0.03974019999986922,
-        "p99": 0.04130259999988084
+        "mean": 0.019333618999985445,
+        "min": 0.011062800000217976,
+        "max": 0.038238300000102754,
+        "stdev": 0.009401369163367162,
+        "variance": 8.838574214591096e-05,
+        "cv": 48.62705302806597,
+        "p50": 0.012990700000045763,
+        "p95": 0.03517290000036155,
+        "p99": 0.037074500000017
       },
       "errores": 0,
-      "tiempo": 2.273746500000243
+      "tiempo": 1.9333618999985447
     },
     {
       "id": "P6",
@@ -563,22 +563,22 @@
       "esperado": "1 posición guardada y ningún HTTP 5xx",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "1 guardada; estados [200]; media 0.1763 s; p95 0.1829 s",
+      "obtenido": "1 guardada; estados [200]; media 0.1183 s; p95 0.1327 s",
       "mensaje": "",
       "stats": {
         "n": 20,
-        "mean": 0.1762834999999768,
-        "min": 0.16882799999984854,
-        "max": 0.1893348999999489,
-        "stdev": 0.005187221479838013,
-        "variance": 2.6907266680892862e-05,
-        "cv": 2.9425450934651827,
-        "p50": 0.17575090000013915,
-        "p95": 0.18292929999984153,
-        "p99": 0.1893348999999489
+        "mean": 0.1183423899999525,
+        "min": 0.10643329999993512,
+        "max": 0.13414089999969292,
+        "stdev": 0.008492232005650711,
+        "variance": 7.21180044377983e-05,
+        "cv": 7.175984873766805,
+        "p50": 0.11747300000024552,
+        "p95": 0.13266879999991943,
+        "p99": 0.13414089999969292
       },
       "errores": 0,
-      "tiempo": 3.5256699999995362
+      "tiempo": 2.36684779999905
     },
     {
       "id": "P7",
@@ -588,23 +588,23 @@
       "esperado": "60 guardadas, error < 10 % y p95 < 2 s",
       "estado": "PASS",
       "error": "Ninguno",
-      "obtenido": "60 guardadas; media 0.5990 s; p95 1.8436 s; máx. 2.0956 s; 0 errores",
+      "obtenido": "60 guardadas; media 0.4805 s; p95 1.7149 s; máx. 2.1568 s; 0 errores",
       "mensaje": "",
       "stats": {
         "n": 60,
-        "mean": 0.5990240299999868,
-        "min": 0.02151129999992918,
-        "max": 2.0956493999999566,
-        "stdev": 0.6834526496534296,
-        "variance": 0.4671075243182935,
-        "cv": 114.09436273423698,
-        "p50": 0.21699649999982284,
-        "p95": 1.8435660000000098,
-        "p99": 2.0956493999999566
+        "mean": 0.4804928666666759,
+        "min": 0.01645360000020446,
+        "max": 2.1567902000001595,
+        "stdev": 0.6435596239231327,
+        "variance": 0.414168989544084,
+        "cv": 133.9373939904041,
+        "p50": 0.056029400000170426,
+        "p95": 1.7149303999999574,
+        "p99": 2.1567902000001595
       },
       "errores": 0,
-      "rps": 21.421109996936543,
-      "tiempo": 35.94144179999921
+      "rps": 24.973124755576674,
+      "tiempo": 28.829572000000553
     },
     {
       "id": "U1",
@@ -616,7 +616,7 @@
       "error": "Ninguno",
       "obtenido": "7/7 claros",
       "mensaje": "descripción corta: HTTP 400 claro; correo inválido: HTTP 400 claro; teléfono inválido: HTTP 400 claro; descripción de 2 001 caracteres: HTTP 400 claro; ruta inexistente: HTTP 404 claro; webhook sin secreto: HTTP 403 claro; cuerpo no JSON: HTTP 400 claro",
-      "tiempo": 0.5467949000001227
+      "tiempo": 0.27824120000013863
     },
     {
       "id": "E23",
@@ -628,7 +628,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 401 en ambos",
       "mensaje": "{\"error\": \"invalid_credentials\"}",
-      "tiempo": 0.4732160000000931
+      "tiempo": 0.2642412999998669
     },
     {
       "id": "E24",
@@ -640,7 +640,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 409 no_gps",
       "mensaje": "{\"error\": \"no_gps\"}",
-      "tiempo": 0.49341069999991305
+      "tiempo": 0.29539999999997235
     },
     {
       "id": "E25",
@@ -652,7 +652,7 @@
       "error": "Ninguno",
       "obtenido": "HTTP 409 no_shift",
       "mensaje": "{\"error\": \"no_shift\"}",
-      "tiempo": 0.48776340000017626
+      "tiempo": 0.3352886999996372
     },
     {
       "id": "E21",
@@ -664,7 +664,7 @@
       "error": "Ninguno",
       "obtenido": "70 × 200 en caché; 59 × 404 y luego 429 (Retry-After 30)",
       "mensaje": "",
-      "tiempo": 3.324057199999288
+      "tiempo": 2.7671834999973726
     }
   ]
 }

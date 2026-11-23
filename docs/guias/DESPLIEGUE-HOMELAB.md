@@ -71,7 +71,22 @@ La base del homelab tiene datos reales (una línea, dos buses) y, desde el 21-no
 ssh homelab 'docker exec -i buses-odoo sh -c "odoo shell -d buses --no-http --db_host db --db_user odoo --db_password \"\$PASSWORD\" --log-level=error"' < scripts/demo_reportes.py
 ```
 
-Repetirlo agrega viajes en días anteriores y no duplica los de un día que ya tiene. Los choferes de demostración tienen la contraseña igual a su usuario: **cámbiala o desactívalos** si el sitio va a seguir público.
+Repetirlo agrega viajes en días anteriores y no duplica los de un día que ya tiene. Cada chofer de demostración recibe una contraseña aleatoria que el script muestra **una sola vez** al final (guárdala en un gestor de contraseñas). Hasta el 23-nov-2026 el script les ponía su usuario como contraseña (DEF-092); si encuentra un chofer así, le da una nueva.
+
+Para cambiar solo las contraseñas de los choferes de demostración, sin agregar viajes:
+
+```bash
+ssh homelab 'docker exec -i buses-odoo sh -c "odoo shell -d buses --no-http --db_host db --db_user odoo --db_password \"\$PASSWORD\" --log-level=error"' <<'EOF'
+import secrets
+for user in env['res.users'].search([('login', 'in', ['chofer1', 'chofer2', 'chofer3', 'chofer4'])]):
+    password = secrets.token_urlsafe(12)
+    user.password = password
+    print(user.login, password)
+env.cr.commit()
+EOF
+```
+
+Cambiar la contraseña cierra las sesiones de las tabletas de ese chofer; su credencial QR sigue valiendo.
 
 ## Operación diaria
 
@@ -86,5 +101,7 @@ Repetirlo agrega viajes en días anteriores y no duplica los de un día que ya t
 ## Lo que no está resuelto
 
 - No hay respaldo automático ni copia fuera del equipo.
+- Las contraseñas de los choferes de demostración creados antes del 23-nov-2026 se cambian con el comando de la sección anterior.
+- Los límites de intentos de la API de la tableta y del portal cuentan por dirección IP. Detrás del túnel, Odoo solo ve la IP real si el Caddy del servidor confía en la red de `cloudflared` (`trusted_proxies`); si no, todos los choferes comparten un mismo límite de 10 inicios de sesión por minuto. Revisar el Caddyfile del servidor, que no está en este repositorio.
 - La salida a producción real (fase 46 de [`PLAN-AUDITORIA-2.md`](../arquitectura/PLAN-AUDITORIA-2.md): jornada con tabletas) sigue pendiente; este despliegue es la demostración.
 - El túnel de Cloudflare es un tercero en el camino de los datos: el GPS pasa por su red antes de llegar a Traccar.

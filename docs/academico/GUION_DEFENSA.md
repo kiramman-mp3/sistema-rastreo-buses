@@ -17,19 +17,19 @@ del proyecto; esta parte es la que se ensaya para la rúbrica. Duración sugerid
 | Qué | Cómo |
 |---|---|
 | Servidor arriba y celular con datos móviles | `https://<dominio>` abre; el celular **sin Wi-Fi**; Traccar Client configurado (`docs/guias/DEMO-TRACCAR-CLIENT.md`) |
-| El bus de la demostración | Buses › Fleet › Buses › el bus: dispositivo GPS registrado; botón **Start demo report** pulsado (dura 8 h) |
-| Un recorrido programado para la hora de la defensa | Buses › Fleet › Schedules: horario de la línea con ese bus; o Buses › Operations › Scheduled trips |
-| Los 12 recorridos simulados | Buses › Configuration › Simulate trips › «Create the demo set» (si hace falta); se identifican como simulados |
-| Pantallas abiertas en pestañas | Mapa en vivo · Scheduled trips · Indicators › Odoo dashboard · Indicators › Grafana · `docs/calidad/16-sonarqube.md` |
+| El bus de la demostración | Buses › Flota › Vehículos de la flota › el bus: dispositivo GPS registrado; botón **Iniciar reporte de demostración** pulsado (dura 8 h) |
+| Un recorrido programado para la hora de la defensa | Buses › Flota › Horarios: horario de la línea con ese bus; o Buses › Operación › Recorridos programados |
+| Los 12 recorridos simulados | Buses › Configuración › Simular recorridos › «Crear el conjunto de demostración (12 recorridos)» (si hace falta); se identifican como simulados |
+| Pantallas abiertas en pestañas | Mapa en vivo · Operación › Recorridos programados · Reportes › Tablero · Reportes › Descargar reporte (PDF) · `docs/calidad/16-sonarqube.md` |
 
 ## A.2. Orden de la demostración (≈ 9 min)
 
-1. **Registro del vehículo (1 min).** Buses › Fleet › Buses › el bus: placa, capacidad, ruta, dispositivo Traccar y el botón **Open in Fleet**: *«cada bus tiene su vehículo en Odoo Fleet, con la placa, el chofer y los asientos sincronizados»*.
-2. **Asignación de una ruta (1 min).** Buses › Fleet › Schedules: horario de la línea y botón **Assign a bus** (por fecha y hora); un bus no puede tener dos recorridos a la misma hora.
+1. **Registro del vehículo (1 min).** Buses › Flota › Vehículos de la flota › el bus: placa, capacidad, ruta, dispositivo Traccar y el botón **Abrir en Fleet**: *«cada bus tiene su vehículo en Odoo Fleet, con la placa, el chofer y los asientos sincronizados»*.
+2. **Asignación de una ruta (1 min).** Buses › Flota › Horarios: horario de la línea y botón **Asignar un bus** (por fecha y hora); un bus no puede tener dos recorridos a la misma hora.
 3. **Consulta de posiciones (1 min).** Mapa en vivo con el celular moviéndose por datos móviles; en el celular, Traccar Client con la dirección `https://gps.<dominio>` y 5 s de intervalo.
-4. **Caso de CUMPLIMIENTO (2 min).** El recorrido del celular o, si no hay tiempo físico, el recorrido simulado «L1 Puntual» (Scheduled trips): paradas **a tiempo**, retraso 0, distancia recorrida ≈ estimada, sin alertas. Se abre el recorrido y se leen las paradas con hora planificada y real.
+4. **Caso de CUMPLIMIENTO (2 min).** El recorrido del celular o, si no hay tiempo físico, el recorrido simulado «L1 Puntual» (Recorridos programados): paradas **a tiempo**, retraso 0, distancia recorrida ≈ estimada, sin alertas. Se abre el recorrido y se leen las paradas con hora planificada y real.
 5. **Caso de INCUMPLIMIENTO (2 min).** El recorrido simulado «L2 Con retraso» (4 paradas tarde, 12 min al final, alerta de llegada tarde) y «L3 Se detuvo antes de la última parada» (parada omitida, recorrido incompleto), con sus alertas.
-6. **Historial e indicadores (2 min).** Indicators › Odoo dashboard: los 12 indicadores, comparación con el periodo anterior, pestañas Lines, Punctuality, Trips, Incidents; pestaña **Formulas** para mostrar la consulta SQL de una cifra. Un vistazo a Grafana.
+6. **Historial e indicadores (2 min).** Reportes › Tablero: los 12 indicadores, comparación con el periodo anterior, pestañas Líneas, Puntualidad, Recorridos, Incidencias y Multas; pestaña **Fórmulas** para mostrar la consulta SQL de una cifra. Cerrar con Reportes › Descargar reporte: el mismo periodo en PDF.
 
 > Si el celular falla el día de la defensa, los recorridos simulados (identificados como tales) cubren los dos casos y la cadena real queda demostrada con las capturas de la lista de evidencias de `DEMO-TRACCAR-CLIENT.md` §5.
 
@@ -44,36 +44,36 @@ Fuente: `docs/calidad/02-estandares-y-reglas.md` §1.1 (reglas R17 a R24) y las 
 | Pregunta | Pantalla o consulta | Qué decir |
 |---|---|---|
 | ¿Dónde se encuentra actualmente el vehículo? | Mapa en vivo de Odoo y portal del pasajero | La última posición válida y su hora; el bus conectado se ve en verde |
-| ¿Qué ruta está realizando? | Recorrido programado (Scheduled trips) y cabecera del turno en la tableta | El horario asigna ruta y bus por fecha y hora |
+| ¿Qué ruta está realizando? | Recorrido programado (Operación › Recorridos programados) y cabecera del turno en la tableta | El horario asigna ruta y bus por fecha y hora |
 | ¿Qué paradas ha visitado? | Líneas del recorrido abierto (hora planificada y real por parada); tira de paradas de la tableta | Cada parada tiene estado: a tiempo, tarde, adelantada u omitida |
 | ¿Está cumpliendo los horarios establecidos? | Puntualidad (T2) y paradas del recorrido | Porcentaje de llegadas dentro de la tolerancia |
-| ¿Cuánto tiempo de retraso ha acumulado? | «Delay at the end» del recorrido y retraso promedio (T3) | El retraso que el recorrido fue acumulando hasta su última parada |
-| ¿Se ha desviado de su ruta? | Alerta de desvío y desviación media (T5); trazado en Grafana › Recorridos | Distancia de las posiciones al trazado; más de 150 m es salirse |
-| ¿Cuántos recorridos ha realizado? | Pestaña Trips del tablero y «Recorridos por día» | Hechos e incompletos por día y por línea |
+| ¿Cuánto tiempo de retraso ha acumulado? | «Retraso al final» del recorrido y retraso promedio (T3) | El retraso que el recorrido fue acumulando hasta su última parada |
+| ¿Se ha desviado de su ruta? | Alerta de desvío (Notificaciones › Desvíos de ruta) y desviación media (T5); el recorrido guarda la desviación media y máxima y el % de posiciones dentro del corredor | Distancia de las posiciones al trazado; más de 150 m es salirse |
+| ¿Cuántos recorridos ha realizado? | Pestaña Recorridos del tablero y «Recorridos por día» | Hechos e incompletos por día y por línea |
 | ¿Qué porcentaje de recorridos se ha cumplido correctamente? | Cumplimiento de ruta (T1) | Recorridos que llegaron a todas las paradas entre los cerrados |
-| ¿Cuáles son las incidencias más frecuentes? | Pestaña Incidents (Pareto) y Grafana › Incidencias | Pocos tipos explican la mayoría; en los datos de prueba, sin señal y llegada tarde |
-| ¿Qué tan confiable es el sistema implementado? | System quality: S1 a S4 y `docs/calidad/17-rendimiento-por-volumen.md` | Integridad de posiciones, exactitud de la sincronización, tiempo de respuesta (p95 menor que 2 s hasta 1 000 000 de posiciones) y detección correcta (12 de 12) |
-| ¿Qué mejoras se realizaron para incrementar la calidad? | `docs/calidad/18-mejora-continua-pdca.md` y `16-sonarqube.md` | 16 bugs y 12 vulnerabilidades de SonarQube a 0; 50 defectos cerrados y 12 abiertos con plan (`PLAN-AUDITORIA-2.md`); 544 + 167 pruebas |
+| ¿Cuáles son las incidencias más frecuentes? | Pestaña Incidencias del tablero (Pareto) y el reporte en PDF | Pocos tipos explican la mayoría; en los datos de prueba, sin señal y llegada tarde |
+| ¿Qué tan confiable es el sistema implementado? | Pestaña Calidad del sistema: S1 a S4 y `docs/calidad/17-rendimiento-por-volumen.md` | Integridad de posiciones, exactitud de la sincronización, tiempo de respuesta (p95 menor que 2 s hasta 1 000 000 de posiciones) y detección correcta (12 de 12) |
+| ¿Qué mejoras se realizaron para incrementar la calidad? | `docs/calidad/18-mejora-continua-pdca.md` y `16-sonarqube.md` | 16 bugs y 12 vulnerabilidades de SonarQube a 0; 93 defectos registrados y 92 cerrados con su prueba (el abierto, DEF-079, es un aviso de Android 17); 639 + 197 pruebas |
 
 ## A.5. Calidad, diseño y mejoras (≈ 4 min)
 
-- **Diseño** (`docs/arquitectura/ARQUITECTURA-Y-DATOS.md`): Traccar reenvía a Odoo; Odoo evalúa recorridos y reglas y calcula indicadores con SQL; dos tableros. *«El indicador es una consulta que se puede ejecutar: no hay números escritos a mano.»*
+- **Diseño** (`docs/arquitectura/ARQUITECTURA-Y-DATOS.md`): Traccar reenvía a Odoo; Odoo evalúa recorridos y reglas y calcula indicadores con SQL; un tablero y un reporte en PDF. *«El indicador es una consulta que se puede ejecutar: no hay números escritos a mano.»*
 - **Pruebas** (`docs/calidad/03-plan-y-casos-de-prueba.md`, `19-matriz-de-trazabilidad.md`): caja negra y blanca, integración Traccar–Odoo con la auditoría de sincronización, rendimiento por volumen.
-- **Calidad** (`docs/calidad/16-sonarqube.md`): Quality Gate aprobado, 0 bugs, 0 vulnerabilidades abiertas, cobertura 78,4 %; **límites**: el JavaScript del módulo no tiene pruebas unitarias y Community no analiza inyecciones ni dependencias.
-- **Mejora continua** (`18-mejora-continua-pdca.md`): Ishikawa, Pareto y cuatro ciclos PDCA con comparación antes y después.
+- **Calidad** (`docs/calidad/16-sonarqube.md`): Quality Gate aprobado, 0 bugs, 0 vulnerabilidades abiertas, cobertura 78,4 % en SonarQube (5-nov) y 94,3 % de Python con `coverage.py` (23-nov); **límites**: el JavaScript del módulo no tiene pruebas unitarias y Community no analiza inyecciones ni dependencias.
+- **Mejora continua** (`18-mejora-continua-pdca.md`): Ishikawa, Pareto y cinco ciclos PDCA con comparación antes y después.
 
 ## A.6. Ensayo
 
-Un ensayo completo consta de: **(1)** la preparación de A.1; **(2)** la demostración de A.2 con un caso de cumplimiento y uno de incumplimiento; **(3)** responder las 11 preguntas de A.4 sin mirar la tabla; **(4)** abrir la pestaña Formulas y explicar de dónde sale una cifra.
+Un ensayo completo consta de: **(1)** la preparación de A.1; **(2)** la demostración de A.2 con un caso de cumplimiento y uno de incumplimiento; **(3)** responder las 11 preguntas de A.4 sin mirar la tabla; **(4)** abrir la pestaña Fórmulas y explicar de dónde sale una cifra.
 Registrar en `docs/academico/BITACORA.md` la fecha del ensayo, lo que falló y lo que se corrigió. **Pendiente: el ensayo con celular real.**
 
 ## A.7. Preguntas difíciles de esta parte
 
 | Pregunta | Respuesta |
 |---|---|
-| ¿Por qué Grafana si el PDF dice Power BI? | El tablero obligatorio es el de Odoo (alternativa A del PDF, completo). Grafana es un complemento gratuito y liviano, con los tableros como código; si no valiera, el de Odoo cubre el criterio por sí solo |
+| ¿Por qué no Power BI? | El PDF ofrece dos alternativas y se eligió la A: el tablero dentro de Odoo, con la consulta de cada cifra a la vista. Grafana se usó como complemento y se retiró el 17-nov-2026 para no mantener dos tableros con las mismas cifras; lo reemplazó el reporte en PDF |
 | ¿Los datos son reales? | Los recorridos de prueba son **simulados e identificados** (`simulated`), lo que el PDF permite; las posiciones de la demostración física son reales. Nunca se mezclan en silencio: el tablero tiene filtro «Real / Simulated / Both» |
-| ¿Cómo sé que una cifra no es estática? | Pestaña Formulas: la consulta de cada indicador; agregar un recorrido o una alerta y volver a consultar |
+| ¿Cómo sé que una cifra no es estática? | Pestaña Fórmulas: la consulta de cada indicador; agregar un recorrido o una alerta y volver a consultar |
 | ¿Qué pasa si Traccar pierde una posición? | La auditoría diaria la detecta (S2 baja) y la consulta periódica de Odoo recupera la última; hay una prueba de integración de eso |
 | ¿Qué no está bien todavía? | El JavaScript del módulo sin pruebas unitarias (0 % medido), kichwa sin revisión de una persona hablante, concurrencia sin medir, y la evidencia física con Traccar Client se completa con el celular |
 
@@ -183,21 +183,23 @@ Puntos a destacar:
 
 | Qué | Cantidad | Resultado |
 |---|---|---|
-| Pruebas automatizadas de Odoo | 250 | 0 fallos |
-| Pruebas de la app de tableta | 72 | 0 fallos |
+| Pruebas automatizadas de Odoo | 639 | 0 fallos |
+| Pruebas de la app de tableta (Jest) | 197 | 0 fallos |
 | Suite en vivo (14 funcionales, 25 de error, 7 de rendimiento, 1 de usabilidad) | 47 | 0 fallos |
 | Auditoría aleatoria con semilla fija | 1.000 peticiones | 0 fallos |
-| Cobertura de código (sentencias y ramas) | 1.853 sentencias | **92,8 %** |
+| Cobertura de Python (sentencias y ramas) | 4.285 sentencias | **94,3 %** |
+| Cobertura de la tableta (sentencias) | 916 sentencias | 89,2 % |
 
-Cifras de la corrida del 2-nov-2026 (`qa/ejecutar_todo.sh`). La evaluación del 28-oct había dado 3 fallos en la suite y 57 en la auditoría, todos del webhook, ya corregidos.
+Cifras de la corrida del 23-nov-2026 (`qa/ejecutar_todo.py`). La evaluación del 28-oct había dado 3 fallos en la suite y 57 en la auditoría, todos del webhook, ya corregidos.
 
 **Rendimiento** (servidor de un solo proceso):
 
-- Uso normal: **0,044 s** en promedio por petición.
-- Con 20 hilos simultáneos: p95 de 1,9 s y **40 peticiones por segundo**. Para 100 buses reportando cada 10 segundos se necesitan 10, es decir casi cuatro veces el margen.
+- Uso normal: **0,030 s** en promedio por petición.
+- Con 20 hilos simultáneos: p95 de 1,7 s y **47,8 peticiones por segundo**. Para 100 buses reportando cada 10 segundos se necesitan 10: casi cinco veces el margen.
 - **Integridad concurrente:** 20 envíos idénticos a la vez guardan 1; 60 de 60 envíos de un mismo bus se guardan.
+- **Volumen:** el tablero responde en 704 ms con 50 000 recorridos (`17-rendimiento-por-volumen.md`).
 
-**Cuadro de mando:** de 12 metas, 8 se cumplen. Las 4 que no se cumplen son: respuestas 5xx (27), posiciones con datos imposibles (33), defectos cerrados (70 % contra la meta de 90 %) y cobertura de rutas HTTP (84,2 % contra 100 %: faltan `/bus_tracking/track`, `/bus_tracking/stop/load` y `/bus_tracking/stop/save`). Las tres primeras vienen de los defectos de la siguiente sección.
+**Cuadro de mando:** se cumplen las 12 metas (`04-resultados-y-metricas.md`). El 28-oct se cumplían 8: las que fallaban (respuestas 5xx, posiciones imposibles, defectos cerrados y rutas HTTP sin probar) se cerraron con los defectos DEF-008 a DEF-010 y con pruebas nuevas.
 
 *"Además hicimos análisis de causa: tres diagramas de Pareto y dos de Ishikawa con los cinco porqués, y una lluvia de ideas de 94 ideas categorizadas."*
 
@@ -220,41 +222,42 @@ Cifras de la corrida del 2-nov-2026 (`qa/ejecutar_todo.sh`). La evaluación del 
 
 ## 8. Defectos abiertos y limitaciones (1 min 30 s)
 
-*"Hay 26 defectos registrados. Los 10 primeros salieron de la construcción y de la evaluación del 28 de octubre, y están cerrados. Los otros 16 los encontró la auditoría integral del 2 de noviembre: 15 ya están corregidos con su prueba, y queda uno abierto."*
+*"Hay 93 defectos registrados, cada uno con su causa raíz y la prueba que lo protege. 92 están cerrados. El abierto, DEF-079, es un aviso de Android 17 en una librería de Expo que no detiene el GPS."*
 
-| Defecto | Qué pasa | Estado |
+| Defectos | De dónde salieron | Estado |
 |---|---|---|
-| DEF-008 a DEF-010 | Posiciones imposibles y HTTP 500 en el webhook | Cerrados (validación en `_apply_position` y pruebas E7 a E9 en la suite) |
-| DEF-011, DEF-012, DEF-015, DEF-016 | Credencial QR de chofer: permisos sólo en la vista, enlace en claro, credencial usada como sesión, choferes con acceso al panel | Cerrados |
-| DEF-017, DEF-024, DEF-025 | GPS de un bus sin turno: Odoo lo guardaba y la tableta no se apagaba al cerrar el turno ni sin señal | Cerrados |
-| DEF-013 | Contraseña de producción en el historial público | **Abierto**: historial ya limpio en local, falta subirlo y cambiar la contraseña |
+| DEF-008 a DEF-010 | Evaluación del 28-oct: posiciones imposibles y HTTP 500 en el webhook | Cerrados |
+| DEF-011 a DEF-026 | Primera auditoría (2-nov): credencial QR, choferes con acceso al panel, GPS de un bus sin turno | Cerrados |
+| DEF-051 a DEF-062 | Segunda auditoría (17-nov): XSS en el portal, colas de la tableta, permisos de choferes | Cerrados |
+| DEF-091 y DEF-092 | Revisión de seguridad (23-nov): un chofer podía llamar por RPC al cliente de Traccar y a los indicadores; los choferes de demostración tenían su usuario como contraseña | Cerrados (13 pruebas nuevas; 8 fallaban antes) |
+| DEF-079 | Aviso de Android 17 en `expo-task-manager` | **Abierto** (no afecta el envío del GPS) |
 
-- **Causa raíz común de la auditoría:** reglas que se cumplían sólo en un lado: el botón oculto en la vista pero el método abierto, el turno controlado en la tableta pero no en el servidor. Ahora cada regla se comprueba en el servidor y tiene su prueba.
-- **Impacto medido antes de corregir:** la tableta mostraba "sin próxima parada" desde la segunda vuelta, unos 10 pasajeros en la misma Wi-Fi recibían "demasiadas consultas", y webhook y cron a la vez daban HTTP 500.
+- **Causa raíz que se repite:** reglas que se cumplían sólo en un lado: el botón oculto en la vista pero el método abierto. La primera auditoría lo encontró en la credencial QR y la revisión del 23-nov en los métodos que Odoo deja llamar por RPC. Ahora cada regla se comprueba en el servidor y tiene una prueba que llama como un chofer.
+- **Mejora continua:** cinco ciclos PDCA con antes y después (`18-mejora-continua-pdca.md`).
 
 **Limitaciones que hay que decir en voz alta:**
 
-- El GPS se **simuló con peticiones HTTP**; no se ha hecho un turno completo con un celular real.
-- El push se probó en cifrado, firma y endpoints, pero no entregado a un navegador real.
-- El CI corre flake8 con todas las reglas, el lint de la tableta y la suite de Odoo; no hay SonarQube ni pylint-odoo.
-- La demostración está desplegada con dominio público (`buses.madebyjohan.xyz`) en un homelab, no en un servidor de producción: no hay respaldo automático ni copia fuera del equipo, y la jornada real con tabletas (fase 46) sigue pendiente.
+- No se ha hecho una jornada real con tabletas (fase 46): el GPS se probó con un celular, con el emulador y simulado por HTTP.
+- El JavaScript del módulo (mapa y tablero) no tiene pruebas unitarias.
+- SonarQube se corrió a mano el 5-nov; el CI corre flake8, ESLint, `tsc`, Jest, gitleaks y la suite de Odoo.
+- La demostración está desplegada con dominio público (`buses.madebyjohan.xyz`) en un homelab, no en un servidor de producción: no hay respaldo automático ni copia fuera del equipo.
 - El kichwa es un borrador sin revisión de una persona hablante.
 - No hay QA independiente: quien desarrolla también probó.
 
-**Decisión del informe:** *"Es apto para un piloto controlado con personal de la universidad. La producción abierta espera a cerrar DEF-013 y a probar un turno completo con tableta y Traccar reales."*
+**Decisión del informe:** *"No está listo para producción general: falta la jornada real con tabletas. Sí está listo como demostración pública y para un piloto controlado con personal de la universidad."*
 
 ---
 
 ## 9. Cierre (1 min)
 
-*"Para resumir: el sistema resuelve el problema que pidió el cliente: el pasajero ve los buses y reporta quejas sin login, y la administración recibe alertas. Está medido, no solo afirmado: 250 pruebas de Odoo y 72 de la tableta sin fallos, 1.000 peticiones aleatorias sin un error, 92,8 % de cobertura y 0,044 segundos de respuesta media. Y está documentado con honestidad: sabemos qué falla, por qué falla y cómo se arregla."*
+*"Para resumir: el sistema resuelve el problema que pidió el cliente: el pasajero ve los buses y reporta quejas sin login, la administración recibe alertas y evalúa cada recorrido con reglas explícitas, y 12 indicadores salen de consultas que se pueden comprobar. Está medido, no solo afirmado: 639 pruebas de Odoo y 197 de la tableta sin fallos, 1.000 peticiones aleatorias sin un error, 94,3 % de cobertura de Python y 0,03 segundos de respuesta media. Y está documentado con honestidad: sabemos qué falla, por qué falla y cómo se arregla."*
 
 **Próximos pasos, en orden:**
 
-1. Cerrar DEF-013: subir el historial limpio y cambiar la contraseña del admin.
-2. Probar un turno completo de dos vueltas con tableta y Traccar reales, con corte de red y SOS sin señal.
-3. Repetir la suite en vivo, la auditoría y la carga con el código nuevo y varios procesos.
-4. Sumar SonarQube o pylint-odoo y una revisión de secretos al CI.
+1. Jornada real con tabletas (fase 46), con corte de red y SOS sin señal.
+2. Respaldo automático con copia fuera del equipo en el homelab.
+3. Pruebas unitarias del JavaScript del módulo.
+4. Volver a correr SonarQube con el código actual.
 5. Revisar el kichwa con una persona hablante.
 
 *"Gracias. Quedamos atentos a sus preguntas."*
@@ -263,11 +266,11 @@ Cifras de la corrida del 2-nov-2026 (`qa/ejecutar_todo.sh`). La evaluación del 
 
 ## Preguntas difíciles y respuestas
 
-**1. ¿Por qué lo dan por bueno si hay defectos abiertos?**
-No lo damos por bueno para producción abierta; lo damos por apto para un piloto controlado. Los defectos están registrados con causa raíz y arreglo, y nuestra propia política (regla 4) dice que bloquean las funciones nuevas hasta cerrarse.
+**1. ¿Por qué lo dan por bueno si hay un defecto abierto?**
+No lo damos por bueno para producción abierta; lo damos por apto para un piloto controlado. El abierto (DEF-079) es un aviso de Android 17 en una librería de terceros que no detiene el GPS; está registrado con su causa y su plan.
 
-**2. ¿Por qué no los corrigieron antes de la defensa?**
-La evaluación de calidad era precisamente para encontrarlos y documentarlos con evidencia. Corregirlos y volver a ejecutar toda la tubería (`qa/ejecutar_todo.sh`) es el siguiente paso. *(Si ya los corrigieron antes de la defensa, cambiar esta respuesta y las cifras.)*
+**2. ¿Cómo saben que una corrección no rompió otra cosa?**
+Cada corrección deja una prueba de regresión (regla 5) y la suite completa corre en el CI. Después de la última corrección (DEF-091) se volvió a ejecutar toda la tubería (`qa/ejecutar_todo.py`) y se regeneraron los documentos de resultados desde las evidencias.
 
 **3. ¿Cómo saben que el sistema funciona si nunca lo probaron con un celular real?**
 Se probó el camino completo con un GPS simulado que usa el mismo protocolo (OsmAnd, puerto 5055) que usa la app. Eso valida Traccar, el webhook, Odoo y el mapa. No valida batería, segundo plano ni pantalla apagada, y por eso es el criterio pendiente de la fase 9.
@@ -279,12 +282,12 @@ Fue decisión del cliente por costo. El plan registra las advertencias: Android 
 Privacidad por diseño: el pasajero solo ve nombre, posición, rumbo y estado del bus; el contacto de una queja es opcional, solo lo ven los administradores y se borra a los 90 días de resuelta; el identificador del GPS solo lo ven los administradores. Falta el consentimiento escrito de los choferes y la revisión legal del aviso (la hace la universidad).
 
 **6. ¿Soportará 100 buses?**
-Se necesitan 10 peticiones por segundo y se midieron 39 con un solo proceso y 20 hilos, sin errores. Falta repetirlo con varios procesos y con el volumen de 30 días (unos 10,8 millones de posiciones, cerca de 3 GB). El volumen del plan es una estimación, no una medida.
+Se necesitan 10 peticiones por segundo y se midieron 47,8 con un solo proceso y 20 hilos, sin errores. Falta repetirlo con varios procesos y con el volumen de 30 días (unos 10,8 millones de posiciones, cerca de 3 GB). El volumen del plan es una estimación, no una medida.
 
 **7. ¿Por qué Odoo para algo que parece una app de mapas?**
 Porque trae usuarios, permisos, panel, tareas programadas y traducciones. Eso dejó el tiempo para lo que aporta valor: ingesta, alertas, portal y quejas.
 
-**8. ¿Qué es la cobertura de 93,8 % y por qué confiar en ella?**
+**8. ¿Qué es la cobertura de 94,3 % y por qué confiar en ella?**
 Es el porcentaje de sentencias y ramas del código que ejecutan las pruebas, medido con coverage.py. No garantiza que no haya errores, y lo demuestra DEF-008 a DEF-010: estaban en código cubierto, porque faltaban datos inválidos en las pruebas. Por eso añadimos la auditoría aleatoria.
 
 **9. ¿El CMMI nivel 2 está certificado?**
@@ -297,13 +300,13 @@ Claude Code ayudó a escribir y probar el código y la documentación; las decis
 Por pedido del cliente se priorizó lo que se pudiera defender y probar. Quedó fuera lo que dependía de datos o decisiones que aún no hay: roster oficial, trazados por calle, correo y puntualidad.
 
 **12. ¿Cómo evitan que alguien falsifique posiciones?**
-El webhook exige un secreto en cabecera y lo compara en tiempo constante; en producción el proxy lo bloquea desde fuera y el tráfico del celular va por HTTPS. El punto débil es que el identificador del dispositivo es la única credencial del GPS; está en la lista de mejoras.
+El webhook exige un secreto en cabecera y lo compara en tiempo constante; en producción el proxy lo bloquea desde fuera y el tráfico del celular va por HTTPS. El punto débil es que el identificador del dispositivo es la única credencial del GPS: solo lo ven los gestores, y desde DEF-091 un chofer ya no puede leerlo por RPC. Está en la lista de mejoras.
 
 **13. ¿Y si cae el webhook o Traccar?**
 Un cron consulta `/api/positions` cada minuto como respaldo, y hay una prueba que comprueba que sobrevive a errores de Traccar. Además `/bus_tracking/health` responde 503 si no llegan posiciones. Falta conectar un servicio externo que avise.
 
 **14. ¿Se puede recuperar tras un desastre?**
-Hay respaldos de Odoo, Traccar y el filestore con checksums y retención, y se probó la restauración en una base paralela y una restauración completa. Falta copiar los respaldos fuera del servidor.
+Hay respaldos de Odoo, Traccar y el filestore con checksums y retención, y se probó la restauración en una base paralela y una restauración completa. Falta copiar los respaldos fuera del servidor, y en el homelab de la demostración aún no hay respaldo automático.
 
 **15. ¿Cuánto costaría tenerlo en Azure?**
 No hay un cálculo en el proyecto. El plan recomienda una máquina virtual de 2 vCPU y 4 a 8 GB, suficiente para 100 buses o menos, pero no se probó contra una suscripción real. No dar una cifra sin calcularla antes.
@@ -315,21 +318,22 @@ No hay un cálculo en el proyecto. El plan recomienda una máquina virtual de 2 
 | Dato | Valor |
 |---|---|
 | Servicios de bus / líneas públicas | 11 / 4 (Troncal, Izamba, Pelileo, Píllaro) |
-| Pruebas de Odoo / tableta | 250 / 72, 0 fallos (2-nov) |
+| Pruebas de Odoo / tableta | 639 / 197, 0 fallos (23-nov) |
 | Suite en vivo | 47 casos, 0 fallos (28-oct: 42 casos, 3 fallos) |
 | Auditoría aleatoria | 1.000 peticiones, 0 fallos (28-oct: 57) |
-| Fallos totales | 0 de 1.297 (28-oct: 60 de 1.192, todos del webhook) |
-| Cobertura | 92,8 % |
-| Tiempo medio | 0,044 s |
-| Capacidad medida / necesaria | 40 req/s / 10 req/s |
-| Defectos | 26 registrados, 25 cerrados, 1 abierto (DEF-013) |
+| Fallos totales | 0 de 1.686 en la corrida del 23-nov (28-oct: 60 de 1.192, todos del webhook) |
+| Cobertura | Python 94,3 %; tableta 89,2 %; SonarQube 78,4 % (5-nov) |
+| Tiempo medio | 0,030 s |
+| Capacidad medida / necesaria | 47,8 req/s / 10 req/s |
+| Indicadores | 12 (8 de transporte y 4 de calidad) |
+| Defectos | 93 registrados, 92 cerrados, 1 abierto (DEF-079) |
 | Metas del cuadro de mando | 12 de 12 cumplidas (28-oct: 8 de 12) |
 | Política | 7 reglas |
 | Lluvia de ideas | 94 ideas |
 | ISO 25010 | 7 cumple, 19 parcial, 5 no evaluado |
 | ISO 12207 | 13 cumple, 14 parcial, 3 no aplica |
 | CMMI | Nivel 2 en consolidación |
-| Decisión | Apto para piloto controlado |
+| Decisión | Demostración pública y piloto controlado; no producción general |
 
 ## Qué no decir
 

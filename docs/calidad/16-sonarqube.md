@@ -3,6 +3,8 @@
 Evidencia de la Actividad 9 del proyecto final (criterio 8, calidad del software con ISO/IEC 25010 y SonarQube). Se analizó **todo el proyecto**: el módulo de Odoo (Python, JavaScript, XML), la app del chofer
 (TypeScript) y los scripts de calidad y despliegue. Fecha: 2026-11-05. SonarQube Community Build **26.10.0.133078**, escáner `sonar-scanner-cli`.
 
+> **Cifras del análisis del 5-nov-2026.** No se volvió a correr SonarQube después (hace falta el servidor y su token). Las pruebas crecieron de 512 a **639** de Odoo y de 167 a **197** de Jest; la cobertura de Python medida con `coverage.py` el 23-nov-2026 es **94,3 %** (sentencias y ramas; 96,0 % solo líneas; modelos 96,0 %, controladores 96,4 %) y la de la tableta 89,2 % de sentencias (`docs/calidad/evidencias/cobertura.txt` y `npx jest --coverage`). El 78,4 % de abajo es la cifra global de SonarQube, que también cuenta el JavaScript del módulo sin pruebas unitarias.
+
 ## 1. Resultado
 
 | | Primer análisis | Después de corregir |

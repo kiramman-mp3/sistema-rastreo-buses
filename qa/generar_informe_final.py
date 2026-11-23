@@ -28,6 +28,8 @@ def read_json(*parts):
 
 M = load_json('metricas.json')
 SUITE, AUD, UNIT, COV = M['suite'], M['auditoria'], M['unitarias'], M['cobertura']
+# the tablet tests are not in metricas.json: the figures of the last `npx jest --coverage`
+JEST = {'total': '197', 'sentencias': '89,2 %', 'fecha': '23-nov-2026'}
 PERF = read_json('rendimiento.json')
 STRESS = read_json('rendimiento-estres.json')
 SONAR_BEFORE = {m['metric']: m.get('value') for m in read_json('sonarqube', 'antes-metricas.json')['component']['measures']}
@@ -54,13 +56,13 @@ add([p('<b>1. Resumen</b>', H2),
      p('El sistema no se limita a mostrar un bus en un mapa: registra recorridos con horario previsto y real, evalúa cada parada y cada recorrido con reglas explícitas, calcula '
        '<b>12 indicadores</b> (8 de transporte y 4 de calidad del software) con consultas SQL que se pueden comprobar, los muestra en un tablero dentro de Odoo, '
        'y se mide a sí mismo: sincronización con Traccar, tiempo de respuesta y detección correcta de incidencias. Se probó con %s pruebas automáticas de Odoo, %s de la app y una suite en vivo de %s casos, '
-       'se analizó con SonarQube y se midió su rendimiento hasta un millón de posiciones.' % (thousands(UNIT['total']), '167', SUITE['total']))])
+       'se analizó con SonarQube y se midió su rendimiento hasta un millón de posiciones.' % (thousands(UNIT['total']), JEST['total'], SUITE['total']))])
 
 add([p('<b>2. Resultados de las pruebas</b>', H2)])
 add(table([
     ['Prueba', 'Cantidad', 'Fallos', 'Nota'],
     ['Pruebas automáticas de Odoo', thousands(UNIT['total']), str(UNIT['fallos'] + UNIT['errores']), 'Cobertura de código %s (sentencias y ramas)' % pct(COV['porcentaje'], 1)],
-    ['Pruebas de la app del chofer (Jest)', '167', '0', 'Cobertura de sentencias 86,9 %'],
+    ['Pruebas de la app del chofer (Jest)', JEST['total'], '0', 'Cobertura de sentencias %s (%s)' % (JEST['sentencias'], JEST['fecha'])],
     ['Suite en vivo contra un servidor real', str(SUITE['total']), str(SUITE['fallos']), 'P7 (60 posiciones de un mismo bus con 20 hilos) está en el límite: p95 entre 1,8 s y 2,2 s en cuatro corridas'],
     ['Auditoría aleatoria de peticiones', thousands(AUD['total']), str(AUD['fallos']), 'Sin respuestas 5xx'],
 ], [0.34, 0.12, 0.1, 0.44], align_center=(1, 2), caption='Pruebas ejecutadas'))
@@ -93,8 +95,8 @@ for key, label in names:
 add(table(rows, [0.28] + [0.18] * 4, align_center=(1, 2, 3, 4), caption='p95 (ms) por escenario de volumen'))
 
 add([p('<b>6. Defectos y mejora continua</b>', H2),
-     p('Se registraron %d defectos, todos cerrados, cada uno con su causa raíz y la prueba que lo protege. Los diez de esta etapa (DEF-039 a DEF-048) se analizan con Ishikawa, Pareto y cuatro ciclos PDCA en '
-       '<i>18-mejora-continua-pdca.md</i>.' % len(dq.DEFECTOS))])
+     p('Se registraron %d defectos (%d cerrados), cada uno con su causa raíz y la prueba que lo protege. Los de la etapa de la rúbrica (DEF-039 a DEF-048) y los de la revisión de seguridad (DEF-091 y DEF-092) se analizan con Ishikawa, Pareto y cinco ciclos PDCA en '
+       '<i>18-mejora-continua-pdca.md</i>.' % (len(dq.DEFECTOS), sum(1 for d in dq.DEFECTOS if d[7] == 'Cerrado')))])
 categorias = Counter(d[6] for d in dq.DEFECTOS)
 total = sum(categorias.values())
 rows, running = [['Categoría', 'Defectos', '%', '% acum.']], 0
@@ -106,14 +108,15 @@ pareto_png = os.path.join(DOCS, 'figuras', 'pareto_defectos.png')
 if os.path.exists(pareto_png):
     add(figure(pareto_png, 'Pareto de los defectos por categoría'))
 nuevos = [list(d[:1]) + [d[3], d[6]] for d in dq.DEFECTOS if d[0] >= 'DEF-039']
-add(table([['ID', 'Defecto', 'Categoría']] + nuevos, [0.1, 0.68, 0.22], caption='Defectos de la etapa del proyecto final (todos cerrados)'))
-add([p('<b>Ciclos PDCA.</b> (1) Análisis estático: 16 bugs y 12 vulnerabilidades a 0. (2) Acceso a Grafana: el token de 5 minutos dejaba el tablero sin datos; ahora dura una jornada con renovación automática. '
-       '(3) Cobertura mal medida (20,4 %) corregida a 78,4 %. (4) Rendimiento por volumen verificado hasta un millón de posiciones sin superar la meta.')])
+add(table([['ID', 'Defecto', 'Categoría']] + nuevos, [0.1, 0.68, 0.22], caption='Defectos de la etapa del proyecto final'))
+add([p('<b>Ciclos PDCA.</b> (1) Análisis estático: 16 bugs y 12 vulnerabilidades a 0. (2) Acceso a Grafana: el token de 5 minutos dejaba el tablero sin datos (Grafana se retiró el 17-nov; lo reemplaza el reporte en PDF). '
+       '(3) Cobertura mal medida (20,4 %) corregida a 78,4 %. (4) Rendimiento por volumen verificado hasta un millón de posiciones sin superar la meta. '
+       '(5) Lo que una sesión de chofer puede llamar por RPC: 8 de 13 pruebas fallaban; ahora pasan todas y los choferes de demostración tienen contraseñas aleatorias.')])
 
 add([p('<b>7. Qué falta</b>', H2)])
 add(bullets([
     'Capturas y ensayo con un celular real con Traccar Client por datos móviles (la guía y la lista de evidencias están en <i>DEMO-TRACCAR-CLIENT.md</i>).',
-    'Desplegar la versión 16.0.1.6.0 en el servidor de Azure, con respaldo y migración previa.',
+    'Jornada real con tabletas (fase 46 de <i>PLAN-AUDITORIA-2.md</i>) y respaldo automático con copia fuera del equipo en el homelab.',
     'Pruebas unitarias del JavaScript del módulo (hoy sin cobertura medida), análisis de dependencias y una prueba de concurrencia.',
     'Revisión del kichwa por una persona hablante: la traducción la hizo una IA.',
 ]))

@@ -21,7 +21,7 @@ El proyecto no se limita a mostrar un bus en un mapa: **evalúa de manera objeti
 | Chofer | Iniciar y terminar su turno desde una tableta o celular; avisar un incidente o una emergencia; saber su horario |
 | Despachador / supervisor | Ver todos los buses, las alertas abiertas, los recorridos del día y su retraso |
 | Gestor del servicio | Definir líneas, paradas, horarios y asignaciones; leer los indicadores y compararlos; auditar el sistema |
-| Administrador de sistemas | Desplegar, respaldar y vigilar el servidor; configurar Traccar, Grafana y los umbrales |
+| Administrador de sistemas | Desplegar, respaldar y vigilar el servidor; configurar Traccar y los umbrales |
 | Docente / evaluador | Comprobar cada indicador, cada regla y cada prueba (rúbrica del proyecto final) |
 
 ## 3. Requisitos funcionales
@@ -40,28 +40,29 @@ Cada uno tiene un criterio de aceptación comprobable y la prueba o evidencia qu
 | RF-08 | **Detectar incumplimientos** con reglas explícitas: llegada tarde, parada omitida, recorrido incompleto, salida tarde, duración distinta de la planificada, desvío, exceso de velocidad, sin señal, parada larga (R3) | Cada regla genera su alerta una sola vez por recorrido y parada; la tolerancia (5 min) y los límites son ajustes; en el límite exacto no hay alerta | `tests/test_trip_rules.py`, `docs/calidad/02-estandares-y-reglas.md` §1.1 |
 | RF-09 | **Recorridos de prueba simulados**, identificados como tales (R4) | Doce recorridos con diez escenarios; cada uno declara qué debe detectarse y la comparación con lo detectado da 12 de 12; nunca aparecen en el mapa ni en el portal | `tests/test_trip_simulator.py`; `docs/calidad/13-recorridos-de-prueba.md` |
 | RF-10 | **Ocho indicadores de transporte y cuatro de software**, cada uno con fórmula, fuente, unidad, resultado, estado e interpretación (R5) | Cada cifra sale de una consulta SQL mostrada junto a ella; ninguna es estática; cambiar los datos cambia la cifra | `tests/test_kpi.py`; `docs/calidad/14-metricas-de-transporte.md` |
-| RF-11 | **Tablero dentro de Odoo** (R6) | Siete pestañas; filtros de periodo, línea y datos reales o simulados; comparación con el periodo anterior; se actualiza solo cada 30 s; estados con palabra y forma, no solo color | `tests/test_dashboard.py`; `docs/calidad/15-tablero-grafana.md` §2 |
-| RF-12 | **Grafana incrustado en Odoo** como tablero complementario (R7) | Seis tableros; solo se entra con una sesión de Odoo; el rol de la base solo lee vistas `kpi_*`; las cifras son las del tablero de Odoo | `tests/test_grafana_*.py`; `qa/grafana_smoke.py` (19) |
+| RF-11 | **Tablero dentro de Odoo** (R6), la alternativa A del PDF | Ocho pestañas (Resumen, Líneas, Puntualidad, Recorridos, Incidencias, Multas, Calidad del sistema y Fórmulas); filtros de periodo, línea y datos reales o simulados; comparación con el periodo anterior; se actualiza solo cada 30 s; estados con palabra y forma, no solo color | `tests/test_dashboard.py`; `docs/calidad/evidencias/tablero-odoo/` |
+| RF-12 | **Reporte de operación en PDF** desde Odoo (reemplaza al Grafana incrustado de R7, retirado el 17-nov-2026 en la versión 16.0.1.9.0) | El asistente pide periodo, líneas y datos reales o simulados; el PDF trae los 12 indicadores con el cambio frente al periodo anterior y las mismas cifras que el tablero | `tests/test_report.py`; `docs/capturas/reporte-pdf.png` |
 | RF-13 | **Auditar la sincronización Traccar–Odoo** y **medir el rendimiento** (R5, R11) | La auditoría diaria compara posiciones; un reenvío perdido baja la exactitud y la consulta periódica la recupera; las consultas principales se miden y guardan | `tests/test_quality.py`, `test_traccar_consistency.py` |
 | RF-14 | **Demostrar el sistema con Traccar Client** desde un celular por datos móviles (R9) | Un gestor activa «Start demo report» en un bus: solo ese bus acepta posiciones sin turno, por 8 horas | `tests/test_demo_report.py`; `docs/guias/DEMO-TRACCAR-CLIENT.md` |
-| RF-15 | **Turnos y app del chofer**: iniciar y terminar turno, GPS, incidentes y SOS, avisos | Un chofer solo ve su turno; el GPS se apaga al terminar; el SOS exige mantener pulsado | `tests/test_driver_*.py`; 167 pruebas de Jest; `qa/tablet_*.py` |
+| RF-15 | **Turnos y app del chofer**: iniciar y terminar turno, GPS, incidentes y SOS, avisos | Un chofer solo ve su turno; el GPS se apaga al terminar; el SOS exige mantener pulsado | `tests/test_driver_*.py`; 197 pruebas de Jest; `qa/tablet_*.py` |
 | RF-16 | **Quejas de pasajeros** con protección contra abuso | Folio, límite por IP, contacto borrado a los 90 días de resuelta | `tests/test_complaints.py` |
-| RF-17 | **Idiomas**: español por defecto, inglés y kichwa en web, tableta y oficina | Los 1046 textos del módulo traducidos, sin entradas vacías | `qa/traducciones.py`, `TestLanguages`; `docs/guias/GLOSARIO-KICHWA.md` |
+| RF-17 | **Idiomas**: español por defecto, inglés y kichwa en web, tableta y oficina | Los 1043 textos del módulo traducidos al español, sin entradas vacías | `qa/traducciones.py`, `TestLanguages`; `docs/guias/GLOSARIO-KICHWA.md` |
+| RF-18 | **Multas por incumplimiento**: el detector propone una multa por cada alerta que lo amerita y un gestor la revisa, confirma o descarta; el chofer la ve en la tableta y puede apelarla una vez | Nunca se multa sin un gestor; el monto respeta el tope mensual; la apelación tiene plazo | `tests/test_fine_*.py` |
 
 ## 4. Requisitos no funcionales
 
 | ID | Requisito | Criterio de aceptación | Medición |
 |---|---|---|---|
 | RNF-01 | **Rendimiento** | p95 menor que 2 000 ms en el mapa, el historial, la lista de recorridos, los indicadores y el tablero, hasta 100 000 posiciones y 5 000 recorridos | Todo bajo 160 ms; con 1 000 000 y 50 000, bajo 704 ms (`docs/calidad/17-rendimiento-por-volumen.md`) |
-| RNF-02 | **Seguridad y privacidad** | Validación en el servidor; el identificador OsmAnd solo lo ve un gestor; el rol de Grafana solo lee vistas sin datos personales; acceso a Grafana solo con token de Odoo | `qa/auditoria.py`; `TestGrafanaRole`; `qa/grafana_smoke.py`; `docs/diseno/PRIVACIDAD.md` |
-| RNF-03 | **Calidad del código** | Quality Gate de SonarQube aprobado; sin bugs ni vulnerabilidades abiertas sin justificar | 16 bugs → 0, 12 vulnerabilidades → 0 (`docs/calidad/16-sonarqube.md`) |
-| RNF-04 | **Cobertura de pruebas** | Al menos 75 % de líneas del código | 78,4 % global; modelos 95 %, controladores 94 % |
-| RNF-05 | **Verificabilidad de las métricas** | Ningún indicador estático ni ficticio; cada cifra se puede reproducir con su consulta | Pestaña «Formulas»; las pruebas comparan los dos tableros |
+| RNF-02 | **Seguridad y privacidad** | Validación en el servidor; el identificador OsmAnd solo lo ve un gestor; los métodos que se pueden llamar por RPC comprueban quién los llama (un chofer no llega a Traccar, a los indicadores ni al simulador, DEF-091); sin contraseñas débiles en los datos de demostración (DEF-092) | `qa/auditoria.py`; `tests/test_rpc_access.py`; `docs/diseno/PRIVACIDAD.md` |
+| RNF-03 | **Calidad del código** | Quality Gate de SonarQube aprobado; sin bugs ni vulnerabilidades abiertas sin justificar | 16 bugs → 0, 12 vulnerabilidades → 0 (`docs/calidad/16-sonarqube.md`, análisis del 5-nov-2026); flake8, ESLint y `tsc` sin avisos en el CI |
+| RNF-04 | **Cobertura de pruebas** | Al menos 75 % de líneas del código | Python 94,3 % (sentencias y ramas; 96,0 % de líneas) con 639 pruebas, el 23-nov-2026; tableta 89,2 % de sentencias con 197 pruebas; 78,4 % global en SonarQube (5-nov, incluye el JavaScript del módulo sin pruebas unitarias) |
+| RNF-05 | **Verificabilidad de las métricas** | Ningún indicador estático ni ficticio; cada cifra se puede reproducir con su consulta | Pestaña «Fórmulas»; las pruebas comparan el tablero y el PDF con las fórmulas |
 | RNF-06 | **Disponibilidad y vigilancia** | `/bus_tracking/health` responde 200 con datos frescos; copias de seguridad programables | `tests/test_http.py`; `scripts/backup.sh` |
 | RNF-07 | **Accesibilidad y usabilidad** | Contraste AAA, estados con palabra y forma, probado con la fuente del sistema al 130 % y al 200 % | `qa/contraste.py`, `qa/accesibilidad.py`, `docs/calidad/12-validacion-ux.md` |
 | RNF-08 | **Despliegue reproducible** | Un comando levanta el stack; las migraciones se prueban sobre una copia | `docker-compose*.yml`, `scripts/init-prod.sh`, `migrations/` |
 | RNF-09 | **Trazabilidad del trabajo** | Flujo Git con ramas por tarea, commits pequeños, integración con `--no-ff` y pruebas en verde | Historial de Git; `docs/academico/BITACORA.md` |
-| RNF-10 | **Mantenibilidad** | Los tableros de Grafana y los documentos de métricas y calidad se generan desde el código | `scripts/gen_grafana_dashboards.py`, `scripts/doc_metricas.py`, `qa/generar_docs.py` |
+| RNF-10 | **Mantenibilidad** | Los documentos de métricas y de calidad se generan desde el código y las evidencias | `scripts/doc_metricas.py`, `qa/generar_docs.py` |
 
 ## 5. Supuestos y restricciones
 

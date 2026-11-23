@@ -77,7 +77,7 @@ El detalle de cada escenario (con el máximo y el tamaño de cada respuesta) est
 | **Caja negra** de las reglas nuevas: valores válidos, inválidos y en el límite (asistente de asignación de 92 y 93 días, coordenadas en las esquinas del planeta y un paso más allá, NaN e infinito, tolerancia de puntualidad exacta, periodo de los indicadores) | `tests/test_boundaries.py` (26), `tests/test_trip_run.py`, `tests/test_trip_rules.py` |
 | **Caja blanca** del cálculo de retraso, parada omitida e indicadores, con casos hechos a mano y resultado conocido | `tests/test_trip_run.py`, `tests/test_kpi.py` (cada fórmula contra datos construidos) |
 | **Integración Traccar–Odoo con la auditoría de sincronización (S2)**: el webhook guarda lo que Traccar reenvía; un reenvío perdido aparece como «falta» y baja la exactitud a 80 %; un reenvío repetido no duplica; un secreto malo no guarda nada; la consulta periódica recupera la última posición perdida y la exactitud vuelve a 100 % | `tests/test_traccar_consistency.py` (6), `tests/test_quality.py` |
-| Cobertura de líneas de los módulos nuevos | `bus_trip.py` 98 %, `bus_kpi.py` 99 %, `trip_simulator.py` 99 %, `bus_fleet.py` 99 %, `bus_grafana.py` y `bus_kpi_views.py` 100 % (informe de `scripts/sonar-coverage.sh`) |
+| Cobertura de líneas de los módulos nuevos | `bus_trip.py` 98 %, `bus_kpi.py` 99 %, `trip_simulator.py` 99 %, `bus_fleet.py` 99 % (informe de `scripts/sonar-coverage.sh` del 5-nov; `bus_grafana.py` y `bus_kpi_views.py`, entonces al 100 %, se retiraron con Grafana el 17-nov) |
 
 ## 6. Detector de multas y migración 16.0.1.10.0 (21-nov-2026)
 

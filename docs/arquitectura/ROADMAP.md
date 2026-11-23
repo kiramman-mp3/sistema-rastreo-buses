@@ -18,7 +18,7 @@ Estado: versión del módulo `16.0.1.11.0` en `main` y `develop` (multas como re
 | App adaptable | 2-nov | 32 a 37 | Diseño móvil y de tableta, accesibilidad, respuesta táctil; DEF-027 a DEF-034 | [`PLAN-UI-MOVIL.md`](PLAN-UI-MOVIL.md) |
 | Endurecimiento previo a la preview | 3-nov | — | Dependencias, observabilidad, privacidad (LOPDP) y operación; etiqueta `v0.9-preview` | [`../academico/BITACORA.md`](../academico/BITACORA.md) |
 | GPS en vivo e iOS | 4-nov | — | Reenvío de Traccar corregido, latido para iOS; DEF-035 a DEF-038; etiqueta `v0.9.5-beta` | [`../academico/BITACORA.md`](../academico/BITACORA.md) |
-| Proyecto final (rúbrica) | 4 y 5-nov | R1 a R12 | Horarios y recorridos, reglas, simulador, 12 indicadores, tablero, Grafana, Fleet, SonarQube, pruebas de rendimiento, requisitos y trazabilidad; DEF-039 a DEF-048 | [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md) |
+| Proyecto final (rúbrica) | 4 y 5-nov | R1 a R12 | Horarios y recorridos, reglas, simulador, 12 indicadores, tablero, Grafana (retirado el 17-nov), Fleet, SonarQube, pruebas de rendimiento, requisitos y trazabilidad; DEF-039 a DEF-048 | [`PLAN-RUBRICA.md`](PLAN-RUBRICA.md) |
 | Integración con Fleet | 5-nov | — | Vehículos de Flota como única ficha del bus, pestaña de rastreo; DEF-049 y DEF-050 | [`FLEET.md`](FLEET.md) |
 | Licencia | 12-nov | — | LGPL-3.0 | `LICENSE` |
 | Segunda auditoría | 17-nov | — | 7 críticos, 14 medios, 7 de robustez y rendimiento y 15 menores; DEF-051 a DEF-062 | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
@@ -26,6 +26,7 @@ Estado: versión del módulo `16.0.1.11.0` en `main` y `develop` (multas como re
 | Control de multas | 20-nov | M1 a M6 | Tipos de multa parametrizables, detector que propone multas desde las alertas con evidencia congelada y comprobaciones, kanban de revisión con descarte y descargo, ficha con mapa y gráfico de velocidad, pantalla *Mis multas* con descargo en la tableta, pestaña del tablero y sección del PDF, escenarios del simulador; DEF-081 a DEF-084 | [`PLAN-MULTAS.md`](PLAN-MULTAS.md) |
 | Multas como reales y cierre previo a `main` | 21-nov | MR1 a MR6 | Se retira el modo demostración de las multas (sin `demo` en la API, sin aviso en la ficha ni en la tableta, sin la casilla `fines_real`), migración 16.0.1.11.0, tableta 1.4.1, versiones alineadas, costo del detector y de la migración medidos; DEF-087 a DEF-089 | [`PLAN-MULTAS-REALES.md`](PLAN-MULTAS-REALES.md) |
 | Release, despliegue en el homelab y datos de demostración | 21-nov | — | Compilación del APK y el IPA 1.4.1 con EAS, release `v1.0.0`, CI en verde; la demostración pasa de la VM de Azure a un homelab (túnel de Cloudflare, Postgres 17, despliegue continuo desde `main` con vuelta atrás); `scripts/demo_reportes.py` agrega 21 días de viajes simulados, multas y quejas para mostrar los reportes (local y homelab); corrección del error de zoom al salir del mapa en vivo (DEF-090) | [`../guias/DESPLIEGUE-HOMELAB.md`](../guias/DESPLIEGUE-HOMELAB.md) |
+| Revisión frente al PDF y de seguridad | 23-nov | — | Lo que una sesión de chofer puede llamar por RPC queda limitado (cliente de Traccar, indicadores, simulador y credencial QR, con 13 pruebas nuevas); contraseñas aleatorias para los choferes de demostración; documentación sin Grafana y con las cifras de una corrida nueva de `qa/ejecutar_todo.py`; DEF-091 a DEF-093 | [`../calidad/18-mejora-continua-pdca.md`](../calidad/18-mejora-continua-pdca.md) |
 | Correcciones de la segunda auditoría | 17-nov | 38 a 45 | Portal sin XSS, colas de la tableta seguras, despliegue sobre Supabase, acceso al panel, turnos y alertas, servidor y GPS de la tableta, permisos de choferes, carga y purga, build; DEF-051 a DEF-062 cerrados | [`PLAN-AUDITORIA-2.md`](PLAN-AUDITORIA-2.md) |
 
 Cifras al cierre de la etapa de la rúbrica (5-nov): 544 pruebas de Odoo, 167 de Jest, 96 % de cobertura de Python según `odoo_test.log`, SonarQube con el Quality Gate aprobado, 50 defectos registrados y cerrados.
@@ -35,6 +36,8 @@ Cifras tras la fase 45 (17-nov): 579 pruebas de Odoo, 179 de Jest, 97 % de cober
 Cifras al 18-nov: 555 pruebas de Odoo (bajan al retirar las de Grafana), 186 de Jest, 75 defectos registrados y cerrados.
 
 Cifras al 21-nov (`develop`): 626 pruebas de Odoo (comando del CI, 0 fallos), 197 de Jest, flake8, lint y typecheck sin avisos; DEF-087 a DEF-089 cerrados. Con DEF-090 (zoom del mapa), 90 defectos registrados y 89 cerrados; el abierto es DEF-079.
+
+Cifras al 23-nov (`qa/ejecutar_todo.py` completo): 639 pruebas de Odoo (0 fallos; 13 nuevas de acceso por RPC), 197 de Jest, cobertura de Python 94,3 % (sentencias y ramas) y de la tableta 89,2 %, suite en vivo 47 de 47, auditoría de 1000 peticiones sin 5xx; 93 defectos registrados y 92 cerrados (abierto: DEF-079).
 
 Cifras al 20-nov (control de multas, tras reinstalar el entorno de desarrollo desde cero): 625 pruebas de Odoo, todas pasan (DEF-084 cerrado). 197 pruebas de Jest. 86 defectos registrados, 85 cerrados (abierto: DEF-079).
 

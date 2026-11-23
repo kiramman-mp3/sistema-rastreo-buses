@@ -22,19 +22,19 @@ Fallos de la suite en vivo (3) y de la auditoría aleatoria (57), por causa. Las
 
 | Categoría | Defectos | % | % acumulado |
 |---|---|---|---|
-| Lógica | 28 | 31,1 % | 31,1 % |
-| Seguridad | 14 | 15,6 % | 46,7 % |
-| Configuración | 12 | 13,3 % | 60,0 % |
-| Accesibilidad y diseño | 7 | 7,8 % | 67,8 % |
-| Interfaz | 5 | 5,6 % | 73,3 % |
-| Validación de entrada | 5 | 5,6 % | 78,9 % |
-| Entorno | 4 | 4,4 % | 83,3 % |
-| Internacionalización | 3 | 3,3 % | 86,7 % |
-| Proceso | 3 | 3,3 % | 90,0 % |
-| Infraestructura y despliegue | 2 | 2,2 % | 92,2 % |
-| Migración | 2 | 2,2 % | 94,4 % |
-| Accesibilidad | 1 | 1,1 % | 95,6 % |
-| Contenido | 1 | 1,1 % | 96,7 % |
+| Lógica | 28 | 30,1 % | 30,1 % |
+| Seguridad | 16 | 17,2 % | 47,3 % |
+| Configuración | 12 | 12,9 % | 60,2 % |
+| Accesibilidad y diseño | 7 | 7,5 % | 67,7 % |
+| Interfaz | 5 | 5,4 % | 73,1 % |
+| Validación de entrada | 5 | 5,4 % | 78,5 % |
+| Entorno | 4 | 4,3 % | 82,8 % |
+| Proceso | 4 | 4,3 % | 87,1 % |
+| Internacionalización | 3 | 3,2 % | 90,3 % |
+| Infraestructura y despliegue | 2 | 2,2 % | 92,5 % |
+| Migración | 2 | 2,2 % | 94,6 % |
+| Accesibilidad | 1 | 1,1 % | 95,7 % |
+| Contenido | 1 | 1,1 % | 96,8 % |
 | Interfaz y vistas | 1 | 1,1 % | 97,8 % |
 | Permisos | 1 | 1,1 % | 98,9 % |
 | Rendimiento | 1 | 1,1 % | 100,0 % |
