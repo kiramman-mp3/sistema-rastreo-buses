@@ -71,5 +71,8 @@ class BusDriverBadge(models.TransientModel):
     link = fields.Char(readonly=True)
 
     def action_done(self):
+        # It deletes as the system, so it checks who asks: any session could otherwise call it over RPC.
+        if not (self.env.su or self.env.user.has_group('bus_tracking.group_bus_manager')):
+            raise AccessError(_("Only managers can close a QR badge."))
         self.sudo().unlink()
         return {'type': 'ir.actions.act_window_close'}
