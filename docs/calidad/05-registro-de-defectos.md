@@ -1,6 +1,6 @@
 # Registro de defectos y análisis de causa raíz
 
-Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana, Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov); DEF-049 y DEF-050 de la actualización en Azure con Fleet (5-nov) y DEF-051 a DEF-062 de la segunda auditoría integral del 17-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA-2.md`, un defecto por hallazgo crítico o medio que es un fallo; su corrección está planificada en las fases 38 a 43). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
+Formato del taller de la Unidad 2: bitácora de incidencias y evaluación de la causa raíz. Los defectos DEF-001 a DEF-007 salen de `docs/academico/BITACORA.md` (se hallaron y cerraron al construir); DEF-008 a DEF-010 los halló la evaluación de calidad del 28-oct-2026 y DEF-011 a DEF-026 la auditoría integral del 2-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA.md`, un defecto por hallazgo crítico o alto) y DEF-027 a DEF-034 la auditoría de diseño móvil del mismo día (`docs/arquitectura/PLAN-UI-MOVIL.md`); DEF-035 a DEF-038 salieron de las pruebas en producción y en el celular (4-nov) y DEF-039 a DEF-048 de la etapa que cubre la rúbrica del proyecto final: simulador, métricas, tablero, Grafana (retirado después), Fleet y SonarQube (`docs/arquitectura/PLAN-RUBRICA.md`, 4 y 5-nov); DEF-049 y DEF-050 de la actualización en Azure con Fleet (5-nov) y DEF-051 a DEF-062 de la segunda auditoría integral del 17-nov-2026 (`docs/arquitectura/PLAN-AUDITORIA-2.md`, un defecto por hallazgo crítico o medio que es un fallo; su corrección se hizo en las fases 38 a 43). DEF-063 a DEF-080 salieron de los pedidos del usuario, del retiro de Grafana, del reporte en PDF y del despliegue de v1.0.0-rc1 (17 y 18-nov); DEF-081 a DEF-086 de las multas (20-nov); DEF-087 a DEF-090 de la revisión antes de pasar a `main` y del sitio publicado (21-nov), y DEF-091 a DEF-093 de la revisión de seguridad y de la documentación frente al PDF del proyecto (23-nov). Generado por `qa/generar_docs.py` desde `qa/datos_calidad.py`.
 
 Cada defecto se registra con tres campos separados: fallo observado, defecto localizado y causa de origen.
 
@@ -98,8 +98,11 @@ Cada defecto se registra con tres campos separados: fallo observado, defecto loc
 | DEF-088 | 21-nov-2026 | Revisión de los documentos antes de pasar a main | El documento de arquitectura decía versión 16.0.1.6.0 y el ROADMAP daba como última etiqueta v1.0.0-rc1 con la app en 1.2.0 | docs/arquitectura/ARQUITECTURA-Y-DATOS.md, docs/arquitectura/ROADMAP.md | Cerrado |
 | DEF-089 | 21-nov-2026 | Retiro del modo demostración de las multas | Dos textos del código seguían diciendo demostración después de quitar el aviso: el detalle de las estadísticas (montos ficticios mientras sea demostración) y la ayuda del monto de un tipo de multa | models/bus_fine_stats.py, models/bus_fine.py, i18n/*.po | Cerrado |
 | DEF-090 | 21-nov-2026 | Error de JavaScript informado en el sitio publicado | Al salir del mapa en vivo girando la rueda del ratón, el panel mostraba el error «Cannot read properties of undefined (reading «_leaflet_pos») | static/src/js/live_map.js, static/src/js/stop_picker.js | Cerrado |
+| DEF-091 | 23-nov-2026 | Revisión de seguridad de lo que se puede llamar por RPC | Un chofer (usuario de portal) con sesión web podía llamar por /web/dataset/call_kw al cliente de Traccar (leer todos los dispositivos con su identificador OsmAnd y todas las posiciones, crear dispositivos), leer los indicadores, crear el conjunto de recorridos simulados y borrar la credencial QR que se muestra a un gestor | models/traccar_api.py, models/bus_kpi.py, models/trip_simulator.py, models/bus_driver_edit.py | Cerrado |
+| DEF-092 | 23-nov-2026 | Revisión de seguridad del despliegue público | Los cuatro choferes de demostración del homelab tenían como contraseña su propio usuario (chofer1 a chofer4) en un sitio público; con DEF-091 bastaba para leer los identificadores de los GPS | scripts/demo_reportes.py | Cerrado |
+| DEF-093 | 23-nov-2026 | Revisión de la documentación frente al PDF del proyecto | La matriz de trazabilidad, los requisitos y el guion de defensa citaban como evidencia a Grafana (retirado el 17-nov) y archivos que ya no existen (15-tablero-grafana.md, test_grafana_*.py, qa/grafana_smoke.py), y daban cifras viejas (544 pruebas de Odoo y 167 de Jest) | docs/calidad/*.md, docs/arquitectura/REQUISITOS.md, docs/academico/GUION_DEFENSA.md, README.md | Cerrado |
 
-Resumen: 90 registrados, 89 cerrados (99 %), 1 abiertos. Densidad: 17,9 defectos por KLOC (5,033 KLOC de Python sin pruebas).
+Resumen: 93 registrados, 92 cerrados (99 %), 1 abiertos. Densidad: 13,9 defectos por KLOC (6,709 KLOC de Python sin pruebas).
 
 ## 2. Análisis de causa raíz e impacto
 
@@ -642,6 +645,24 @@ Resumen: 90 registrados, 89 cerrados (99 %), 1 abiertos. Densidad: 17,9 defectos
 - **Causa raíz:** Leaflet 1.9.4 retrasa el zoom de la rueda con un temporizador que map.remove() no cancela: al desmontarse la pantalla, el zoom se ejecutaba sobre un mapa sin paneles.
 - **Categoría:** Lógica
 - **Prueba que lo protege:** Se cancela scrollWheelZoom._timer antes de map.remove() en el mapa en vivo y en el selector de paradas; desplegado en el homelab el 21-nov (sin prueba automática: no hay pruebas de navegador para este caso)
+
+### DEF-091: Un chofer (usuario de portal) con sesión web podía llamar por /web/dataset/call_kw al cliente de Traccar (leer todos los dispositivos con su identificador OsmAnd y todas las posiciones, crear dispositivos), leer los indicadores, crear el conjunto de recorridos simulados y borrar la credencial QR que se muestra a un gestor
+
+- **Causa raíz:** Odoo ejecuta por RPC cualquier método público sin comprobar permisos: un modelo abstracto no tiene permisos propios y un método que no lee el registro nunca los consulta. Se protegieron los botones de la vista (DEF-011) pero no estos métodos, que trabajan como el sistema o con SQL directo.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** tests/test_rpc_access.py (13 pruebas; 8 fallaban con el código anterior); el acceso queda para el sistema, los gestores y los administradores de Ajustes
+
+### DEF-092: Los cuatro choferes de demostración del homelab tenían como contraseña su propio usuario (chofer1 a chofer4) en un sitio público; con DEF-091 bastaba para leer los identificadores de los GPS
+
+- **Causa raíz:** El script de datos de demostración, pensado primero para desarrollo, se reutilizó en el servidor público; la guía pedía cambiar las contraseñas a mano y no se hizo.
+- **Categoría:** Seguridad
+- **Prueba que lo protege:** El script da contraseñas aleatorias, las muestra una vez y cambia la de un chofer que aún tenga su usuario como contraseña; comprobado en una base desechable (la contraseña vieja deja de servir)
+
+### DEF-093: La matriz de trazabilidad, los requisitos y el guion de defensa citaban como evidencia a Grafana (retirado el 17-nov) y archivos que ya no existen (15-tablero-grafana.md, test_grafana_*.py, qa/grafana_smoke.py), y daban cifras viejas (544 pruebas de Odoo y 167 de Jest)
+
+- **Causa raíz:** Al retirar Grafana se actualizaron el código, el README y las guías de operación, pero no los entregables que lo citaban como evidencia; las cifras se escribían a mano en cada documento.
+- **Categoría:** Proceso
+- **Prueba que lo protege:** Evidencias regeneradas con qa/ejecutar_todo.py el 23-nov; documentos 03, 04, 05 y 07 regenerados; los demás corregidos y sin referencias rotas a archivos retirados
 
 ## 3. Qué falta para cerrar los abiertos
 
